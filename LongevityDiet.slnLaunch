@@ -1,0 +1,12 @@
+[
+  {
+    "Name": "HTTPS - Longevity Diet",
+    "Projects": [
+      {
+        "Path": "src\\LongevityDiet.API\\LongevityDiet.API.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
+  }
+]

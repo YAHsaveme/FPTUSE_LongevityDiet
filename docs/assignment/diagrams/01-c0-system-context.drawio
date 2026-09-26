@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" modified="2026-09-26T03:07:19.724283+00:00" agent="LongevityDiet Assignment Diagram Generator v3" version="24.7.17" type="device">
+  <diagram id="C0-System-Context" name="Page-1">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1180" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c2" value="C0 - System Context - Longevity Diet Companion" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=28;align=left;fontColor=#1F2937;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="35" width="2020" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" value="Business context only: people, the Longevity Diet Companion software system, and its direct external dependency." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=14;align=left;fontColor=#4B5563;" vertex="1" parent="1">
+          <mxGeometry x="70" y="93" width="2020" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="&lt;b&gt;Guest&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:13px'&gt;[Person]&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;strokeColor=#1F2937;fillColor=#FFFFFF;fontFamily=Arial;fontColor=#1F2937;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="170" y="280" width="170" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="&lt;b&gt;Member&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:13px'&gt;[Person]&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;strokeColor=#1F2937;fillColor=#FFFFFF;fontFamily=Arial;fontColor=#1F2937;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="170" y="500" width="170" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="&lt;b&gt;Administrator&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:13px'&gt;[Person]&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;strokeColor=#1F2937;fillColor=#FFFFFF;fontFamily=Arial;fontColor=#1F2937;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="170" y="720" width="170" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" value="&lt;b&gt;Longevity Diet Companion&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:14px'&gt;[Software System]&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:14px'&gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style='font-size:15px'&gt;Turns longevity-diet principles into safe, explainable planning, tracking, recommendation, adherence, challenge, reminder, and progress workflows.&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#374151;strokeWidth=2;fontFamily=Arial;fontColor=#1F2937;align=center;verticalAlign=middle;fillColor=#FCE8D5;strokeColor=#C58B42;strokeWidth=2;fontSize=20;spacing=24;" vertex="1" parent="1">
+          <mxGeometry x="850" y="255" width="760" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="&lt;b&gt;Optional Local AI Runtime&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:14px'&gt;[External Software System - Optional]&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:14px'&gt;Local LLM / Ollama-style HTTP API&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style='font-size:15px'&gt;Rewrites already-computed explanations only. It never changes ranking, allergy/safety constraints, or LDAS.&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#374151;strokeWidth=2;fontFamily=Arial;fontColor=#1F2937;align=center;verticalAlign=middle;dashed=1;dashPattern=8 6;strokeColor=#6B7280;fontSize=16;spacing=14;" vertex="1" parent="1">
+          <mxGeometry x="1760" y="450" width="330" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;curved=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;endSize=12;strokeColor=#374151;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.175;entryDx=0;entryDy=0;" edge="1" parent="1" source="c4" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;curved=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;endSize=12;strokeColor=#374151;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5416667;entryDx=0;entryDy=0;" edge="1" parent="1" source="c5" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;curved=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;endSize=12;strokeColor=#374151;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.9083333;entryDx=0;entryDy=0;" edge="1" parent="1" source="c6" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;curved=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;endSize=12;strokeColor=#374151;strokeWidth=2;dashed=1;dashPattern=7 5;strokeColor=#6B7280;exitX=1;exitY=0.5166667;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="c7" target="c8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c13" value="Views public information, registers, and signs in" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=14;align=center;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="390" y="300" width="390" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" value="Plans, tracks, requests recommendations, and reviews progress" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=14;align=center;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="385" y="520" width="410" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c15" value="Manages catalog, rules, audit, event, and job operations" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=14;align=center;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="390" y="740" width="400" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" value="Optional explanation rewrite" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=13;align=center;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="1615" y="515" width="140" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="c17" value="&lt;b&gt;C0 scope&lt;/b&gt;  Internal technologies and containers are intentionally hidden. The optional local AI runtime is shown only because it is a directly connected external software system." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=13;align=center;fontColor=#4B5563;" vertex="1" parent="1">
+          <mxGeometry x="600" y="935" width="1100" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="c18" value="&lt;b&gt;Legend&lt;/b&gt;  Person = actor  |  Warm card = software system  |  Dashed card/arrow = optional external dependency  |  Arrow = directed relationship" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;fontSize=13;align=center;fontColor=#1F2937;" vertex="1" parent="1">
+          <mxGeometry x="330" y="1055" width="1540" height="42" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
