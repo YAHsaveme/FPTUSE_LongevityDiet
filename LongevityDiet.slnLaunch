@@ -1,11 +1,54 @@
 [
   {
-    "Name": "HTTPS - Longevity Diet",
+    "Name": "Development - Full Stack",
+    "Projects": [
+      {
+        "Path": "docker-compose.dcproj",
+        "Action": "Start",
+        "DebugTarget": "Infrastructure Only"
+      },
+      {
+        "Path": "src\\LongevityDiet.Recommendation.Grpc\\LongevityDiet.Recommendation.Grpc.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "src\\LongevityDiet.API\\LongevityDiet.API.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "src\\LongevityDiet.Worker\\LongevityDiet.Worker.csproj",
+        "Action": "Start",
+        "DebugTarget": "LongevityDiet.Worker"
+      },
+      {
+        "Path": "src\\LongevityDiet.Web\\LongevityDiet.Web.esproj",
+        "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Docker Compose - Full Stack",
+    "Projects": [
+      {
+        "Path": "docker-compose.dcproj",
+        "Action": "Start",
+        "DebugTarget": "Full Stack"
+      }
+    ]
+  },
+  {
+    "Name": "Development - Web + API",
     "Projects": [
       {
         "Path": "src\\LongevityDiet.API\\LongevityDiet.API.csproj",
         "Action": "Start",
         "DebugTarget": "https"
+      },
+      {
+        "Path": "src\\LongevityDiet.Web\\LongevityDiet.Web.esproj",
+        "Action": "Start"
       }
     ]
   }

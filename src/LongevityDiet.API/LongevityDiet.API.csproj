@@ -3,7 +3,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <SpaRoot>..\LongevityDiet.Web\</SpaRoot>
     <UserSecretsId>d094366f-e74b-42a3-b3ce-d69eeff4bfcc</UserSecretsId>
   </PropertyGroup>
 
@@ -33,14 +32,4 @@
     </Content>
   </ItemGroup>
 
-  <Target
-    Name="BuildFrontend"
-    BeforeTargets="Build"
-    Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipFrontendBuild)' != 'true'">
-    <Exec
-      WorkingDirectory="$(SpaRoot)"
-      Command="npm ci"
-      Condition="!Exists('$(SpaRoot)node_modules\typescript\bin\tsc')" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
-  </Target>
 </Project>

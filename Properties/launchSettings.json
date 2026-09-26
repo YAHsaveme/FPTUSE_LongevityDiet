@@ -1,0 +1,32 @@
+{
+  "profiles": {
+    "Full Stack": {
+      "commandName": "DockerCompose",
+      "composeLaunchServiceName": "web",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchUrl": "http://localhost:5173",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "sqlserver": "StartWithoutDebugging",
+        "redis": "StartWithoutDebugging",
+        "recommendation-grpc": "StartWithoutDebugging",
+        "api": "StartDebugging",
+        "worker": "StartDebugging",
+        "web": "StartWithoutDebugging"
+      }
+    },
+    "Infrastructure Only": {
+      "commandName": "DockerCompose",
+      "composeLaunchAction": "None",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "sqlserver": "StartWithoutDebugging",
+        "redis": "StartWithoutDebugging",
+        "recommendation-grpc": "DoNotStart",
+        "api": "DoNotStart",
+        "worker": "DoNotStart",
+        "web": "DoNotStart"
+      }
+    }
+  }
+}

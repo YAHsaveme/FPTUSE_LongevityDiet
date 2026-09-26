@@ -2,7 +2,6 @@
 **/obj
 **/node_modules
 **/dist
-src/LongevityDiet.API/wwwroot
 
 .git
 .vs

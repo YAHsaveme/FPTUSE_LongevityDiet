@@ -2,7 +2,8 @@
   "name": "longevitydiet-e2e-tests",
   "private": true,
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:docker": "playwright test --config=playwright.docker.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0"
