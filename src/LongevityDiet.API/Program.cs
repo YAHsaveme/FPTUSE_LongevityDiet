@@ -91,10 +91,15 @@ try
 
     var app = builder.Build();
 
+    if (app.Environment.IsDevelopment())
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+        await dbContext.Database.MigrateAsync();
+    }
+
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
-    app.UseDefaultFiles();
-    app.UseStaticFiles();
 
     if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
     {
@@ -117,7 +122,6 @@ try
 
     app.MapHealthChecks("/health");
     app.MapControllers();
-    app.MapFallbackToFile("index.html");
 
     app.Run();
 }

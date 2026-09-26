@@ -31,7 +31,7 @@ Chuẩn bị rationale:
 ## Submission cleanup
 Loại:
 - bin/obj;
-- node_modules/dist/wwwroot generated;
+- node_modules/dist generated;
 - .vs;
 - temp logs;
 - backup files;

@@ -56,11 +56,13 @@ PRN232_LongevityDiet/
 ├─ .editorconfig
 ├─ Directory.Build.props
 ├─ docker-compose.yml
+├─ docker-compose.dcproj
 ├─ .env.example
+├─ LongevityDiet.slnLaunch
 └─ LongevityDiet.sln
 ```
 
-Generated folders such as `bin/`, `obj/`, `node_modules/` and API `wwwroot/` are not source and are ignored.
+`LongevityDiet.Web` is a Visual Studio JavaScript Project System (`.esproj`) project. Frontend and backend remain separate deployable applications. Generated folders such as `bin/`, `obj/`, `node_modules/` and `dist/` are not source and are ignored.
 
 ## Architecture references
 
@@ -90,10 +92,11 @@ The canonical diagram set covers:
 - safety/privacy/AI guardrails;
 - PRN232 and book-to-software traceability;
 - 9 canonical architecture diagrams with geometry/export QA;
-- .NET 9 solution and React/TypeScript/Vite application;
-- ASP.NET Core serving the React production build;
+- .NET 9 solution with separate ASP.NET Core backend and React/TypeScript/Vite `.esproj` frontend;
+- Visual Studio multi-project startup profile for Web + API;
+- separate development ports: Web `5173`, API HTTPS `7110` / HTTP `5110`;
+- Visual Studio Docker Compose project for Web/API/gRPC/Worker/SQL/Redis;
 - OpenAPI/Swagger and health baseline;
-- Docker Compose baseline for Web/API/gRPC/Worker/SQL/Redis;
 - EF Core/JWT/gRPC/Redis/Serilog dependencies;
 - repository-wide `.editorconfig` + .NET analyzer/build policy.
 
@@ -124,42 +127,40 @@ Canonical planning location:
 
 Week 1 Task 1 was assigned to Thành viên 1 (bạn) and is complete. All tasks are end-to-end Full-Stack tasks and include reviewer, dependencies, testing, deliverables and Definition of Done.
 
-## Visual Studio HTTPS
+## Visual Studio development
 
-1. Open `LongevityDiet.sln`.
-2. Set `LongevityDiet.API` as Startup Project.
-3. Select launch profile `https`.
-4. Run with F5.
+Open `LongevityDiet.sln` in Visual Studio 2022. The solution contains separate backend (`.csproj`) and frontend (`.esproj`) projects.
 
-UI:
+For normal development, select **Development - Full Stack** and press F5. Visual Studio starts SQL Server and Redis through Docker Compose, while Web, REST API, Recommendation gRPC and Worker run as native development projects for fast debugging.
+
 ```text
-https://localhost:7110/
+Frontend UI:         http://localhost:5173
+Backend API HTTPS:   https://localhost:7110
+Backend API HTTP:    http://localhost:5110
+Recommendation gRPC http://localhost:5010
+SQL Server:          localhost:14330
+Redis:               localhost:6379
+Swagger:             https://localhost:7110/swagger/index.html
+Health:              https://localhost:7110/health
 ```
 
-Swagger:
-```text
-https://localhost:7110/swagger/index.html
-```
+During native development, Vite proxies `/api/*` from port `5173` to the backend at `https://localhost:7110`. Frontend and backend therefore remain separate processes and separate ports while browser requests keep a simple same-origin development flow.
 
-Health:
-```text
-https://localhost:7110/health
-```
-
-The API project builds the React frontend automatically and serves the generated SPA from `wwwroot`.
+Use **Development - Web + API** only when SQL Server/Redis are already running and you only need the UI/API pair. For a fully containerized runtime, select **Docker Compose - Full Stack**. Visual Studio uses `docker-compose.dcproj` to start Web, API, Recommendation gRPC, Worker, SQL Server and Redis. Docker ports are Web `5173`, API `8080`, gRPC `8081`, SQL Server `14330`, and Redis `6379`.
 
 ## Local development configuration
 
 Secrets are not stored in `appsettings.Development.json`.
 
-For the current developer machine, local SQL connection string and JWT signing key are stored with .NET User Secrets for `LongevityDiet.API`.
+For the current developer machine, the API SQL connection string/JWT signing key and the Worker SQL connection string are stored with .NET User Secrets.
 
-For a new machine:
+For a new machine, run the repository initializer once before the first F5:
+
 ```powershell
-dotnet user-secrets init --project .\src\LongevityDiet.API\LongevityDiet.API.csproj
-dotnet user-secrets set "ConnectionStrings:Default" "<local-connection-string>" --project .\src\LongevityDiet.API\LongevityDiet.API.csproj
-dotnet user-secrets set "Jwt:SigningKey" "<at-least-32-character-key>" --project .\src\LongevityDiet.API\LongevityDiet.API.csproj
+pwsh .\scripts\Initialize-LocalDevelopment.ps1
 ```
+
+It creates a local ignored `.env` with generated development secrets when needed and synchronizes the API/Worker .NET User Secrets. Do not commit `.env`.
 
 ## Build and test
 
@@ -184,11 +185,18 @@ npm ci
 npm test
 ```
 
+Against an already running Docker Compose full stack:
+```powershell
+npm run test:docker
+```
+
 Current verified test baseline:
 - UnitTests: 8/8 pass.
 - IntegrationTests: 7/7 pass.
-- E2ETests: 1/1 pass on Chrome.
+- E2ETests: 1/1 pass on Chrome in native Visual Studio-style development.
+- Docker E2ETests: 1/1 pass against the fully containerized stack.
 - Full .NET build: 0 warnings, 0 errors.
+- Docker Compose build/runtime smoke: PASS.
 
 ## Docker
 
