@@ -1,0 +1,62 @@
+name: Project Quality Gate
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            src/LongevityDiet.Web/package-lock.json
+            tests/LongevityDiet.E2ETests/package-lock.json
+
+      - name: Validate frozen project structure
+        shell: pwsh
+        run: ./scripts/Validate-ProjectStructure.ps1
+
+      - name: Validate Docker Compose configuration
+        run: docker compose --env-file .env.example config --quiet
+
+      - name: Restore .NET
+        run: dotnet restore ./LongevityDiet.sln
+
+      - name: Build .NET
+        env:
+          CI: "true"
+        run: dotnet build ./LongevityDiet.sln -c Release --no-restore
+
+      - name: Test .NET
+        run: dotnet test ./LongevityDiet.sln -c Release --no-build
+
+      - name: Install frontend dependencies
+        working-directory: src/LongevityDiet.Web
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: src/LongevityDiet.Web
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: src/LongevityDiet.Web
+        run: npm run build

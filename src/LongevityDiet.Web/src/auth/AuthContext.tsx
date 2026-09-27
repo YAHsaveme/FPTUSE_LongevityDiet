@@ -1,42 +1,19 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { api, setApiAccessToken } from '../lib/api'
-
-export type SessionUser = {
-  id: string
-  email: string
-  displayName: string
-  role: string
-  profileCompleted: boolean
-}
+import {
+  AuthContext,
+  type AuthContextValue,
+  type LoginInput,
+  type RegisterInput,
+  type SessionUser,
+} from './authState'
 
 type AuthSessionResponse = {
   accessToken: string
   accessTokenExpiresAt: string
   user: SessionUser
 }
-
-type RegisterInput = {
-  email: string
-  password: string
-  displayName: string
-}
-
-type LoginInput = {
-  email: string
-  password: string
-}
-
-type AuthContextValue = {
-  user: SessionUser | null
-  isLoading: boolean
-  login: (input: LoginInput) => Promise<SessionUser>
-  register: (input: RegisterInput) => Promise<SessionUser>
-  logout: () => Promise<void>
-  updateSessionUser: (updates: Partial<SessionUser>) => void
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null)
 
 let bootstrapPromise: Promise<AuthSessionResponse | null> | null = null
 
@@ -134,13 +111,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const value = useContext(AuthContext)
-  if (!value) {
-    throw new Error('useAuth must be used inside AuthProvider')
-  }
-
-  return value
 }
