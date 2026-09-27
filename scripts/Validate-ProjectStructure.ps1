@@ -51,7 +51,8 @@ $dependencyRules = @{
 foreach ($entry in $dependencyRules.GetEnumerator()) {
     [xml]$xml = Read-ProjectText $entry.Key
     $refs = @($xml.Project.ItemGroup.ProjectReference | ForEach-Object {
-        [IO.Path]::GetFileNameWithoutExtension([string]$_.Include)
+        $include = ([string]$_.Include).Replace('\', '/')
+        [IO.Path]::GetFileNameWithoutExtension($include)
     } | Where-Object { $_ })
 
     $expected = @($entry.Value)
