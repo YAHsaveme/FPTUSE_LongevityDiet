@@ -3,7 +3,7 @@ import { ArrowRight, LockKeyhole, Mail } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-import { useAuth } from '../../auth/AuthContext'
+import { useAuth } from '../../auth/authState'
 import { getApiErrorMessage } from '../../lib/apiError'
 import { AuthFrame } from './AuthFrame'
 

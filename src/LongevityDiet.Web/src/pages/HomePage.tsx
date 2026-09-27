@@ -13,7 +13,7 @@ import {
   Utensils,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
+import { useAuth } from '../auth/authState'
 
 const reveal = {
   initial: { opacity: 0, y: 34 },

@@ -3,14 +3,15 @@
 ## Read first
 
 Before changing architecture or business logic, read:
-0. `.agents/project-context.md`
-1. `docs/01-BOOK-RESEARCH.md`
-2. `docs/03-FUNCTIONAL-REQUIREMENTS.md`
-3. `docs/05-SYSTEM-ARCHITECTURE.md`
-4. `docs/08-SAFETY-PRIVACY-AI.md`
-5. `docs/10-PRN232-TRACEABILITY.md`
-6. `docs/task/ROADMAP-9-WEEKS.md`
-7. the active `docs/task/Week N/Task N.md`
+0. `CONTRIBUTING.md`
+1. `.agents/project-context.md`
+2. `docs/01-BOOK-RESEARCH.md`
+3. `docs/03-FUNCTIONAL-REQUIREMENTS.md`
+4. `docs/05-SYSTEM-ARCHITECTURE.md`
+5. `docs/08-SAFETY-PRIVACY-AI.md`
+6. `docs/10-PRN232-TRACEABILITY.md`
+7. `docs/task/ROADMAP-9-WEEKS.md`
+8. the active `docs/task/Week N/Task N.md`
 
 ## Mandatory PRN232 constraints
 
@@ -84,3 +85,57 @@ Follow:
 - One owner, one reviewer per major task.
 - Task owner is responsible end-to-end where the scope requires it: data/domain -> repository/service -> API -> frontend -> tests.
 - Do not re-create work already marked completed.
+
+## Architecture freeze
+
+For ordinary feature work, the current solution structure is frozen.
+
+Canonical projects:
+- `LongevityDiet.Domain`
+- `LongevityDiet.Repositories`
+- `LongevityDiet.Services`
+- `LongevityDiet.API`
+- `LongevityDiet.Recommendation.Grpc`
+- `LongevityDiet.Worker`
+- `LongevityDiet.Web`
+- `docker-compose.dcproj`
+
+Do not add, rename, move, split, merge, or delete projects/services just to make a task easier.
+Do not change the established FE/BE/service ports or runtime boundaries.
+Do not introduce direct Browser -> SQL/Redis/gRPC access.
+Do not bypass API -> Services -> Repository.
+Do not replace Redis Streams, Transactional Outbox, or the independent gRPC Recommendation boundary without explicit team approval.
+
+A real architecture change requires, in the same change:
+- explicit team approval;
+- affected ADR update;
+- affected C4/architecture diagram update;
+- README/project-context update;
+- project-structure validation update.
+
+## Code placement rules
+
+- Domain: entities/value/domain concepts only; no infrastructure dependency.
+- Repositories: EF Core persistence/query and canonical `LongevityDietDbContext`.
+- Services: business rules and application workflows.
+- API: HTTP/auth/validation boundary, DI composition, OpenAPI; no business-rule dumping.
+- Recommendation.Grpc: independent recommendation gRPC host.
+- Worker: async/scheduled jobs, Outbox publication, Redis Streams consumption.
+- Web: browser UI only; use the existing API client/proxy convention.
+- Do not create generic `Helpers`, `Utils`, or god-service folders/classes as dumping grounds.
+
+## Mandatory pre-merge validation
+
+Run:
+
+```powershell
+pwsh .\scripts\Validate-ProjectStructure.ps1
+dotnet build .\LongevityDiet.sln -c Debug
+dotnet test .\LongevityDiet.sln -c Debug --no-build
+
+cd .\src\LongevityDiet.Web
+npm run lint
+npm run build
+```
+
+If runtime boundaries changed, also run Docker Compose and the relevant E2E flow.

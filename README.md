@@ -54,6 +54,10 @@ PRN232_LongevityDiet/
 │  ├─ LongevityDiet.UnitTests/
 │  └─ LongevityDiet.IntegrationTests/
 ├─ .editorconfig
+├─ .github/
+│  ├─ pull_request_template.md
+│  └─ workflows/project-quality.yml
+├─ CONTRIBUTING.md
 ├─ Directory.Build.props
 ├─ docker-compose.yml
 ├─ docker-compose.dcproj
@@ -126,6 +130,29 @@ Canonical planning location:
 - each week contains `Task 1.md` through `Task 4.md`
 
 Week 1 Task 1 was assigned to Thành viên 1 (bạn) and is complete. All tasks are end-to-end Full-Stack tasks and include reviewer, dependencies, testing, deliverables and Definition of Done.
+
+## Team Member Responsibilities
+
+The team has four Full-Stack Developers. Ownership is organized by end-to-end task, not by a permanent frontend/backend silo. Each Owner is responsible for the complete vertical slice required by the task and each task has a different Reviewer.
+
+| Member | Primary responsibility | Week 1 ownership | Review responsibility |
+|---|---|---|---|
+| Thành viên 1 | Identity/authentication foundation, profile/onboarding, integration quality and project consistency | Task 1 - Identity, Authentication, Profile & Onboarding | Reviews Task 3 |
+| Thành viên 2 | Catalog/data-query foundation and business data quality | Task 2 - Food, Recipe, Diet Rule Catalog & Query Foundation | Reviews Task 4 |
+| Thành viên 3 | Core planning/tracking workflow and deterministic business behavior | Task 3 - Meal Planning, Meal Logging & Eating Window | Reviews Task 1 |
+| Thành viên 4 | Distributed-service thin slice and asynchronous processing | Task 4 - gRPC Recommendation + Outbox + Redis Streams + Worker | Reviews Task 2 |
+
+Shared responsibilities for every member:
+- follow the active `docs/task/Week N/Task N.md` scope and Definition of Done;
+- preserve the canonical architecture and dependency direction;
+- implement the full vertical slice where the task requires Domain/Data -> Repository/Service -> API -> Web -> Tests;
+- add/update tests, migrations, API contracts and documentation affected by the change;
+- run project-structure validation, build and relevant tests before requesting review;
+- never commit secrets or generated build artifacts;
+- review AI-generated code before merge and verify it runs in the real project;
+- perform cross-review before feature -> `develop` merge.
+
+Detailed contribution and architecture rules are defined in `CONTRIBUTING.md` and reinforced by `AGENTS.md`, `.editorconfig`, the pull-request template and `scripts/Validate-ProjectStructure.ps1`.
 
 ## Visual Studio development
 
