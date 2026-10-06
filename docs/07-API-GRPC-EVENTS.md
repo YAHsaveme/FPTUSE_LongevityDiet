@@ -1,5 +1,21 @@
 # 07 — REST API, gRPC & Event Contracts
 
+## Target Gateway and service routing
+The following is **Target Architecture**; current public REST contracts remain compatible at the Gateway edge wherever practical.
+
+| Public route | Target service |
+|---|---|
+| /api/v1/auth/**, /api/v1/me/** | Identity & Profile :8081 |
+| /api/v1/foods/**, /api/v1/recipes/**, catalog/rule admin | Catalog & Rules :8082 |
+| /api/v1/meal-plans/**, /api/v1/challenges/**, /api/v1/fmd/**, /api/v1/recommendations/** | Planning :8083 |
+| /api/v1/meal-logs/**, /api/v1/activity-logs/**, /api/v1/eating-windows/**, /api/v1/adherence/**, /api/v1/progress/**, /api/v1/weekly-reports/** | Tracking & Progress :8084 |
+| /api/v1/admin/jobs/**, /api/v1/admin/events/**, /api/v1/admin/dead-letter/** | Worker ops :8086 |
+
+YARP Gateway listens internally on :8080 behind public HTTPS :443. Planning calls Recommendation using gRPC/HTTP2 :8085. Redis Streams is internal :6379. Each service uses only its own logical SQL database over EF Core/TDS :1433. Optional Local AI explanation rewrite uses HTTP :11434.
+
+### Target event ownership
+Each domain service writes its own Outbox and publishes with XADD. Background Worker and approved Recommendation read-model consumers use XREADGROUP/XACK. Worker never polls another service database; results that belong to another domain return as events to the owning service. Event contracts are versioned and consumers are idempotent by EventId.
+
 ## REST conventions
 Base: `/api/v1`
 - JSON camelCase.

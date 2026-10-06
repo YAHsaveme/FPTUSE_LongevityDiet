@@ -1,5 +1,19 @@
 # 06 — Database Design
 
+## Target service database ownership
+This section describes **Target Architecture** ownership only. The current implementation still uses the canonical shared DbContext/database until a later runtime migration.
+
+| Target owner | Logical database | Domain data |
+|---|---|---|
+| Identity & Profile Service | LongevityIdentityDb | User, RefreshToken, UserProfile, Allergy/UserAllergy, exclusions |
+| Catalog & Rules Service | LongevityCatalogDb | Food, Recipe, ingredients/allergens, DietRule/RuleVersion/RuleSetVersion |
+| Planning Service | LongevityPlanningDb | MealPlan/Day/PlannedMeal, Challenge/Day, FMD safety/cycle, recommendation feedback request ownership where applicable |
+| Tracking & Progress Service | LongevityTrackingDb | MealLog/Item, ActivityLog, EatingWindowSnapshot, AdherenceScore/Dimension, weekly-report read ownership |
+| Recommendation Service | LongevityRecommendationDb | recommendation-local catalog/rule snapshots, ranking request/result metadata needed by the service |
+| Background Worker | LongevityWorkerDb | worker job state, ProcessedEvent/idempotency, retry/dead-letter operational state |
+
+Rules: no cross-database foreign keys, no service reads another service database, integration references use stable IDs, and copied read models arrive through versioned API/event contracts. Each service owns its own Outbox when it publishes domain events.
+
 ## Conventions
 - PK: `uniqueidentifier` / Guid unless lookup table needs small integer.
 - Timestamps: UTC `datetime2`.

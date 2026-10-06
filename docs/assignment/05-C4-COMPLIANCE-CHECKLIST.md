@@ -1,92 +1,56 @@
 # C4 Compliance Checklist - Longevity Diet Companion
 
-This checklist is based on the official C4 Model review checklist, notation guidance, System Context guidance, Container guidance, and queues/topics guidance.
-
-## 1. Diagram Identity
-
+## 1. Diagram identity
 | Check | C0 | C1 |
 |---|---|---|
-| Clear title | PASS | PASS |
-| Diagram type obvious | PASS - System Context | PASS - Container |
-| Scope obvious | PASS - one software system | PASS - one software system boundary |
-| Key / legend present | PASS | PASS |
-| Consistent naming between diagrams | PASS | PASS |
+| Clear title/type/scope | PASS | PASS - Target Architecture |
+| English naming | PASS | PASS |
+| Legend/notation | PASS | PASS |
+| One abstraction level | PASS | PASS |
 
-## 2. Elements
+## 2. C0 checks
+- Shows Guest, Member, Administrator, Longevity Diet Companion and direct optional Local AI Runtime.
+- Hides Gateway, services, databases, Redis, gRPC, Worker and ports.
+- No implementation technology leaks into System Context.
 
-| Check | Result |
-|---|---|
-| Every element has a name | PASS |
-| Every element type is explicit | PASS |
-| Every element has a short responsibility | PASS |
-| Every C1 container has technology stated | PASS |
-| External/optional dependency is visually distinct | PASS |
-| Shapes/border styles have meaning documented in legend | PASS |
-## 3. Relationships
+## 3. C1 target checks
+- Web Application reaches backend only through API Gateway.
+- API Gateway is YARP; internal listener :8080 behind public HTTPS :443.
+- Identity & Profile Service :8081 owns LongevityIdentityDb.
+- Catalog & Rules Service :8082 owns LongevityCatalogDb.
+- Planning Service :8083 owns LongevityPlanningDb.
+- Tracking & Progress Service :8084 owns LongevityTrackingDb.
+- Recommendation Service gRPC/HTTP2 :8085 owns LongevityRecommendationDb.
+- Background Worker ops/health :8086 owns LongevityWorkerDb.
+- Each DB link is EF Core/TDS :1433 and no service points at another service DB.
+- Event Streams uses Redis 7 Streams :6379 and has explicit producers/consumers.
+- Optional Local AI :11434 is external and explanation-only.
+- No controller/repository/table/class details appear on C1.
 
-| Check | Result |
-|---|---|
-| Every relationship is directional | PASS |
-| Every relationship has an intent label | PASS |
-| C1 inter-process relationships show technology/protocol | PASS |
-| Synchronous vs asynchronous communication is visually distinct | PASS |
-| No connector passes through unrelated text | PASS |
-| No connector passes through unrelated boxes | PASS |
-| Curved/diagonal connectors are rejected by automated geometry lint | PASS |
-| Arrowhead style is consistent | PASS |
+## 4. Messaging
+Logical Event Streams are shown as a C4 queue/topic-style data-store container. Domain services publish integration events; Worker and approved Recommendation read-model consumers initiate XREADGROUP/XACK operations. Redis server placement belongs to Deployment. Supporting Dynamic views show XADD, XREADGROUP, XACK and dead-letter order in detail.
 
-## 4. Level-of-Abstraction Rules
+## 5. Current/target separation
+- C1 = approved Target Architecture from ADR-005.
+- Local Deployment = actual current Docker Compose topology.
+- Production Target = intended secure target topology.
+- Documentation must never imply the target service split/database split is already implemented.
 
-### C0 - System Context
-- Shows Guest, Member, Administrator, Longevity Diet Companion, and the direct optional Local AI dependency.
-- Hides React, API, SQL Server, Redis, gRPC, Worker, Controllers, Services, and Repositories.
-- Technology/protocol detail is intentionally omitted except the external dependency description.
+## 6. Automated quality gates
+Validators check:
+- required target element names and exact ports;
+- six database ownership names;
+- Gateway and target DSL relationships;
+- current Local Deployment preservation;
+- C0 abstraction leaks;
+- draw.io XML validity and orthogonal routing;
+- connector/text, connector/box, connector/connector collisions;
+- advanced SVG edge-label/edge-rect/label-rect/text-overflow checks;
+- assignment technology/physical DB coverage;
+- Structurizr static checks and live validation when available.
 
-### C1 - Container
-- Shows runnable applications/data stores only for the target web-only MVP; no Mobile App is in scope.
-- API internal Controller -> Service -> Repository layers are not modelled as C1 containers.
-- Nginx is part of the Web runtime container because the project deploys the SPA through it.
-- Sample-image-only Cloudinary, RabbitMQ, Brevo, Google AI, and split Diet/Identity/Progress services are intentionally excluded.
-## 5. Message-Based Architecture Correction
+## 7. Visual QA
+At normal zoom: no label touches a connector; no connector crosses a box; each service/database pair is obvious; Gateway placement is unambiguous; Event Streams is visibly connected; text remains minimal.
 
-The official C4 queues/topics guidance recommends modelling each logical queue/topic as a C4 container (a data store), rather than modelling the message bus/broker itself as a C4 container.
-
-Therefore C1 uses:
-
-- **Application Event Streams** = logical queue/topic-style C4 container.
-- **Technology:** Redis 7 Streams.
-- Worker -> Application Event Streams = `XADD`.
-- Application Event Streams -> Worker = `XREADGROUP + XACK`.
-- Redis server/broker deployment topology is left to deployment documentation.
-
-This keeps the Assignment requirement "Redis message broker integration" while preserving correct C4 abstraction.
-
-## 6. Automated Quality Gates
-
-The final validator checks:
-- draw.io XML validity;
-- orthogonal routing and `curved=0`;
-- consistent filled block arrowheads;
-- connector/text intersections;
-- connector/unrelated-box intersections;
-- required Assignment document sections and technologies;
-- all 33 target physical database tables;
-- required Structurizr model relationships;
-- Structurizr CLI validation when Docker/image is available.
-## 7. Source Grounding
-
-BMAD rule applied: because this is an existing project, repository code/configuration and agreed project documents are the source of truth. The supplied architecture image is used for visual composition only; sample-only services are not copied into LDC.
-
-- Official C4 Model: https://c4model.com/
-- System Context: https://c4model.com/diagrams/system-context
-- Container: https://c4model.com/diagrams/container
-- Notation: https://c4model.com/diagrams/notation
-- Review checklist: https://c4model.com/diagrams/checklist
-- Queues and topics: https://c4model.com/abstractions/queues-and-topics
-- C4 skill: https://github.com/bitsmuggler/c4-skill
-- BMAD Explore and Validate: https://docs.bmad-method.org/plan/explore-and-validate-an-idea/
-- PRN232 Final Assignment PDF supplied by the team.
-
-## 8. Final Status
-
-The four master diagrams are generated from one canonical script, exported as high-resolution PNGs, and must pass the validator before they are treated as submission-ready.
+## 8. Sources
+Official C4 Model, diagrams.net guidance, Microsoft .NET microservices/data-ownership and API Gateway/YARP guidance, Redis Streams documentation, Architecture Decision Studio lecturer guidance, and reviewed project-local architecture skills.
