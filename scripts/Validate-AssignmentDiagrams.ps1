@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$root = 'D:\PRN232\PRN232_LongevityDiet'
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $diagramDir = Join-Path $root 'docs\assignment\diagrams'
 $previewDir = Join-Path $root 'docs\assignment\previews'
 $vectorDir = Join-Path $root 'docs\assignment\vector'
@@ -204,6 +204,7 @@ Write-Output "PASS Physical DB full target table coverage ($($requiredTables.Cou
 
 $c0Text = Get-Content (Join-Path $diagramDir '01-c0-system-context.drawio') -Raw -Encoding UTF8
 $c1Text = Get-Content (Join-Path $diagramDir '02-c1-container-architecture.drawio') -Raw -Encoding UTF8
+$c1SemanticText = [System.Net.WebUtility]::HtmlDecode($c1Text)
 
 foreach ($requiredC0 in @('Guest','Member','Administrator','Longevity Diet Companion','Local AI Runtime','Software System')) {
     if ($c0Text -notmatch [regex]::Escape($requiredC0)) {
@@ -217,12 +218,12 @@ foreach ($requiredC1 in @(
     ':443',':8080',':8081',':8082',':8083',':8084',':8085',':8086',':6379',':1433',':11434',
     'gRPC / HTTP/2','Redis Streams','EF Core / TDS'
 )) {
-    if ($c1Text -notmatch [regex]::Escape($requiredC1)) {
+    if ($c1SemanticText -notmatch [regex]::Escape($requiredC1)) {
         throw "Missing required Target C1 element/content: $requiredC1"
     }
 }
 foreach ($sampleOnly in @('Mobile App','Cloudinary','Brevo','RabbitMQ','Google AI')) {
-    if ($c0Text -match [regex]::Escape($sampleOnly) -or $c1Text -match [regex]::Escape($sampleOnly)) {
+    if ($c0Text -match [regex]::Escape($sampleOnly) -or $c1SemanticText -match [regex]::Escape($sampleOnly)) {
         throw "Reference-image component leaked into project architecture: $sampleOnly"
     }
 }
@@ -232,12 +233,12 @@ foreach ($forbiddenC0 in @('React 19','ASP.NET Core','SQL Server 2022','Redis 7 
     }
 }
 foreach ($forbiddenC1 in @('React 19 + TypeScript + Vite + Nginx','SQL Server 2022 + EF Core migrations','[Container - Message Broker]')) {
-    if ($c1Text -match [regex]::Escape($forbiddenC1)) {
+    if ($c1SemanticText -match [regex]::Escape($forbiddenC1)) {
         throw "C4 abstraction leak detected in Container view: $forbiddenC1"
     }
 }
 foreach ($requiredTitle in @('C0 - C4 System Context','C1 - C4 Container')) {
-    if ($c0Text -notmatch [regex]::Escape($requiredTitle) -and $c1Text -notmatch [regex]::Escape($requiredTitle)) {
+    if ($c0Text -notmatch [regex]::Escape($requiredTitle) -and $c1SemanticText -notmatch [regex]::Escape($requiredTitle)) {
         throw "Missing course/C4 terminology disambiguation: $requiredTitle"
     }
 }
