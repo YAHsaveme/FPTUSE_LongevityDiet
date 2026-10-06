@@ -56,6 +56,7 @@ foreach ($forbidden in @('React 19','ASP.NET Core','SQL Server 2022','Redis 7','
 }
 
 $containerText = [IO.File]::ReadAllText((Join-Path $ArchitectureDir '02-container-architecture.drawio'), [Text.Encoding]::UTF8)
+$containerSemanticText = [System.Net.WebUtility]::HtmlDecode($containerText)
 $targetC1Required = @(
     'Target Architecture','API Gateway','Identity & Profile Service','Catalog & Rules Service','Planning Service','Tracking & Progress Service',
     'Recommendation Service','Background Worker','Event Streams',
@@ -64,10 +65,10 @@ $targetC1Required = @(
     'gRPC / HTTP/2','Redis Streams','EF Core / TDS'
 )
 foreach ($required in $targetC1Required) {
-    if ($containerText -notmatch [regex]::Escape($required)) { throw "Target C1 semantic requirement missing: $required" }
+    if ($containerSemanticText -notmatch [regex]::Escape($required)) { throw "Target C1 semantic requirement missing: $required" }
 }
 foreach ($forbidden in @('[Container - Message Broker]','<b>REST API</b>','<b>SQL Database</b>')) {
-    if ($containerText -match [regex]::Escape($forbidden)) { throw "Obsolete target-C1 center detected: $forbidden" }
+    if ($containerSemanticText -match [regex]::Escape($forbidden)) { throw "Obsolete target-C1 center detected: $forbidden" }
 }
 
 $deploymentText = [IO.File]::ReadAllText((Join-Path $ArchitectureDir '03-docker-deployment.drawio'), [Text.Encoding]::UTF8)
@@ -81,13 +82,29 @@ foreach ($forbidden in @('[External Container]','[External Container - Database]
 }
 if ($componentText -notmatch [regex]::Escape('[Supporting Runtime Concern]')) { throw 'Component view must distinguish supporting runtime concerns from C4 components.' }
 
-foreach ($targetFile in @('05-recommendation-dynamic.drawio','06-outbox-redis-dynamic.drawio')) {
-    $targetText = [IO.File]::ReadAllText((Join-Path $ArchitectureDir $targetFile), [Text.Encoding]::UTF8)
-    if ($targetText -notmatch 'Target') { throw "Target/planned status is not explicit in $targetFile" }
+$recommendationText = [System.Net.WebUtility]::HtmlDecode([IO.File]::ReadAllText((Join-Path $ArchitectureDir '05-recommendation-dynamic.drawio'), [Text.Encoding]::UTF8))
+foreach ($required in @('Target Architecture','API Gateway','Planning Service','Recommendation Service','LongevityRecommendationDb','Local AI Runtime','gRPC / HTTP/2 :8085')) {
+    if ($recommendationText -notmatch [regex]::Escape($required)) { throw "Recommendation dynamic target requirement missing: $required" }
+}
+foreach ($forbidden in @('LongevityDiet.API','SQL Server</b>')) {
+    if ($recommendationText -match [regex]::Escape($forbidden)) { throw "Recommendation dynamic obsolete target element detected: $forbidden" }
 }
 
-$productionText = [IO.File]::ReadAllText((Join-Path $ArchitectureDir '10-production-secure-deployment.drawio'), [Text.Encoding]::UTF8)
-foreach ($required in @('Production Target','HTTPS / TLS','HTTPS / REST','gRPC / HTTP/2 + TLS','Private Application Network','no public application ports')) {
+$outboxText = [System.Net.WebUtility]::HtmlDecode([IO.File]::ReadAllText((Join-Path $ArchitectureDir '06-outbox-redis-dynamic.drawio'), [Text.Encoding]::UTF8))
+foreach ($required in @('Target Architecture','Tracking & Progress Service','LongevityTrackingDb','Event Streams','Background Worker','LongevityWorkerDb','XADD','XREADGROUP','XACK','dead-letter')) {
+    if ($outboxText -notmatch [regex]::Escape($required)) { throw "Outbox/Redis dynamic target requirement missing: $required" }
+}
+foreach ($forbidden in @('Same Logical Database','Poll pending outbox rows','LongevityDiet.API')) {
+    if ($outboxText -match [regex]::Escape($forbidden)) { throw "Outbox/Redis dynamic obsolete ownership detected: $forbidden" }
+}
+
+$productionText = [System.Net.WebUtility]::HtmlDecode([IO.File]::ReadAllText((Join-Path $ArchitectureDir '10-production-secure-deployment.drawio'), [Text.Encoding]::UTF8))
+foreach ($required in @(
+    'Production Target','Web Edge','API Gateway','Identity & Profile Service','Catalog & Rules Service','Planning Service','Tracking & Progress Service',
+    'Recommendation Service','Background Worker','Event Streams','LongevityIdentityDb','LongevityCatalogDb','LongevityPlanningDb','LongevityTrackingDb','LongevityRecommendationDb','LongevityWorkerDb',
+    'HTTPS / TLS :443','HTTPS / REST :8080','HTTPS/REST :8081','HTTPS/REST :8082','HTTPS/REST :8083','HTTPS/REST :8084','gRPC / HTTP/2 + TLS :8085','HTTPS/REST :8086','Ops :8086','Redis :6379','TDS :1433',
+    'Private Application Network','no public application ports'
+)) {
     if ($productionText -notmatch [regex]::Escape($required)) { throw "Production deployment semantic requirement missing: $required" }
 }
 Write-Host 'PASS C4 abstraction/status/production-security semantic checks'
