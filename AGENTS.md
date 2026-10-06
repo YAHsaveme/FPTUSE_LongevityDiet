@@ -72,12 +72,17 @@ Do not remove or bypass:
 ## Draw.io rules
 
 Follow:
+- `.agents/ARCHITECTURE-DIAGRAM-SKILLS.md`
 - `.agents/skills/c4-architecture/SKILL.md`
+- `.agents/skills/architecture-diagrams-as-code/SKILL.md`
+- `.agents/skills/drawio-advanced-qa/SKILL.md`
 - `.agents/skills/bmad-assignment-foundation/SKILL.md`
 - `.agents/skills/drawio-system-architecture/SKILL.md`
 - `.agents/skills/architecture-diagram-qa/SKILL.md`
 - `.agents/skills/assignment-diagram-polish/SKILL.md`
 - `docs/architecture/DRAWIO-GUIDELINES.md`
+
+Precedence: current code/Docker for Current Runtime and the approved target architecture spec/ADR for Target Architecture always beat generic skill examples.
 
 ## Task workflow
 
