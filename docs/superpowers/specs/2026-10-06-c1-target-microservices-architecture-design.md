@@ -2,7 +2,7 @@
 
 Date: 2026-10-06
 Project: Longevity Diet Companion
-Status: Design approved in chat; written spec pending user review
+Status: Approved by user on 2026-10-06
 
 ## 1. Purpose
 This specification defines the new **C1 Target Architecture** requested for the PRN232 LongevityDiet project. The target moves the current modular-distributed design toward explicit service ownership while keeping the assignment understandable, demoable, and visually clean.
