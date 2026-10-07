@@ -1,4 +1,4 @@
-﻿workspace "Longevity Diet Companion" "PRN232 current runtime and approved target architecture" {
+workspace "Longevity Diet Companion" "PRN232 current runtime and approved target architecture" {
     !impliedRelationships false
 
     model {
@@ -80,11 +80,21 @@
                 dockerDesktop = deploymentNode "Docker Desktop" "Current container runtime." "Docker Desktop" {
                     compose = deploymentNode "Docker Compose project: longevity-diet" "Current six-service Compose topology." "Docker Compose" {
                         infrastructureNode "web service / Nginx" "Serves SPA and reverse-proxies /api." "Nginx"
-                        apiNode = deploymentNode "api service :8080" "Current REST API." ".NET 9" { containerInstance apiCurrent }
-                        grpcNode = deploymentNode "recommendation-grpc :8081" "Current gRPC service." ".NET 9 / h2c" { containerInstance recommendationCurrent }
-                        workerNode = deploymentNode "worker service" "Current worker." ".NET 9" { containerInstance workerCurrent }
-                        sqlNode = deploymentNode "sqlserver :1433" "Current shared application DB host." "SQL Server 2022" { containerInstance databaseCurrent }
-                        redisNode = deploymentNode "redis :6379" "Current Redis Streams host." "Redis 7" { containerInstance eventStreamsCurrent }
+                        apiNode = deploymentNode "api service :8080" "Current REST API." ".NET 9" {
+                            containerInstance apiCurrent
+                        }
+                        grpcNode = deploymentNode "recommendation-grpc :8081" "Current gRPC service." ".NET 9 / h2c" {
+                            containerInstance recommendationCurrent
+                        }
+                        workerNode = deploymentNode "worker service" "Current worker." ".NET 9" {
+                            containerInstance workerCurrent
+                        }
+                        sqlNode = deploymentNode "sqlserver :1433" "Current shared application DB host." "SQL Server 2022" {
+                            containerInstance databaseCurrent
+                        }
+                        redisNode = deploymentNode "redis :6379" "Current Redis Streams host." "Redis 7" {
+                            containerInstance eventStreamsCurrent
+                        }
                     }
                 }
             }
@@ -98,14 +108,30 @@
                 infrastructureNode "TLS termination" "HTTPS entry point." "Nginx / TLS"
             }
             privateProd = deploymentNode "Private Application Network" "Target private service/data network." "Private Network" {
-                gatewayNode = deploymentNode "API Gateway :8080" "YARP gateway." ".NET 9" { containerInstance targetGateway }
-                identityNode = deploymentNode "Identity :8081" "Identity/Profile service." ".NET 9" { containerInstance identityService }
-                catalogNode = deploymentNode "Catalog :8082" "Catalog/Rules service." ".NET 9" { containerInstance catalogService }
-                planningNode = deploymentNode "Planning :8083" "Planning service." ".NET 9" { containerInstance planningService }
-                trackingNode = deploymentNode "Tracking :8084" "Tracking/Progress service." ".NET 9" { containerInstance trackingService }
-                recommendationNode = deploymentNode "Recommendation :8085" "Private gRPC HTTP/2 + TLS." ".NET 9 / HTTP2 + TLS" { containerInstance targetRecommendation }
-                workerNodeTarget = deploymentNode "Worker :8086" "Internal ops/health only." ".NET 9 Worker" { containerInstance targetWorker }
-                redisTarget = deploymentNode "Redis :6379" "Private event-stream runtime." "Redis 7" { containerInstance targetEventStreams }
+                gatewayNode = deploymentNode "API Gateway :8080" "YARP gateway." ".NET 9" {
+                    containerInstance targetGateway
+                }
+                identityNode = deploymentNode "Identity :8081" "Identity/Profile service." ".NET 9" {
+                    containerInstance identityService
+                }
+                catalogNode = deploymentNode "Catalog :8082" "Catalog/Rules service." ".NET 9" {
+                    containerInstance catalogService
+                }
+                planningNode = deploymentNode "Planning :8083" "Planning service." ".NET 9" {
+                    containerInstance planningService
+                }
+                trackingNode = deploymentNode "Tracking :8084" "Tracking/Progress service." ".NET 9" {
+                    containerInstance trackingService
+                }
+                recommendationNode = deploymentNode "Recommendation :8085" "Private gRPC HTTP/2 + TLS." ".NET 9 / HTTP2 + TLS" {
+                    containerInstance targetRecommendation
+                }
+                workerNodeTarget = deploymentNode "Worker :8086" "Internal ops/health only." ".NET 9 Worker" {
+                    containerInstance targetWorker
+                }
+                redisTarget = deploymentNode "Redis :6379" "Private event-stream runtime." "Redis 7" {
+                    containerInstance targetEventStreams
+                }
                 sqlTarget = deploymentNode "SQL Server :1433" "Physical host for six logically owned target DBs." "SQL Server 2022" {
                     containerInstance identityDb
                     containerInstance catalogDb
@@ -167,12 +193,12 @@
             title "C4 Dynamic View - Recommendation (Target)"
         }
 
-        dynamic targetWorker "Outbox-Redis-Dynamic" "Target service-owned Outbox and event processing" {
+        dynamic ldc "Outbox-Redis-Dynamic" "Target service-owned Outbox and event processing" {
             1: trackingService -> trackingDb "Commits business state + Outbox" "EF Core / TDS :1433"
-            2: trackingService -> targetEventStreams "Publishes event" "Redis Streams XADD :6379"
-            3: targetWorker -> targetEventStreams "Reads event" "Redis Streams XREADGROUP :6379"
+            2: trackingService -> targetEventStreams "Publishes event" "Redis Streams :6379"
+            3: targetWorker -> targetEventStreams "Reads event" "Redis Streams :6379"
             4: targetWorker -> workerDb "Persists idempotency/job state" "EF Core / TDS :1433"
-            5: targetWorker -> targetEventStreams "Acknowledges / publishes result or dead-letter" "Redis Streams XACK/XADD :6379"
+            5: targetWorker -> targetEventStreams "Acknowledges / publishes result or dead-letter" "Redis Streams :6379"
             autoLayout lr 110 110
             title "C4 Dynamic View - Service Outbox and Redis Streams (Target)"
         }
@@ -192,19 +218,71 @@
         }
 
         styles {
-            element "Person" { shape Person background #FFFFFF color #111827 stroke #374151 strokeWidth 2 fontSize 20 }
-            element "Software System" { shape RoundedBox background #FCE8D5 color #111827 stroke #C58B42 strokeWidth 2 fontSize 20 }
-            element "Container" { shape Box background #FFFFFF color #111827 stroke #374151 strokeWidth 2 fontSize 18 }
-            element "Database" { shape Cylinder }
-            element "Queue" { shape Pipe }
-            element "Current" { background #F9FAFB color #374151 stroke #9CA3AF }
-            element "Target" { background #FFFFFF color #111827 stroke #374151 }
-            element "External" { background #FFFFFF color #111827 stroke #6B7280 border dashed }
-            element "Optional" { border dashed }
-            relationship "Relationship" { color #374151 thickness 2 routing Orthogonal fontSize 15 }
-            relationship "Async" { style dashed }
-            relationship "Optional" { style dashed color #6B7280 }
-            relationship "Current" { color #9CA3AF }
+            element "Person" {
+                shape Person
+                background #FFFFFF
+                color #111827
+                stroke #374151
+                strokeWidth 2
+                fontSize 20
+            }
+            element "Software System" {
+                shape RoundedBox
+                background #FCE8D5
+                color #111827
+                stroke #C58B42
+                strokeWidth 2
+                fontSize 20
+            }
+            element "Container" {
+                shape Box
+                background #FFFFFF
+                color #111827
+                stroke #374151
+                strokeWidth 2
+                fontSize 18
+            }
+            element "Database" {
+                shape Cylinder
+            }
+            element "Queue" {
+                shape Pipe
+            }
+            element "Current" {
+                background #F9FAFB
+                color #374151
+                stroke #9CA3AF
+            }
+            element "Target" {
+                background #FFFFFF
+                color #111827
+                stroke #374151
+            }
+            element "External" {
+                background #FFFFFF
+                color #111827
+                stroke #6B7280
+                border dashed
+            }
+            element "Optional" {
+                border dashed
+            }
+            relationship "Relationship" {
+                color #374151
+                thickness 2
+                routing Orthogonal
+                fontSize 15
+            }
+            relationship "Async" {
+                style dashed
+            }
+            relationship "Optional" {
+                style dashed
+                color #6B7280
+            }
+            relationship "Current" {
+                color #9CA3AF
+            }
         }
     }
 }

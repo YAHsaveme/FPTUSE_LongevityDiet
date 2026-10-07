@@ -127,25 +127,35 @@ $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
 if ($pythonCommand) {
     & $pythonCommand.Source $sectionPreviewScript
     if ($LASTEXITCODE -ne 0) {
-        throw 'Physical DB section preview generation failed.'
+        throw 'Physical DB section preview generation failed with Python.'
     }
-    Write-Output 'PASS Physical DB section preview regeneration'
 }
 else {
-    $sectionDir = Join-Path $previewDir 'physical-db-sections'
-    foreach ($sectionFile in @(
-        '01-identity-profile.png',
-        '02-catalog-rules.png',
-        '03-planning-tracking.png',
-        '04-progress-engagement-safety.png',
-        '05-messaging-reliability-operations.png'
-    )) {
-        if (-not (Test-Path (Join-Path $sectionDir $sectionFile))) {
-            throw "Python is unavailable and required existing section preview is missing: $sectionFile"
-        }
+    $uvCommand = Get-Command uv -ErrorAction SilentlyContinue
+    $uvPath = if ($uvCommand) { $uvCommand.Source } else { Join-Path $env:USERPROFILE '.local\bin\uv.exe' }
+    if (-not (Test-Path $uvPath)) {
+        throw 'Neither Python nor uv is available; physical DB section preview regeneration is mandatory.'
     }
-    Write-Warning 'Python is not installed/on PATH; skipped re-cropping section previews and verified the five existing preview files instead.'
+    & $uvPath run --with pillow --python 3.12 python $sectionPreviewScript
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Physical DB section preview generation failed with uv + Pillow.'
+    }
 }
+
+$sectionDir = Join-Path $previewDir 'physical-db-sections'
+foreach ($sectionFile in @(
+    '01-identity-profile.png',
+    '02-catalog-rules.png',
+    '03-planning-tracking.png',
+    '04-progress-engagement-safety.png',
+    '05-messaging-reliability-operations.png'
+)) {
+    $sectionPath = Join-Path $sectionDir $sectionFile
+    if (-not (Test-Path $sectionPath) -or (Get-Item $sectionPath).Length -le 0) {
+        throw "Required regenerated section preview is missing or empty: $sectionFile"
+    }
+}
+Write-Output 'PASS Physical DB section preview regeneration'
 
 $assignmentDoc = Join-Path $root 'docs\assignment\00-ASSIGNMENT-DOCUMENT.md'
 if (-not (Test-Path $assignmentDoc)) {
@@ -259,30 +269,44 @@ foreach ($required in @('systemContext ldc "C0-SystemContext"', 'container ldc "
 Write-Output 'PASS workspace.dsl structural checks'
 
 $dockerCommand = Get-Command docker -ErrorAction SilentlyContinue
-if ($dockerCommand) {
-    $previousPreference = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    try {
-        docker image inspect structurizr/structurizr *> $null
-        $structurizrImageReady = ($LASTEXITCODE -eq 0)
-    }
-    finally {
-        $ErrorActionPreference = $previousPreference
-    }
+if (-not $dockerCommand) {
+    throw 'Docker CLI is required for mandatory live Structurizr validation.'
+}
 
-    if ($structurizrImageReady) {
-        $c4Dir = Split-Path $dsl -Parent
-        docker run --rm -v "${c4Dir}:/workspace" structurizr/structurizr validate -workspace /workspace/workspace.dsl
-        if ($LASTEXITCODE -ne 0) {
-            throw 'Structurizr CLI validation failed.'
-        }
-        Write-Output 'PASS Structurizr CLI workspace validation'
-    }
-    else {
-        Write-Warning 'Docker daemon/Structurizr image is unavailable; skipped live Structurizr CLI validation after static workspace checks passed.'
+$previousPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+    docker info *> $null
+    $dockerDaemonReady = ($LASTEXITCODE -eq 0)
+}
+finally {
+    $ErrorActionPreference = $previousPreference
+}
+if (-not $dockerDaemonReady) {
+    throw 'Docker daemon is not available; live Structurizr validation is mandatory.'
+}
+
+$structurizrImage = 'structurizr/structurizr:latest'
+$previousPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+    docker image inspect $structurizrImage *> $null
+    $structurizrImageReady = ($LASTEXITCODE -eq 0)
+}
+finally {
+    $ErrorActionPreference = $previousPreference
+}
+if (-not $structurizrImageReady) {
+    docker pull $structurizrImage
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Structurizr Docker image is required and could not be pulled.'
     }
 }
-else {
-    Write-Warning 'Docker CLI is unavailable; skipped live Structurizr CLI validation after static workspace checks passed.'
+
+$c4Dir = Split-Path $dsl -Parent
+docker run --rm -v "${c4Dir}:/workspace" $structurizrImage validate -workspace /workspace/workspace.dsl
+if ($LASTEXITCODE -ne 0) {
+    throw 'Structurizr CLI validation failed.'
 }
+Write-Output 'PASS Structurizr CLI workspace validation'
 Write-Output 'Assignment diagram validation complete.'
