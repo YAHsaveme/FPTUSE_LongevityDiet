@@ -1,50 +1,52 @@
-# Task 4 - Explanation Adapter, Feedback Intelligence & Recommendation UX
+# Task 4 - Rule Governance, Safety Audit & Admin Review
 
-**Owner:** Thành viên 4  
-**Reviewer:** Thành viên 2  
-**Branch:** `feature/w3-t4-explanation-ux`
+**Owner:** Thành viên 4
+**Reviewer:** Thành viên 2
+**Branch:** `feature/w3-t4-rule-governance-audit`
+**Status:** Planned
 
 ## Mục tiêu
-Tạo lớp giải thích thân thiện và recommendation UX hoàn chỉnh mà không giao quyền quyết định cho generative AI.
 
-## Deterministic explanation
-- Map reason code -> localized explanation template.
-- Luôn có deterministic fallback.
-- Không phụ thuộc AI để render recommendation.
+Đưa rule/safety/admin flow từ CRUD thành lifecycle có provenance, review, version và audit để historical result luôn truy vết được.
 
-## Optional local AI adapter
-Nếu dùng:
-- chạy local/free model;
-- input chỉ gồm structured reason data cần thiết;
-- không gửi secret/raw health-sensitive content không cần thiết;
-- output chỉ rewrite cách diễn đạt;
-- validate length/tone;
-- timeout + fallback template;
-- không được thêm claim mới;
-- không được thay đổi rank/score/constraint.
+## Rule governance
 
-## Feedback intelligence
-- Aggregate feedback statistics.
-- Không tự động sửa production weight.
-- Cung cấp signal cho admin/team review.
-- Detect excessive repetition/dislike trend.
+Lifecycle: Draft -> InReview -> Published -> Retired.
 
-## Frontend UX
-- Recommendation list/card.
-- Reason panel.
-- Replace flow.
-- Feedback actions.
-- Loading/error/service-unavailable states.
-- Clearly distinguish recommendation from medical advice.
+- Published version immutable.
+- Source/evidence metadata bắt buộc.
+- Parameter validation.
+- Publish ghi actor/time/change note.
+- Retire không xóa lịch sử.
+- Không hard-delete version đã dùng trong plan/score/recommendation.
+- Authorization rõ cho review/publish/retire.
 
-## Testing
-- fallback khi AI unavailable;
-- output validation;
-- reason code coverage;
-- no rank mutation;
-- timeout behavior;
-- feedback aggregation;
-- accessibility keyboard/focus.
+## Audit & change impact
+
+- Audit safety transitions, eligibility reason codes, rule publish/retire và admin actions.
+- Append-oriented audit record.
+- Không log token/password/sensitive answer không cần thiết.
+- Xác định result nào dùng rule/version cũ.
+- Không retroactively rewrite historical result.
+
+## API/UI
+
+- Draft/edit/submit review/approve/reject/publish/retire.
+- Compare version + provenance/history.
+- Admin audit search/filter/pagination.
+- Safety review queue + rule impact view.
+
+## Testing bắt buộc
+
+- Invalid lifecycle transition.
+- Publish without provenance.
+- Edit published version.
+- Concurrent publish.
+- Member access Admin API.
+- Audit append behavior.
+- Sensitive-field redaction.
+- Historical version trace.
 
 ## Definition of Done
-Recommendation UX hoạt động ngay cả khi optional AI tắt; mọi quyết định vẫn đến từ deterministic engine.
+
+Admin có thể biết ai thay đổi gì, khi nào, version nào được dùng; production rule không thể bị sửa âm thầm và Member không truy cập được Admin audit/governance.

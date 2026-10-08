@@ -1,69 +1,47 @@
-# Task 4 - Progress Dashboard, Trend Aggregation & Insight Projection
+# Task 4 - App Shell + Design System + Unified UX Quality
 
-**Owner:** Thành viên 4  
-**Reviewer:** Thành viên 2  
-**Branch:** `feature/w2-t4-progress-dashboard`
+**Owner:** Thành viên 4
+**Reviewer:** Thành viên 2
+**Branch:** `feature/w2-t4-app-ux-integration`
+**Status:** Planned
 
 ## Mục tiêu
-Tạo dashboard đọc dữ liệu aggregate thật thay vì tính lại toàn bộ raw data mỗi lần render.
 
-## Data Projection
-Tạo projection/summary phù hợp:
-- DailyWellnessSummary;
-- WeeklyProgressSummary;
-- latest LDAS;
-- activity totals;
-- eating-window adherence;
-- challenge progress;
-- logging consistency.
+Tích hợp các page thành một application thống nhất, responsive, accessible và có error/loading/validation behavior nhất quán.
 
-Projection update phải idempotent và có rebuild strategy.
+## App integration
 
-## Backend
-- Aggregation service.
-- Date-range trend query.
-- Current dashboard query.
-- Projection rebuild command/service cho troubleshooting.
-- Không để Controller chứa aggregation logic.
+- AppShell, header/sidebar/mobile navigation.
+- Member/Admin route groups.
+- Protected/role-aware navigation.
+- Session-expiry và return URL thống nhất.
+- Main journeys không có route dead-end.
 
-## Event integration
-Khi MealLog/Activity/Challenge thay đổi:
-- emit/reuse domain/business event;
-- Worker có thể recalc projection async;
-- eventual-consistency UX phải rõ.
+## Design & shared UI
 
-## API
-- GET dashboard summary.
-- GET trend series theo supported range.
-- GET insight inputs/explanations.
+- Typography/spacing/radius/focus/breakpoint foundations.
+- Reuse Button, FormField, Card, Status, Modal, EmptyState, Skeleton, Alert, Pagination khi có giá trị.
+- Giữ visual identity hiện có.
+- Keyboard navigation, visible focus, labels, heading hierarchy, reduced motion.
 
-## Frontend
-Thay static dashboard values bằng:
-- latest score;
-- activity;
-- eating window;
-- challenge;
-- recent trends.
+## Unified state/error
 
-Phải có:
-- skeleton/loading;
-- empty state;
-- stale/update indicator nếu async projection chưa xong;
-- responsive cards.
+- Shared ProblemDetails/error parser.
+- Field validation mapping.
+- 401/403/404/409/429/5xx handling.
+- Không spinner vô hạn hoặc retry gây double-submit.
+- React Query/server-state convention; invalidate đúng sau mutation.
+- Route-level lazy loading và tránh duplicate request.
 
-## Testing
-- Projection idempotency.
-- Event replay không double count.
-- Date-range aggregation.
-- Empty/new user.
-- Eventual consistency.
-- Query performance baseline.
+## Testing bắt buộc
 
-## Deliverables
-- Projection schema/service.
-- Dashboard/trend APIs.
-- Dashboard UI dùng data thật.
-- Tests + query timing evidence.
+- Anonymous/member/admin navigation.
+- Reload nested route/session restore.
+- Validation/conflict/network timeout.
+- Keyboard/focus.
+- Mobile/tablet/desktop critical screens.
+- Production frontend build/bundle regression.
 
 ## Definition of Done
-Dashboard không còn hardcoded business metrics; cùng dữ liệu nguồn tạo cùng projection và event replay không làm sai tổng.
+
+Critical Member/Admin journeys chạy trong một shell thống nhất; responsive/accessibility/error/loading state đủ tốt để demo và không còn hardcoded/mock production state.

@@ -32,7 +32,8 @@ Final visual and geometry QA for:
 - Explicitly excludes the reference team's Mobile App, Cloudinary, RabbitMQ, Brevo, Google AI, split microservices, and split databases.
 - Increased container typography and internal padding while shortening descriptions so the whole view is readable at one glance.
 - Separated Guest/Member/Administrator HTTPS lanes and kept every connector orthogonal.
-- Separated Worker publish and consume lanes and moved REST, gRPC, EF Core, Redis, and optional-AI labels into dedicated whitespace.
+- Separated Worker publish and event-delivery lanes and moved REST, gRPC, EF Core, Redis, and optional-AI labels into dedicated whitespace.
+- Relationship labels now match arrow direction; `XREADGROUP`/`XACK` command direction is left to the Dynamic view instead of being mislabeled on a reverse data-flow arrow.
 - Preserved SQL Server cylinder notation, a warm system boundary, and an external dashed optional-AI card.
 - Corrected the message-based C4 abstraction: logical streams/queues are containers/data stores; the Redis broker/server is not modelled as a C4 container.
 ### Conceptual ERD
@@ -63,7 +64,7 @@ The Assignment validator now runs geometry lint before PNG export and also rejec
 - missing required C0/C1 project elements/protocol labels;
 - accidental leakage of sample-image-only components (Mobile App, Cloudinary, Brevo, RabbitMQ, Google AI, Diet Service, Identity Service, Progress Service).
 
-The final `workspace.dsl` was also validated with the official Structurizr CLI Docker image (`structurizr/structurizr`) and returned exit code 0. The Physical DB coverage check reports **33/33 tables**.
+The canonical `workspace.dsl` now contains System Context, Container, API Component, two Dynamic views, and the Local Demo Deployment model. Static DSL checks pass. A previous validation run had returned Structurizr CLI exit code 0; on the 2026-10-05 audit run, Docker Desktop was not running, so the validator truthfully skipped the live CLI step rather than reporting a false PASS. Physical DB coverage remains **33/33 tables**.
 
 ## Completion condition
-The Assignment pack is considered final only when geometry lint passes with zero findings, all four PNG previews export successfully, the required documentation/technology checks pass, Physical DB coverage is 33/33, and Structurizr validates `workspace.dsl`.
+The Assignment pack is considered final only when geometry lint passes with zero findings, all four PNG previews export successfully, the required documentation/technology checks pass, Physical DB coverage is 33/33, and the static `workspace.dsl` checks pass; live Structurizr CLI validation is additionally required whenever Docker/Structurizr is available.

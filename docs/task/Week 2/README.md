@@ -1,32 +1,38 @@
-# Week 2 - Adherence, Activity & 14-Day Habit System
+# Week 2 - Core Product Value + Recommendation + UX
 
 ## Mục tiêu tuần
-Biến dữ liệu meal/activity thành một vòng lặp theo dõi hành vi có thể đo lường: **Activity -> LDAS -> Challenge -> Progress Dashboard**.
+
+Biến foundation Week 1 thành sản phẩm có vòng lặp sử dụng rõ ràng: **Track -> Score -> Challenge -> Dashboard -> Recommendation -> Action**.
 
 ## Phân công
+
 | Task | Owner | Reviewer |
 |---|---|---|
-| Task 1 - Activity Tracking & Personal Goal Progress | Thành viên 1 | Thành viên 3 |
-| Task 2 - LDAS Scoring Engine & Versioned Calculation | Thành viên 2 | Thành viên 4 |
-| Task 3 - 14-Day Challenge, Streak & Completion | Thành viên 3 | Thành viên 1 |
-| Task 4 - Progress Dashboard, Trend Aggregation & Insight Projection | Thành viên 4 | Thành viên 2 |
+| Task 1 - Activity Tracking + LDAS Scoring | Thành viên 1 | Thành viên 3 |
+| Task 2 - 14-Day Challenge + Progress Dashboard | Thành viên 2 | Thành viên 4 |
+| Task 3 - Recommendation v2 + Replacement + Feedback | Thành viên 3 | Thành viên 1 |
+| Task 4 - App Shell + Design System + Unified UX Quality | Thành viên 4 | Thành viên 2 |
 
 ## Dependency
-- Week 1 Auth/Profile phải ổn định.
-- MealLog/EatingWindow từ Week 1 Task 3 là input cho LDAS.
-- RuleSetVersion là input cho score versioning.
-- Không dùng dữ liệu mock cho dashboard production flow.
+
+- Week 1 catalog/rules/planner/gRPC phải ổn định.
+- MealLog/EatingWindow là input cho LDAS.
+- Recommendation luôn ưu tiên hard constraints hơn preference/feedback.
+- Dashboard dùng dữ liệu/projection thật, không mock.
 
 ## Integration order
-1. Activity model + API.
-2. LDAS calculator/version.
-3. Challenge lifecycle.
-4. Aggregate projection/dashboard.
-5. E2E: log activity/meal -> recalc -> challenge/progress UI.
 
-## Exit criteria
-- Activity CRUD thật.
-- LDAS có version, breakdown và disclaimer.
-- 14-day challenge có lifecycle/streak đúng.
-- Dashboard đọc aggregate thật.
-- Unit/integration tests pass.
+1. Activity + score contract.
+2. Challenge + dashboard projection.
+3. Recommendation v2 + replace/feedback.
+4. App shell + shared UX integration.
+5. E2E: plan/log/activity -> score/challenge/dashboard -> recommendation/replace.
+
+## Week exit criteria
+
+- Activity CRUD + aggregation thật.
+- LDAS deterministic, versioned, có disclaimer.
+- 14-day challenge persist đúng.
+- Dashboard không còn hardcoded metric.
+- Recommendation explainable + replacement an toàn.
+- Main Member journeys chạy trong một app shell responsive, error/loading state nhất quán.

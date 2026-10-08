@@ -22,10 +22,10 @@ Dependency/version source-of-truth nằm trong `*.csproj`, `package.json` và `p
 ## Task planning
 
 - `task/README.md` - task-management conventions.
-- `task/ROADMAP-9-WEEKS.md` - high-level roadmap.
-- `task/Week 1/` through `task/Week 9/` - detailed weekly planning.
+- `task/ROADMAP-4-WEEKS.md` - high-level roadmap.
+- `task/Week 1/` through `task/Week 4/` - detailed weekly planning.
 - Mỗi week có `README.md` + `Task 1.md` ... `Task 4.md`.
-- Week 1 Task 1 do Thành viên 1 phụ trách và đã hoành thành.
+- Week 1 Task 1 do Thành viên 1 phụ trách và đã hoàn thành.
 
 ## Architecture
 

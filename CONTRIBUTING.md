@@ -11,7 +11,7 @@ Before coding, read in this order:
 3. `docs/05-SYSTEM-ARCHITECTURE.md`
 4. `docs/03-FUNCTIONAL-REQUIREMENTS.md`
 5. `docs/08-SAFETY-PRIVACY-AI.md`
-6. `docs/task/ROADMAP-9-WEEKS.md`
+6. `docs/task/ROADMAP-4-WEEKS.md`
 7. the active `docs/task/Week N/Task N.md`
 
 If a task conflicts with these documents, stop and resolve the conflict before implementing.

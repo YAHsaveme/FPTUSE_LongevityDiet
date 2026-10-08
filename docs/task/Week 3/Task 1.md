@@ -1,72 +1,43 @@
-# Task 1 - Recommendation Ranking v2 & Explainability
+# Task 1 - Reminder Scheduling + Notification Center
 
-**Owner:** Thành viên 1  
-**Reviewer:** Thành viên 3  
-**Branch:** `feature/w3-t1-ranking-v2`
+**Owner:** Thành viên 1
+**Reviewer:** Thành viên 3
+**Branch:** `feature/w3-t1-reminder-notification`
+**Status:** Planned
 
 ## Mục tiêu
-Nâng Recommendation gRPC Service từ baseline ranking thành engine có score breakdown, reason code và policy version rõ ràng.
 
-## Ranking pipeline
-1. Validate request.
-2. Apply hard constraints.
-3. Normalize candidate features.
-4. Apply versioned weight configuration.
-5. Calculate score components.
-6. Stable sort.
-7. Return accepted + rejected candidates cùng reason codes.
+Tạo reminder/notification flow chạy bằng Worker, theo timezone và user preference, không phụ thuộc frontend polling.
 
-## Hard constraints
-- allergen;
-- explicit user exclusion;
-- inactive recipe/food;
-- unsupported rule state;
-- safety flag liên quan.
+## Phạm vi chính
 
-Hard constraint không bao giờ bị override bởi preference hoặc feedback.
-
-## Soft signals
-Có thể gồm:
-- plant-forward alignment;
-- legumes/whole grains;
-- cuisine preference;
-- meal-time fit;
-- recent repetition penalty;
-- user feedback;
-- plan balance.
-
-Mọi signal phải có config/version, không magic number rải rác.
-
-## gRPC contract
-Response nên có:
-- CandidateId;
-- TotalScore;
-- ScoreComponents;
-- ReasonCodes;
-- PolicyVersion;
-- RejectedReason khi bị filter.
+- ReminderPreference, ReminderSchedule, ReminderDispatchRecord.
+- Notification, NotificationType và unread/read state.
+- Reminder type: meal logging, activity, challenge, weekly summary.
+- Opt-in/opt-out, quiet hours, timezone-aware schedule.
+- Disabled account không dispatch.
+- Idempotency key để tránh gửi duplicate cùng reminder window.
+- Worker emit NotificationRequested event; consumer persist Notification đúng một lần.
 
 ## API/UI
-- API expose recommendation result theo DTO sạch.
-- UI hiển thị "Vì sao gợi ý này?" từ reason code.
-- Không hiển thị raw internal weights nếu không cần.
 
-## Testing
-- hard constraint precedence;
-- tie-break stability;
-- same input/version -> same output;
-- score component sum;
-- version switching;
-- malformed request;
-- empty candidate set;
-- performance với candidate set thực tế.
+- GET/PUT reminder preferences.
+- Preview next scheduled reminder.
+- Notification list + pagination.
+- Unread count.
+- Mark one/all read.
+- Bell badge + notification panel/page + deep-link hợp lệ.
 
-## Deliverables
-- Versioned ranking configuration.
-- Updated proto + service.
-- API mapping.
-- Explainable UI.
-- Unit/integration/performance tests.
+## Testing bắt buộc
+
+- Timezone/offset boundary.
+- Quiet hours.
+- Duplicate prevention.
+- Disabled reminder/account.
+- Worker restart/concurrent workers.
+- Duplicate source event.
+- Notification ownership/read transition.
 
 ## Definition of Done
-Recommendation có thể giải thích bằng deterministic reason codes và kết quả tái lập được theo policy version.
+
+Reminder được schedule đúng theo preference và tạo notification đúng một lần; restart/retry không tạo duplicate và user quản lý read state qua UI thật.
