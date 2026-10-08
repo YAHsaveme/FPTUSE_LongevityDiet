@@ -3,8 +3,12 @@
 ## 1. Architecture style
 **Modular distributed application**: one primary layered REST API plus one independent gRPC recommendation service, one background Worker, relational DB and Redis Streams.
 
-This intentionally avoids over-engineered microservices. The assignment requires distributed concepts, but a 9-week student team needs service boundaries that remain testable and operable.
+This intentionally avoids over-engineered microservices. The assignment requires distributed concepts, but a 4-week student team needs service boundaries that remain testable and operable.
 
+### Compile-time dependency rule
+This project intentionally uses a **classic layered architecture**, not Clean/Onion/Hexagonal Architecture. The current project-reference direction is API -> Services -> Repositories -> Domain, with the API composition root also referencing Repositories directly for dependency registration; Worker references Services/Repositories/Domain; Recommendation.Grpc references Domain. This is acceptable for the PRN232 layered-architecture requirement and 4-week scope, but it must not be described as Clean Architecture because the Services layer currently depends on the Repositories implementation project.
+
+If the project later adopts Clean Architecture, repository/service contracts should move inward to an application/domain abstraction project and infrastructure implementations should depend inward on those contracts. That is a future refactor, not an MVP requirement.
 ## 2. Logical components
 ### React Web
 - Authentication UI.
@@ -90,7 +94,7 @@ Recommendation flow:
 ```
 
 ## 6. Consistency strategy
-For 9-week MVP:
+For the 4-week MVP:
 - Core user transaction is authoritative in SQL.
 - Event publication uses a simple `OutboxMessage` table.
 - Background publisher sends pending outbox rows to Redis.
@@ -148,11 +152,17 @@ Internal Docker network:
 - gRPC/SQL/Redis are not intended for public exposure in production.
 - Health checks and `depends_on` conditions coordinate startup for demo.
 
+Production target:
+- Public Web Edge terminates HTTPS/TLS and serves the SPA.
+- Web Edge proxies REST traffic to the API over HTTPS.
+- API calls Recommendation Service using gRPC over HTTP/2 + TLS.
+- API, Recommendation, Worker, SQL Server and Redis remain on a private application network.
+
 ## 11. Why Redis Streams instead of Kafka
 - Assignment explicitly permits Redis Pub/Sub or Streams.
 - Streams support persistence, consumer groups and acknowledgements.
 - Lower local resource/ops burden than Kafka.
-- Easier Docker demo for 4-person/9-week scope.
+- Easier Docker demo for 4-person/4-week scope.
 - Still demonstrates producer, consumer, retry and DLQ.
 Trade-off: Kafka would scale/partition ecosystems further, but that is not needed for this assignment.
 

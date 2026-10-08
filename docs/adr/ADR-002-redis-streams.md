@@ -10,7 +10,7 @@ Use Redis Streams with consumer groups, acknowledgements, retry and dead-letter 
 ## Rationale
 - Persistent stream semantics and consumer groups.
 - Much lower local/demo operational burden than Kafka.
-- Fits 9-week scope and Docker Desktop.
+- Fits 4-week scope and Docker Desktop.
 - Still demonstrates producer + consumer clearly.
 
 ## Consequence

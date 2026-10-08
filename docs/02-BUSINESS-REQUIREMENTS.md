@@ -5,7 +5,7 @@
 - BR-02: Give explainable feedback rather than opaque “AI advice”.
 - BR-03: Make safety-sensitive fasting content gated and auditable.
 - BR-04: Demonstrate every mandatory PRN232 distributed-system capability.
-- BR-05: Keep MVP feasible for 4 Full-Stack members in 9 weeks.
+- BR-05: Keep MVP feasible for 4 Full-Stack members in 4 weeks.
 - BR-06: Preserve source provenance and rule-version history.
 - BR-07: Allow future localization to Vietnamese foods without changing core architecture.
 

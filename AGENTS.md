@@ -10,7 +10,7 @@ Before changing architecture or business logic, read:
 4. `docs/05-SYSTEM-ARCHITECTURE.md`
 5. `docs/08-SAFETY-PRIVACY-AI.md`
 6. `docs/10-PRN232-TRACEABILITY.md`
-7. `docs/task/ROADMAP-9-WEEKS.md`
+7. `docs/task/ROADMAP-4-WEEKS.md`
 8. the active `docs/task/Week N/Task N.md`
 
 ## Mandatory PRN232 constraints
@@ -72,7 +72,13 @@ Do not remove or bypass:
 ## Draw.io rules
 
 Follow:
+- `.agents/ARCHITECTURE-DIAGRAM-SKILLS.md`
+- `.agents/skills/c4-drawio-assignment-production/SKILL.md`
 - `.agents/skills/c4-architecture/SKILL.md`
+- `.agents/skills/c4-model/SKILL.md`
+- `.agents/skills/drawio-studio/SKILL.md`
+- `.agents/skills/drawio-architecture-diagrams/SKILL.md`
+- `.agents/skills/architecture-diagrams-as-code/SKILL.md`
 - `.agents/skills/bmad-assignment-foundation/SKILL.md`
 - `.agents/skills/drawio-system-architecture/SKILL.md`
 - `.agents/skills/architecture-diagram-qa/SKILL.md`

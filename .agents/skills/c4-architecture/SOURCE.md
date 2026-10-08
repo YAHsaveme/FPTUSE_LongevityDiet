@@ -2,6 +2,7 @@
 
 - Upstream: https://github.com/bitsmuggler/c4-skill
 - Synced: 2026-09-26
+- Last upstream verification: 2026-10-05 (latest upstream commit remains `d9dd48987054d6633da031fe3624afc2cb1da4eb`)
 - Vendored clone: `.agents/vendor/c4-skill`
 - Upstream commit: `d9dd48987054d6633da031fe3624afc2cb1da4eb`
 - Copied content: `skills/c4-architecture/` from the upstream repository.

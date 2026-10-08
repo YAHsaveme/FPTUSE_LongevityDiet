@@ -1,65 +1,45 @@
-# Task 2 - Meal Replacement, Preference & Feedback Loop
+# Task 2 - Weekly Report + Worker Reliability & Recovery
 
-**Owner:** Thành viên 2  
-**Reviewer:** Thành viên 4  
-**Branch:** `feature/w3-t2-replacement-feedback`
+**Owner:** Thành viên 2
+**Reviewer:** Thành viên 4
+**Branch:** `feature/w3-t2-report-worker-reliability`
+**Status:** Planned
 
 ## Mục tiêu
-Cho phép user thay món hoặc phản hồi recommendation mà không phá meal-plan consistency và safety constraints.
 
-## Domain & Data
-Tạo hoặc hoàn thiện:
-- RecommendationFeedback;
-- MealReplacementHistory;
-- UserFoodPreference;
-- optional preference strength/value.
+Tạo weekly summary có business value đồng thời đưa async pipeline lên mức có retry, recovery và idempotency đáng tin cậy.
 
-Feedback type ví dụ:
-- Like;
-- Dislike;
-- NotRelevant;
-- TooRepetitive;
-- PreferLater;
-- PreferEarlier.
+## Weekly report
 
-## Replacement flow
-1. Load current plan context.
-2. Preserve meal slot/date requirements.
-3. Reapply hard constraints.
-4. Exclude current candidate nếu user yêu cầu.
-5. Rank alternatives.
-6. Save replacement history.
-7. Update plan atomically.
+- WeeklyReport, WeeklyReportMetric, generation version/status.
+- Input: activity summary, LDAS trend, eating window, challenge, logging consistency.
+- Worker generate theo local week boundary.
+- Idempotent key: User + Week + ReportVersion.
+- Historical report không bị rewrite âm thầm.
+- API list/detail/current status + UI report page.
 
-## Business rules
-- Feedback không trực tiếp chỉnh weight production nếu chưa qua policy.
-- Không học từ một feedback đơn lẻ thành hard exclusion.
-- Explicit exclusion khác với dislike.
-- Replacement history phải audit được.
-- User A không tác động preference User B.
+## Worker reliability
 
-## API
-- POST recommendation feedback.
-- POST planned meal replacement.
-- GET replacement history.
-- GET/PUT explicit food preferences/exclusions.
+- Bounded retry/backoff.
+- Dead-letter/recovery path.
+- XACK chỉ sau business side effect thành công.
+- Pending-entry recovery.
+- ProcessedEvent unique EventId.
+- Outbox retry metadata + cleanup/retention.
+- Graceful shutdown/cancellation.
+- Read-only diagnostics: pending/failed/heartbeat.
 
-## Frontend
-- Replace action.
-- Alternative list.
-- Like/dislike/not relevant.
-- Preference settings.
-- Explanation trước khi confirm replace.
-- Undo chỉ khi state còn hợp lệ.
+## Testing bắt buộc
 
-## Testing
-- replacement preserves constraints;
-- explicit exclusion;
-- dislike vs exclusion;
-- repeated replacement;
-- concurrency/version conflict;
-- ownership;
-- feedback persistence.
+- Duplicate weekly job.
+- Empty/new user.
+- Week/timezone boundary.
+- Worker crash before/after side effect.
+- Duplicate delivery.
+- Redis/SQL unavailable.
+- Poison message + pending recovery.
+- Concurrent consumers.
 
 ## Definition of Done
-User thay món và gửi feedback qua UI; plan cập nhật an toàn, có history và recommendation tiếp theo đọc đúng preference contract.
+
+Weekly report được tạo idempotently và Worker có thể restart/retry mà không mất message hoặc double side effect; failure quan sát và phục hồi được.

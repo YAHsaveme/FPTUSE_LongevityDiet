@@ -27,7 +27,7 @@ This checklist is based on the official C4 Model review checklist, notation guid
 | Check | Result |
 |---|---|
 | Every relationship is directional | PASS |
-| Every relationship has an intent label | PASS |
+| Every relationship has an intent label that matches arrow direction | PASS |
 | C1 inter-process relationships show technology/protocol | PASS |
 | Synchronous vs asynchronous communication is visually distinct | PASS |
 | No connector passes through unrelated text | PASS |
@@ -45,8 +45,11 @@ This checklist is based on the official C4 Model review checklist, notation guid
 ### C1 - Container
 - Shows runnable applications/data stores only for the target web-only MVP; no Mobile App is in scope.
 - API internal Controller -> Service -> Repository layers are not modelled as C1 containers.
-- Nginx is part of the Web runtime container because the project deploys the SPA through it.
+- The Web Application container is the browser SPA; Nginx is deployment infrastructure/static hosting and belongs in the Deployment view.
 - Sample-image-only Cloudinary, RabbitMQ, Brevo, Google AI, and split Diet/Identity/Progress services are intentionally excluded.
+## 4.1 Deployment separation
+The browser SPA is modelled as the C4 Web Application container. Nginx is deployment infrastructure/static hosting, not an additional C4 application container. SQL Server and Application Event Streams are logical C4 data-store containers; their SQL Server/Redis server processes are deployment topology.
+
 ## 5. Message-Based Architecture Correction
 
 The official C4 queues/topics guidance recommends modelling each logical queue/topic as a C4 container (a data store), rather than modelling the message bus/broker itself as a C4 container.
@@ -56,7 +59,8 @@ Therefore C1 uses:
 - **Application Event Streams** = logical queue/topic-style C4 container.
 - **Technology:** Redis 7 Streams.
 - Worker -> Application Event Streams = `XADD`.
-- Application Event Streams -> Worker = `XREADGROUP + XACK`.
+- C1 reverse data-flow relationship = Application Event Streams -> Background Worker, labelled as queued entries being available for processing.
+- Dynamic view shows the command direction explicitly: Worker -> Application Event Streams for `XREADGROUP` and `XACK`.
 - Redis server/broker deployment topology is left to deployment documentation.
 
 This keeps the Assignment requirement "Redis message broker integration" while preserving correct C4 abstraction.
@@ -71,8 +75,8 @@ The final validator checks:
 - connector/unrelated-box intersections;
 - required Assignment document sections and technologies;
 - all 33 target physical database tables;
-- required Structurizr model relationships;
-- Structurizr CLI validation when Docker/image is available.
+- required Structurizr model relationships and course-vs-official C4 terminology guards;
+- Structurizr CLI validation when Docker daemon/image is available; otherwise the validator reports a truthful skip after static DSL checks.
 ## 7. Source Grounding
 
 BMAD rule applied: because this is an existing project, repository code/configuration and agreed project documents are the source of truth. The supplied architecture image is used for visual composition only; sample-only services are not copied into LDC.

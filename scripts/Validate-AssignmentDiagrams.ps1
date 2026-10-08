@@ -6,6 +6,49 @@ $previewDir = Join-Path $root 'docs\assignment\previews'
 $vectorDir = Join-Path $root 'docs\assignment\vector'
 $drawio = 'D:\Draw.io\draw.io.exe'
 
+function Invoke-DrawIoExport {
+    param(
+        [string]$Format,
+        [string]$InputFile,
+        [string]$OutputFile,
+        [int]$Width = 0
+    )
+
+    for ($attempt = 1; $attempt -le 2; $attempt++) {
+        Remove-Item $OutputFile -Force -ErrorAction SilentlyContinue
+
+        if ($Format -eq 'png') {
+            $arguments = @(
+                '--export', '--format', 'png', '--theme', 'light', '--size', 'page',
+                '--width', [string]$Width, '--output', ('"' + $OutputFile + '"'), ('"' + $InputFile + '"')
+            )
+        }
+        else {
+            $arguments = @(
+                '--export', '--format', 'svg', '--theme', 'light',
+                '--output', ('"' + $OutputFile + '"'), ('"' + $InputFile + '"')
+            )
+        }
+
+        $process = Start-Process -FilePath $drawio -ArgumentList $arguments -PassThru -WindowStyle Hidden
+        $finished = $process.WaitForExit(30000)
+        if (-not $finished) {
+            try { $process.Kill() } catch { }
+        }
+
+        for ($i = 0; $i -lt 10 -and -not (Test-Path $OutputFile); $i++) {
+            Start-Sleep -Milliseconds 250
+        }
+
+        if ((Test-Path $OutputFile) -and (Get-Item $OutputFile).Length -gt 0) {
+            return
+        }
+
+        if ($attempt -lt 2) { Start-Sleep -Seconds 1 }
+    }
+
+    throw "draw.io $Format export failed or timed out after retry: $([IO.Path]::GetFileName($InputFile))"
+}
 $expected = @(
     '01-c0-system-context.drawio',
     '02-c1-container-architecture.drawio',
@@ -35,7 +78,7 @@ foreach ($name in $expected) {
         throw "Invalid draw.io XML: $name"
     }
 
-    if ($xml.mxfile.diagram.Count -lt 1) {
+    if (@($xml.mxfile.diagram).Count -lt 1) {
         throw "No draw.io page found: $name"
     }
 
@@ -52,7 +95,7 @@ foreach ($name in $expected) {
         }
     }
 
-    if ($raw -match 'Ã|Â|â€™|â€“|â€”|�') {
+    if ($raw -match '[^\x00-\x7F]') {
         throw "Possible encoding artifact in $name"
     }
 
@@ -64,14 +107,14 @@ foreach ($name in $expected) {
         '04-physical-database.drawio' { 6000 }
         default { 4800 }
     }
-    & $drawio --export --format png --theme light --size page --width $exportWidth --output $png $file | Out-Null
+    Invoke-DrawIoExport -Format 'png' -InputFile $file -OutputFile $png -Width $exportWidth
 
     if (-not (Test-Path $png)) {
         throw "PNG export failed: $name"
     }
 
     $svg = Join-Path $vectorDir ([IO.Path]::GetFileNameWithoutExtension($name) + '.svg')
-    & $drawio --export --format svg --theme light --output $svg $file | Out-Null
+    Invoke-DrawIoExport -Format 'svg' -InputFile $file -OutputFile $svg
     if (-not (Test-Path $svg)) {
         throw "SVG export failed: $name"
     }
@@ -80,9 +123,28 @@ foreach ($name in $expected) {
 }
 
 $sectionPreviewScript = Join-Path $root 'scripts\Generate-PhysicalDbSectionPreviews.py'
-python $sectionPreviewScript
-if ($LASTEXITCODE -ne 0) {
-    throw 'Physical DB section preview generation failed.'
+$pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+if ($pythonCommand) {
+    & $pythonCommand.Source $sectionPreviewScript
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Physical DB section preview generation failed.'
+    }
+    Write-Output 'PASS Physical DB section preview regeneration'
+}
+else {
+    $sectionDir = Join-Path $previewDir 'physical-db-sections'
+    foreach ($sectionFile in @(
+        '01-identity-profile.png',
+        '02-catalog-rules.png',
+        '03-planning-tracking.png',
+        '04-progress-engagement-safety.png',
+        '05-messaging-reliability-operations.png'
+    )) {
+        if (-not (Test-Path (Join-Path $sectionDir $sectionFile))) {
+            throw "Python is unavailable and required existing section preview is missing: $sectionFile"
+        }
+    }
+    Write-Warning 'Python is not installed/on PATH; skipped re-cropping section previews and verified the five existing preview files instead.'
 }
 
 $assignmentDoc = Join-Path $root 'docs\assignment\00-ASSIGNMENT-DOCUMENT.md'
@@ -143,15 +205,15 @@ Write-Output "PASS Physical DB full target table coverage ($($requiredTables.Cou
 $c0Text = Get-Content (Join-Path $diagramDir '01-c0-system-context.drawio') -Raw -Encoding UTF8
 $c1Text = Get-Content (Join-Path $diagramDir '02-c1-container-architecture.drawio') -Raw -Encoding UTF8
 
-foreach ($requiredC0 in @('Guest','Member','Administrator','Longevity Diet Companion','Optional Local AI Runtime','Software System')) {
+foreach ($requiredC0 in @('Guest','Member','Administrator','Longevity Diet Companion','Local AI Runtime','Software System')) {
     if ($c0Text -notmatch [regex]::Escape($requiredC0)) {
         throw "Missing required C0 element/content: $requiredC0"
     }
 }
 foreach ($requiredC1 in @(
-    'Web Application','REST API','Recommendation Service','SQL Server',
-    'Background Worker','Application Event Streams','Redis 7 Streams',
-    'HTTPS + REST/JSON','gRPC / HTTP2','EF Core / TDS','XREADGROUP + XACK'
+    'Web Application','REST API','Recommendation Service','SQL Database',
+    'Background Worker','Event Streams','Redis 7 Streams',
+    'REST / HTTPS','gRPC / HTTP/2','EF Core / TDS','Publish / Consume / Redis Streams'
 )) {
     if ($c1Text -notmatch [regex]::Escape($requiredC1)) {
         throw "Missing required C1 element/content: $requiredC1"
@@ -162,7 +224,22 @@ foreach ($sampleOnly in @('Mobile App','Cloudinary','Brevo','RabbitMQ','Google A
         throw "Reference-image component leaked into project architecture: $sampleOnly"
     }
 }
-Write-Output 'PASS C0/C1 project-scope and anti-copy checks'
+foreach ($forbiddenC0 in @('React 19','ASP.NET Core','SQL Server 2022','Redis 7 Streams','gRPC / HTTP2','Local LLM / Ollama-style HTTP API')) {
+    if ($c0Text -match [regex]::Escape($forbiddenC0)) {
+        throw "Implementation detail leaked into C4 System Context: $forbiddenC0"
+    }
+}
+foreach ($forbiddenC1 in @('React 19 + TypeScript + Vite + Nginx','SQL Server 2022 + EF Core migrations','[Container - Message Broker]')) {
+    if ($c1Text -match [regex]::Escape($forbiddenC1)) {
+        throw "C4 abstraction leak detected in Container view: $forbiddenC1"
+    }
+}
+foreach ($requiredTitle in @('C0 - C4 System Context','C1 - C4 Container')) {
+    if ($c0Text -notmatch [regex]::Escape($requiredTitle) -and $c1Text -notmatch [regex]::Escape($requiredTitle)) {
+        throw "Missing course/C4 terminology disambiguation: $requiredTitle"
+    }
+}
+Write-Output 'PASS C0/C1 project-scope, abstraction, terminology and anti-copy checks'
 
 $dsl = Join-Path $root 'docs\assignment\c4\workspace.dsl'
 if (-not (Test-Path $dsl)) {
@@ -170,7 +247,7 @@ if (-not (Test-Path $dsl)) {
 }
 
 $dslText = Get-Content $dsl -Raw -Encoding UTF8
-foreach ($required in @('systemContext ldc "C0-SystemContext"', 'container ldc "C1-Container"', 'web -> api', 'api -> recommendation', 'worker -> redis', 'redis -> worker')) {
+foreach ($required in @('systemContext ldc "C0-SystemContext"', 'container ldc "C1-Container"', 'web -> api', 'api -> recommendation', 'worker -> eventStreams', 'productionTarget = deploymentEnvironment "Production Target"', 'deployment ldc productionTarget "Production-Secure-Deployment"')) {
     if ($dslText -notmatch [regex]::Escape($required)) {
         throw "Missing required C4 DSL content: $required"
     }
@@ -180,8 +257,17 @@ Write-Output 'PASS workspace.dsl structural checks'
 
 $dockerCommand = Get-Command docker -ErrorAction SilentlyContinue
 if ($dockerCommand) {
-    docker image inspect structurizr/structurizr *> $null
-    if ($LASTEXITCODE -eq 0) {
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        docker image inspect structurizr/structurizr *> $null
+        $structurizrImageReady = ($LASTEXITCODE -eq 0)
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
+
+    if ($structurizrImageReady) {
         $c4Dir = Split-Path $dsl -Parent
         docker run --rm -v "${c4Dir}:/workspace" structurizr/structurizr validate -workspace /workspace/workspace.dsl
         if ($LASTEXITCODE -ne 0) {
@@ -189,6 +275,11 @@ if ($dockerCommand) {
         }
         Write-Output 'PASS Structurizr CLI workspace validation'
     }
+    else {
+        Write-Warning 'Docker daemon/Structurizr image is unavailable; skipped live Structurizr CLI validation after static workspace checks passed.'
+    }
 }
-
+else {
+    Write-Warning 'Docker CLI is unavailable; skipped live Structurizr CLI validation after static workspace checks passed.'
+}
 Write-Output 'Assignment diagram validation complete.'

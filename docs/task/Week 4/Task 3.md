@@ -1,51 +1,81 @@
-# Task 3 - Weekly Report Generation & Summary Persistence
+# Task 3 - Release Regression, PRN232 Evidence & Demo Rehearsal
 
-**Owner:** Thành viên 3  
-**Reviewer:** Thành viên 1  
-**Branch:** `feature/w4-t3-weekly-report`
+**Owner:** Thành viên 3
+**Reviewer:** Thành viên 1
+**Branch:** `feature/w4-t3-regression-evidence-demo`
+**Status:** Planned
 
 ## Mục tiêu
-Tạo weekly wellness summary phục vụ user review mà không tính toàn bộ dữ liệu raw mỗi lần mở trang.
 
-## Domain & Data
-Tạo:
-- WeeklyReport;
-- WeeklyReportMetric;
-- generation version/status.
+Chứng minh release candidate đúng bằng automated regression, rubric evidence có trọng số và một final demo repeatable đúng 7 mục PDF.
 
-Report input:
-- activity summary;
-- LDAS trend;
-- eating-window summary;
-- challenge progress;
-- logging consistency.
+## Release regression
 
-## Generation
-- Worker scheduled theo local week boundary.
-- Idempotent key: User + Week + ReportVersion.
-- Snapshot metrics tại thời điểm generation.
-- Có rebuild/regenerate controlled path.
-- Không tạo diagnosis hoặc medical conclusion.
+Test matrix tối thiểu:
+1. Register/Login/Profile.
+2. Catalog/rule CRUD + REST status semantics.
+3. Search/filter/sort/pagination.
+4. Generate plan + meal log/eating window.
+5. Activity + LDAS + challenge + dashboard.
+6. REST -> gRPC recommendation + replacement.
+7. Outbox -> Redis -> Worker.
+8. Reminder/notification/weekly report.
+9. FMD safety block.
+10. Admin rule governance/audit.
+11. Docker health/restart/communication.
 
-## API/UI
-- List report history.
-- Get report detail.
-- Current week status.
-- Weekly report page/cards.
-- Explain metric source/window.
+Rules:
+- deterministic fixtures;
+- không phụ thuộc manual DB state;
+- flaky/order-dependent test = defect;
+- async test có timeout/diagnostic rõ;
+- targeted real SQL/Redis/gRPC integration khi provider behavior cần được chứng minh.
 
-## Optional export
-Chỉ nếu cần business/demo:
-- lightweight printable view hoặc export artifact.
-- Không để export logic làm blocker core report.
+## PRN232 assessment matrix — 100%
 
-## Testing
-- week boundary/timezone;
-- duplicate job;
-- empty/new user;
-- historical immutability;
-- regeneration version;
-- metric consistency.
+| Criterion | Weight | Evidence phải chuẩn bị |
+|---|---:|---|
+| System architecture and design | 20% | C0/C1/deployment + ADR + dependency boundaries |
+| REST API implementation | 20% | CRUD + layered architecture + JWT + REST semantics + query features + Swagger |
+| Background Job | 10% | Worker scheduled/async business job + persisted result |
+| Message Broker integration | 15% | Redis producer/consumer + ACK/idempotency/recovery |
+| gRPC service | 15% | independent gRPC + REST -> gRPC trace/result |
+| Docker/Cloud deployment | 10% | clean Docker Compose + health + communication |
+| Documentation and presentation | 10% | README/docs/evidence + rehearsed presentation |
+| **Total** | **100%** | không được thiếu mandatory evidence |
+
+Mỗi rubric row phải map tới:
+- code location;
+- endpoint/service;
+- diagram/doc;
+- automated test;
+- runtime command;
+- demo step.
+
+Không claim feature chưa implement; file path/port/service name phải tồn tại và đúng.
+
+## Final Demo Checklist — 7/7 theo PDF
+
+1. **System architecture**.
+2. **REST API functionality**.
+3. **Background job execution**.
+4. **Message publishing and consuming**.
+5. **gRPC communication**.
+6. **Docker or cloud deployment**.
+7. **End-to-end business workflow**.
+
+Một demo flow nên chứng minh nhiều rubric item liên tục thay vì nhảy qua các màn hình rời rạc.
+
+## Demo rehearsal
+
+- Synthetic stable demo data.
+- Main flow time-boxed.
+- Người điều khiển/nói từng segment rõ.
+- Chuẩn bị một controlled failure: gRPC hoặc Redis unavailable -> graceful state -> recovery.
+- Command/browser/log view verify trước.
+- Chạy full demo ít nhất hai lần liên tiếp không sửa data thủ công.
+- Backup screenshots/logs chỉ là fallback, không thay runtime evidence.
 
 ## Definition of Done
-Worker tạo weekly report đúng một lần mỗi version/week và user đọc được report persist qua UI.
+
+Regression suite repeatable trên clean test environment; 100% rubric matrix có real evidence; demo 7/7 được chạy hai lần liên tiếp và controlled failure-recovery hoạt động như mô tả.

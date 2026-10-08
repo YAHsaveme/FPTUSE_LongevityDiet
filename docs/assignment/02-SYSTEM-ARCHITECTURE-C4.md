@@ -2,12 +2,12 @@
 
 ## 1. Modelling rule
 
-This Assignment uses two architecture levels only:
+The Assignment submission requires two C4 views and uses course-specific aliases:
 
-- **C0 - System Context**
-- **C1 - Container Architecture**
+- **Assignment C0 = official C4 System Context diagram (Level 1)**
+- **Assignment C1 = official C4 Container diagram (Level 2)**
 
-Official C4 terminology is **System Context** and **Container**. The Assignment labels C0/C1 are kept in file names and diagram titles so the deliverable matches the course wording.
+C0/C1 are course labels, not official C4 level numbers. Engineering documentation may additionally use C4 Component (Level 3), Dynamic, and Deployment views when they add value. A Code diagram (Level 4) is intentionally omitted because it is neither required nor useful for this project.
 
 ## 2. C0 - System Context
 
@@ -59,13 +59,13 @@ Zoom into the LDC system boundary and show the **target deployable applications/
 ### Containers
 
 #### Web Application
-**Technology:** React 19 + TypeScript + Vite + Nginx
+**Technology:** React 19 + TypeScript + Vite
 
 Responsibilities:
 - Browser UI.
 - Public pages and authentication screens.
 - Member/admin UI.
-- Nginx serves the SPA and proxies `/api/*` requests to the REST API.
+- The SPA runs in the user browser. Nginx is deployment infrastructure that serves the production build and reverse-proxies `/api/*`; it is shown in the Deployment view rather than merged into the C4 Web Application container technology.
 
 #### REST API
 **Technology:** ASP.NET Core .NET 9
@@ -91,7 +91,7 @@ Responsibilities:
 - Does not receive user credentials and does not own the primary database.
 
 #### SQL Server
-**Technology:** SQL Server 2022 + EF Core migrations
+**Technology:** SQL Server 2022
 
 Responsibilities:
 - System of record.
@@ -145,13 +145,13 @@ Responsibilities:
 | REST API | Recommendation Service | Request ranked meal alternatives | gRPC / HTTP2 |
 | Background Worker | SQL Server | Read Outbox and write async results | EF Core / TDS |
 | Background Worker | Application Event Streams | Publish pending events | Redis Streams XADD |
-| Application Event Streams | Background Worker | Deliver queued events | Redis Streams XREADGROUP + XACK |
+| Background Worker | Application Event Streams | Consume and acknowledge queued events | Redis Streams XREADGROUP + XACK |
 | REST API | Optional Local AI Runtime | Optionally rewrite structured explanation text | Local HTTP/JSON |
 
-## 5. Architecture decisions visible in C1
+### Relationship-direction rule`r`nRelationship arrows follow the interaction initiator. Because Redis Streams consumption in this project is pull-based, the Worker initiates `XREADGROUP` and `XACK`, so both publish and consume/ack relationships point **Worker -> Application Event Streams**. The Dynamic view carries the temporal order.`r`n`r`n## 5. Architecture decisions visible in C1
 
 ### One primary REST API, not microservice sprawl
-The project is a 9-week, 4-person Assignment. A modular REST API keeps business logic testable while still demonstrating real distributed boundaries through gRPC, Redis and Worker processes.
+The project is a 4-week, 4-person Assignment. A modular REST API keeps business logic testable while still demonstrating real distributed boundaries through gRPC, Redis and Worker processes.
 
 ### One primary SQL database
 The current architecture intentionally uses one SQL Server system of record. Splitting identity/catalog/progress into independent databases would add distributed consistency cost without adding assignment value.
@@ -200,3 +200,14 @@ Planned under Week 1 Tasks 2-4:
 - Worker business processors.
 
 The C1 diagram represents the **target Assignment MVP architecture**, while this status section prevents the document from falsely claiming every internal feature is already complete.
+
+## 8. Complementary engineering C4 views
+
+The Assignment pack stops at required C0/C1, but the engineering architecture set in `docs/architecture/` adds only views that answer a different question:
+
+- **Component view (Level 3):** internal structure of `LongevityDiet.API`, with implemented versus planned responsibilities made explicit.
+- **Deployment view:** maps the logical C4 containers onto the local Docker Compose demo environment.
+- **Dynamic view - Recommendation:** ordered target collaboration for synchronous recommendation.
+- **Dynamic view - Outbox/Redis:** ordered target collaboration for reliable asynchronous processing.
+
+No System Landscape view is needed because this project owns one software system rather than an enterprise portfolio. No Code diagram is maintained because the official C4 guidance treats it as optional and the source code/IDE already provides that detail.

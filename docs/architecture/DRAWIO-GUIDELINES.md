@@ -18,11 +18,16 @@ Use separate views instead of mixing abstraction levels:
 - 02 Container: runtime/deployable applications and data stores.
 - 03 Deployment: physical/runtime placement only.
 - 04 Component: internal structure of LongevityDiet.API only.
-- 05 Dynamic: synchronous recommendation flow.
-- 06 Dynamic: transactional-outbox and Redis flow.
+- 05 Dynamic: **target** synchronous recommendation flow.
+- 06 Dynamic: **target** transactional-outbox and Redis flow.
 - 07 Requirements Coverage: PDF sections 1-4.
 - 08 Requirements Coverage: PDF sections 5-8.
 - 09 End-to-End Demo Flow: presentation evidence.
+
+## C4 official numbering vs course labels
+- Official C4 core levels: System Context = Level 1, Container = Level 2, Component = Level 3, Code = Level 4.
+- The Assignment names Context as C0 and Container as C1; treat these as course labels, not official C4 level numbers.
+- Do not add System Landscape or Code views merely to make the set look more complete; add a view only when it communicates useful architecture information.
 
 ## Monochrome visual grammar
 - White background and white box fill.
@@ -68,7 +73,7 @@ This rule is mandatory because PNG export is part of QA:
   - Redis Streams XREADGROUP / XACK
 
 ## Deployment rule
-Deployment is topology, not a duplicate Container diagram.
+Deployment is topology, not a duplicate Container diagram. The browser-hosted React SPA is the Web Application container instance; Nginx is deployment infrastructure/static hosting. The logical SQL Server database and Application Event Streams remain C4 data-store containers, while the SQL Server/Redis server processes are deployment nodes/infrastructure.
 Show:
 - Developer Workstation
 - Docker Desktop

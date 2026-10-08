@@ -1,60 +1,55 @@
-# Task 3 - Plan Quality Evaluation & Constraint Scenario Engine
+# Task 3 - FMD Education, Safety Gate & Cycle Tracking
 
-**Owner:** Thành viên 3  
-**Reviewer:** Thành viên 1  
-**Branch:** `feature/w3-t3-plan-quality`
+**Owner:** Thành viên 3
+**Reviewer:** Thành viên 1
+**Branch:** `feature/w3-t3-fmd-safety-tracking`
+**Status:** Planned
 
 ## Mục tiêu
-Tạo evaluation harness để team đo chất lượng planner/recommendation bằng test scenario thay vì đánh giá cảm tính.
 
-## Scenario model
-Tạo test/evaluation scenario có:
-- synthetic profile;
-- allergens/exclusions;
-- preferences;
-- active RuleSetVersion;
-- candidate catalog;
-- expected hard constraints;
-- expected quality assertions.
+Implement FMD trong phạm vi **education + safety assessment + tracking**, không tạo therapeutic protocol và không biến ứng dụng thành medical device.
 
-## Quality dimensions
-- no hard-constraint violation;
-- meal diversity;
-- repeated-recipe limit;
-- rule coverage;
-- preference fit;
-- feasible meal frequency;
-- deterministic reproducibility.
+## Safety workflow
 
-## Engine
-- Evaluate one plan.
-- Evaluate batch scenarios.
-- Produce structured result.
-- Fail clearly khi safety invariant bị vi phạm.
-- Không biến quality score thành clinical claim.
+State tối thiểu:
+1. EducationNotViewed
+2. EducationViewed
+3. AssessmentRequired
+4. AssessmentSubmitted
+5. EligibleForTracking
+6. ProfessionalReviewRequired
 
-## Admin/Developer tooling
-Có thể expose development/admin endpoint hoặc command:
-- run scenario set;
-- inspect failed assertions;
-- compare policy versions.
+Backend phải enforce transition; UI không phải security boundary.
 
-Không expose sensitive internal tooling cho Member role.
+## Phạm vi chính
 
-## Testing
-- golden scenarios;
-- regression scenario suite;
-- edge case zero candidates;
-- conflicting constraints;
-- small catalog;
-- policy-version comparison.
+- FmdEducationAcknowledgement.
+- FmdSafetyAssessment/FmdSafetyAnswer/FmdEligibilityResult.
+- FmdCycle/FmdCycleDay/FmdCycleStatus.
+- Assessment/version/source metadata.
+- High-risk flag route sang professional review.
+- Chỉ EligibleForTracking mới start cycle.
+- User có thể stop cycle bất kỳ lúc nào.
+- Không generate fasting prescription hoặc therapeutic menu.
 
-## Deliverables
-- Scenario schema/fixtures.
-- Evaluation engine.
-- Regression suite.
-- Developer/admin result view hoặc report endpoint.
-- Baseline quality thresholds.
+## API/UI
+
+- Education metadata + acknowledgement.
+- Assessment submit/current state.
+- Eligibility/tracking state.
+- Start/get/update/stop/complete cycle + history.
+- Education, questionnaire, result, cycle tracker, warning/stop UI.
+
+## Testing bắt buộc
+
+- Blocking/high-risk flags.
+- Invalid state transition/direct API bypass.
+- Start without eligibility.
+- Eligibility revoked.
+- Duplicate active cycle.
+- Stop/complete/history immutability.
+- Ownership.
 
 ## Definition of Done
-Mỗi thay đổi ranking/planner có thể chạy scenario regression và phát hiện constraint regression trước khi merge.
+
+High-risk user bị backend chặn khỏi self-directed cycle; eligible user chỉ được track cycle state/history và toàn bộ wording giữ đúng wellness/education scope.
