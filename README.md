@@ -1,5 +1,7 @@
 # Longevity Diet Companion
 
+## Project description
+
 PRN232 Final Assignment: distributed .NET application hỗ trợ người dùng xây dựng và theo dõi thói quen longevity diet/lifestyle theo hướng giải thích được, truy vết được rule/source và có distributed architecture rõ ràng.
 
 ## Product boundary
@@ -40,7 +42,7 @@ PRN232_LongevityDiet/
 │  └─ task/
 │     ├─ Week 1/
 │     ├─ ...
-│     └─ Week 9/
+│     └─ Week 4/
 ├─ scripts/
 ├─ src/
 │  ├─ LongevityDiet.API/
@@ -68,7 +70,7 @@ PRN232_LongevityDiet/
 
 `LongevityDiet.Web` is a Visual Studio JavaScript Project System (`.esproj`) project. Frontend and backend remain separate deployable applications. Generated folders such as `bin/`, `obj/`, `node_modules/` and `dist/` are not source and are ignored.
 
-## Architecture references
+## System architecture
 
 - `docs/assignment/README.md` - Assignment-facing documentation pack.
 - `docs/assignment/00-ASSIGNMENT-DOCUMENT.md` - submission entry point: Context -> Problems -> Solutions -> Actors/Features -> C0/C1 -> Technology -> Conceptual ERD -> Physical DB -> PRN232 coverage.
@@ -125,8 +127,8 @@ Week 1 Task 1 is complete. The remaining Week 1 Task 2-4 work is documented unde
 
 Canonical planning location:
 
-- `docs/task/ROADMAP-9-WEEKS.md`
-- `docs/task/Week 1/README.md` through `docs/task/Week 9/README.md`
+- `docs/task/ROADMAP-4-WEEKS.md`
+- `docs/task/Week 1/README.md` through `docs/task/Week 4/README.md`
 - each week contains `Task 1.md` through `Task 4.md`
 
 Week 1 Task 1 was assigned to Thành viên 1 (bạn) and is complete. All tasks are end-to-end Full-Stack tasks and include reviewer, dependencies, testing, deliverables and Definition of Done.
@@ -154,7 +156,7 @@ Shared responsibilities for every member:
 
 Detailed contribution and architecture rules are defined in `CONTRIBUTING.md` and reinforced by `AGENTS.md`, `.editorconfig`, the pull-request template and `scripts/Validate-ProjectStructure.ps1`.
 
-## Visual Studio development
+## Installation guide
 
 Open `LongevityDiet.sln` in Visual Studio 2022. The solution contains separate backend (`.csproj`) and frontend (`.esproj`) projects.
 
@@ -225,7 +227,7 @@ Current verified test baseline:
 - Full .NET build: 0 warnings, 0 errors.
 - Docker Compose build/runtime smoke: PASS.
 
-## Docker
+## Deployment instructions
 
 ```powershell
 Copy-Item .env.example .env
@@ -247,12 +249,17 @@ Core containers:
 - Layering: API -> Services -> Repository.
 - CRUD + search/filter/sort/pagination: Week 1 Task 2.
 - JWT: Week 1 Task 1.
+- Dependency Injection: ASP.NET Core/Generic Host DI with scoped DbContext and centralized service registration.
+- Configuration management: appsettings + environment variables + .NET User Secrets/local ignored .env.
+- Logging & exception handling: structured logging + RFC7807/ProblemDetails.
 - Background Service: `LongevityDiet.Worker`.
 - Redis Streams producer/consumer: Week 1 Task 4.
 - gRPC Recommendation: Week 1 Task 4.
 - Docker: Compose + Dockerfiles.
 - Database: SQL Server + EF Core.
 - Swagger/OpenAPI: API baseline.
+- Full rubric/evidence matrix: docs/10-PRN232-TRACEABILITY.md.
+- Test/deploy/final-demo plan: docs/09-TEST-DEPLOY-DEMO.md.
 
 ## Research basis
 

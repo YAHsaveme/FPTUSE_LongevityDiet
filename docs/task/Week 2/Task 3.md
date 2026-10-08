@@ -1,59 +1,51 @@
-# Task 3 - 14-Day Challenge, Streak & Completion
+# Task 3 - Recommendation v2 + Replacement + Feedback
 
-**Owner:** Thành viên 3  
-**Reviewer:** Thành viên 1  
-**Branch:** `feature/w2-t3-challenge`
+**Owner:** Thành viên 3
+**Reviewer:** Thành viên 1
+**Branch:** `feature/w2-t3-recommendation-v2`
+**Status:** Planned
 
 ## Mục tiêu
-Tạo habit challenge 14 ngày nguyên bản của project để biến principles thành hành vi nhỏ, có thể theo dõi và hoàn thành.
 
-## Domain & Data
-Tạo:
-- ChallengeTemplate;
-- ChallengeDayTemplate;
-- UserChallenge;
-- UserChallengeDay;
-- ChallengeCompletionEvent.
+Nâng gRPC recommendation từ thin slice Week 1 thành engine deterministic, explainable và hỗ trợ replace/feedback mà không phá safety constraints.
 
-## Business rules
-- Template content là original project content, không copy sample meal plan có bản quyền.
-- User chỉ có một active instance của cùng challenge nếu product rule yêu cầu.
-- Day completion idempotent.
-- Streak dựa trên local date/timezone.
-- Missed day policy phải rõ: không backfill tự động nếu không có user action.
-- Challenge progress không thay đổi LDAS trực tiếp ngoài rule đã cấu hình.
+## Ranking pipeline
 
-## Service/API
-- List challenge templates.
-- Start challenge.
-- Get active challenge.
-- Complete/uncomplete day.
-- Get history.
-- Calculate streak/progress.
-- Admin template publish/deactivate nếu cần.
+1. Validate request.
+2. Apply hard constraints: allergen, exclusion, inactive data, unsupported/safety state.
+3. Normalize candidate features.
+4. Apply versioned soft weights.
+5. Calculate score components.
+6. Stable sort/tie-break.
+7. Return accepted/rejected candidates + reason codes.
 
-## Frontend
-- Challenge overview.
-- 14-day timeline.
-- Current-day card.
-- Complete action.
-- Streak/progress.
-- Completed-state summary.
+## Replacement & feedback
 
-## Testing
-- Start duplicate.
-- Completion idempotency.
-- Timezone day boundary.
-- Streak break/continue.
-- 14/14 completion.
-- Deactivated template behavior.
-- Ownership.
+- RecommendationFeedback, MealReplacementHistory, UserFoodPreference/Exclusion.
+- Replace meal phải reapply hard constraints và update plan atomically.
+- Dislike khác explicit exclusion.
+- Feedback không tự sửa production weight.
+- History phải audit được.
 
-## Deliverables
-- Schema + migration.
-- Challenge service/API.
-- Challenge UI.
-- Unit/integration tests.
+## API/UI
+
+- Recommendation DTO sạch từ gRPC response.
+- POST feedback.
+- POST planned-meal replacement.
+- Preference/exclusion settings.
+- “Vì sao gợi ý này?” từ deterministic reason code.
+- AI nếu có chỉ rewrite explanation; timeout phải fallback, không được đổi rank/score.
+
+## Testing bắt buộc
+
+- Hard constraint precedence.
+- Stable tie-break/reproducibility.
+- Replace preserves constraints.
+- Dislike vs exclusion.
+- Ownership/concurrency conflict.
+- AI unavailable fallback.
+- No rank mutation by explanation layer.
 
 ## Definition of Done
-User start/complete challenge 14 ngày, progress/streak persist chính xác và flow vẫn đúng qua reload/timezone boundaries.
+
+User nhận recommendation có lý do, thay món và gửi feedback qua UI; kết quả deterministic, an toàn và audit được.

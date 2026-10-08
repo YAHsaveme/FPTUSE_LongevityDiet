@@ -40,6 +40,33 @@ foreach ($project in $requiredProjects) {
     Assert-ProjectRule (Test-Path (Join-Path $root $project)) "Missing canonical project: $project"
 }
 
+$requiredPlanningFiles = [System.Collections.Generic.List[string]]::new()
+$requiredPlanningFiles.Add('docs\task\README.md')
+$requiredPlanningFiles.Add('docs\task\ROADMAP-4-WEEKS.md')
+$requiredPlanningFiles.Add('docs\09-TEST-DEPLOY-DEMO.md')
+$requiredPlanningFiles.Add('docs\10-PRN232-TRACEABILITY.md')
+
+foreach ($week in 1..4) {
+    $requiredPlanningFiles.Add("docs\task\Week $week\README.md")
+    foreach ($task in 1..4) {
+        $requiredPlanningFiles.Add("docs\task\Week $week\Task $task.md")
+    }
+}
+
+foreach ($planningFile in $requiredPlanningFiles) {
+    Assert-ProjectRule (Test-Path (Join-Path $root $planningFile)) "Missing canonical 4-week planning/evidence file: $planningFile"
+}
+
+$forbiddenPlanningPaths = [System.Collections.Generic.List[string]]::new()
+$forbiddenPlanningPaths.Add('docs\task\ROADMAP-9-WEEKS.md')
+foreach ($week in 5..9) {
+    $forbiddenPlanningPaths.Add("docs\task\Week $week")
+}
+
+foreach ($forbiddenPath in $forbiddenPlanningPaths) {
+    Assert-ProjectRule (-not (Test-Path (Join-Path $root $forbiddenPath))) "Stale 9-week planning artifact must be removed: $forbiddenPath"
+}
+
 $sourceProjectFiles = Get-ChildItem (Join-Path $root 'src') -Recurse -File |
     Where-Object { $_.Extension -in @('.csproj', '.esproj') } |
     ForEach-Object { (Get-RelativeProjectPath -BasePath $root -FullPath $_.FullName).Replace('/', '\') }
@@ -97,6 +124,60 @@ $launch = Read-ProjectText 'LongevityDiet.slnLaunch'
 Assert-ProjectRule ($launch -match 'Development - Full Stack') 'Visual Studio Development - Full Stack profile is missing.'
 Assert-ProjectRule ($launch -match 'Docker Compose - Full Stack') 'Visual Studio Docker Compose - Full Stack profile is missing.'
 
+$rootReadme = Read-ProjectText 'README.md'
+$requiredReadmeSections = @(
+    'Project description',
+    'System architecture',
+    'Technology stack',
+    'Installation guide',
+    'Deployment instructions',
+    'Team Member Responsibilities'
+)
+
+foreach ($section in $requiredReadmeSections) {
+    $pattern = "(?m)^##\s+$([regex]::Escape($section))\s*$"
+    Assert-ProjectRule ($rootReadme -match $pattern) "README.md is missing PRN232-required section: $section"
+}
+
+$traceability = Read-ProjectText 'docs\10-PRN232-TRACEABILITY.md'
+Assert-ProjectRule ($traceability -match 'System architecture and design') 'PRN232 traceability is missing the architecture rubric criterion.'
+Assert-ProjectRule ($traceability -match 'REST API implementation') 'PRN232 traceability is missing the REST rubric criterion.'
+Assert-ProjectRule ($traceability -match 'Background Job') 'PRN232 traceability is missing the Background Job rubric criterion.'
+Assert-ProjectRule ($traceability -match 'Message Broker integration') 'PRN232 traceability is missing the Message Broker rubric criterion.'
+Assert-ProjectRule ($traceability -match 'gRPC service') 'PRN232 traceability is missing the gRPC rubric criterion.'
+Assert-ProjectRule ($traceability -match 'Docker/Cloud deployment') 'PRN232 traceability is missing the deployment rubric criterion.'
+Assert-ProjectRule ($traceability -match 'Documentation and presentation') 'PRN232 traceability is missing the documentation rubric criterion.'
+$requiredTraceabilityTerms = @(
+    'ASP.NET Core',
+    'Entity Framework Core',
+    'Dependency Injection',
+    'Configuration management',
+    'Logging and exception handling',
+    'JWT Authentication',
+    'RESTful API design',
+    'gRPC communication',
+    'Message Broker integration',
+    'Background Service',
+    'Docker containerization'
+)
+foreach ($term in $requiredTraceabilityTerms) {
+    Assert-ProjectRule ($traceability -match [regex]::Escape($term)) "PRN232 traceability is missing technical requirement: $term"
+}
+
+$demoPlan = Read-ProjectText 'docs\09-TEST-DEPLOY-DEMO.md'
+$requiredDemoItems = @(
+    'System architecture',
+    'REST API functionality',
+    'Background job execution',
+    'Message publishing and consuming',
+    'gRPC communication',
+    'Docker or cloud deployment',
+    'End-to-end business workflow'
+)
+foreach ($demoItem in $requiredDemoItems) {
+    Assert-ProjectRule ($demoPlan -match [regex]::Escape($demoItem)) "Final demo plan is missing PRN232 demonstration item: $demoItem"
+}
+
 if ($failures.Count -gt 0) {
     Write-Host 'PROJECT_STRUCTURE_VALIDATION=FAIL' -ForegroundColor Red
     foreach ($failure in $failures) {
@@ -106,4 +187,4 @@ if ($failures.Count -gt 0) {
 }
 
 Write-Host 'PROJECT_STRUCTURE_VALIDATION=PASS' -ForegroundColor Green
-Write-Host 'Canonical projects, dependency direction, FE/BE separation and runtime ports are intact.'
+Write-Host 'Canonical projects, dependency direction, FE/BE separation, runtime ports, 4-week planning and PRN232 README/rubric guardrails are intact.'

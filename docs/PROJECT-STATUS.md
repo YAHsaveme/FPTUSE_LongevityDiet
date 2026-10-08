@@ -75,8 +75,8 @@ Verified:
 - Task 4: gRPC Recommendation + Transactional Outbox + Redis Streams + Worker.
 
 Canonical task documentation:
-- `task/ROADMAP-9-WEEKS.md`
-- `task/Week 1/` through `task/Week 9/`
+- `task/ROADMAP-4-WEEKS.md`
+- `task/Week 1/` through `task/Week 4/`
 - every week contains README + four major Full-Stack tasks.
 
 ## Clean-tree rules

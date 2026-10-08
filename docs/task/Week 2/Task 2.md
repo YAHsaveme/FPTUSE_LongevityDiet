@@ -1,75 +1,50 @@
-# Task 2 - LDAS Scoring Engine & Versioned Calculation
+# Task 2 - 14-Day Challenge + Progress Dashboard
 
-**Owner:** Thành viên 2  
-**Reviewer:** Thành viên 4  
-**Branch:** `feature/w2-t2-ldas-engine`
+**Owner:** Thành viên 2
+**Reviewer:** Thành viên 4
+**Branch:** `feature/w2-t2-challenge-dashboard`
+**Status:** Planned
 
 ## Mục tiêu
-Implement **Longevity Diet Adherence Score (LDAS)** như một project-defined adherence heuristic, không phải clinical score, biological age hay lifespan prediction.
 
-## Domain & Data
-Tạo:
-- AdherenceScore;
-- ScoreDimension;
-- ScoreRuleVersion hoặc ScoreConfigurationVersion;
-- ScoreCalculationSnapshot.
+Biến meal/activity/LDAS thành vòng lặp hành vi 14 ngày và dashboard tổng hợp dùng dữ liệu thật.
 
-Snapshot phải lưu:
-- UserId;
-- score 0-100;
-- dimension scores;
-- calculation timestamp;
-- source data window;
-- score version;
-- missing-data flags.
+## Phạm vi chính
 
-## Calculation
-Baseline dimensions:
-- food-pattern quality;
-- vegetable/whole-grain/legume consistency;
-- refined sugar/saturated-fat avoidance;
-- eating-window adherence;
-- activity adherence;
-- logging/challenge consistency;
-- personalized-rule adherence.
+- ChallengeTemplate, ChallengeDayTemplate, UserChallenge, UserChallengeDay.
+- Start/complete/uncomplete challenge, progress và streak theo local date.
+- Completion idempotent; không tự backfill ngày đã bỏ lỡ.
+- DailyWellnessSummary/WeeklyProgressSummary hoặc projection tương đương.
+- Dashboard aggregate: latest LDAS, activity, eating-window, challenge, logging consistency.
+- Projection update idempotent, có rebuild strategy.
+- Event replay không được double count.
 
-Weights phải configuration/version driven, không hardcode rải rác.
+## API/UI
 
-## Rules
-- Tổng score clamp 0-100.
-- Missing data phải có policy rõ; không mặc định coi missing = bad.
-- Score version immutable sau khi publish.
-- Recalculation cùng input/version phải deterministic.
-- UI/API bắt buộc disclaimer non-clinical.
+- List/start/current/history challenge.
+- Complete/uncomplete day.
+- Dashboard summary + trend series.
+- 14-day timeline, current-day card, progress/streak.
+- Dashboard cards/trend có loading, empty, stale/update state.
 
-## Service/API
-- Calculate current score.
-- Get latest score.
-- Get history/trend.
-- Get dimension breakdown.
-- Admin get/publish score configuration version.
+## Testing bắt buộc
 
-## Frontend
-- Score card.
-- Breakdown chart/list.
-- Explanation cho từng dimension.
-- Missing-data indicator.
-- Non-clinical disclaimer.
-
-## Testing
-- Weight total validation.
-- Boundary 0/100.
-- Missing-data cases.
-- Version reproducibility.
-- Same input -> same output.
-- Score history.
-- Disclaimer/API contract.
+- Duplicate challenge start.
+- 14/14 completion.
+- Timezone/streak boundary.
+- Ownership.
+- Projection idempotency.
+- Event replay.
+- Empty/new user.
+- Date-range aggregation.
 
 ## Deliverables
-- Versioned scoring engine.
-- Schema + migration.
-- API/UI.
-- Tests + sample deterministic fixtures.
+
+- Schema/migration.
+- Challenge service/API/UI.
+- Projection service + dashboard API/UI.
+- Unit/integration tests.
 
 ## Definition of Done
-LDAS được tính từ dữ liệu thật, có breakdown/version/explanation, reproducible và không có text nào tuyên bố score là tuổi sinh học hoặc dự đoán tuổi thọ.
+
+User có thể chạy challenge 14 ngày và xem dashboard từ dữ liệu persist thật; reload/event replay không làm sai streak hoặc aggregate.
