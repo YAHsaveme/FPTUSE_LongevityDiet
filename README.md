@@ -54,7 +54,8 @@ PRN232_LongevityDiet/
 │  └─ LongevityDiet.Web/
 ├─ tests/
 │  ├─ LongevityDiet.UnitTests/
-│  └─ LongevityDiet.IntegrationTests/
+│  ├─ LongevityDiet.IntegrationTests/
+│  └─ LongevityDiet.E2ETests/
 ├─ .editorconfig
 ├─ .github/
 │  ├─ pull_request_template.md
@@ -88,7 +89,8 @@ The canonical diagram set covers:
 - Transactional Outbox + Redis flow;
 - PRN232 requirement coverage;
 - deliverables/demo assessment;
-- end-to-end demo flow.
+- end-to-end demo flow;
+- Production Secure Deployment.
 
 ## Current implementation status
 
@@ -97,7 +99,7 @@ The canonical diagram set covers:
 - research, scope, business/functional/non-functional requirements;
 - safety/privacy/AI guardrails;
 - PRN232 and book-to-software traceability;
-- 9 canonical architecture diagrams with geometry/export QA;
+- 10 canonical architecture diagrams with geometry/export QA;
 - .NET 9 solution with separate ASP.NET Core backend and React/TypeScript/Vite `.esproj` frontend;
 - Visual Studio multi-project startup profile for Web + API;
 - separate development ports: Web `5173`, API HTTPS `7110` / HTTP `5110`;
@@ -186,7 +188,7 @@ For the current developer machine, the API SQL connection string/JWT signing key
 For a new machine, run the repository initializer once before the first F5:
 
 ```powershell
-pwsh .\scripts\Initialize-LocalDevelopment.ps1
+.\scripts\Initialize-LocalDevelopment.ps1
 ```
 
 It creates a local ignored `.env` with generated development secrets when needed and synchronizes the API/Worker .NET User Secrets. Do not commit `.env`.
