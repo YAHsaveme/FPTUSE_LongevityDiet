@@ -1,0 +1,56 @@
+const fs=require('fs');
+const path=require('path');
+const ROOT=path.resolve(__dirname,'..');
+const OUT=path.join(ROOT,'docs','architecture','10-production-secure-deployment.drawio');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const TEXT='text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Arial;fontColor=#1F2937;';
+const BOX='rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#374151;strokeWidth=2;fontFamily=Arial;fontColor=#1F2937;align=center;verticalAlign=middle;';
+const DB='shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#FFFFFF;strokeColor=#374151;strokeWidth=2;fontFamily=Arial;fontColor=#1F2937;align=center;verticalAlign=middle;';
+const QUEUE=BOX+'shape=process;size=0.08;';
+const EXT=BOX+'dashed=1;dashPattern=8 6;strokeColor=#6B7280;';
+const EDGE='edgeStyle=orthogonalEdgeStyle;rounded=0;curved=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;endSize=12;strokeColor=#374151;strokeWidth=2;';
+const ASYNC=EDGE+'dashed=1;dashPattern=7 5;';
+let n=2,c=[]; const id=(p='c')=>p+(n++);
+function vertex(v,x,y,w,h,s,cid){cid=cid||id();c.push(`<mxCell id="${cid}" value="${esc(v)}" style="${esc(s)}" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${w}" height="${h}" as="geometry"/></mxCell>`);return cid;}
+function text(v,x,y,w,h,size=13,align='left'){return vertex(v,x,y,w,h,TEXT+`fontSize=${size};align=${align};`);}
+function edge(s,t,{style=EDGE,exit=[.5,.5],entry=[.5,.5],points=[]}={}){let st=style+`exitX=${exit[0]};exitY=${exit[1]};exitDx=0;exitDy=0;entryX=${entry[0]};entryY=${entry[1]};entryDx=0;entryDy=0;`;let g='<mxGeometry relative="1" as="geometry">';if(points.length)g+='<Array as="points">'+points.map(([x,y])=>`<mxPoint x="${x}" y="${y}"/>`).join('')+'</Array>';g+='</mxGeometry>';const eid=id('e');c.push(`<mxCell id="${eid}" style="${esc(st)}" edge="1" parent="1" source="${s}" target="${t}">${g}</mxCell>`);return eid;}
+const box=(name,type,tech,resp)=>`<b>${name}</b><br><font style='font-size:13px'>[${type}]</font><br><font style='font-size:13px'>${tech}</font><br><font style='font-size:12px'>${resp}</font>`;
+const db=name=>box(name,'Container Instance / Database','SQL Server 2022 / :1433','Private owned data');
+text('<b>C4 Deployment - Production Target - Longevity Diet Companion</b>',60,35,5600,50,27);
+text('Only HTTPS :443 is public; application, SQL and Redis ports stay private.',60,88,4300,32,13);
+vertex('',400,230,5400,2450,'rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;fillOpacity=0;strokeColor=#6B7280;strokeWidth=2;dashed=1;dashPattern=8 6;','prod-boundary');
+text('<b>Production Environment</b> [Target]',430,245,430,34,16);
+vertex('',1000,330,4600,2200,'rounded=0;whiteSpace=wrap;html=1;fillColor=#F9FAFB;fillOpacity=30;strokeColor=#9CA3AF;strokeWidth=2;dashed=1;dashPattern=8 6;','private-boundary');
+text('<b>Private Application Network</b>',1030,345,430,32,15);
+const browser=vertex(box('User Browser','Deployment Node','Web Browser','Uses Web Application'),50,420,280,170,EXT);
+const webEdge=vertex(box('Web Edge','Infrastructure Node','Nginx / TLS :443','Hosts Web Application'),520,410,360,190,BOX+'strokeWidth=3;');
+const gateway=vertex(box('API Gateway','Container Instance','YARP / .NET 9 / :8080','Private routing edge'),1300,430,3800,150,BOX+'fontSize=17;');
+const identityDb=vertex(db('LongevityIdentityDb'),1050,850,380,170,DB); const identity=vertex(box('Identity & Profile Service','Container Instance','ASP.NET Core / :8081','Auth / profile'),1600,850,500,170,BOX);
+const catalogDb=vertex(db('LongevityCatalogDb'),2350,850,380,170,DB); const catalog=vertex(box('Catalog & Rules Service','Container Instance','ASP.NET Core / :8082','Catalog / rules'),2900,850,500,170,BOX);
+const planningDb=vertex(db('LongevityPlanningDb'),3650,850,380,170,DB); const planning=vertex(box('Planning Service','Container Instance','ASP.NET Core / :8083','Planning workflows'),4200,850,500,170,BOX);
+const trackingDb=vertex(db('LongevityTrackingDb'),1600,1400,380,170,DB); const tracking=vertex(box('Tracking & Progress Service','Container Instance','ASP.NET Core / :8084','Logs / progress'),2150,1400,500,170,BOX);
+const workerDb=vertex(db('LongevityWorkerDb'),2900,1400,380,170,DB); const worker=vertex(box('Background Worker','Container Instance','.NET 9 / Ops :8086','Async jobs'),3450,1400,500,170,BOX);
+const recommendationDb=vertex(db('LongevityRecommendationDb'),4200,1400,380,170,DB); const recommendation=vertex(box('Recommendation Service','Container Instance','gRPC / .NET 9 / :8085','Safety / ranking'),4750,1400,500,170,BOX);
+const events=vertex(box('Event Streams','Container Instance / Queue','Redis Streams 7 / :6379','Private integration events'),1300,2150,4000,170,QUEUE);
+const ai=vertex(box('Local AI Runtime','External System / Optional','HTTP :11434','Explanation only'),5950,1400,360,180,EXT);
+edge(browser,webEdge,{exit:[1,.5],entry:[0,.5]}); text('HTTPS / TLS :443',345,430,165,26,12,'center');
+edge(webEdge,gateway,{exit:[1,.5],entry:[0,.5]}); text('HTTPS / REST :8080',920,430,210,26,12,'center');
+edge(gateway,identity,{exit:[.1447368421,1],entry:[.5,0]}); text('HTTPS/REST :8081',1870,690,170,26,12,'left');
+edge(gateway,catalog,{exit:[.4868421053,1],entry:[.5,0]}); text('HTTPS/REST :8082',3170,690,170,26,12,'left');
+edge(gateway,planning,{exit:[.8289473684,1],entry:[.5,0]}); text('HTTPS/REST :8083',4470,690,170,26,12,'left');
+edge(gateway,tracking,{exit:[.25,1],entry:[.5,0],points:[[2250,1250],[2400,1250]]}); text('HTTPS/REST :8084',2270,1140,170,26,12,'left');
+edge(gateway,worker,{exit:[.5921052632,1],entry:[.5,0],points:[[3550,1250],[3700,1250]]}); text('HTTPS/REST :8086',3570,1140,170,26,12,'left');
+const owned=[[identity,identityDb,1440,895],[catalog,catalogDb,2740,895],[planning,planningDb,4040,895],[tracking,trackingDb,1990,1445],[worker,workerDb,3290,1445],[recommendation,recommendationDb,4590,1445]];
+for(const [s,d,x,y] of owned){edge(s,d,{exit:[0,.5],entry:[1,.5]});text('TDS :1433',x,y,150,28,11,'center');}
+edge(planning,recommendation,{exit:[.5,1],entry:[.5,0],points:[[4450,1250],[5000,1250]]}); text('gRPC / HTTP/2 + TLS :8085',4540,1140,270,28,12,'center');
+edge(recommendation,ai,{style:ASYNC,exit:[1,.5],entry:[0,.4722222222]}); text('HTTP :11434 / Optional',5430,1340,250,28,12,'center');
+edge(identity,events,{style:ASYNC,exit:[0,.75],entry:[.05375,0],points:[[1515,977.5]]}); text('Redis :6379',1535,1740,125,24,11,'left');
+edge(catalog,events,{style:ASYNC,exit:[0,.75],entry:[.37875,0],points:[[2815,977.5]]}); text('Redis :6379',2835,1740,125,24,11,'left');
+edge(planning,events,{style:ASYNC,exit:[0,.75],entry:[.70375,0],points:[[4115,977.5]]}); text('Redis :6379',4135,1740,125,24,11,'left');
+edge(tracking,events,{style:ASYNC,exit:[.5,1],entry:[.275,0]}); text('Redis :6379',2420,1880,125,24,11,'left');
+edge(worker,events,{style:ASYNC,exit:[.5,1],entry:[.6,0]}); text('Redis :6379',3720,1880,125,24,11,'left');
+edge(recommendation,events,{style:ASYNC,exit:[.5,1],entry:[.925,0]}); text('Redis :6379',5020,1880,125,24,11,'left');
+text('<b>Security boundary</b>  Only Web Edge exposes :443. Gateway, services, SQL Server and Redis have no public application ports.',1450,2420,3500,40,13,'center');
+text('<b>Legend</b>  Solid = synchronous/TLS | Dashed = async/optional | all :808x/:1433/:6379 endpoints are private',1300,2600,3500,34,12,'center');
+const xml=`<?xml version="1.0" encoding="utf-8"?>\n<mxfile host="app.diagrams.net" modified="${new Date().toISOString()}" agent="LongevityDiet Production Deployment Generator" version="31.4.5" type="device"><diagram id="Production-Secure-Deployment" name="Page-1"><mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="6500" pageHeight="2850" math="0" shadow="0"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${c.join('')}</root></mxGraphModel></diagram></mxfile>`;
+fs.writeFileSync(OUT,xml,'utf8'); console.log('WROTE '+OUT);

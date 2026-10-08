@@ -1,7 +1,7 @@
 from pathlib import Path
 from PIL import Image
 
-ROOT = Path(r"D:\PRN232\PRN232_LongevityDiet")
+ROOT = Path(__file__).resolve().parent.parent
 source = ROOT / "docs" / "assignment" / "previews" / "04-physical-database.png"
 out_dir = ROOT / "docs" / "assignment" / "previews" / "physical-db-sections"
 out_dir.mkdir(parents=True, exist_ok=True)

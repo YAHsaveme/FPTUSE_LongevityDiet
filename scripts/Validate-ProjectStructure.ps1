@@ -15,6 +15,16 @@ function Read-ProjectText {
     return Get-Content (Join-Path $root $RelativePath) -Raw
 }
 
+function Get-RelativeProjectPath {
+    param([string]$BasePath, [string]$FullPath)
+    $base = [IO.Path]::GetFullPath($BasePath).TrimEnd('\', '/')
+    $full = [IO.Path]::GetFullPath($FullPath)
+    if (-not $full.StartsWith($base + [IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Path is outside project root: $FullPath"
+    }
+    return $full.Substring($base.Length + 1)
+}
+
 $requiredProjects = @(
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj',
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj',
@@ -32,7 +42,7 @@ foreach ($project in $requiredProjects) {
 
 $sourceProjectFiles = Get-ChildItem (Join-Path $root 'src') -Recurse -File |
     Where-Object { $_.Extension -in @('.csproj', '.esproj') } |
-    ForEach-Object { [IO.Path]::GetRelativePath($root, $_.FullName).Replace('/', '\') }
+    ForEach-Object { (Get-RelativeProjectPath -BasePath $root -FullPath $_.FullName).Replace('/', '\') }
 
 $allowedSourceProjects = @($requiredProjects | Where-Object { $_ -like 'src\*' })
 foreach ($project in $sourceProjectFiles) {

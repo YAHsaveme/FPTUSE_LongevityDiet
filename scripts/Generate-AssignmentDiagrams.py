@@ -2,7 +2,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
-ROOT = Path(r"D:\PRN232\PRN232_LongevityDiet")
+ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "assignment" / "diagrams"
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -138,9 +138,19 @@ class Diagram:
 
     def save(self, filename):
         ET.indent(self.mxfile, space="  ")
+        target = OUT / filename
         ET.ElementTree(self.mxfile).write(
-            OUT / filename, encoding="utf-8", xml_declaration=True
+            target, encoding="utf-8", xml_declaration=True
         )
+
+        mirror_map = {
+            "01-c0-system-context.drawio": ROOT / "docs" / "architecture" / "01-system-context.drawio",
+            "02-c1-container-architecture.drawio": ROOT / "docs" / "architecture" / "02-container-architecture.drawio",
+        }
+        mirror = mirror_map.get(filename)
+        if mirror:
+            mirror.parent.mkdir(parents=True, exist_ok=True)
+            mirror.write_bytes(target.read_bytes())
 
 def page_title(d, main, sub, width=2200):
     d.text(main, 70, 35, width, 55, size=28, bold=True)
@@ -158,6 +168,17 @@ def c4_box(name, element_type, technology, description, font=18):
         f"<font style='font-size:14px'>[{element_type}]</font><br>"
         f"<font style='font-size:14px'>{technology}</font><br><br>"
         f"<font style='font-size:15px'>{description}</font>"
+    )
+
+
+
+def compact_c4_box(name, element_type, technology, responsibility):
+    tech_line = f"<br><font style='font-size:14px'>{technology}</font>" if technology else ""
+    return (
+        f"<b>{name}</b><br>"
+        f"<font style='font-size:13px'>[{element_type}]</font>"
+        f"{tech_line}<br>"
+        f"<font style='font-size:13px'>{responsibility}</font>"
     )
 
 def concept_box(d, name, description, x, y, w=330, h=120, ref=False):
@@ -180,219 +201,159 @@ def table_box(d, name, lines, x, y, w=430, h=245):
 
 
 def build_c0():
-    d = Diagram("C0-System-Context", 2200, 1180)
+    d = Diagram("C0-System-Context", 2100, 1080)
     page_title(
         d,
-        "C0 - System Context - Longevity Diet Companion",
-        "Business context only: people, the Longevity Diet Companion software system, and its direct external dependency.",
-        2020,
+        "C0 - C4 System Context - Longevity Diet Companion",
+        "People, the system, and direct external systems only.",
+        1900,
     )
 
-    guest = d.vertex(actor_value("Guest"), 170, 280, 170, 160, ACTOR)
-    member = d.vertex(actor_value("Member"), 170, 500, 170, 160, ACTOR)
-    admin = d.vertex(actor_value("Administrator"), 170, 720, 170, 160, ACTOR)
+    guest = d.vertex(actor_value("Guest"), 150, 250, 170, 150, ACTOR)
+    member = d.vertex(actor_value("Member"), 150, 465, 170, 150, ACTOR)
+    admin = d.vertex(actor_value("Administrator"), 150, 680, 170, 150, ACTOR)
 
+    system_style = BOX + "fillColor=#F3F4F6;strokeColor=#1F2937;strokeWidth=3;"
     system = d.vertex(
-        c4_box(
+        compact_c4_box(
             "Longevity Diet Companion",
             "Software System",
             "",
-            "Turns longevity-diet principles into safe, explainable planning, tracking, recommendation, adherence, challenge, reminder, and progress workflows.",
+            "Plan / Track / Recommend",
         ),
-        850, 255, 760, 600,
-        SOFTWARE_SYSTEM + "fontSize=20;spacing=24;"
+        760, 240, 650, 600,
+        system_style + "fontSize=20;spacing=20;"
     )
 
     optional_ai = d.vertex(
-        c4_box(
-            "Optional Local AI Runtime",
-            "External Software System - Optional",
-            "Local LLM / Ollama-style HTTP API",
-            "Rewrites already-computed explanations only. It never changes ranking, allergy/safety constraints, or LDAS.",
+        compact_c4_box(
+            "Local AI Runtime",
+            "External Software System / Optional",
+            "",
+            "Explanation rewrite only",
         ),
-        1760, 450, 330, 230,
+        1660, 435, 300, 210,
         EXTERNAL + "fontSize=16;spacing=14;"
     )
 
-    # Straight, independent relationship lanes.
-    d.edge(guest, system, exit=(1, .5), entry=(0, .175))
-    d.edge(member, system, exit=(1, .5), entry=(0, .5416667))
-    d.edge(admin, system, exit=(1, .5), entry=(0, .9083333))
-    d.edge(system, optional_ai, style=OPTIONAL, exit=(1, .5166667), entry=(0, .5))
+    d.edge(guest, system, exit=(1, .5), entry=(0, .142))
+    d.edge(member, system, exit=(1, .5), entry=(0, .50))
+    d.edge(admin, system, exit=(1, .5), entry=(0, .858))
+    d.edge(system, optional_ai, style=OPTIONAL, exit=(1, .50), entry=(0, .50))
 
-    # Labels live in whitespace above each relationship; no text touches a connector.
-    d.text("Views public information, registers, and signs in", 390, 300, 390, 34, size=14, align="center")
-    d.text("Plans, tracks, requests recommendations, and reviews progress", 385, 520, 410, 36, size=14, align="center")
-    d.text("Manages catalog, rules, audit, event, and job operations", 390, 740, 400, 36, size=14, align="center")
-    d.text("Optional explanation rewrite", 1615, 515, 140, 34, size=13, align="center")
+    d.text("Browse / Sign in", 390, 280, 250, 30, size=14, align="center")
+    d.text("Plan / Track", 390, 495, 250, 30, size=14, align="center")
+    d.text("Manage", 390, 710, 250, 30, size=14, align="center")
+    d.text("Rewrite explanation", 1450, 495, 200, 30, size=13, align="center")
 
     d.text(
-        "<b>C0 scope</b>  Internal technologies and containers are intentionally hidden. "
-        "The optional local AI runtime is shown only because it is a directly connected external software system.",
-        600, 935, 1100, 48, size=13, align="center", color=MUTED,
-    )
-    d.text(
-        "<b>Legend</b>  Person = actor  |  Warm card = software system  |  Dashed card/arrow = optional external dependency  |  Arrow = directed relationship",
-        330, 1055, 1540, 42, size=13, align="center",
+        "<b>Legend</b>  Person = actor  |  Solid box = system in scope  |  Dashed = optional external dependency",
+        420, 970, 1260, 36, size=13, align="center",
     )
     d.save("01-c0-system-context.drawio")
 
 
 def build_c1():
-    d = Diagram("C1-Container", 2500, 1560)
+    d = Diagram("C1-Container", 5000, 2700)
     page_title(
         d,
-        "C1 - Target Container Architecture - Longevity Diet Companion",
-        "Web-only target PRN232 MVP: deployable containers, responsibilities, technologies, and communication protocols.",
-        2300,
+        "C1 - C4 Container - Longevity Diet Companion (Target Architecture)",
+        "Gateway, service-owned databases, explicit ports, and connected event flows.",
+        4300,
     )
 
-    # Original composition inspired by the supplied reference image without copying its services.
-    d.vertex("", 180, 330, 1900, 1090, BOUNDARY, cid="ldc-boundary")
-    d.text("<b>Longevity Diet Companion</b>  [Software System Boundary]", 215, 1380, 760, 36, size=15)
+    boundary_style = (
+        "rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;fillOpacity=0;"
+        "strokeColor=#9CA3AF;strokeWidth=2;dashed=1;dashPattern=8 6;"
+    )
+    d.vertex("", 50, 330, 4300, 2200, boundary_style, cid="ldc-boundary")
+    d.text("<b>Longevity Diet Companion</b>", 80, 350, 350, 34, size=16)
 
-    # Direct people outside the software-system boundary.
-    guest = d.vertex(actor_value("Guest"), 520, 150, 150, 150, ACTOR)
-    member = d.vertex(actor_value("Member"), 1110, 150, 150, 150, ACTOR)
-    admin = d.vertex(actor_value("Administrator"), 1700, 150, 150, 150, ACTOR)
+    guest = d.vertex(actor_value("Guest"), 1125, 120, 150, 145, ACTOR)
+    member = d.vertex(actor_value("Member"), 2125, 120, 150, 145, ACTOR)
+    admin = d.vertex(actor_value("Administrator"), 3225, 120, 150, 145, ACTOR)
 
-    # Runtime containers.
     web = d.vertex(
-        c4_box(
-            "Web Application",
-            "Container",
-            "React 19 + TypeScript + Vite + Nginx",
-            "Browser SPA for public, member, and admin screens. Nginx serves the build and reverse-proxies /api requests.",
-        ),
-        480, 400, 1300, 170,
-        BOX + "fontSize=18;spacing=15;"
+        compact_c4_box("Web Application", "Container", "React / TypeScript / HTTPS :443", "Browser UI"),
+        850, 410, 2900, 135, BOX + "fontSize=17;spacing=10;"
+    )
+    gateway = d.vertex(
+        compact_c4_box("API Gateway", "Container", "YARP / .NET 9 / :8080", "Routing / edge policy"),
+        500, 630, 3800, 150, BOX + "fontSize=17;spacing=10;"
     )
 
-    api = d.vertex(
-        c4_box(
-            "REST API",
-            "Container",
-            "ASP.NET Core .NET 9 + EF Core 9",
-            "JWT and role authorization; REST CRUD/query workflows; business orchestration; EF Core persistence; transactional Outbox; gRPC client.",
-        ),
-        740, 700, 780, 220,
-        BOX + "fontSize=18;spacing=15;"
-    )
+    identity_db = d.vertex(compact_c4_box("LongevityIdentityDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 100, 900, 380, 170, DB + "fontSize=15;spacing=8;")
+    identity = d.vertex(compact_c4_box("Identity & Profile Service", "Container", "ASP.NET Core / REST :8081", "Auth / profile"), 650, 900, 500, 170, BOX + "fontSize=16;spacing=9;")
+    catalog_db = d.vertex(compact_c4_box("LongevityCatalogDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1350, 900, 380, 170, DB + "fontSize=15;spacing=8;")
+    catalog = d.vertex(compact_c4_box("Catalog & Rules Service", "Container", "ASP.NET Core / REST :8082", "Catalog / rules"), 1900, 900, 500, 170, BOX + "fontSize=16;spacing=9;")
+    planning_db = d.vertex(compact_c4_box("LongevityPlanningDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 2600, 900, 380, 170, DB + "fontSize=15;spacing=8;")
+    planning = d.vertex(compact_c4_box("Planning Service", "Container", "ASP.NET Core / REST :8083", "Plans / challenge / FMD"), 3150, 900, 500, 170, BOX + "fontSize=16;spacing=9;")
 
-    recommendation = d.vertex(
-        c4_box(
-            "Recommendation Service",
-            "Container",
-            "ASP.NET Core gRPC .NET 9",
-            "Independent service for hard safety filters, deterministic ranking, score components, and explainable reason codes.",
-        ),
-        250, 715, 360, 190,
-        BOX + "fontSize=17;spacing=13;"
-    )
+    tracking_db = d.vertex(compact_c4_box("LongevityTrackingDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 650, 1350, 380, 170, DB + "fontSize=15;spacing=8;")
+    tracking = d.vertex(compact_c4_box("Tracking & Progress Service", "Container", "ASP.NET Core / REST :8084", "Logs / LDAS / progress"), 1200, 1350, 500, 170, BOX + "fontSize=16;spacing=9;")
+    worker_db = d.vertex(compact_c4_box("LongevityWorkerDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1900, 1350, 380, 170, DB + "fontSize=15;spacing=8;")
+    worker = d.vertex(compact_c4_box("Background Worker", "Container", ".NET 9 Worker / Ops :8086", "Async jobs / reports"), 2450, 1350, 500, 170, BOX + "fontSize=16;spacing=9;")
+    recommendation_db = d.vertex(compact_c4_box("LongevityRecommendationDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 3150, 1350, 380, 170, DB + "fontSize=15;spacing=8;")
+    recommendation = d.vertex(compact_c4_box("Recommendation Service", "Container", "gRPC / .NET 9 / :8085", "Safety filter / ranking"), 3700, 1350, 500, 170, BOX + "fontSize=16;spacing=9;")
 
-    database = d.vertex(
-        c4_box(
-            "SQL Server",
-            "Container - Database",
-            "SQL Server 2022 + EF Core migrations",
-            "Primary system of record for identity, profile, catalog, rules, plans, logs, progress, Outbox, audit, and idempotency.",
-        ),
-        300, 1060, 580, 240,
-        DB + "fontSize=17;spacing=13;"
-    )
+    events = d.vertex(compact_c4_box("Event Streams", "Container - Queue", "Redis Streams 7 / :6379", "Integration events"), 350, 2050, 3900, 170, QUEUE + "fontSize=17;spacing=10;")
+    optional_ai = d.vertex(compact_c4_box("Local AI Runtime", "External System / Optional", "HTTP :11434", "Explanation only"), 4450, 1350, 360, 180, EXTERNAL + "fontSize=15;spacing=9;")
 
-    worker = d.vertex(
-        c4_box(
-            "Background Worker",
-            "Container",
-            ".NET 9 Worker Service",
-            "Publishes pending Outbox events, consumes idempotently, and runs reminders, recalculation, weekly reports, retry, and dead-letter workflows.",
-        ),
-        1030, 1070, 430, 220,
-        BOX + "fontSize=17;spacing=13;"
-    )
+    d.edge(guest, web, exit=(.5, 1), entry=(.1206896552, 0), points=[(1200, 330)])
+    d.edge(member, web, exit=(.5, 1), entry=(.4655172414, 0), points=[(2200, 330)])
+    d.edge(admin, web, exit=(.5, 1), entry=(.8448275862, 0), points=[(3300, 330)])
+    d.text("HTTPS :443", 1218, 300, 135, 24, size=12)
+    d.text("HTTPS :443", 2218, 300, 135, 24, size=12)
+    d.text("HTTPS :443", 3318, 300, 135, 24, size=12)
 
-    redis = d.vertex(
-        c4_box(
-            "Application Event Streams",
-            "Container - Queue/Topic Data Store",
-            "Redis 7 Streams",
-            "Logical domain/notification streams with consumer groups, acknowledgements, retry, and dead-letter handling.",
-        ),
-        1630, 1070, 420, 220,
-        QUEUE + "fontSize=17;spacing=13;"
-    )
+    d.edge(web, gateway, exit=(.5, 1), entry=(.4736842105, 0), points=[(2300, 575)])
+    d.text("HTTPS / REST :443", 2070, 548, 205, 24, size=12, align="center")
 
-    optional_ai = d.vertex(
-        c4_box(
-            "Optional Local AI Runtime",
-            "External Software System - Optional",
-            "Local LLM / Ollama-style HTTP API",
-            "Explanation rewrite only. Ranking, allergy/safety hard constraints, and LDAS always remain deterministic.",
-        ),
-        2140, 705, 300, 210,
-        EXTERNAL + "fontSize=15;spacing=12;"
-    )
+    d.edge(gateway, identity, exit=(.1052631579, 1), entry=(.5, 0))
+    d.edge(gateway, catalog, exit=(.4342105263, 1), entry=(.5, 0))
+    d.edge(gateway, planning, exit=(.7631578947, 1), entry=(.5, 0))
+    d.text("REST :8081", 915, 800, 135, 24, size=12)
+    d.text("REST :8082", 2165, 800, 135, 24, size=12)
+    d.text("REST :8083", 3415, 800, 135, 24, size=12)
 
-    # People -> Web: vertical HTTPS lanes.
-    d.edge(guest, web, exit=(.5, 1), entry=(.0884615, 0))
-    d.edge(member, web, exit=(.5, 1), entry=(.5423077, 0))
-    d.edge(admin, web, exit=(.5, 1), entry=(.9961538, 0))
-    d.text("HTTPS", 610, 335, 82, 28, size=13, align="center")
-    d.text("HTTPS", 1200, 335, 82, 28, size=13, align="center")
-    d.text("HTTPS", 1790, 335, 82, 28, size=13, align="center")
+    d.edge(gateway, tracking, exit=(.1973684211, 1), entry=(.5, 0), points=[(1250, 1250), (1450, 1250)])
+    d.edge(gateway, worker, exit=(.5263157895, 1), entry=(.5, 0), points=[(2500, 1250), (2700, 1250)])
+    d.text("REST :8084", 1268, 1100, 135, 24, size=12)
+    d.text("Ops :8086", 2518, 1100, 125, 24, size=12)
 
-    # Web -> API: one clear vertical application lane.
-    d.edge(web, api, exit=(.5, 1), entry=(.5, 0))
-    d.text(
-        "Calls application API<br><b>HTTPS + REST/JSON</b>",
-        1175, 605, 300, 56, size=13, align="center"
-    )
+    owned_pairs = [
+        (identity, identity_db, 490, 945),
+        (catalog, catalog_db, 1740, 945),
+        (planning, planning_db, 2990, 945),
+        (tracking, tracking_db, 1040, 1395),
+        (worker, worker_db, 2290, 1395),
+        (recommendation, recommendation_db, 3540, 1395),
+    ]
+    for source, target, x, y in owned_pairs:
+        d.edge(source, target, exit=(0, .5), entry=(1, .5))
+        d.text("EF Core / TDS :1433", x, y, 150, 28, size=11, align="center")
 
-    # API -> Recommendation: horizontal typed service call.
-    d.edge(api, recommendation, exit=(0, .5), entry=(1, .5))
-    d.text(
-        "Rank meal alternatives<br><b>gRPC / HTTP2</b>",
-        615, 740, 120, 54, size=13, align="center"
-    )
+    d.edge(planning, recommendation, exit=(.5, 1), entry=(.5, 0), points=[(3400, 1200), (3950, 1200)])
+    d.text("gRPC / HTTP/2 :8085", 3490, 1090, 230, 28, size=12, align="center")
+    d.edge(recommendation, optional_ai, style=OPTIONAL, exit=(.8, 0), entry=(.5, 0), points=[(4100, 1280), (4630, 1280)])
+    d.text("HTTP :11434 / Optional", 4140, 1180, 240, 28, size=12, align="center")
 
-    # API -> SQL: business state and Outbox in one transaction.
-    d.edge(
-        api, database,
-        exit=(.225641, 1), entry=(.5, 0),
-        points=[(916, 975), (590, 975)]
-    )
-    d.text("Business state + Outbox", 560, 930, 250, 30, size=13, align="center")
-    d.text("EF Core / TDS", 930, 930, 145, 30, size=13, align="center")
-
-    # Worker -> SQL: a separate horizontal persistence lane.
-    d.edge(worker, database, exit=(0, .5), entry=(1, .5))
-    d.text(
-        "Read Outbox / write async results<br><b>EF Core / TDS</b>",
-        885, 1115, 140, 52, size=13, align="center"
-    )
-
-    # Worker <-> Redis Streams: parallel asynchronous lanes.
-    d.edge(worker, redis, style=ASYNC, exit=(1, .27), entry=(0, .27))
-    d.text("Publish events<br><b>XADD</b>", 1465, 1075, 160, 42, size=13, align="center")
-
-    d.edge(redis, worker, style=ASYNC, exit=(0, .70), entry=(1, .70))
-    d.text(
-        "Consume + acknowledge<br><b>XREADGROUP + XACK</b>",
-        1462, 1238, 165, 48, size=13, align="center"
-    )
-
-    # API -> Optional AI: optional direct external dependency.
-    d.edge(api, optional_ai, style=OPTIONAL, exit=(1, .5), entry=(0, .5))
-    d.text(
-        "Optional explanation rewrite<br><b>Local HTTP/JSON</b>",
-        1600, 740, 500, 52, size=13, align="center"
-    )
+    d.edge(identity, events, style=ASYNC, exit=(0, .75), entry=(.0538461538, 0), points=[(560, 1027.5)])
+    d.edge(catalog, events, style=ASYNC, exit=(0, .75), entry=(.3756410256, 0), points=[(1815, 1027.5)])
+    d.edge(planning, events, style=ASYNC, exit=(0, .75), entry=(.6961538462, 0), points=[(3065, 1027.5)])
+    d.edge(tracking, events, style=ASYNC, exit=(.5, 1), entry=(.2820512821, 0))
+    d.edge(worker, events, style=ASYNC, exit=(.5, 1), entry=(.6025641026, 0))
+    d.edge(recommendation, events, style=ASYNC, exit=(.5, 1), entry=(.9230769231, 0))
+    d.text("Redis :6379", 578, 1650, 125, 24, size=11)
+    d.text("Redis :6379", 1833, 1650, 125, 24, size=11)
+    d.text("Redis :6379", 3083, 1650, 125, 24, size=11)
+    d.text("Redis :6379", 1468, 1810, 125, 24, size=11)
+    d.text("Redis :6379", 2718, 1810, 125, 24, size=11)
+    d.text("Redis :6379", 3968, 1810, 125, 24, size=11)
 
     d.text(
-        "<b>Legend</b>  Person = actor  |  White card = container  |  Cylinder = database  |  "
-        "Queue card = logical Redis stream(s)  |  Solid = synchronous  |  Dashed = asynchronous/optional",
-        360, 1490, 1780, 44, size=13, align="center",
+        "<b>Legend</b>  Solid = synchronous  |  Dashed = async/optional  |  Cylinder = owned database  |  Target Architecture only",
+        900, 2420, 2800, 40, size=13, align="center"
     )
     d.save("02-c1-container-architecture.drawio")
 
@@ -877,8 +838,29 @@ def build_physical():
 
 
 if __name__ == "__main__":
-    build_c0()
-    build_c1()
-    build_conceptual()
-    build_physical()
-    print("Generated 4 full Assignment diagrams in", OUT)
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate LongevityDiet assignment diagrams")
+    parser.add_argument(
+        "--only",
+        default="all",
+        help="Comma-separated: c0,c1,conceptual,physical (default: all)",
+    )
+    args = parser.parse_args()
+    selected = {part.strip().lower() for part in args.only.split(",")}
+    if "all" in selected:
+        selected = {"c0", "c1", "conceptual", "physical"}
+
+    builders = {
+        "c0": build_c0,
+        "c1": build_c1,
+        "conceptual": build_conceptual,
+        "physical": build_physical,
+    }
+    unknown = selected - builders.keys()
+    if unknown:
+        raise SystemExit(f"Unknown diagram selector(s): {sorted(unknown)}")
+    for name in ("c0", "c1", "conceptual", "physical"):
+        if name in selected:
+            builders[name]()
+    print("Generated", ", ".join(sorted(selected)), "in", OUT)
