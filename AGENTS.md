@@ -138,7 +138,7 @@ A real architecture change requires, in the same change:
 Run:
 
 ```powershell
-pwsh .\scripts\Validate-ProjectStructure.ps1
+.\scripts\Validate-ProjectStructure.ps1
 dotnet build .\LongevityDiet.sln -c Debug
 dotnet test .\LongevityDiet.sln -c Debug --no-build
 

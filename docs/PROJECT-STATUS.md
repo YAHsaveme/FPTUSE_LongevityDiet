@@ -62,7 +62,7 @@ Verified:
 - Docker runtime: Web `5173` 200, API `8080/health` 200, Web-to-API proxy verified, all six Compose services started successfully.
 - OpenAPI runtime includes Bearer security scheme.
 - API publish excludes appsettings.Testing.json.
-- Architecture validation: GEOMETRY_LINT=PASS + 9/9 diagrams PASS.
+- Architecture validation: GEOMETRY_LINT=PASS + 10/10 diagrams PASS.
 
 ## Week 1 Task 1 status
 
@@ -104,10 +104,10 @@ They are ignored and are removed from the final clean source tree after verifica
 ## Architecture validation
 
 ```powershell
-pwsh .\scripts\Validate-ArchitectureDiagrams.ps1
+.\scripts\Validate-ArchitectureDiagrams.ps1
 ```
 
-This command now runs geometry lint first, then validates XML/encoding and exports all 9 canonical PNG previews.
+This command now runs geometry lint first, then validates XML/encoding and exports all 10 canonical PNG previews.
 
 ## Next action
 

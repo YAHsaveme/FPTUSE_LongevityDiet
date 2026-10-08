@@ -164,7 +164,7 @@ Every task owner is responsible for tests appropriate to the change:
 Before opening a PR:
 
 ```powershell
-pwsh .\scripts\Validate-ProjectStructure.ps1
+.\scripts\Validate-ProjectStructure.ps1
 dotnet build .\LongevityDiet.sln -c Debug
 dotnet test .\LongevityDiet.sln -c Debug --no-build
 
