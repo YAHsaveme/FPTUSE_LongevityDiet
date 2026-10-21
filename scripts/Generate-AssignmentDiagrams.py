@@ -136,9 +136,11 @@ class Diagram:
                 ET.SubElement(arr, "mxPoint", {"x": str(x), "y": str(y)})
         return cid
 
-    def save(self, filename):
+    def save(self, filename, output_dir=None):
         ET.indent(self.mxfile, space="  ")
-        target = OUT / filename
+        target_dir = Path(output_dir) if output_dir else OUT
+        target_dir.mkdir(parents=True, exist_ok=True)
+        target = target_dir / filename
         ET.ElementTree(self.mxfile).write(
             target, encoding="utf-8", xml_declaration=True
         )
@@ -201,17 +203,17 @@ def table_box(d, name, lines, x, y, w=430, h=245):
 
 
 def build_c0():
-    d = Diagram("C0-System-Context", 2100, 1080)
+    d = Diagram("C0-System-Context", 1800, 1000)
     page_title(
         d,
         "C0 - C4 System Context - Longevity Diet Companion",
         "People, the system, and direct external systems only.",
-        1900,
+        1640,
     )
 
-    guest = d.vertex(actor_value("Guest"), 150, 250, 170, 150, ACTOR)
-    member = d.vertex(actor_value("Member"), 150, 465, 170, 150, ACTOR)
-    admin = d.vertex(actor_value("Administrator"), 150, 680, 170, 150, ACTOR)
+    guest = d.vertex(actor_value("Guest"), 100, 225, 160, 140, ACTOR)
+    member = d.vertex(actor_value("Member"), 100, 430, 160, 140, ACTOR)
+    admin = d.vertex(actor_value("Administrator"), 100, 635, 160, 140, ACTOR)
 
     system_style = BOX + "fillColor=#F3F4F6;strokeColor=#1F2937;strokeWidth=3;"
     system = d.vertex(
@@ -221,7 +223,7 @@ def build_c0():
             "",
             "Plan / Track / Recommend",
         ),
-        760, 240, 650, 600,
+        590, 225, 560, 550,
         system_style + "fontSize=20;spacing=20;"
     )
 
@@ -232,130 +234,250 @@ def build_c0():
             "",
             "Explanation rewrite only",
         ),
-        1660, 435, 300, 210,
+        1420, 405, 280, 190,
         EXTERNAL + "fontSize=16;spacing=14;"
     )
 
-    d.edge(guest, system, exit=(1, .5), entry=(0, .142))
+    d.edge(guest, system, exit=(1, .5), entry=(0, .1272727273))
     d.edge(member, system, exit=(1, .5), entry=(0, .50))
-    d.edge(admin, system, exit=(1, .5), entry=(0, .858))
+    d.edge(admin, system, exit=(1, .5), entry=(0, .8727272727))
     d.edge(system, optional_ai, style=OPTIONAL, exit=(1, .50), entry=(0, .50))
 
-    d.text("Browse / Sign in", 390, 280, 250, 30, size=14, align="center")
-    d.text("Plan / Track", 390, 495, 250, 30, size=14, align="center")
-    d.text("Manage", 390, 710, 250, 30, size=14, align="center")
-    d.text("Rewrite explanation", 1450, 495, 200, 30, size=13, align="center")
+    d.text("Browse / Sign in", 315, 250, 190, 28, size=14, align="center")
+    d.text("Plan / Track", 315, 455, 190, 28, size=14, align="center")
+    d.text("Manage", 315, 660, 190, 28, size=14, align="center")
+    d.text("Rewrite explanation", 1195, 455, 190, 28, size=13, align="center")
 
     d.text(
-        "<b>Legend</b>  Person = actor  |  Solid box = system in scope  |  Dashed = optional external dependency",
-        420, 970, 1260, 36, size=13, align="center",
+        "<b>Legend</b>  Person = actor  |  Solid = system in scope  |  Dashed = optional external dependency",
+        350, 900, 1100, 36, size=13, align="center",
     )
     d.save("01-c0-system-context.drawio")
 
 
 def build_c1():
-    d = Diagram("C1-Container", 5000, 2700)
+    d = Diagram("C1-Container", 2800, 1600)
     page_title(
         d,
         "C1 - C4 Container - Longevity Diet Companion (Target Architecture)",
-        "Gateway, service-owned databases, explicit ports, and connected event flows.",
-        4300,
+        "Target containers, owned logical databases, protocols, and integration events.",
+        2500,
     )
 
     boundary_style = (
         "rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;fillOpacity=0;"
         "strokeColor=#9CA3AF;strokeWidth=2;dashed=1;dashPattern=8 6;"
     )
-    d.vertex("", 50, 330, 4300, 2200, boundary_style, cid="ldc-boundary")
-    d.text("<b>Longevity Diet Companion</b>", 80, 350, 350, 34, size=16)
+    d.vertex("", 70, 300, 2380, 1220, boundary_style, cid="ldc-boundary")
+    d.text("<b>Longevity Diet Companion</b>", 100, 315, 330, 30, size=16)
 
-    guest = d.vertex(actor_value("Guest"), 1125, 120, 150, 145, ACTOR)
-    member = d.vertex(actor_value("Member"), 2125, 120, 150, 145, ACTOR)
-    admin = d.vertex(actor_value("Administrator"), 3225, 120, 150, 145, ACTOR)
+    guest = d.vertex(actor_value("Guest"), 450, 130, 140, 130, ACTOR)
+    member = d.vertex(actor_value("Member"), 1280, 130, 140, 130, ACTOR)
+    admin = d.vertex(actor_value("Administrator"), 2030, 130, 140, 130, ACTOR)
 
     web = d.vertex(
         compact_c4_box("Web Application", "Container", "React / TypeScript / HTTPS :443", "Browser UI"),
-        850, 410, 2900, 135, BOX + "fontSize=17;spacing=10;"
+        320, 370, 1850, 105, BOX + "fontSize=17;spacing=8;"
     )
     gateway = d.vertex(
         compact_c4_box("API Gateway", "Container", "YARP / .NET 9 / :8080", "Routing / edge policy"),
-        500, 630, 3800, 150, BOX + "fontSize=17;spacing=10;"
+        320, 530, 1850, 115, BOX + "fontSize=17;spacing=8;"
     )
 
-    identity_db = d.vertex(compact_c4_box("LongevityIdentityDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 100, 900, 380, 170, DB + "fontSize=15;spacing=8;")
-    identity = d.vertex(compact_c4_box("Identity & Profile Service", "Container", "ASP.NET Core / REST :8081", "Auth / profile"), 650, 900, 500, 170, BOX + "fontSize=16;spacing=9;")
-    catalog_db = d.vertex(compact_c4_box("LongevityCatalogDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1350, 900, 380, 170, DB + "fontSize=15;spacing=8;")
-    catalog = d.vertex(compact_c4_box("Catalog & Rules Service", "Container", "ASP.NET Core / REST :8082", "Catalog / rules"), 1900, 900, 500, 170, BOX + "fontSize=16;spacing=9;")
-    planning_db = d.vertex(compact_c4_box("LongevityPlanningDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 2600, 900, 380, 170, DB + "fontSize=15;spacing=8;")
-    planning = d.vertex(compact_c4_box("Planning Service", "Container", "ASP.NET Core / REST :8083", "Plans / challenge / FMD"), 3150, 900, 500, 170, BOX + "fontSize=16;spacing=9;")
+    identity = d.vertex(compact_c4_box("Identity & Profile Service", "Container", "ASP.NET Core / REST :8081", "Auth / profile"), 150, 760, 410, 135, BOX + "fontSize=16;spacing=8;")
+    catalog = d.vertex(compact_c4_box("Catalog & Rules Service", "Container", "ASP.NET Core / REST :8082", "Catalog / rules"), 720, 760, 410, 135, BOX + "fontSize=16;spacing=8;")
+    planning = d.vertex(compact_c4_box("Planning Service", "Container", "ASP.NET Core / REST :8083", "Plans / challenge / FMD"), 1290, 760, 410, 135, BOX + "fontSize=16;spacing=8;")
+    tracking = d.vertex(compact_c4_box("Tracking & Progress Service", "Container", "ASP.NET Core / REST :8084", "Logs / LDAS / progress"), 1860, 760, 410, 135, BOX + "fontSize=16;spacing=8;")
 
-    tracking_db = d.vertex(compact_c4_box("LongevityTrackingDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 650, 1350, 380, 170, DB + "fontSize=15;spacing=8;")
-    tracking = d.vertex(compact_c4_box("Tracking & Progress Service", "Container", "ASP.NET Core / REST :8084", "Logs / LDAS / progress"), 1200, 1350, 500, 170, BOX + "fontSize=16;spacing=9;")
-    worker_db = d.vertex(compact_c4_box("LongevityWorkerDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1900, 1350, 380, 170, DB + "fontSize=15;spacing=8;")
-    worker = d.vertex(compact_c4_box("Background Worker", "Container", ".NET 9 Worker / Ops :8086", "Async jobs / reports"), 2450, 1350, 500, 170, BOX + "fontSize=16;spacing=9;")
-    recommendation_db = d.vertex(compact_c4_box("LongevityRecommendationDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 3150, 1350, 380, 170, DB + "fontSize=15;spacing=8;")
-    recommendation = d.vertex(compact_c4_box("Recommendation Service", "Container", "gRPC / .NET 9 / :8085", "Safety filter / ranking"), 3700, 1350, 500, 170, BOX + "fontSize=16;spacing=9;")
+    identity_db = d.vertex(compact_c4_box("LongevityIdentityDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 190, 960, 330, 115, DB + "fontSize=15;spacing=6;")
+    catalog_db = d.vertex(compact_c4_box("LongevityCatalogDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 760, 960, 330, 115, DB + "fontSize=15;spacing=6;")
+    planning_db = d.vertex(compact_c4_box("LongevityPlanningDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1330, 960, 330, 115, DB + "fontSize=15;spacing=6;")
+    tracking_db = d.vertex(compact_c4_box("LongevityTrackingDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1900, 960, 330, 115, DB + "fontSize=15;spacing=6;")
 
-    events = d.vertex(compact_c4_box("Event Streams", "Container - Queue", "Redis Streams 7 / :6379", "Integration events"), 350, 2050, 3900, 170, QUEUE + "fontSize=17;spacing=10;")
-    optional_ai = d.vertex(compact_c4_box("Local AI Runtime", "External System / Optional", "HTTP :11434", "Explanation only"), 4450, 1350, 360, 180, EXTERNAL + "fontSize=15;spacing=9;")
+    worker = d.vertex(compact_c4_box("Background Worker", "Container", ".NET 9 Worker / Ops :8086", "Async jobs / reports"), 780, 1120, 420, 120, BOX + "fontSize=16;spacing=7;")
+    worker_db = d.vertex(compact_c4_box("LongevityWorkerDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 780, 1260, 420, 105, DB + "fontSize=14;spacing=5;")
+    recommendation = d.vertex(compact_c4_box("Recommendation Service", "Container", "gRPC / .NET 9 / :8085", "Safety / ranking"), 1900, 1120, 420, 120, BOX + "fontSize=16;spacing=7;")
+    recommendation_db = d.vertex(compact_c4_box("LongevityRecommendationDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1900, 1260, 420, 105, DB + "fontSize=14;spacing=5;")
 
-    d.edge(guest, web, exit=(.5, 1), entry=(.1206896552, 0), points=[(1200, 330)])
-    d.edge(member, web, exit=(.5, 1), entry=(.4655172414, 0), points=[(2200, 330)])
-    d.edge(admin, web, exit=(.5, 1), entry=(.8448275862, 0), points=[(3300, 330)])
-    d.text("HTTPS :443", 1218, 300, 135, 24, size=12)
-    d.text("HTTPS :443", 2218, 300, 135, 24, size=12)
-    d.text("HTTPS :443", 3318, 300, 135, 24, size=12)
+    events = d.vertex(compact_c4_box("Event Streams", "Container - Queue", "Redis Streams 7 / :6379", "Integration events"), 350, 1400, 1850, 90, QUEUE + "fontSize=16;spacing=6;")
+    optional_ai = d.vertex(compact_c4_box("Local AI Runtime", "External System / Optional", "HTTP :11434", "Explanation only"), 2510, 1100, 250, 160, EXTERNAL + "fontSize=15;spacing=7;")
 
-    d.edge(web, gateway, exit=(.5, 1), entry=(.4736842105, 0), points=[(2300, 575)])
-    d.text("HTTPS / REST :443", 2070, 548, 205, 24, size=12, align="center")
+    # Actors -> Web: exact vertical lanes.
+    d.edge(guest, web, exit=(.5, 1), entry=(.1081081081, 0))
+    d.edge(member, web, exit=(.5, 1), entry=(.5567567568, 0))
+    d.edge(admin, web, exit=(.5, 1), entry=(.9621621622, 0))
+    d.text("HTTPS :443", 535, 318, 105, 24, size=12)
+    d.text("HTTPS :443", 1365, 318, 105, 24, size=12)
+    d.text("HTTPS :443", 2115, 290, 105, 24, size=12)
 
-    d.edge(gateway, identity, exit=(.1052631579, 1), entry=(.5, 0))
-    d.edge(gateway, catalog, exit=(.4342105263, 1), entry=(.5, 0))
-    d.edge(gateway, planning, exit=(.7631578947, 1), entry=(.5, 0))
-    d.text("REST :8081", 915, 800, 135, 24, size=12)
-    d.text("REST :8082", 2165, 800, 135, 24, size=12)
-    d.text("REST :8083", 3415, 800, 135, 24, size=12)
+    d.edge(web, gateway, exit=(.5, 1), entry=(.5, 0))
+    d.text("HTTPS / REST :443", 1260, 490, 170, 24, size=12)
 
-    d.edge(gateway, tracking, exit=(.1973684211, 1), entry=(.5, 0), points=[(1250, 1250), (1450, 1250)])
-    d.edge(gateway, worker, exit=(.5263157895, 1), entry=(.5, 0), points=[(2500, 1250), (2700, 1250)])
-    d.text("REST :8084", 1268, 1100, 135, 24, size=12)
-    d.text("Ops :8086", 2518, 1100, 125, 24, size=12)
+    # Gateway -> REST services: exact vertical fan-out.
+    d.edge(gateway, identity, exit=(.0189189189, 1), entry=(.5, 0))
+    d.edge(gateway, catalog, exit=(.3270270270, 1), entry=(.5, 0))
+    d.edge(gateway, planning, exit=(.6351351351, 1), entry=(.5, 0))
+    d.edge(gateway, tracking, exit=(.9432432432, 1), entry=(.5, 0))
+    d.text("REST :8081", 370, 685, 100, 22, size=12)
+    d.text("REST :8082", 940, 685, 100, 22, size=12)
+    d.text("REST :8083", 1510, 685, 100, 22, size=12)
+    d.text("REST :8084", 2080, 685, 100, 22, size=12)
 
-    owned_pairs = [
-        (identity, identity_db, 490, 945),
-        (catalog, catalog_db, 1740, 945),
-        (planning, planning_db, 2990, 945),
-        (tracking, tracking_db, 1040, 1395),
-        (worker, worker_db, 2290, 1395),
-        (recommendation, recommendation_db, 3540, 1395),
-    ]
-    for source, target, x, y in owned_pairs:
-        d.edge(source, target, exit=(0, .5), entry=(1, .5))
-        d.text("EF Core / TDS :1433", x, y, 150, 28, size=11, align="center")
+    # Admin operations route uses the catalog/planning whitespace corridor.
+    d.edge(gateway, worker, exit=(.4864864865, 1), entry=(.7619047619, 0), points=[(1220, 1090), (1100, 1090)])
+    d.text("Ops :8086", 1060, 1040, 100, 22, size=12)
 
-    d.edge(planning, recommendation, exit=(.5, 1), entry=(.5, 0), points=[(3400, 1200), (3950, 1200)])
-    d.text("gRPC / HTTP/2 :8085", 3490, 1090, 230, 28, size=12, align="center")
-    d.edge(recommendation, optional_ai, style=OPTIONAL, exit=(.8, 0), entry=(.5, 0), points=[(4100, 1280), (4630, 1280)])
-    d.text("HTTP :11434 / Optional", 4140, 1180, 240, 28, size=12, align="center")
+    # Service-owned databases.
+    for source, target, line_x in [
+        (identity, identity_db, 355),
+        (catalog, catalog_db, 925),
+        (planning, planning_db, 1495),
+        (tracking, tracking_db, 2065),
+    ]:
+        d.edge(source, target, exit=(.5, 1), entry=(.5, 0))
+        d.text("EF Core / TDS :1433", line_x + 14, 910, 145, 22, size=12)
 
-    d.edge(identity, events, style=ASYNC, exit=(0, .75), entry=(.0538461538, 0), points=[(560, 1027.5)])
-    d.edge(catalog, events, style=ASYNC, exit=(0, .75), entry=(.3756410256, 0), points=[(1815, 1027.5)])
-    d.edge(planning, events, style=ASYNC, exit=(0, .75), entry=(.6961538462, 0), points=[(3065, 1027.5)])
-    d.edge(tracking, events, style=ASYNC, exit=(.5, 1), entry=(.2820512821, 0))
-    d.edge(worker, events, style=ASYNC, exit=(.5, 1), entry=(.6025641026, 0))
-    d.edge(recommendation, events, style=ASYNC, exit=(.5, 1), entry=(.9230769231, 0))
-    d.text("Redis :6379", 578, 1650, 125, 24, size=11)
-    d.text("Redis :6379", 1833, 1650, 125, 24, size=11)
-    d.text("Redis :6379", 3083, 1650, 125, 24, size=11)
-    d.text("Redis :6379", 1468, 1810, 125, 24, size=11)
-    d.text("Redis :6379", 2718, 1810, 125, 24, size=11)
-    d.text("Redis :6379", 3968, 1810, 125, 24, size=11)
+    d.edge(worker, worker_db, exit=(.5, 1), entry=(.5, 0))
+    d.text("EF Core / TDS :1433", 1370, 1245, 145, 18, size=12)
+    d.edge(recommendation, recommendation_db, exit=(.5, 1), entry=(.5, 0))
+    d.text("EF Core / TDS :1433", 1540, 1245, 145, 18, size=12)
+
+    # Planning -> Recommendation through a dedicated gap between Planning and Tracking.
+    d.edge(planning, recommendation, exit=(1, 1), entry=(.5, 0), points=[(1725, 895), (1725, 1090), (2110, 1090)])
+    d.text("gRPC / HTTP/2 :8085", 1738, 1010, 145, 22, size=12)
+
+    # Optional external AI is aligned with Recommendation for a short, direct relation.
+    d.edge(recommendation, optional_ai, style=OPTIONAL, exit=(1, .5), entry=(0, .5))
+    d.text("HTTP :11434", 2350, 1145, 125, 22, size=12)
+
+    # Domain event producers use separate whitespace corridors.
+    d.edge(identity, events, style=ASYNC, exit=(0, .70), entry=(.0702702703, 0), points=[(100, 854.5), (100, 1380), (480, 1380)])
+    d.edge(catalog, events, style=ASYNC, exit=(0, .70), entry=(.1621621622, 0), points=[(650, 854.5), (650, 1380)])
+    d.edge(planning, events, style=ASYNC, exit=(0, .70), entry=(.4864864865, 0), points=[(1250, 854.5), (1250, 1380)])
+    # Tracking -> Event Streams remains in Structurizr/docs and is expanded in the async Dynamic view.
+    d.text("Redis :6379", 115, 1185, 105, 22, size=12)
+    d.text("Redis :6379", 430, 1250, 105, 22, size=12)
+    d.text("Redis :6379", 1265, 1185, 105, 22, size=12)
+    # Tracking async protocol is documented in the Dynamic view.
+
+    # Worker and Recommendation initiate consumer/publish operations against Streams.
+    d.edge(worker, events, style=ASYNC, exit=(0, .75), entry=(.2108108108, 0), points=[(740, 1210), (740, 1380)])
+    d.edge(recommendation, events, style=ASYNC, exit=(0, .75), entry=(.8108108108, 0), points=[(1850, 1210), (1850, 1380)])
+    d.text("Redis :6379", 500, 1280, 105, 22, size=12)
+    d.text("Redis :6379", 1600, 1280, 105, 22, size=12)
 
     d.text(
-        "<b>Legend</b>  Solid = synchronous  |  Dashed = async/optional  |  Cylinder = owned database  |  Target Architecture only",
-        900, 2420, 2800, 40, size=13, align="center"
+        "<b>Legend</b>  Solid = synchronous  |  Dashed = async/optional  |  Cylinder = owned DB  |  C1 = Target Architecture",
+        650, 1535, 1500, 34, size=13, align="center"
     )
     d.save("02-c1-container-architecture.drawio")
+
+
+def build_cloud_docker_deployment():
+    d = Diagram("Cloud-Docker-Deployment", 2500, 1450)
+    page_title(
+        d,
+        "C4 Deployment - Cloud Docker Target - Longevity Diet Companion",
+        "Target only: one cloud VM, Docker Compose, private service network, and persistent named volumes.",
+        2250,
+    )
+
+    cloud_style = "rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;fillOpacity=0;strokeColor=#6B7280;strokeWidth=2;dashed=1;dashPattern=8 6;"
+    node_style = "rounded=0;whiteSpace=wrap;html=1;fillColor=#F9FAFB;fillOpacity=30;strokeColor=#9CA3AF;strokeWidth=2;dashed=1;dashPattern=6 5;"
+
+    d.vertex("", 260, 160, 2050, 1200, cloud_style, cid="cloud-boundary")
+    d.text("<b>Cloud Provider / IaaS</b>", 290, 175, 300, 30, size=16)
+    d.vertex("", 400, 230, 1880, 1080, node_style, cid="vm-boundary")
+    d.text("<b>Virtual Machine</b>  [Linux / Deployment Node]", 430, 245, 420, 30, size=15)
+    d.vertex("", 520, 300, 1690, 910, node_style, cid="docker-boundary")
+    d.text("<b>Docker Engine</b>", 550, 315, 260, 28, size=15)
+    d.vertex("", 620, 370, 1570, 650, node_style, cid="compose-boundary")
+    d.text("<b>Docker Compose</b>", 650, 385, 260, 28, size=15)
+    d.vertex("", 700, 440, 1450, 520, node_style, cid="network-boundary")
+    d.text("<b>ldc-network</b>  [private Docker network / service DNS]", 730, 455, 520, 28, size=14)
+
+    browser = d.vertex(
+        compact_c4_box("User Browser", "External Client", "HTTPS :443", "Public entry only"),
+        35, 505, 180, 120, EXTERNAL + "fontSize=15;spacing=7;"
+    )
+    web = d.vertex(
+        compact_c4_box("Web Edge", "Container Instance", "Nginx + SPA / :443", "TLS + static UI"),
+        760, 510, 300, 110, BOX + "fontSize=15;spacing=7;"
+    )
+    gateway = d.vertex(
+        compact_c4_box("API Gateway", "Container Instance", "YARP / :8080", "Private routing"),
+        1170, 510, 300, 110, BOX + "fontSize=15;spacing=7;"
+    )
+    domains = d.vertex(
+        "<b>Domain Services</b><br><font style='font-size:13px'>[4 Container Instances]</font><br>"
+        "<font style='font-size:13px'>Identity :8081 | Catalog :8082</font><br>"
+        "<font style='font-size:13px'>Planning :8083 | Tracking :8084</font>",
+        760, 690, 710, 150, BOX + "fontSize=15;spacing=8;"
+    )
+    recommendation = d.vertex(
+        compact_c4_box("Recommendation :8085", "Container Instance", "gRPC / HTTP/2", "Safety + ranking"),
+        760, 870, 300, 100, BOX + "fontSize=15;spacing=6;"
+    )
+    worker = d.vertex(
+        compact_c4_box("Worker :8086", "Container Instance", ".NET 9 Worker", "Async jobs"),
+        1170, 870, 300, 100, BOX + "fontSize=15;spacing=6;"
+    )
+    sql = d.vertex(
+        compact_c4_box("SQL Server :1433", "Container Instance", "SQL Server 2022", "6 owned logical DBs"),
+        1810, 695, 300, 140, DB + "fontSize=15;spacing=6;"
+    )
+    redis = d.vertex(
+        compact_c4_box("Redis :6379", "Container Instance", "Redis Streams :6379", "Async transport"),
+        1510, 870, 260, 100, BOX + "fontSize=15;spacing=6;"
+    )
+
+    sql_volume = d.vertex(
+        "<b>sql-data</b><br><font style='font-size:13px'>[Docker named volume]</font><br>"
+        "<font style='font-size:13px'>mount -> /var/opt/mssql</font>",
+        1810, 1080, 300, 85, BOX + "fontSize=15;spacing=6;"
+    )
+    redis_volume = d.vertex(
+        "<b>redis-data</b><br><font style='font-size:13px'>[Docker named volume]</font><br>"
+        "<font style='font-size:13px'>mount -> /data (AOF)</font>",
+        1510, 1080, 260, 85, BOX + "fontSize=15;spacing=6;"
+    )
+    disk = d.vertex(
+        "<b>Persistent Disk</b><br><font style='font-size:13px'>[Cloud block storage attached to VM]</font><br>"
+        "<font style='font-size:13px'>Docker-managed named-volume data survives container recreation</font>",
+        1320, 1220, 780, 80, BOX + "fontSize=15;spacing=6;"
+    )
+
+    d.edge(browser, web, exit=(1, .5), entry=(0, .5))
+    d.text("HTTPS :443", 365, 535, 150, 24, size=13, align="center")
+    d.edge(web, gateway, exit=(1, .5), entry=(0, .5))
+    d.text("HTTP/REST :8080", 1065, 535, 120, 24, size=12, align="center")
+    d.edge(gateway, domains, exit=(.5, 1), entry=(.5, 0), points=[(1320, 660), (1115, 660)])
+    d.text("REST :8081-:8084", 1160, 630, 150, 22, size=12)
+    d.edge(domains, sql, exit=(1, .5), entry=(0, .5))
+    d.text("TDS :1433", 1550, 730, 100, 22, size=12)
+    d.edge(domains, recommendation, exit=(.2112676056, 1), entry=(.5, 0))
+    # Planning is the gRPC caller inside the Domain Services deployment group.
+    d.text("gRPC / HTTP/2 :8085", 950, 842, 170, 20, size=12)
+    d.edge(worker, redis, style=ASYNC, exit=(1, .5), entry=(0, .5))
+    # Redis protocol/port is carried by the Redis deployment node.
+
+    d.edge(sql, sql_volume, exit=(.5, 1), entry=(.5, 0))
+    d.text("volume mount", 1980, 950, 110, 20, size=12)
+    d.edge(redis, redis_volume, exit=(.5, 1), entry=(.5, 0))
+    d.text("volume mount", 1660, 1005, 110, 20, size=12)
+    d.edge(sql_volume, disk, exit=(.5, 1), entry=(.8205128205, 0))
+    d.edge(redis_volume, disk, exit=(.5, 1), entry=(.4102564103, 0))
+
+    d.text(
+        "<b>Network rule</b>  Only HTTPS :443 is public. :8080-:8086, :1433 and :6379 stay on the private Docker network; containers resolve each other by service DNS.",
+        650, 1320, 1550, 38, size=13, align="center",
+    )
+    d.text(
+        "Target only - supporting Deployment view. Current local Docker Compose remains documented separately in 03-docker-deployment.",
+        720, 1380, 1450, 30, size=12, align="center", color=MUTED,
+    )
+    d.save("11-cloud-docker-deployment.drawio", output_dir=ROOT / "docs" / "architecture")
+
 
 
 def build_conceptual():
@@ -844,23 +966,24 @@ if __name__ == "__main__":
     parser.add_argument(
         "--only",
         default="all",
-        help="Comma-separated: c0,c1,conceptual,physical (default: all)",
+        help="Comma-separated: c0,c1,conceptual,physical,cloud (default: all)",
     )
     args = parser.parse_args()
     selected = {part.strip().lower() for part in args.only.split(",")}
     if "all" in selected:
-        selected = {"c0", "c1", "conceptual", "physical"}
+        selected = {"c0", "c1", "conceptual", "physical", "cloud"}
 
     builders = {
         "c0": build_c0,
         "c1": build_c1,
         "conceptual": build_conceptual,
         "physical": build_physical,
+        "cloud": build_cloud_docker_deployment,
     }
     unknown = selected - builders.keys()
     if unknown:
         raise SystemExit(f"Unknown diagram selector(s): {sorted(unknown)}")
-    for name in ("c0", "c1", "conceptual", "physical"):
+    for name in ("c0", "c1", "conceptual", "physical", "cloud"):
         if name in selected:
             builders[name]()
     print("Generated", ", ".join(sorted(selected)), "in", OUT)

@@ -56,6 +56,55 @@ $expected = @(
     '04-physical-database.drawio'
 )
 
+function Assert-OneGlanceDiagramReadability {
+    param(
+        [string]$File,
+        [string]$Name
+    )
+
+    if ($Name -notin @('01-c0-system-context.drawio', '02-c1-container-architecture.drawio')) {
+        return
+    }
+
+    [xml]$diagramXml = Get-Content $File -Raw -Encoding UTF8
+    $model = $diagramXml.mxfile.diagram.mxGraphModel
+    $pageWidth = [int]$model.pageWidth
+    $pageHeight = [int]$model.pageHeight
+    $aspect = $pageWidth / [double]$pageHeight
+    $rawDiagram = Get-Content $File -Raw -Encoding UTF8
+    $fontSizes = @()
+    foreach ($match in [regex]::Matches($rawDiagram, '(?:fontSize=|font-size:)(\d+)')) {
+        $fontSizes += [int]$match.Groups[1].Value
+    }
+    if ($fontSizes.Count -eq 0) {
+        throw "No explicit typography found for one-glance validation: $Name"
+    }
+    $minFont = ($fontSizes | Measure-Object -Minimum).Minimum
+
+    if ($Name -eq '01-c0-system-context.drawio') {
+        if ($pageWidth -gt 1900 -or $pageHeight -gt 1100) {
+            throw "C0 one-glance page is oversized: ${pageWidth}x${pageHeight}; target <= 1900x1100."
+        }
+        if ($minFont -lt 13) {
+            throw "C0 typography below readability floor: ${minFont}px; minimum is 13px."
+        }
+    }
+    else {
+        if ($pageWidth -gt 3000 -or $pageHeight -gt 1800) {
+            throw "C1 one-glance page is oversized: ${pageWidth}x${pageHeight}; target <= 3000x1800."
+        }
+        if ($minFont -lt 12) {
+            throw "C1 typography below readability floor: ${minFont}px; minimum is 12px."
+        }
+    }
+
+    if ($aspect -lt 1.55 -or $aspect -gt 1.95) {
+        throw "One-glance landscape aspect is outside presentation range in ${Name}: $([math]::Round($aspect, 2))."
+    }
+
+    Write-Output "PASS one-glance readability $Name (${pageWidth}x${pageHeight}, min ${minFont}px)"
+}
+
 $geometryLint = Join-Path $root 'scripts\Lint-ArchitectureGeometry.ps1'
 & $geometryLint -ArchitectureDir $diagramDir
 
@@ -81,6 +130,8 @@ foreach ($name in $expected) {
     if (@($xml.mxfile.diagram).Count -lt 1) {
         throw "No draw.io page found: $name"
     }
+
+    Assert-OneGlanceDiagramReadability -File $file -Name $name
 
     foreach ($edge in $xml.SelectNodes('//mxCell[@edge="1"]')) {
         $style = [string]$edge.style

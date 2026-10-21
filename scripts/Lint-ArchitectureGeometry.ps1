@@ -5,7 +5,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $files = Get-ChildItem $ArchitectureDir -Filter '*.drawio' -File |
-    Where-Object { $_.Name -match '^(?:0[1-9]|10)-' } |
+    Where-Object { $_.Name -match '^(?:0[1-9]|1[01])-' } |
     Sort-Object Name
 
 function Get-StyleValue([string]$Style, [string]$Key, [double]$Default)
