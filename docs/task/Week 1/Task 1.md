@@ -5,6 +5,14 @@
 **Branch:** `feature/w1-t1-auth-profile`  
 **Status:** Done
 
+## Architecture alignment (ADR-005)
+
+- **Target owner:** Identity & Profile Service (`:8081`) behind API Gateway.
+- **Owned data:** `LongevityIdentityDb`; no target shared DbContext/database access.
+- **Async contract:** publish profile/identity changes such as `UserProfileUpdated.v1` when other services need copied data.
+- **Migration note:** this task is an accepted Current Runtime baseline; target migration must preserve its public behavior/tests while moving ownership into Identity & Profile Service.
+
+
 ## Mục tiêu
 
 Hoàn thiện identity foundation để mọi feature sau có current user, ownership, role, session và profile personalization đáng tin cậy.

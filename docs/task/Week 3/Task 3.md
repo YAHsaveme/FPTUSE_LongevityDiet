@@ -5,6 +5,13 @@
 **Branch:** `feature/w3-t3-fmd-safety-tracking`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target owner:** Planning Service (`REST :8083`).
+- **Owned data:** FMD safety assessment/cycle state in `LongevityPlanningDb`.
+- **Guardrail:** backend safety state machine remains deterministic; Local AI cannot decide eligibility or therapeutic behavior.
+
+
 ## Mục tiêu
 
 Implement FMD trong phạm vi **education + safety assessment + tracking**, không tạo therapeutic protocol và không biến ứng dụng thành medical device.

@@ -5,6 +5,14 @@
 **Branch:** `feature/w1-t3-plan-log-window`  
 **Status:** Not Started
 
+## Architecture alignment (ADR-005)
+
+- **Target owners:** Planning Service (`:8083`) owns MealPlan/MealPlanDay/PlannedMeal; Tracking & Progress Service (`:8084`) owns MealLog/MealLogItem/EatingWindowSnapshot.
+- **Owned data:** `LongevityPlanningDb` and `LongevityTrackingDb`; no cross-service SQL FK/join/transaction.
+- **Cross-boundary data:** stable IDs plus API/versioned events/read models.
+- **Implementation rule:** split the core loop by target ownership even when one user journey spans both services.
+
+
 ## Mục tiêu
 Tạo core product loop: **Profile + Catalog + Rules -> Meal Plan -> Meal Log -> Eating Window**.
 
@@ -32,6 +40,8 @@ Pipeline:
 7. Persist reason codes/basic explanation metadata.
 
 Planner phải deterministic/reproducible. AI không tham gia quyết định.
+
+**Boundary rule:** UserProfile, active RuleSetVersion và Food/Recipe candidates phải đi vào Planning qua versioned service contracts, APIs hoặc event-driven read models/snapshots. Planning Service không được query trực tiếp `LongevityIdentityDb` hoặc `LongevityCatalogDb`.
 
 ### REST API
 - Generate plan.
