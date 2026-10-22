@@ -52,9 +52,7 @@ DB = (
     "fillColor=#FFFFFF;strokeColor=#374151;strokeWidth=2;fontFamily=Arial;"
     "fontColor=#1F2937;align=center;verticalAlign=middle;"
 )
-QUEUE = (
-    BOX + "shape=process;size=0.08;"
-)
+QUEUE = BOX
 EDGE = (
     "edgeStyle=orthogonalEdgeStyle;rounded=0;curved=0;orthogonalLoop=1;"
     "jettySize=auto;html=1;endArrow=block;endFill=1;endSize=12;"
@@ -294,12 +292,12 @@ def build_c1():
     planning_db = d.vertex(compact_c4_box("LongevityPlanningDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1330, 960, 330, 115, DB + "fontSize=15;spacing=6;")
     tracking_db = d.vertex(compact_c4_box("LongevityTrackingDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1900, 960, 330, 115, DB + "fontSize=15;spacing=6;")
 
-    worker = d.vertex(compact_c4_box("Background Worker", "Container", ".NET 9 Worker / Ops :8086", "Async jobs / reports"), 780, 1120, 420, 120, BOX + "fontSize=16;spacing=7;")
-    worker_db = d.vertex(compact_c4_box("LongevityWorkerDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 780, 1260, 420, 105, DB + "fontSize=14;spacing=5;")
-    recommendation = d.vertex(compact_c4_box("Recommendation Service", "Container", "gRPC / .NET 9 / :8085", "Safety / ranking"), 1900, 1120, 420, 120, BOX + "fontSize=16;spacing=7;")
-    recommendation_db = d.vertex(compact_c4_box("LongevityRecommendationDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1900, 1260, 420, 105, DB + "fontSize=14;spacing=5;")
+    worker = d.vertex(compact_c4_box("Background Worker", "Container", ".NET 9 Worker / Ops :8086", "Async jobs / reports"), 780, 1100, 420, 110, BOX + "fontSize=16;spacing=7;")
+    worker_db = d.vertex(compact_c4_box("LongevityWorkerDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 780, 1250, 420, 95, DB + "fontSize=14;spacing=5;")
+    recommendation = d.vertex(compact_c4_box("Recommendation Service", "Container", "gRPC / .NET 9 / :8085", "Safety / ranking"), 1900, 1100, 420, 110, BOX + "fontSize=16;spacing=7;")
+    recommendation_db = d.vertex(compact_c4_box("LongevityRecommendationDb", "Container / Database", "SQL Server 2022 / :1433", "Owned data"), 1900, 1250, 420, 95, DB + "fontSize=14;spacing=5;")
 
-    events = d.vertex(compact_c4_box("Event Streams", "Container - Queue", "Redis Streams 7 / :6379", "Integration events"), 350, 1400, 1850, 90, QUEUE + "fontSize=16;spacing=6;")
+    events = d.vertex(compact_c4_box("Event Streams", "Container - Queue", "Redis Streams 7 / :6379", "Integration events"), 350, 1400, 1850, 100, QUEUE + "fontSize=16;spacing=8;")
     optional_ai = d.vertex(compact_c4_box("Local AI Runtime", "External System / Optional", "HTTP :11434", "Explanation only"), 2510, 1100, 250, 160, EXTERNAL + "fontSize=15;spacing=7;")
 
     # Actors -> Web: exact vertical lanes.
@@ -308,7 +306,7 @@ def build_c1():
     d.edge(admin, web, exit=(.5, 1), entry=(.9621621622, 0))
     d.text("HTTPS :443", 535, 318, 105, 24, size=12)
     d.text("HTTPS :443", 1365, 318, 105, 24, size=12)
-    d.text("HTTPS :443", 2115, 290, 105, 24, size=12)
+    d.text("HTTPS :443", 2115, 318, 105, 24, size=12)
 
     d.edge(web, gateway, exit=(.5, 1), entry=(.5, 0))
     d.text("HTTPS / REST :443", 1260, 490, 170, 24, size=12)
@@ -324,8 +322,8 @@ def build_c1():
     d.text("REST :8084", 2080, 685, 100, 22, size=12)
 
     # Admin operations route uses the catalog/planning whitespace corridor.
-    d.edge(gateway, worker, exit=(.4864864865, 1), entry=(.7619047619, 0), points=[(1220, 1090), (1100, 1090)])
-    d.text("Ops :8086", 1060, 1040, 100, 22, size=12)
+    d.edge(gateway, worker, exit=(.4864864865, 1), entry=(.7619047619, 0), points=[(1220, 1060), (1100, 1060)])
+    d.text("Ops :8086", 1080, 700, 80, 22, size=12)
 
     # Service-owned databases.
     for source, target, line_x in [
@@ -335,37 +333,35 @@ def build_c1():
         (tracking, tracking_db, 2065),
     ]:
         d.edge(source, target, exit=(.5, 1), entry=(.5, 0))
-        d.text("EF Core / TDS :1433", line_x + 14, 910, 145, 22, size=12)
+        d.text("EF Core / TDS :1433", line_x + 28, 910, 145, 22, size=12)
 
     d.edge(worker, worker_db, exit=(.5, 1), entry=(.5, 0))
-    d.text("EF Core / TDS :1433", 1370, 1245, 145, 18, size=12)
+    d.text("TDS :1433", 880, 1222, 80, 18, size=12)
     d.edge(recommendation, recommendation_db, exit=(.5, 1), entry=(.5, 0))
-    d.text("EF Core / TDS :1433", 1540, 1245, 145, 18, size=12)
+    d.text("TDS :1433", 2010, 1222, 80, 18, size=12)
 
     # Planning -> Recommendation through a dedicated gap between Planning and Tracking.
-    d.edge(planning, recommendation, exit=(1, 1), entry=(.5, 0), points=[(1725, 895), (1725, 1090), (2110, 1090)])
-    d.text("gRPC / HTTP/2 :8085", 1738, 1010, 145, 22, size=12)
+    d.edge(planning, recommendation, exit=(1, 1), entry=(0, .3181818182), points=[(1745, 895), (1745, 1135), (1860, 1135)])
+    d.text("gRPC / HTTP/2 :8085", 1510, 1085, 160, 22, size=12)
 
     # Optional external AI is aligned with Recommendation for a short, direct relation.
-    d.edge(recommendation, optional_ai, style=OPTIONAL, exit=(1, .5), entry=(0, .5))
-    d.text("HTTP :11434", 2350, 1145, 125, 22, size=12)
+    d.edge(recommendation, optional_ai, style=OPTIONAL, exit=(1, .5), entry=(0, .34375))
+    d.text("HTTP :11434", 2370, 1080, 110, 22, size=12)
 
-    # Domain event producers use separate whitespace corridors.
-    d.edge(identity, events, style=ASYNC, exit=(0, .70), entry=(.0702702703, 0), points=[(100, 854.5), (100, 1380), (480, 1380)])
-    d.edge(catalog, events, style=ASYNC, exit=(0, .70), entry=(.1621621622, 0), points=[(650, 854.5), (650, 1380)])
-    d.edge(planning, events, style=ASYNC, exit=(0, .70), entry=(.4864864865, 0), points=[(1250, 854.5), (1250, 1380)])
-    # Tracking -> Event Streams remains in Structurizr/docs and is expanded in the async Dynamic view.
-    d.text("Redis :6379", 115, 1185, 105, 22, size=12)
-    d.text("Redis :6379", 430, 1250, 105, 22, size=12)
-    d.text("Redis :6379", 1265, 1185, 105, 22, size=12)
-    # Tracking async protocol is documented in the Dynamic view.
+    # Event Streams stay compact at C1: representative producer/consumer relationships are shown.
+    # Tracking -> Streams remains explicit in Structurizr and the Async Dynamic view to avoid a non-planar C1 crossing.
+    d.edge(identity, events, style=ASYNC, exit=(0, .70), entry=(.0702702703, 0), points=[(100, 854.5), (100, 1360), (480, 1360)])
+    d.edge(catalog, events, style=ASYNC, exit=(0, .70), entry=(.1621621622, 0), points=[(650, 854.5), (650, 1360)])
+    d.edge(planning, events, style=ASYNC, exit=(0, .70), entry=(.4864864865, 0), points=[(1250, 854.5), (1250, 1360)])
+    d.text("Publish", 130, 1170, 80, 22, size=12)
+    d.text("Publish", 500, 1170, 80, 22, size=12)
+    d.text("Publish", 1280, 1170, 80, 22, size=12)
 
-    # Worker and Recommendation initiate consumer/publish operations against Streams.
-    d.edge(worker, events, style=ASYNC, exit=(0, .75), entry=(.2108108108, 0), points=[(740, 1210), (740, 1380)])
-    d.edge(recommendation, events, style=ASYNC, exit=(0, .75), entry=(.8108108108, 0), points=[(1850, 1210), (1850, 1380)])
-    d.text("Redis :6379", 500, 1280, 105, 22, size=12)
-    d.text("Redis :6379", 1600, 1280, 105, 22, size=12)
-
+    # Consumers are explicit; detailed XREADGROUP/XACK/result ordering stays in the Dynamic view.
+    d.edge(worker, events, style=ASYNC, exit=(0, .75), entry=(.2108108108, 0), points=[(730, 1182.5), (730, 1360), (740, 1360)])
+    d.edge(recommendation, events, style=ASYNC, exit=(0, .75), entry=(.8108108108, 0), points=[(1850, 1182.5), (1850, 1360)])
+    d.text("Read / Ack / Publish", 760, 1355, 160, 22, size=12)
+    d.text("Read snapshot", 1660, 1355, 130, 22, size=12)
     d.text(
         "<b>Legend</b>  Solid = synchronous  |  Dashed = async/optional  |  Cylinder = owned DB  |  C1 = Target Architecture",
         650, 1535, 1500, 34, size=13, align="center"

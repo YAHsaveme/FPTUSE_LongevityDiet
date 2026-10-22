@@ -40,7 +40,7 @@ All SQL databases use private EF Core/TDS :1433. Multiple logical databases may 
 - Worker consumes/acknowledges events and may publish result/retry/dead-letter events.
 - Recommendation may consume approved catalog/rule snapshot events into its own read model.
 
-Redis Streams is never isolated. Producers use XADD; consumers use XREADGROUP/XACK in supporting Dynamic views.
+Redis Streams is never isolated. Producers use XADD; consumers use XREADGROUP/XACK in supporting Dynamic views. To keep the teacher-facing C1 one-glance readable, the draw.io C1 shows representative publish/read lanes; the complete Tracking -> Event Streams relationship remains authoritative in Structurizr and is expanded in `06-outbox-redis-dynamic.drawio`.
 
 ## 5. Database-per-service rule
 Every business service has exactly one owned logical database in C1. No service may connect to another service's database. Cross-service reads use APIs or copied event-driven read models; no cross-database FK or SQL join crosses service boundaries.
@@ -58,7 +58,7 @@ Current Local Deployment still contains one primary REST API, one Recommendation
 - Dedicated whitespace corridor around every relationship label.
 - No line through text/box; no connector crossing/overlap.
 - Database visually paired directly beneath/adjacent to its owning service.
-- Event Streams centered in an async lane with explicit producers/consumers.
+- Event Streams centered in an async lane with representative producer/read lanes; complete async relationships remain in Structurizr/Dynamic views.
 - No controller/repository/table/class detail in C1.
 
 ## 9. Supporting views

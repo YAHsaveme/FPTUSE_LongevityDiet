@@ -48,7 +48,7 @@ The vendored SVG heuristic checker is used as a second opinion, not as a replace
 - draw.io renders a short terminal segment immediately before an arrowhead;
 - its inferred label rectangle differs from the rendered text position.
 
-Such findings are not silently ignored: each changed PNG is inspected full-frame. Real label/corridor findings were moved in the generator; known actor/arrowhead heuristic findings are recorded rather than distorting the diagram solely to satisfy a heuristic.
+Such findings are not silently ignored: each changed PNG is inspected full-frame. Real label/corridor findings were moved in the generator. On the final C1 export, the checker reports 9 heuristic-only findings: 3 actor-stroke contacts and 6 cylinder/terminal-shape findings; there are no remaining `edge-label`, `text-overflow`, or real connector-crossing findings. These known actor/cylinder heuristics are recorded rather than distorting the diagram solely to satisfy the checker.
 
 ## Visual review
 
@@ -61,7 +61,7 @@ Such findings are not silently ignored: each changed PNG is inspected full-frame
 - Top-to-bottom reading order: actors -> Web -> Gateway -> domain services -> owned databases/support lane -> Event Streams.
 - Service/database ownership pairs are visually recognizable.
 - Recommendation/Worker have their own owned databases.
-- Event Streams visibly has producers/consumers while detailed XADD/XREADGROUP/XACK order remains in the Dynamic view to avoid text overload.
+- Event Streams visibly has representative publish/read lanes; the full Tracking -> Event Streams relationship remains in Structurizr and `06-outbox-redis-dynamic.drawio`, where XADD/XREADGROUP/XACK ordering is shown without overloading C1.
 - Local AI stays external and optional.
 
 ## Deployment/async supporting QA
