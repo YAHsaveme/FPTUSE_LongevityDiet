@@ -5,6 +5,13 @@
 **Branch:** `feature/w2-t1-activity-ldas`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target owner:** Tracking & Progress Service (`REST :8084`).
+- **Owned data:** `LongevityTrackingDb` for activity, LDAS and scoring snapshots.
+- **Dependencies:** profile/rule inputs arrive through contracts or copied event read models, never direct IdentityDb/CatalogDb reads.
+
+
 ## Mục tiêu
 
 Tạo vertical slice từ activity data đến **Longevity Diet Adherence Score (LDAS)** để user có thể theo dõi hành vi và nhận score giải thích được, không biến score thành clinical claim.

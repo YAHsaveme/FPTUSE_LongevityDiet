@@ -5,6 +5,13 @@
 **Branch:** `feature/w4-t2-release-readiness`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target deployment:** Cloud VM -> Docker Engine -> Docker Compose -> private `ldc-network`; only HTTPS :443 public.
+- **Data placement:** one SQL Server may host six logical service-owned DBs; `sql-data` mounts `/var/opt/mssql`; `redis-data` mounts `/data` (AOF); named volumes persist on the VM cloud disk.
+- **Runtime gate:** target Gateway/services/databases must have real projects/config/Compose evidence before C1 may be called deployed.
+
+
 ## Mục tiêu
 
 Bảo đảm project có thể build, migrate, seed và chạy từ clean environment mà không phụ thuộc trạng thái máy developer; đồng thời chứng minh toàn bộ service bắt buộc giao tiếp thành công trong Docker Compose.
@@ -29,19 +36,28 @@ Bảo đảm project có thể build, migrate, seed và chạy từ clean enviro
 - Compose restart giữ đúng persistence cần thiết.
 - Không expose SQL/Redis/gRPC public hơn mức demo cần thiết.
 
-## Required service communication matrix
+## Required target service communication matrix
 
-Phải verify trong composed environment:
-1. Browser -> Web.
-2. Web -> REST API.
-3. REST API -> SQL Server.
-4. REST API -> Recommendation gRPC.
-5. API business transaction -> SQL + Outbox.
-6. Worker -> SQL Server.
-7. Worker publisher -> Redis Streams.
-8. Redis consumer group -> Worker.
-9. Worker -> persisted async result.
-10. UI/API đọc được kết quả cuối.
+Phải verify trong composed target environment:
+1. Browser -> Web Edge: `HTTPS :443`.
+2. Web Edge -> API Gateway: private `HTTP/REST :8080` sau public TLS edge.
+3. API Gateway -> Identity/Catalog/Planning/Tracking: `REST :8081/:8082/:8083/:8084` bằng Docker service DNS.
+4. API Gateway -> Worker operations: `Ops/REST :8086`, Admin only.
+5. Planning Service -> Recommendation Service: private `gRPC / HTTP/2 :8085`.
+6. Mỗi business service -> **database do chính service sở hữu**: `TDS :1433`; không có foreign-service DB access.
+7. Owning-service Outbox publisher -> Event Streams: Redis `XADD :6379`.
+8. Background Worker -> Event Streams: `XREADGROUP/XACK :6379`.
+9. Background Worker -> `LongevityWorkerDb` cho job/idempotency/retry state; domain-owned result quay lại owning service bằng result event.
+10. Recommendation -> optional Local AI: `HTTP :11434` nếu bật; failure phải fallback deterministic.
+11. Web/API Gateway -> owning service đọc được final persisted result.
+
+### Persistence placement evidence
+
+- `sql-data` là Docker named volume mount vào SQL Server `/var/opt/mssql`.
+- `redis-data` là Docker named volume mount vào Redis `/data`; AOF được bật cho persistence phù hợp.
+- Stop/start hoặc recreate container không được làm mất dữ liệu nằm trong named volume.
+- Cloud Docker Target phải chứng minh named-volume data nằm trên **persistent disk của VM**, không nằm chỉ trong writable container layer.
+- SQL :1433, Redis :6379 và :8080-:8086 không public ra Internet; chỉ HTTPS :443 public.
 
 ## CI quality gates
 
@@ -79,7 +95,7 @@ Document và verify:
 - Seed twice/idempotent.
 - Clean Docker image build.
 - `docker compose config`.
-- Full six-service Compose start.
+- Full **target Compose topology** start: Web Edge, API Gateway, 4 REST domain services, Recommendation, Worker, SQL Server và Redis.
 - Missing required config fail-fast.
 - Health/readiness transition.
 - Required communication matrix pass.
@@ -90,4 +106,4 @@ Document và verify:
 
 ## Definition of Done
 
-Một clean environment có thể dựng hệ thống bằng documented commands; migration/seed/Docker/config không phụ thuộc secret hoặc state ngầm trên máy developer; sáu service bắt buộc giao tiếp thành công và có runtime evidence.
+Một clean environment có thể dựng **Target Architecture** bằng documented commands; migration/seed/Docker/config không phụ thuộc secret hoặc state ngầm trên máy developer; target communication matrix pass; `sql-data`/`redis-data` persistence được chứng minh; chỉ :443 public; và mọi target container/database trong C1 có runtime/Compose evidence. Nếu chưa đạt các điều này thì tài liệu phải tiếp tục ghi rõ Target, không được claim đã deploy.

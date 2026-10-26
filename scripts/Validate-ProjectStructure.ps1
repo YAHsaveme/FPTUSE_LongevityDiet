@@ -43,6 +43,7 @@ foreach ($project in $requiredProjects) {
 $requiredPlanningFiles = [System.Collections.Generic.List[string]]::new()
 $requiredPlanningFiles.Add('docs\task\README.md')
 $requiredPlanningFiles.Add('docs\task\ROADMAP-4-WEEKS.md')
+$requiredPlanningFiles.Add('docs\task\ARCHITECTURE-ALIGNMENT-MATRIX.md')
 $requiredPlanningFiles.Add('docs\09-TEST-DEPLOY-DEMO.md')
 $requiredPlanningFiles.Add('docs\10-PRN232-TRACEABILITY.md')
 
@@ -55,6 +56,28 @@ foreach ($week in 1..4) {
 
 foreach ($planningFile in $requiredPlanningFiles) {
     Assert-ProjectRule (Test-Path (Join-Path $root $planningFile)) "Missing canonical 4-week planning/evidence file: $planningFile"
+}
+
+$alignmentMatrix = Read-ProjectText 'docs\task\ARCHITECTURE-ALIGNMENT-MATRIX.md'
+foreach ($required in @(
+    'ADR-005','API Gateway','LongevityIdentityDb','LongevityCatalogDb','LongevityPlanningDb','LongevityTrackingDb',
+    'LongevityRecommendationDb','LongevityWorkerDb','Redis Streams','sql-data','redis-data','service DNS','Background Worker must not poll another service database'
+)) {
+    Assert-ProjectRule ($alignmentMatrix -match [regex]::Escape($required)) "Architecture alignment matrix is missing required target rule: $required"
+}
+
+$taskFiles = Get-ChildItem (Join-Path $root 'docs\task') -Recurse -File -Filter 'Task *.md' |
+    Where-Object { $_.Directory.Name -match '^Week [1-4]$' }
+Assert-ProjectRule ($taskFiles.Count -eq 16) "Expected exactly 16 task files for four weeks; found $($taskFiles.Count)."
+foreach ($taskFile in $taskFiles) {
+    $taskText = Get-Content $taskFile.FullName -Raw -Encoding UTF8
+    $relativeTask = Get-RelativeProjectPath -BasePath $root -FullPath $taskFile.FullName
+    Assert-ProjectRule ($taskText -match [regex]::Escape('## Architecture alignment (ADR-005)')) "Task is missing ADR-005 architecture alignment: $relativeTask"
+}
+
+$targetTaskCorpus = ($taskFiles | ForEach-Object { Get-Content $_.FullName -Raw -Encoding UTF8 }) -join "`n"
+foreach ($staleFlow in @('Web -> REST API.','REST API -> SQL Server.','REST API -> Recommendation gRPC.','Full six-service Compose start.','6-service communication matrix.')) {
+    Assert-ProjectRule ($targetTaskCorpus -notmatch [regex]::Escape($staleFlow)) "Stale pre-ADR-005 task flow remains: $staleFlow"
 }
 
 $forbiddenPlanningPaths = [System.Collections.Generic.List[string]]::new()

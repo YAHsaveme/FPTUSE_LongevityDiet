@@ -9,6 +9,16 @@
 - Reserve whitespace corridors for relationship labels; labels must not sit directly on lines.
 - Prefer short protocol/port labels to sentences.
 
+## One-glance presentation contract
+- C0/C1 must remain understandable as complete full-frame images at normal presentation scale; no local zoom should be needed to identify names, ports, owned databases or arrow direction.
+- Prefer a compact landscape frame near 16:9. Automated limits are C0 <= `1900x1100` and C1 <= `3000x1800`.
+- Minimum explicit typography floor: C0 `13px`; C1 `12px`. Do not bypass the gate by omitting explicit font sizes.
+- Compact wording and geometry before considering a larger page. If extra runtime/deployment detail is needed, create a supporting Dynamic or Deployment view instead of expanding C1 indefinitely.
+- Keep safe whitespace around title, actors, system-boundary title and legend.
+- Peer containers use aligned grid positions and consistent dimensions where practical.
+- Pair each service with its owned database in the same visual ownership column/lane.
+- Reserve connector corridors before placing labels; labels may not overlap boxes, frames, titles or other connectors.
+
 ## C1 Target layout
 Use horizontal bands: actors; Web + API Gateway; four REST domain services; owned DB row; Recommendation lane; async Worker/Event Streams lane; external Local AI outside boundary. Every service/database ownership pair must be immediately recognizable.
 

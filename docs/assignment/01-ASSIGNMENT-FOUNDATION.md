@@ -89,26 +89,30 @@ Keep FMD education/tracking separate from normal meal planning and require a saf
 
 `Register/Login -> Onboarding -> Resolve Rules -> Generate Plan -> Log Meal/Activity -> Calculate Progress -> Request Recommendation -> Receive Reminder/Weekly Report`
 
-The distributed-system demonstration extends the same flow:
+The Target Architecture distributed-system demonstration extends the same flow:
 
-`Web -> REST API -> SQL + Outbox -> Worker Publisher -> Redis Streams -> Worker Consumer`
+`Web -> API Gateway -> owning REST service -> owned SQL + Outbox -> service-owned publisher -> Redis Streams -> Background Worker -> result event -> owning service`
 
 and:
 
-`REST API -> gRPC Recommendation Service -> Ranked Recommendation`
+`Web -> API Gateway -> Planning Service -> gRPC / HTTP/2 :8085 -> Recommendation Service -> Ranked Recommendation`
+
+Current Runtime remains documented separately until the target Gateway/service/database split is implemented.
 
 ## 7. Technology
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| Web | React 19, TypeScript, Vite, Nginx | SPA UI and reverse proxy |
-| REST API | ASP.NET Core .NET 9 | HTTP API, auth, business orchestration |
-| Application | .NET Services layer | Business workflows and rules |
-| Persistence | EF Core 9 | ORM and migrations |
-| Database | SQL Server 2022 | System of record |
+| Web | React 19, TypeScript, Vite, Nginx | SPA UI and public web edge |
+| API Gateway | YARP + ASP.NET Core .NET 9 | Single API routing/edge-policy boundary |
+| Domain REST Services | ASP.NET Core .NET 9 | Identity/Profile, Catalog/Rules, Planning, Tracking/Progress |
+| Application | .NET Services layer | Business workflows and rules inside owning service |
+| Persistence | EF Core 9 | Service-owned ORM/migrations |
+| Database | SQL Server 2022 | Six owned logical databases; may share one physical SQL instance |
 | Recommendation | ASP.NET Core gRPC .NET 9 | Independent typed ranking service |
 | Message Broker | Redis 7 Streams | Durable asynchronous messaging |
-| Background | .NET Worker Service | Outbox publisher, consumers and scheduled jobs |
+| Outbox Publisher | Hosted background publisher inside each owning domain service | Reads only that service's Outbox and XADDs integration events |
+| Background | .NET Worker Service | Consumers, scheduled jobs, idempotency/retry state and result events |
 | Security | JWT + rotating refresh token | Authentication and session management |
 | API Docs | OpenAPI + Swagger UI | API discovery and demo |
 | Deployment | Docker + Docker Compose | Reproducible local distributed environment |

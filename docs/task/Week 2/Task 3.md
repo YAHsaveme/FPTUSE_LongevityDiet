@@ -5,6 +5,13 @@
 **Branch:** `feature/w2-t3-recommendation-v2`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target owners:** Planning Service owns plan/replacement transaction; Recommendation Service owns ranking/read-model state in `LongevityRecommendationDb`.
+- **Communication:** Planning -> Recommendation via private `gRPC / HTTP/2 :8085`.
+- **Feedback:** route through a versioned Recommendation contract/event; do not give Recommendation direct PlanningDb access.
+
+
 ## Mục tiêu
 
 Nâng gRPC recommendation từ thin slice Week 1 thành engine deterministic, explainable và hỗ trợ replace/feedback mà không phá safety constraints.

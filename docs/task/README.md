@@ -5,6 +5,7 @@ Thư mục này là kế hoạch triển khai chính thức của **Longevity Di
 ## Cấu trúc
 
 - `ROADMAP-4-WEEKS.md` - roadmap cấp cao 4 tuần.
+- `ARCHITECTURE-ALIGNMENT-MATRIX.md` - mapping bắt buộc 16 task -> target service, owned database, sync/async protocol và deployment guardrails theo ADR-005.
 - `Week 1/` -> `Week 4/` - task chi tiết theo tuần.
 - Mỗi tuần gồm:
   - `README.md`: mục tiêu, dependency, integration order, phân công và exit criteria.
@@ -34,11 +35,12 @@ Một task chỉ được xem là hoàn thành khi:
 3. validation, authorization, ownership và error handling đúng;
 4. business rule quan trọng có test;
 5. migration/API contract/docs liên quan được cập nhật;
-6. không hardcode secret hoặc production data;
-7. không duplicate schema/logic;
-8. có review chéo;
-9. không dùng mock/template thay cho production implementation;
-10. có evidence đủ để demo hoặc kiểm chứng.
+6. target service/database ownership trong `ARCHITECTURE-ALIGNMENT-MATRIX.md` được giữ đúng; không thêm foreign-service DB access hoặc bypass API Gateway;
+7. không hardcode secret hoặc production data;
+8. không duplicate schema/logic;
+9. có review chéo;
+10. không dùng mock/template thay cho production implementation;
+11. có evidence đủ để demo hoặc kiểm chứng.
 
 ## Branch convention
 

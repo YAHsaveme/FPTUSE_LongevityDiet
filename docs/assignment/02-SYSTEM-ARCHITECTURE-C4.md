@@ -40,7 +40,7 @@ All SQL databases use private EF Core/TDS :1433. Multiple logical databases may 
 - Worker consumes/acknowledges events and may publish result/retry/dead-letter events.
 - Recommendation may consume approved catalog/rule snapshot events into its own read model.
 
-Redis Streams is never isolated. Producers use XADD; consumers use XREADGROUP/XACK in supporting Dynamic views.
+Redis Streams is never isolated. Producers use XADD; consumers use XREADGROUP/XACK in supporting Dynamic views. To keep the teacher-facing C1 one-glance readable, the draw.io C1 shows representative publish/read lanes; the complete Tracking -> Event Streams relationship remains authoritative in Structurizr and is expanded in `06-outbox-redis-dynamic.drawio`.
 
 ## 5. Database-per-service rule
 Every business service has exactly one owned logical database in C1. No service may connect to another service's database. Cross-service reads use APIs or copied event-driven read models; no cross-database FK or SQL join crosses service boundaries.
@@ -58,8 +58,17 @@ Current Local Deployment still contains one primary REST API, one Recommendation
 - Dedicated whitespace corridor around every relationship label.
 - No line through text/box; no connector crossing/overlap.
 - Database visually paired directly beneath/adjacent to its owning service.
-- Event Streams centered in an async lane with explicit producers/consumers.
+- Event Streams centered in an async lane with representative producer/read lanes; complete async relationships remain in Structurizr/Dynamic views.
 - No controller/repository/table/class detail in C1.
 
 ## 9. Supporting views
-Engineering documentation may additionally use Component, Dynamic and Deployment views. These answer different questions and must not be mixed into C1.
+Engineering documentation additionally uses Component, Dynamic and Deployment views. They answer different questions and must not be mixed into C1.
+
+- `03-docker-deployment.drawio`: actual Current Local Docker Compose topology.
+- `06-outbox-redis-dynamic.drawio`: target Outbox -> XADD -> Redis Streams -> XREADGROUP/XACK -> result/dead-letter flow.
+- `10-production-secure-deployment.drawio`: secure Production Target placement.
+- `11-cloud-docker-deployment.drawio`: assignment-friendly Cloud Docker Target on one IaaS VM.
+
+The Cloud Docker view makes deployment storage explicit: `sql-data` mounts to SQL Server `/var/opt/mssql`; `redis-data` mounts to Redis `/data` with AOF; Docker manages both named volumes on the VM's persistent cloud disk. Only HTTPS :443 is public. Internal service, SQL and Redis traffic stays on the private `ldc-network` and uses Docker service DNS.
+
+The Assignment permits Kafka or Redis Pub/Sub/Streams. ADR-002 selects Redis Streams for this project; Kafka is not added merely to imitate an example diagram.

@@ -13,7 +13,7 @@ $previewDir = Join-Path $ArchitectureDir 'previews'
 New-Item -ItemType Directory -Force -Path $previewDir | Out-Null
 
 $files = Get-ChildItem $ArchitectureDir -Filter '*.drawio' -File |
-    Where-Object { $_.Name -match '^(?:0[1-9]|10)-' } |
+    Where-Object { $_.Name -match '^(?:0[1-9]|1[01])-' } |
     Sort-Object Name
 
 if (-not $files) { throw 'No final architecture diagrams found.' }
@@ -107,6 +107,18 @@ foreach ($required in @(
 )) {
     if ($productionText -notmatch [regex]::Escape($required)) { throw "Production deployment semantic requirement missing: $required" }
 }
+$cloudDockerPath = Join-Path $ArchitectureDir '11-cloud-docker-deployment.drawio'
+if (-not (Test-Path $cloudDockerPath)) { throw 'Missing Cloud Docker supporting deployment view: 11-cloud-docker-deployment.drawio' }
+$cloudDockerText = [System.Net.WebUtility]::HtmlDecode([IO.File]::ReadAllText($cloudDockerPath, [Text.Encoding]::UTF8))
+foreach ($required in @(
+    'Cloud Docker Target','Cloud Provider / IaaS','Virtual Machine','Docker Engine','Docker Compose','ldc-network','Web Edge','API Gateway',
+    'Identity :8081','Catalog :8082','Planning :8083','Tracking :8084','Recommendation :8085','Worker :8086','SQL Server :1433','Redis :6379',
+    'sql-data','redis-data','Persistent Disk','/var/opt/mssql','/data','HTTPS :443','HTTP/REST :8080','gRPC / HTTP/2 :8085','TDS :1433','Redis Streams :6379',
+    'service DNS','private Docker network','Target only'
+)) {
+    if ($cloudDockerText -notmatch [regex]::Escape($required)) { throw "Cloud Docker deployment semantic requirement missing: $required" }
+}
 Write-Host 'PASS C4 abstraction/status/production-security semantic checks'
+Write-Host 'PASS Cloud Docker topology/persistence/network semantic checks'
 Write-Host ''
 Write-Host ("Validated geometry/XML/encoding and exported {0} diagrams to {1}" -f $files.Count, $previewDir)

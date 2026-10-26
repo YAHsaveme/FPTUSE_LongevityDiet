@@ -5,6 +5,13 @@
 **Branch:** `feature/w2-t2-challenge-dashboard`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target owners:** Planning Service owns Challenge state in `LongevityPlanningDb`; Tracking & Progress Service owns Dashboard/progress projections in `LongevityTrackingDb`.
+- **Integration:** projection updates are event-driven/idempotent; replay must not double count.
+- **Guardrail:** dashboard aggregation must not become a cross-database SQL join.
+
+
 ## Mục tiêu
 
 Biến meal/activity/LDAS thành vòng lặp hành vi 14 ngày và dashboard tổng hợp dùng dữ liệu thật.

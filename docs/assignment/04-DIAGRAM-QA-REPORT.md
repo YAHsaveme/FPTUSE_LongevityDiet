@@ -1,70 +1,80 @@
 # Assignment Diagram QA Report
 
 ## Scope
-Final visual and geometry QA for:
-- 01-c0-system-context.drawio
-- 02-c1-container-architecture.drawio
-- 03-conceptual-erd.drawio
-- 04-physical-database.drawio
+Teacher-facing Assignment views:
+- `01-c0-system-context.drawio`
+- `02-c1-container-architecture.drawio`
+- `03-conceptual-erd.drawio`
+- `04-physical-database.drawio`
 
-## Quality gates
-1. Orthogonal connectors only.
-2. Curved connectors explicitly disabled.
-3. Filled block arrowheads with one consistent size.
-4. No connector/text intersections.
-5. No diagonal connector segments.
-6. No connector routed through unrelated boxes.
-7. Relationship labels placed in dedicated whitespace.
-8. Boundary titles kept separate from boundary strokes.
-9. Arial typography with readable hierarchy.
-10. Every master diagram is exported as both a high-resolution PNG and a vector SVG. SVG is the preferred format for deep zoom, printing and Physical DB review.
-## Visual polish applied
+Engineering supporting views are validated separately, including Current Local Docker, async Outbox/Redis, Production Target, and `11-cloud-docker-deployment.drawio`.
 
-### C0 - System Context
-- Kept Guest, Member, Administrator, the single LDC software system, and the direct optional Local AI external dependency.
-- Re-routed all actor relationships using deliberate right-angle lanes.
-- Moved labels away from connector strokes.
-- Increased arrowhead clarity and kept the warm system card as the focal point.
+## Current architecture truth
 
-### C1 - Container Architecture
-- Rebuilt the page as a target web-only architecture using the supplied image only as a spacing/hierarchy reference, not as copied content.
-- Kept only project-owned deployable/runtime containers: Web, REST API, Recommendation gRPC, SQL Server, Background Worker, and logical Application Event Streams implemented with Redis 7 Streams.
-- Explicitly excludes the reference team's Mobile App, Cloudinary, RabbitMQ, Brevo, Google AI, split microservices, and split databases.
-- Increased container typography and internal padding while shortening descriptions so the whole view is readable at one glance.
-- Separated Guest/Member/Administrator HTTPS lanes and kept every connector orthogonal.
-- Separated Worker publish and event-delivery lanes and moved REST, gRPC, EF Core, Redis, and optional-AI labels into dedicated whitespace.
-- Relationship labels now match arrow direction; `XREADGROUP`/`XACK` command direction is left to the Dynamic view instead of being mislabeled on a reverse data-flow arrow.
-- Preserved SQL Server cylinder notation, a warm system boundary, and an external dashed optional-AI card.
-- Corrected the message-based C4 abstraction: logical streams/queues are containers/data stores; the Redis broker/server is not modelled as a C4 container.
-### Conceptual ERD
-- Increased entity title/body text.
-- Simplified the page to business concepts only.
-- Re-routed multi-segment relationships with orthogonal waypoints.
-- Removed text/connector collisions detected by geometry lint.
-- Kept technical messaging/tokens out of the conceptual view.
+- C0 = C4 System Context: Guest, Member, Administrator, Longevity Diet Companion, optional external Local AI Runtime.
+- C1 = **ADR-005 Target Architecture**, not Current Runtime.
+- Target C1 includes Web Application, YARP API Gateway, four REST domain services, Recommendation Service, Background Worker, six service-owned logical databases, Event Streams and optional Local AI.
+- Current Docker Compose remains a separate Deployment view until the target service/database split is implemented.
+- Redis Streams remains the selected message broker. Kafka is permitted by the Assignment but is not part of this project's architecture.
 
-### Physical Database
-- Increased table body and section-heading typography.
-- Kept cross-domain FK information inside table fields to avoid spaghetti lines.
-- Re-routed local FK connectors orthogonally.
-- Shows the full 33-table Target Assignment MVP, grouped into Identity/Profile, Catalog/Rules, Planning/Tracking, Progress/Engagement/Safety, and Messaging/Reliability/Operations.
+## One-glance presentation gates
 
-## Automated checks
-The Assignment validator now runs geometry lint before PNG export and also rejects:
-- non-orthogonal edge styles;
-- curved connectors;
-- inconsistent arrowhead style/size;
-- malformed XML;
-- encoding artifacts;
-- missing required C4 DSL relationships;
-- connector intersections with unrelated boxes;
-- text/connector intersections and diagonal segments;
-- missing required Assignment document sections/mandatory technologies;
-- missing any of the 33 Target MVP physical database tables;
-- missing required C0/C1 project elements/protocol labels;
-- accidental leakage of sample-image-only components (Mobile App, Cloudinary, Brevo, RabbitMQ, Google AI, Diet Service, Identity Service, Progress Service).
+- C0 page: `1800x1000`, minimum explicit typography `13px`.
+- C1 page: `2800x1600`, minimum explicit typography `12px`.
+- Both are compact landscape frames; page size validation rejects a return to the former oversized C1 canvas.
+- C1 box copy is limited to name, C4 type, technology/port and one short responsibility.
+- Ports/protocols retained: :443, :8080-:8086, :1433, :6379 and optional :11434; Planning -> Recommendation explicitly uses gRPC / HTTP/2 :8085.
 
-The canonical `workspace.dsl` now contains System Context, Container, API Component, two Dynamic views, and the Local Demo Deployment model. Static DSL checks pass. A previous validation run had returned Structurizr CLI exit code 0; on the 2026-10-05 audit run, Docker Desktop was not running, so the validator truthfully skipped the live CLI step rather than reporting a false PASS. Physical DB coverage remains **33/33 tables**.
+## Geometry and semantic QA
+
+Automated gates reject:
+1. non-orthogonal/diagonal connector segments;
+2. connector/text and connector/unrelated-box intersections;
+3. connector crossings/overlaps in canonical geometry;
+4. curved connectors or inconsistent arrowheads;
+5. malformed XML/encoding artifacts;
+6. missing target services, six owned databases, required ports/protocols or Event Streams;
+7. C0 implementation-detail leakage;
+8. sample-image contamination such as Mobile App, Cloudinary, RabbitMQ, Brevo or Google AI;
+9. missing 33-table Target MVP physical-database coverage;
+10. Structurizr C0/C1/deployment relationship regressions.
+
+`Validate-AssignmentDiagrams.ps1` currently passes geometry, one-glance readability, PNG/SVG export, 33/33 physical tables, C4 semantics and live Structurizr Docker validation.
+
+## Advanced SVG checker interpretation
+
+The vendored SVG heuristic checker is used as a second opinion, not as a replacement for canonical draw.io geometry lint and rendered-image review. It can report false positives where:
+- an exported UML actor's own strokes meet its legitimate connector;
+- draw.io renders a short terminal segment immediately before an arrowhead;
+- its inferred label rectangle differs from the rendered text position.
+
+Such findings are not silently ignored: each changed PNG is inspected full-frame. Real label/corridor findings were moved in the generator. On the final C1 export, the checker reports 9 heuristic-only findings: 3 actor-stroke contacts and 6 cylinder/terminal-shape findings; there are no remaining `edge-label`, `text-overflow`, or real connector-crossing findings. These known actor/cylinder heuristics are recorded rather than distorting the diagram solely to satisfy the checker.
+
+## Visual review
+
+### C0
+- All three actors, the in-scope system and optional Local AI are identifiable without local zoom.
+- Relationship labels sit in whitespace and C0 contains no ports/implementation technologies.
+- External dependency remains outside the system boundary.
+
+### C1 Target
+- Top-to-bottom reading order: actors -> Web -> Gateway -> domain services -> owned databases/support lane -> Event Streams.
+- Service/database ownership pairs are visually recognizable.
+- Recommendation/Worker have their own owned databases.
+- Event Streams visibly has representative publish/read lanes; the full Tracking -> Event Streams relationship remains in Structurizr and `06-outbox-redis-dynamic.drawio`, where XADD/XREADGROUP/XACK ordering is shown without overloading C1.
+- Local AI stays external and optional.
+
+## Deployment/async supporting QA
+
+`11-cloud-docker-deployment.drawio` answers the lecturer's deployment questions without overloading C1:
+- Cloud Provider / IaaS -> Virtual Machine -> Docker Engine -> Docker Compose -> private `ldc-network`.
+- Docker service DNS is the internal discovery mechanism.
+- Only HTTPS :443 is public; :8080-:8086, SQL :1433 and Redis :6379 remain private.
+- `sql-data` mounts `/var/opt/mssql`; `redis-data` mounts `/data` with AOF.
+- Named-volume data is shown on the VM persistent cloud disk rather than the container writable layer.
+
+`06-outbox-redis-dynamic.drawio` shows the async sequence: local business transaction + Outbox -> XADD -> Redis Streams -> XREADGROUP -> Worker idempotency/job state -> XACK/result/dead-letter. Worker does not own or write another service's domain database.
 
 ## Completion condition
-The Assignment pack is considered final only when geometry lint passes with zero findings, all four PNG previews export successfully, the required documentation/technology checks pass, Physical DB coverage is 33/33, and the static `workspace.dsl` checks pass; live Structurizr CLI validation is additionally required whenever Docker/Structurizr is available.
+
+Architecture documentation is accepted only when Assignment validation, engineering architecture validation, project-structure/task alignment validation, rendered-image review and repository verification all pass, and no document falsely presents Target Architecture as already deployed.

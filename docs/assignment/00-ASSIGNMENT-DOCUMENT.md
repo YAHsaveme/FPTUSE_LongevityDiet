@@ -80,62 +80,85 @@ The official C4 model calls these views **System Context** and **Container**. Th
 
 ![C1 Container Architecture](previews/02-c1-container-architecture.png)
 
-**Purpose:** zoom into the LDC software-system boundary and show the target deployable/runnable applications, data stores and runtime communication for the completed Assignment MVP. The product is web-only; there is no Mobile App container.
+**Status:** approved **Target Architecture** from ADR-005. It is intentionally not presented as the Current Runtime until code and Docker Compose are migrated.
 
-| Container | Technology | Responsibility |
+**Purpose:** show target deployable applications/data stores, ownership boundaries and communication while keeping the C1 view readable at one glance. The product is web-only; there is no Mobile App container.
+
+| Container | Technology / port | Owned data | Responsibility |
+|---|---|---|---|
+| **Web Application** | React + TypeScript / HTTPS :443 | None | Browser UI |
+| **API Gateway** | YARP + .NET 9 / :8080 behind public :443 | None | Routing and edge policy |
+| **Identity & Profile Service** | ASP.NET Core / REST :8081 | LongevityIdentityDb | Auth/profile |
+| **Catalog & Rules Service** | ASP.NET Core / REST :8082 | LongevityCatalogDb | Catalog/rules |
+| **Planning Service** | ASP.NET Core / REST :8083 | LongevityPlanningDb | Plans/challenge/FMD |
+| **Tracking & Progress Service** | ASP.NET Core / REST :8084 | LongevityTrackingDb | Logs/LDAS/progress |
+| **Recommendation Service** | .NET gRPC / HTTP/2 :8085 | LongevityRecommendationDb | Safety/ranking |
+| **Background Worker** | .NET Worker + Ops :8086 | LongevityWorkerDb | Async jobs/reports |
+| **Event Streams** | Redis 7 Streams :6379 | Redis persistence | Integration events |
+| **Optional Local AI Runtime** | external HTTP :11434 | External | Explanation rewrite only |
+
+Each business service connects only to its owned logical database through **EF Core / TDS :1433**. For assignment/cloud cost efficiency, the six logical databases may share one physical SQL Server instance without weakening ownership boundaries.
+
+### 6.3 Core Target Relationships
+
+| Source | Destination | Protocol / intent |
 |---|---|---|
-| **Web Application** | React 19, TypeScript, Vite, Nginx | SPA UI; serves assets; reverse-proxies `/api` requests. |
-| **REST API** | ASP.NET Core .NET 9 | JWT; REST/JSON endpoints; business orchestration; EF Core; gRPC client. |
-| **Recommendation Service** | ASP.NET Core gRPC .NET 9 | Hard safety filters; deterministic ranking; reason codes. |
-| **SQL Server** | SQL Server 2022 + EF Core | Primary system of record and transactional Outbox. |
-| **Background Worker** | .NET 9 Worker Service | Outbox publisher; Redis consumers; reminders; recalculation; weekly jobs. |
-| **Application Event Streams** | Redis 7 Streams | Logical queue/topic-style data stores for asynchronous domain/notification events, consumer-group processing, acknowledgement, retry and dead-letter handling. |
-| **Optional Local AI Runtime** | Local LLM / Ollama-style HTTP API | Optional explanation rewrite only; deterministic ranking, safety constraints and LDAS remain authoritative. |
+| Actor / browser | Web Application | HTTPS :443 |
+| Web Application | API Gateway | HTTPS/REST :443 public edge; :8080 internal listener |
+| API Gateway | Identity / Catalog / Planning / Tracking | REST :8081 / :8082 / :8083 / :8084 |
+| API Gateway | Worker operations | REST/Ops :8086, Admin only |
+| Planning Service | Recommendation Service | gRPC / HTTP/2 :8085 |
+| Each business service | Its owned database | EF Core / TDS :1433 |
+| Domain services | Event Streams | Redis Streams / XADD :6379 |
+| Background Worker | Event Streams | XREADGROUP / XACK / result or dead-letter :6379 |
+| Recommendation Service | Event Streams | approved snapshot-event consumer when required |
+| Recommendation Service | Optional Local AI Runtime | HTTP :11434, explanation only |
 
-### 6.3 Core Runtime Relationships
+The Final Assignment permits **Kafka or Redis Pub/Sub/Streams** for the message-broker requirement. This project deliberately selects **Redis Streams** (ADR-002); Kafka is an allowed alternative, not part of this architecture.
 
-| Source | Destination | Technology / intent |
-|---|---|---|
-| Browser / actor | Web Application | HTTPS |
-| Web Application | REST API | HTTPS + REST/JSON |
-| REST API | SQL Server | EF Core / TDS - business state + Outbox |
-| REST API | Recommendation Service | gRPC / HTTP2 |
-| Background Worker | SQL Server | EF Core / TDS - read Outbox + write async results |
-| Background Worker | Application Event Streams | Redis Streams XADD - publish pending events |
-| Application Event Streams | Background Worker | Redis Streams XREADGROUP + XACK - consume/acknowledge |
-| REST API | Optional Local AI Runtime | Local HTTP/JSON - optional explanation rewrite only |
 ### 6.4 Architecture Invariants
 
 - Browser never connects directly to SQL Server, Redis or gRPC.
-- API internal **Controller -> Service -> Repository** layers are not separate C1 containers.
-- API does not dual-write SQL + Redis in the request path.
-- Business state and `OutboxMessage` are committed in one SQL transaction.
-- Worker publishes pending Outbox messages to logical Application Event Streams implemented with Redis 7 Streams.
-- The C4 model represents the logical streams/queues as containers (data stores), not the Redis broker/server itself.
-- Consumers are idempotent through `ProcessedEvent`.
-- Recommendation ranking and safety constraints are deterministic.
-- Optional AI may explain existing reasons only; it cannot override safety/ranking.
+- Web reaches backend services only through the API Gateway.
+- No service reads another service's database; no cross-service SQL joins/FKs.
+- Business state and an Outbox record are committed locally before event publication.
+- Consumers are idempotent by EventId and acknowledge only after successful processing.
+- Event Streams is a logical C4 queue/topic-style data store; Redis server placement belongs to Deployment views.
+- Recommendation ranking/safety are deterministic; optional AI cannot override them.
+- Current Runtime and Target Architecture are documented separately.
 
-### 6.5 Main Flows
+### 6.5 Main Target Flows
 
 **Synchronous:**  
-`React -> REST API -> Service -> Repository -> SQL Server`
+`Browser -> Web -> API Gateway -> owning REST service -> owned SQL database`
 
 **Recommendation:**  
-`React -> REST API -> gRPC Client -> Recommendation Service -> ranked result -> REST DTO -> React`
+`Web -> API Gateway -> Planning -> gRPC/HTTP2 -> Recommendation -> ranked result`
 
 **Asynchronous:**  
-`REST API -> SQL + Outbox -> Worker publisher -> Redis Streams -> Worker consumer -> ProcessedEvent / async result`
+`Owning service -> business state + Outbox -> XADD Redis Stream -> Worker XREADGROUP -> idempotent work -> XACK / result event`
+
+### 6.6 Supporting Deployment and Dynamic Views
+
+C0 and C1 remain the two required Assignment architecture levels. Supporting views answer lecturer questions without overloading C1:
+
+- `docs/architecture/03-docker-deployment.drawio` - **Current Local Docker Compose** topology.
+- `docs/architecture/06-outbox-redis-dynamic.drawio` - transactional Outbox and Redis Streams sequence (`XADD`, `XREADGROUP`, `XACK`, dead-letter).
+- `docs/architecture/10-production-secure-deployment.drawio` - secure Production Target placement.
+- `docs/architecture/11-cloud-docker-deployment.drawio` - **Cloud Docker Target**: cloud VM -> Docker Engine -> Docker Compose -> private `ldc-network`.
+
+For the Cloud Docker Target, only **HTTPS :443** is public. Containers resolve each other through Docker **service DNS** on the private network. SQL Server :1433 and Redis :6379 remain private. SQL data is mounted to Docker named volume `sql-data` at `/var/opt/mssql`; Redis data is mounted to `redis-data` at `/data` with AOF. Those named volumes are Docker-managed on the VM's **persistent cloud disk**, so recreating a container does not by itself delete persisted volume data.
 
 ## 7. Technology
 
 | Area | Technology |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, Nginx |
-| REST API | ASP.NET Core .NET 9 |
-| Application layer | .NET Services |
-| Persistence | EF Core 9 |
-| Database | SQL Server 2022 |
+| Frontend / Web Edge | React 19, TypeScript, Vite, Nginx |
+| API Gateway | YARP + ASP.NET Core .NET 9 |
+| Domain REST services | ASP.NET Core .NET 9 (:8081-:8084) |
+| Application layer | .NET Services inside each owning service |
+| Persistence | EF Core 9 per service |
+| Database | SQL Server 2022; six owned logical DBs may share one physical instance |
 | Recommendation | ASP.NET Core gRPC .NET 9 |
 | Messaging | Redis 7 Streams |
 | Background processing | .NET 9 Worker Service |
