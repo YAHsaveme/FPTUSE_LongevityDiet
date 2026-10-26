@@ -5,6 +5,13 @@
 **Branch:** `feature/w2-t4-app-ux-integration`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target owners:** Web Application + API Gateway.
+- **Communication:** browser uses HTTPS :443; all backend API calls pass through Gateway; browser never calls internal services, gRPC, SQL or Redis directly.
+- **UX rule:** route/service errors are presented consistently without exposing internal service topology to the user.
+
+
 ## Mục tiêu
 
 Tích hợp các page thành một application thống nhất, responsive, accessible và có error/loading/validation behavior nhất quán.

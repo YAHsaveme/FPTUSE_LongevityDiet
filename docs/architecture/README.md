@@ -15,6 +15,7 @@ This folder contains engineering C4/supporting views for Longevity Diet Companio
 6. `06-outbox-redis-dynamic.drawio` - Target per-service Outbox/Redis collaboration.
 7-9. PRN232 coverage/demo support views.
 10. `10-production-secure-deployment.drawio` - Production Target placement/security view.
+11. `11-cloud-docker-deployment.drawio` - Cloud Docker Target: IaaS VM, Docker Engine/Compose, private service DNS/network, SQL/Redis named volumes and persistent disk.
 
 ## Target C1 rules
 - Public HTTPS :443 -> Web/API Gateway edge.

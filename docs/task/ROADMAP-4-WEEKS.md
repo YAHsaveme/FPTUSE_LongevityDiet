@@ -24,12 +24,16 @@
 
 ## Integration strategy
 
-1. Không phá baseline Week 1 Task 1 đã pass.
-2. Ưu tiên dependency theo vertical slice thay vì làm từng layer rời rạc.
-3. Contract dùng chung phải freeze sớm trong tuần.
-4. Mỗi task merge qua review chéo trước khi integration cuối tuần.
-5. Cuối mỗi tuần chạy build/test + frontend build + Docker smoke phù hợp.
-6. Week 4 là feature freeze: chỉ hoàn thiện blocker, hardening, regression và submission.
+1. Không phá baseline Week 1 Task 1 đã pass; migration của baseline phải đi vào **Identity & Profile Service / LongevityIdentityDb** mà không đổi public behavior.
+2. **ADR-005 Target Architecture là source of truth cho mọi task mới.** Ownership chi tiết nằm ở `ARCHITECTURE-ALIGNMENT-MATRIX.md`.
+3. New domain logic không được làm tăng coupling vào REST API/shared DbContext cũ; transitional adapters chỉ dùng trong quá trình migration.
+4. Week 1 bootstrap phải freeze YARP Gateway, service boundaries, service-owned databases, public route compatibility và event contracts trước khi feature branches diverge.
+5. Ưu tiên dependency theo vertical slice thay vì làm từng layer rời rạc.
+6. Contract dùng chung phải freeze sớm trong tuần.
+7. Mỗi task merge qua review chéo trước khi integration cuối tuần.
+8. Cuối mỗi tuần chạy build/test + frontend build + Docker smoke phù hợp.
+9. Week 4 là feature freeze: chỉ hoàn thiện blocker, hardening, regression và submission.
+10. Không được claim Target C1 đã deploy nếu target Gateway/services/databases chưa tồn tại trong runtime/Compose; khi đó phải ghi rõ Current Runtime vs Target.
 
 ## Success criteria sau 4 tuần
 

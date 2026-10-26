@@ -5,6 +5,13 @@
 **Branch:** `feature/w4-t1-hardening`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Scope:** API Gateway + every target service + Worker.
+- **DI/data rule:** each service-specific DbContext is scoped and accesses only its owned logical DB; the old `LongevityDietDbContext` rule applies only to Current Runtime during migration.
+- **Trace rule:** propagate correlation across Gateway -> REST/gRPC and service Outbox -> Redis -> Worker.
+
+
 ## Mục tiêu
 
 Hardening toàn hệ thống trước release để auth/ownership, DI lifetime, dependency failure, error contract, tracing và performance có behavior rõ ràng và có evidence.
@@ -24,7 +31,7 @@ Hardening toàn hệ thống trước release để auth/ownership, DI lifetime,
 ## Dependency Injection quality gate
 
 - Dependency được constructor-inject, không service-locator tùy tiện.
-- `LongevityDietDbContext` là scoped.
+- Current Runtime: `LongevityDietDbContext` vẫn scoped trong giai đoạn migration. Target Architecture: mỗi service có DbContext riêng, scoped, và chỉ connect database mà service đó sở hữu.
 - Singleton không capture scoped dependency.
 - Worker tạo DI scope cho scoped unit-of-work.
 - Typed gRPC client đăng ký tập trung.

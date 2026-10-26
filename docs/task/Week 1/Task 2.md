@@ -5,6 +5,14 @@
 **Branch:** `feature/w1-t2-catalog-rules`  
 **Status:** Not Started
 
+## Architecture alignment (ADR-005)
+
+- **Target owner:** Catalog & Rules Service (`REST :8082`) behind API Gateway.
+- **Owned data:** `LongevityCatalogDb` only.
+- **Async contract:** publish catalog/rule-version events for downstream copied read models; do not let Planning/Recommendation read CatalogDb directly.
+- **Implementation rule:** new catalog/rule logic belongs to this service boundary, not the transitional shared REST API.
+
+
 ## Mục tiêu
 
 Tạo data foundation thật cho meal planning, recommendation, LDAS và admin; đồng thời chứng minh phần REST CRUD + search/filter/sort/pagination của rubric PRN232 bằng contract rõ và test được.

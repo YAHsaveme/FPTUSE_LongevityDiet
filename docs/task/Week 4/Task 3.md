@@ -5,6 +5,13 @@
 **Branch:** `feature/w4-t3-regression-evidence-demo`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Evidence chain:** C0 -> C1 Target -> Current/Cloud Deployment -> Recommendation/Outbox Dynamic views.
+- **Protocol evidence:** HTTPS :443, REST :8081-:8084, gRPC/HTTP2 :8085, Ops :8086, TDS :1433, Redis Streams :6379.
+- **Truth rule:** never claim a target container/database is implemented without runtime evidence.
+
+
 ## Mục tiêu
 
 Chứng minh release candidate đúng bằng automated regression, rubric evidence có trọng số và một final demo repeatable đúng 7 mục PDF.
@@ -17,8 +24,8 @@ Test matrix tối thiểu:
 3. Search/filter/sort/pagination.
 4. Generate plan + meal log/eating window.
 5. Activity + LDAS + challenge + dashboard.
-6. REST -> gRPC recommendation + replacement.
-7. Outbox -> Redis -> Worker.
+6. Web -> API Gateway -> Planning -> Recommendation `gRPC/HTTP2 :8085` + replacement.
+7. Owning-service Outbox -> `XADD` Redis Streams -> Worker `XREADGROUP/XACK` -> result event/owning-service persistence.
 8. Reminder/notification/weekly report.
 9. FMD safety block.
 10. Admin rule governance/audit.
@@ -39,8 +46,8 @@ Rules:
 | REST API implementation | 20% | CRUD + layered architecture + JWT + REST semantics + query features + Swagger |
 | Background Job | 10% | Worker scheduled/async business job + persisted result |
 | Message Broker integration | 15% | Redis producer/consumer + ACK/idempotency/recovery |
-| gRPC service | 15% | independent gRPC + REST -> gRPC trace/result |
-| Docker/Cloud deployment | 10% | clean Docker Compose + health + communication |
+| gRPC service | 15% | independent Recommendation gRPC + Planning -> gRPC/HTTP2 :8085 trace/result |
+| Docker/Cloud deployment | 10% | Current Local + Cloud Docker Target views, target Compose runtime, health, service DNS, private ports and volume persistence |
 | Documentation and presentation | 10% | README/docs/evidence + rehearsed presentation |
 | **Total** | **100%** | không được thiếu mandatory evidence |
 
@@ -68,6 +75,8 @@ Một demo flow nên chứng minh nhiều rubric item liên tục thay vì nhả
 
 ## Demo rehearsal
 
+- Architecture segment đi theo thứ tự: **C0 -> C1 Target -> Current Local / Cloud Docker Deployment -> Outbox Redis Dynamic**, không nhảy lẫn abstraction level.
+- Khi trình bày Cloud Docker, chỉ rõ `ldc-network`, Docker service DNS, `sql-data -> /var/opt/mssql`, `redis-data -> /data (AOF)` và Persistent Disk.
 - Synthetic stable demo data.
 - Main flow time-boxed.
 - Người điều khiển/nói từng segment rõ.

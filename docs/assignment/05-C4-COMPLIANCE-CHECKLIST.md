@@ -50,7 +50,17 @@ Validators check:
 - Structurizr static checks and live validation when available.
 
 ## 7. Visual QA
-At normal zoom: no label touches a connector; no connector crosses a box; each service/database pair is obvious; Gateway placement is unambiguous; Event Streams is visibly connected; text remains minimal.
+- C0 is constrained to 1800x1000 with minimum explicit typography 13px.
+- C1 is constrained to 2800x1600 with minimum explicit typography 12px.
+- At normal full-frame scale: service names, owned DBs, ports and arrow directions remain identifiable without zooming into individual areas.
+- No canonical geometry connector crosses an unrelated box; Gateway placement is unambiguous; Event Streams is visibly connected; text remains minimal.
+- Supporting Deployment/Dynamic views carry Docker, cloud persistence and XADD/XREADGROUP/XACK details instead of bloating C1.
 
-## 8. Sources
+## 8. Cloud Docker supporting check
+- Cloud Provider/IaaS -> VM -> Docker Engine -> Docker Compose -> private `ldc-network`.
+- Only HTTPS :443 public; service/SQL/Redis ports private and discoverable by Docker service DNS.
+- SQL `sql-data -> /var/opt/mssql`; Redis `redis-data -> /data (AOF)`; both persist on VM persistent disk.
+- This is a **Target** supporting view; Current Local Deployment remains separate.
+
+## 9. Sources
 Official C4 Model, diagrams.net guidance, Microsoft .NET microservices/data-ownership and API Gateway/YARP guidance, Redis Streams documentation, Architecture Decision Studio lecturer guidance, and reviewed project-local architecture skills.

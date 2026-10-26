@@ -5,18 +5,27 @@
 **Branch:** `feature/w3-t2-report-worker-reliability`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target owners:** Tracking & Progress Service owns `WeeklyReport` in `LongevityTrackingDb`; Background Worker owns only job/retry/idempotency state in `LongevityWorkerDb`.
+- **Async flow:** Worker computes asynchronously and emits result; Tracking persists the domain result.
+- **Guardrail:** Worker never reads/writes TrackingDb directly in the target architecture.
+
+
 ## Mục tiêu
 
 Tạo weekly summary có business value đồng thời đưa async pipeline lên mức có retry, recovery và idempotency đáng tin cậy.
 
 ## Weekly report
 
-- WeeklyReport, WeeklyReportMetric, generation version/status.
-- Input: activity summary, LDAS trend, eating window, challenge, logging consistency.
-- Worker generate theo local week boundary.
+- `WeeklyReport`, `WeeklyReportMetric`, generation version/status thuộc Tracking & Progress Service / `LongevityTrackingDb`.
+- Input: activity summary, LDAS trend, eating window, challenge, logging consistency qua approved event/read-model contract.
+- Worker schedule/compute job theo local week boundary bằng state trong `LongevityWorkerDb`, sau đó publish `WeeklyReportGenerated`/result event.
+- Tracking & Progress Service consume result event và persist `WeeklyReport` vào `LongevityTrackingDb`.
 - Idempotent key: User + Week + ReportVersion.
 - Historical report không bị rewrite âm thầm.
 - API list/detail/current status + UI report page.
+- Worker không query/write `LongevityTrackingDb` trực tiếp.
 
 ## Worker reliability
 

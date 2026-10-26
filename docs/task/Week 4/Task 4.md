@@ -5,6 +5,13 @@
 **Branch:** `release/w4-final`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Final consistency gate:** README, C0/C1, ADRs, Docker/Cloud views, Compose, task docs and runtime must describe the same architecture state.
+- **Stale-doc gate:** remove/qualify old shared REST API/shared DB wording where it conflicts with Target C1.
+- **Submission rule:** keep Current Runtime vs Target Architecture explicit until target deployment evidence exists.
+
+
 ## Mục tiêu
 
 Đóng release dưới feature freeze: sửa blocker có kiểm soát, hoàn tất đúng deliverables PDF, đồng bộ tài liệu với implementation và tạo clean submission.
@@ -44,7 +51,7 @@ Các command trong README phải chạy được; không để instruction stale
 
 - Root README.
 - `docs/05-SYSTEM-ARCHITECTURE.md`.
-- Architecture C0/C1/deployment diagrams.
+- Architecture C0/C1 plus Current Local, Production Target, **Cloud Docker Target** and async Dynamic supporting diagrams.
 - ADRs.
 - API/gRPC/events.
 - DB design.
@@ -91,7 +98,8 @@ Không xóa:
 - fresh SQL migration.
 - Swagger/OpenAPI.
 - Docker Compose config/runtime smoke.
-- 6-service communication matrix.
+- **Target communication matrix** từ W4-T2: Gateway, 4 domain services, Recommendation, Worker, SQL/Redis, service DNS/private ports và named-volume persistence.
+- Architecture-state consistency: không claim Target C1 đã deploy nếu Compose/runtime chưa có đủ target containers/databases.
 - 7/7 demo checklist.
 - file links/diagram export.
 - no-secret scan.

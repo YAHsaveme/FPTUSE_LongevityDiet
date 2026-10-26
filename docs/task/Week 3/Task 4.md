@@ -5,6 +5,13 @@
 **Branch:** `feature/w3-t4-rule-governance-audit`
 **Status:** Planned
 
+## Architecture alignment (ADR-005)
+
+- **Target owner:** Catalog & Rules Service owns rule lifecycle/provenance in `LongevityCatalogDb`.
+- **Audit ownership:** each domain keeps its own domain audit; WorkerDb may keep operational event/job diagnostics.
+- **Integration:** cross-domain review evidence travels by API/events; no central component writes foreign service databases.
+
+
 ## Mục tiêu
 
 Đưa rule/safety/admin flow từ CRUD thành lifecycle có provenance, review, version và audit để historical result luôn truy vết được.

@@ -5,6 +5,14 @@
 **Branch:** `feature/w1-t4-distributed-slice`  
 **Status:** Not Started
 
+## Architecture alignment (ADR-005)
+
+- **Target owners:** API Gateway, Recommendation Service (`gRPC/HTTP2 :8085`), Background Worker (`Ops :8086`) and Event Streams (`Redis :6379`).
+- **Owned data:** `LongevityRecommendationDb` and `LongevityWorkerDb`; each domain service keeps its own Outbox in its own database.
+- **Critical rule:** the Outbox publisher belongs to the same service boundary as the Outbox it reads. Background Worker must not poll another service database.
+- **Flow:** owning service commits state + Outbox -> `XADD` -> Worker `XREADGROUP` -> WorkerDb idempotency/job state -> `XACK` / result event.
+
+
 ## Mục tiêu
 
 Hoàn thành sớm vertical slice thật cho **gRPC + Message Broker + Background Worker**, ba phần bắt buộc có trọng số cao của PRN232.
@@ -47,19 +55,22 @@ Rules:
 
 ## Redis Streams producer
 
-- Poll pending outbox.
-- `XADD`.
-- EventId/CorrelationId.
+- Publisher chạy **bên trong service boundary sở hữu Outbox** (ví dụ hosted background publisher của Tracking/Planning/Catalog/Identity), không phải central Worker đọc database của service khác.
+- Chỉ poll pending Outbox của **chính service/database đang sở hữu publisher**.
+- `XADD` lên Redis Streams :6379.
+- EventId/CorrelationId/schema version.
 - Mark published sau khi broker operation thành công.
 - Bounded retry/backoff.
 - Failure không làm mất Outbox row.
+- Background Worker tuyệt đối không poll `LongevityIdentityDb`, `LongevityCatalogDb`, `LongevityPlanningDb` hoặc `LongevityTrackingDb` để lấy Outbox.
 
 ## Redis Streams consumer
 
 - Consumer group + `XREADGROUP`.
-- `ProcessedEvent` idempotency.
-- Persist business side effect.
-- `XACK` chỉ sau successful processing.
+- `ProcessedEvent` idempotency trong `LongevityWorkerDb` cho Worker-owned processing state.
+- Worker chỉ persist job/retry/idempotency/operational side effect thuộc `LongevityWorkerDb`.
+- Nếu kết quả business thuộc domain khác, Worker publish **result event**; service sở hữu domain consume event và persist vào database của chính nó.
+- `XACK` chỉ sau successful processing/persistence hoặc sau khi result event đã được phát hành theo contract đáng tin cậy.
 - Pending-entry visibility.
 - Retry + dead-letter/recovery path.
 - Stale pending entry có recovery strategy (`XPENDING` + claim/auto-claim hoặc tương đương).
@@ -105,17 +116,17 @@ Consumer không được chỉ log message. Phải tạo business side effect c�
 - Real proto + independent gRPC service.
 - API typed gRPC client.
 - Recommendation UI thin slice.
-- Outbox/ProcessedEvent schema.
+- Service-owned Outbox schema/publisher + Worker-owned `ProcessedEvent`/job state.
 - Redis producer/consumer group.
-- Worker business processor.
+- Worker business processor + result-event contract cho domain-owned result.
 - Health/log evidence.
 - Distributed E2E evidence.
 
 ## Definition of Done
 
 Demo lặp lại được:
-1. REST -> gRPC -> ranked recommendation -> UI.
-2. Business action -> SQL + Outbox -> Redis -> Worker -> persisted result.
+1. Web -> API Gateway -> Planning -> gRPC/HTTP2 :8085 -> Recommendation -> ranked result -> UI.
+2. Owning service business action -> own SQL + Outbox -> `XADD` Redis -> Worker `XREADGROUP`/idempotency -> `XACK`/result event -> owning service persists domain result.
 3. Controlled failure/restart không làm mất event hoặc double side effect.
 
 Rubric evidence phải đủ để giảng viên nhìn thấy riêng: gRPC interaction, producer, consumer và BackgroundService.

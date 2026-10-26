@@ -19,11 +19,16 @@ Produce teacher-ready C0/C1 architecture diagrams for Longevity Diet Companion t
 
 ## C1 contract
 - Official C4 level: Container.
-- Show runtime applications and data stores only.
-- Current required containers: Web Application, REST API, Recommendation Service, Background Worker, SQL Database, Event Streams.
-- Direct external system: Local AI Runtime, optional.
-- Show communication technology on inter-container relationships: REST/HTTPS, gRPC/HTTP/2, EF Core/TDS, Redis Streams, HTTP/JSON.
-- Do not put Controller, Service, Repository, DbContext, middleware, or classes in C1; those belong in Component/Code views.
+- The Assignment C1 is the approved **Target Architecture** from ADR-005; it must never be described as the Current Runtime until the code and Docker topology are migrated.
+- Required target containers: Web Application; YARP API Gateway; Identity & Profile Service; Catalog & Rules Service; Planning Service; Tracking & Progress Service; Recommendation Service; Background Worker; Event Streams.
+- Required owned logical databases: LongevityIdentityDb, LongevityCatalogDb, LongevityPlanningDb, LongevityTrackingDb, LongevityRecommendationDb, LongevityWorkerDb.
+- Direct external system: Local AI Runtime, optional and explanation-only.
+- Public edge: HTTPS :443. Internal target contracts: Gateway :8080; REST services :8081-:8084; Recommendation gRPC :8085; Worker ops :8086; Redis Streams :6379; SQL/TDS :1433; optional Local AI HTTP :11434.
+- Web reaches backend only through API Gateway. Planning reaches Recommendation through gRPC/HTTP/2. Every business service reaches only its owned database.
+- Event Streams is the logical Redis Streams queue/topic-style data store with explicit producers and consumers; do not model the Redis server itself as a C4 application container.
+- Current Docker Compose remains documented separately in the Local Deployment supporting view.
+- Show communication technology on inter-container relationships: HTTPS/REST, gRPC/HTTP/2, EF Core/TDS, Redis Streams, HTTP/JSON.
+- Do not put Controller, Service, Repository, DbContext, middleware, classes, Docker nodes, cloud hosts, or volume mounts in C1; those belong in Component/Deployment views.
 
 ## Text budget
 - English names only on architecture elements.
