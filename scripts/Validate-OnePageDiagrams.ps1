@@ -83,4 +83,6 @@ foreach($name in @('01-c0-system-context.drawio','02-c1-container-architecture.d
   }
   Write-Host "PASS MONO $name | RGB grayscale only ($($colors.Count) values)"
 }
-Write-Host 'PASS: All editable one-page Draw.io / DBML sources and monochrome exports validated.'
+& node (Join-Path $PSScriptRoot 'Validate-OnePageLayout.js')
+Assert ($LASTEXITCODE -eq 0) 'Collision/layout check failed: overlapping boxes or connectors'
+Write-Host 'PASS: One-page diagrams, monochrome styling, box clearance, routed edges and DBML tables verified.'

@@ -106,7 +106,7 @@ function create(name,w,h){
  g.edge(pub,redis,'',{exit:[.5,1],entry:[.28,0],color:C.orange,dashed:true});
  g.edge(redis,receiver,'',{exit:[.75,0],entry:[.5,1],color:C.orange,dashed:true});
  g.band('<b>EVENT / DATA OWNERSHIP</b>   Identity, Catalog, Planning, Tracking → Outbox → Redis → Worker / projected read models. Every service reads/writes ONLY its own logical database.',390,2720,5120,200,'#F0F5FB','#CAD7E6',30);
- g.band('<b>LEGEND:</b> Blue: presentation  ·  Navy: gateway/worker  ·  Purple: identity  ·  Coral: catalog  ·  Amber: planning  ·  Cyan: tracking  ·  Green: recommendation.<br/><b>Scope:</b> This is approved ADR-005 TARGET; current runtime still has a shared primary API and partial service separation.',140,3005,5630,165,'#F8FAFD','#DAE3EE',29);
+ g.band('<b>NOTATION:</b> Solid arrows = synchronous HTTPS / gRPC or owned SQL DB access. Dashed arrows = asynchronous Redis Streams events. All boxes use standard black/white drafting.<br/><b>Scope:</b> ADR-005 TARGET architecture; current runtime still uses a shared ASP.NET Core API and partial service separation.',140,3005,5630,165,'#F8FAFD','#DAE3EE',29);
  g.save('02-c1-container-architecture.drawio');
 }
 {

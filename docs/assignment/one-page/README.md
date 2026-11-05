@@ -26,6 +26,8 @@
 
 Open editable Draw.io sources with Draw.io Desktop or https://app.diagrams.net (File > Open From > Device). Open DBML in https://dbdiagram.io to modify tables/relations and use the DBML source to regenerate vector exports.
 
+**Windows/VS Code DBML viewer installed:** official `dbdiagram.dbdiagram-vscode` extension (v0.5.4, 2026-11-05). Open `06-database-target.dbml` in VS Code, then press `Ctrl+Shift+P` and choose **DBML: Open Preview to the Side** to view the interactive ERD. This keeps the schema local; importing it into the dbdiagram.io website is optional.
+
 All three Draw.io files have one large canvas. All five PDF files have **exactly one page**; zoom or print on a large landscape format (for example A0). A4 print will necessarily shrink a detailed ERD/C2, so use a digital viewer at high zoom instead.
 
 Regenerate **all editable source files and all PDF/PNG/SVG exports**, then validate them, from the project root:
