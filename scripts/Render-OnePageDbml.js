@@ -4,8 +4,16 @@
 */
 const fs=require('fs'),path=require('path');
 const root=path.resolve(__dirname,'..'),dest=path.join(root,'docs','assignment','one-page');
-const color={identity:'#7646AF',catalog:'#CF684C',planning:'#AD7622',tracking:'#088DA3',recommendation:'#36845D',worker:'#556B8E'};
-const bg={identity:'#F5F0FF',catalog:'#FFF2ED',planning:'#FFF6E7',tracking:'#ECF9FA',recommendation:'#EEF8F0',worker:'#F1F4FA'};
+// Standard engineering ERD: neutral black/white, sharp table boxes, local FK connectors.
+const color={identity:'#303030',catalog:'#303030',planning:'#303030',tracking:'#303030',recommendation:'#303030',worker:'#303030'};
+const bg={identity:'#FFFFFF',catalog:'#FFFFFF',planning:'#FFFFFF',tracking:'#FFFFFF',recommendation:'#FFFFFF',worker:'#FFFFFF'};
+function asGrayscale(svg){
+  return svg.replace(/#[0-9a-fA-F]{6}\b/g, (hex)=>{
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    const v=Math.round(.299*r+.587*g+.114*b).toString(16).padStart(2,'0').toUpperCase();
+    return '#'+v+v+v;
+  });
+}
 const X=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 function readDBML(file){
  const src=fs.readFileSync(path.join(dest,file),'utf8'),groups=new Map(),rel=[];
@@ -51,8 +59,8 @@ function render(file,output,title,sub){
   const row=isTarget?Math.floor(si/3):0,col=si%3;
   const gx=125+col*3150,gy=338+row*2820;
   const c=color[schema]||'#53789F',f=bg[schema]||'#EFF5FC';
-  put('<rect x="'+gx+'" y="'+gy+'" width="'+GW+'" height="'+GH+'" rx="26" fill="#FCFDFF" stroke="'+c+'" stroke-width="7"/>');
-  put('<rect x="'+gx+'" y="'+gy+'" width="'+GW+'" height="204" rx="26" fill="'+f+'" stroke="none"/>');
+  put('<rect x="'+gx+'" y="'+gy+'" width="'+GW+'" height="'+GH+'" fill="#FFFFFF" stroke="'+c+'" stroke-width="7"/>');
+  put('<rect x="'+gx+'" y="'+gy+'" width="'+GW+'" height="204" fill="'+f+'" stroke="none"/>');
   tx(gx+78,gy+87,schema.toUpperCase()+' DATABASE',63,c,700);
   tx(gx+78,gy+156,(isTarget?'TARGET · LOGICAL SQL SERVER DB':'CURRENT · EF CORE ENTITY DB')+'  |  '+groups.get(schema).length+' TABLES',36,'#526278');
   const list=groups.get(schema),cols=[[],[]];
@@ -94,8 +102,8 @@ function render(file,output,title,sub){
   const c=color[schema]||'#53789F',f=bg[schema]||'#EFF5FC';
   for(const t of tables){
    const {x,y,w,h}=pos[schema+'.'+t.name];
-   put('<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="16" fill="#FFFFFF" stroke="'+c+'" stroke-width="4"/>');
-   put('<path d="M'+(x+16)+' '+y+' H'+(x+w-16)+' Q'+(x+w)+' '+y+' '+(x+w)+' '+(y+16)+' V'+(y+100)+' H'+x+' V'+(y+16)+' Q'+x+' '+y+' '+(x+16)+' '+y+'" fill="'+c+'"/>');
+   put('<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="#FFFFFF" stroke="'+c+'" stroke-width="4"/>');
+   put('<rect x="'+x+'" y="'+y+'" width="'+w+'" height="100" fill="'+c+'"/>');
    tx(x+36,y+70,t.name,49,'#FFFFFF',700);
    let yy=y+139;
    t.cols.forEach((field,i)=>{
@@ -109,11 +117,11 @@ function render(file,output,title,sub){
   }
  }
  const legendY=isTarget?6045:3280;
- put('<rect x="140" y="'+legendY+'" width="9320" height="180" rx="16" fill="#F1F5FA" stroke="#D5DFEB" stroke-width="3"/>');
+ put('<rect x="140" y="'+legendY+'" width="9320" height="180" fill="#F7F7F7" stroke="#999999" stroke-width="3"/>');
  tx(180,legendY+62,'PK = PRIMARY KEY    |    FK = FOREIGN KEY (ONLY WITHIN SAME LOGICAL DB)    |    UQ = UNIQUE    |    ARROWS = LOCAL RELATIONSHIPS',34,'#29405A',700);
  tx(180,legendY+125,(isTarget?'TARGET OWNERSHIP PROPOSAL · '+nEdges+' SQL FK links · Cross-service IDs are scalar references, NOT relational joins.':'CURRENT EF CORE MODELS · '+nEdges+' modeled local FKs · SQL Server migrations are the source of ultimate physical truth.'),31,'#577086');
  put('</svg>');
- fs.writeFileSync(path.join(dest,output),markup.join('\n'),'utf8');
+ fs.writeFileSync(path.join(dest,output),asGrayscale(markup.join('\n')),'utf8');
  console.log(output,'groups',schemas.length,'tables',Object.keys(pos).length,'refs',nEdges,'size',W,H);
 }
 render('06-database-target.dbml','06-database-target-one-page.svg','LONGEVITYDIET  |  TARGET DATABASE ARCHITECTURE','DBML SOURCE  •  33 LOGICAL ENTITY TYPES  •  SIX SEPARATE DATABASE OWNERS  •  ONE VECTOR SHEET');

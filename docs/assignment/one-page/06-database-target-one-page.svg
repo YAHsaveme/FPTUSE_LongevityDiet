@@ -1,695 +1,695 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="9600" height="6360" viewBox="0 0 9600 6360">
-<defs><marker id="end" orient="auto" markerWidth="12" markerHeight="12" refX="9" refY="5"><path d="M0 0 L10 5 L0 10 Z" fill="#73839D"/></marker></defs>
+<defs><marker id="end" orient="auto" markerWidth="12" markerHeight="12" refX="9" refY="5"><path d="M0 0 L10 5 L0 10 Z" fill="#818181"/></marker></defs>
 <rect width="9600" height="6360" fill="#FFFFFF"/>
-<text x="145" y="128" font-family="Arial, sans-serif" font-size="89" font-weight="700" fill="#18304D" text-anchor="start">LONGEVITYDIET  |  TARGET DATABASE ARCHITECTURE</text>
-<text x="145" y="208" font-family="Arial, sans-serif" font-size="43" font-weight="400" fill="#61748B" text-anchor="start">DBML SOURCE  •  33 LOGICAL ENTITY TYPES  •  SIX SEPARATE DATABASE OWNERS  •  ONE VECTOR SHEET</text>
-<line x1="145" y1="258" x2="9450" y2="258" stroke="#CBD7E6" stroke-width="7"/>
-<rect x="125" y="338" width="3030" height="2670" rx="26" fill="#FCFDFF" stroke="#7646AF" stroke-width="7"/>
-<rect x="125" y="338" width="3030" height="204" rx="26" fill="#F5F0FF" stroke="none"/>
-<text x="203" y="425" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#7646AF" text-anchor="start">IDENTITY DATABASE</text>
-<text x="203" y="494" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#526278" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  7 TABLES</text>
-<rect x="3275" y="338" width="3030" height="2670" rx="26" fill="#FCFDFF" stroke="#CF684C" stroke-width="7"/>
-<rect x="3275" y="338" width="3030" height="204" rx="26" fill="#FFF2ED" stroke="none"/>
-<text x="3353" y="425" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#CF684C" text-anchor="start">CATALOG DATABASE</text>
-<text x="3353" y="494" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#526278" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  8 TABLES</text>
-<rect x="6425" y="338" width="3030" height="2670" rx="26" fill="#FCFDFF" stroke="#AD7622" stroke-width="7"/>
-<rect x="6425" y="338" width="3030" height="204" rx="26" fill="#FFF6E7" stroke="none"/>
-<text x="6503" y="425" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#AD7622" text-anchor="start">PLANNING DATABASE</text>
-<text x="6503" y="494" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#526278" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  7 TABLES</text>
-<rect x="125" y="3158" width="3030" height="2670" rx="26" fill="#FCFDFF" stroke="#088DA3" stroke-width="7"/>
-<rect x="125" y="3158" width="3030" height="204" rx="26" fill="#ECF9FA" stroke="none"/>
-<text x="203" y="3245" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#088DA3" text-anchor="start">TRACKING DATABASE</text>
-<text x="203" y="3314" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#526278" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  7 TABLES</text>
-<rect x="3275" y="3158" width="3030" height="2670" rx="26" fill="#FCFDFF" stroke="#36845D" stroke-width="7"/>
-<rect x="3275" y="3158" width="3030" height="204" rx="26" fill="#EEF8F0" stroke="none"/>
-<text x="3353" y="3245" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#36845D" text-anchor="start">RECOMMENDATION DATABASE</text>
-<text x="3353" y="3314" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#526278" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  1 TABLES</text>
-<rect x="6425" y="3158" width="3030" height="2670" rx="26" fill="#FCFDFF" stroke="#556B8E" stroke-width="7"/>
-<rect x="6425" y="3158" width="3030" height="204" rx="26" fill="#F1F4FA" stroke="none"/>
-<text x="6503" y="3245" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#556B8E" text-anchor="start">WORKER DATABASE</text>
-<text x="6503" y="3314" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#526278" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  3 TABLES</text>
-<polyline fill="none" stroke="#7646AF" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,713 1635,713 1635,713 1587,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#7646AF" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,1267 1635,1267 1635,713 1587,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#7646AF" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,2081 1635,2081 1635,713 1587,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#7646AF" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="3085,2081 3130,2081 3130,1737 3085,1737" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#7646AF" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="197,1779 150,1779 150,713 197,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#7646AF" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="197,1267 150,1267 150,713 197,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#CF684C" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="6235,1695 6280,1695 6280,1225 6235,1225" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#CF684C" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="4845,1695 4785,1695 4785,713 4737,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#CF684C" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="6235,2081 6280,2081 6280,1225 6235,1225" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#CF684C" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="4845,713 4785,713 4785,1435 4737,1435" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#CF684C" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="3347,2249 3300,2249 3300,1863 3347,1863" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#CF684C" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="4737,2249 4785,2249 4785,713 4845,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#AD7622" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="7995,1955 7935,1955 7935,713 7887,713" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#AD7622" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="9385,713 9430,713 9430,1955 9385,1955" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#AD7622" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="7995,1611 7935,1611 7935,1183 7887,1183" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#AD7622" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="7887,1611 7935,1611 7935,1183 7995,1183" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#088DA3" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="197,4473 150,4473 150,4045 197,4045" marker-end="url(#end)"/>
-<polyline fill="none" stroke="#088DA3" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,4003 1635,4003 1635,3533 1587,3533" marker-end="url(#end)"/>
-<rect x="197" y="613" width="1390" height="510" rx="16" fill="#FFFFFF" stroke="#7646AF" stroke-width="4"/>
-<path d="M213 613 H1571 Q1587 613 1587 629 V713 H197 V629 Q197 613 213 613" fill="#7646AF"/>
+<text x="145" y="128" font-family="Arial, sans-serif" font-size="89" font-weight="700" fill="#2C2C2C" text-anchor="start">LONGEVITYDIET  |  TARGET DATABASE ARCHITECTURE</text>
+<text x="145" y="208" font-family="Arial, sans-serif" font-size="43" font-weight="400" fill="#717171" text-anchor="start">DBML SOURCE  •  33 LOGICAL ENTITY TYPES  •  SIX SEPARATE DATABASE OWNERS  •  ONE VECTOR SHEET</text>
+<line x1="145" y1="258" x2="9450" y2="258" stroke="#D5D5D5" stroke-width="7"/>
+<rect x="125" y="338" width="3030" height="2670" fill="#FFFFFF" stroke="#303030" stroke-width="7"/>
+<rect x="125" y="338" width="3030" height="204" fill="#FFFFFF" stroke="none"/>
+<text x="203" y="425" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#303030" text-anchor="start">IDENTITY DATABASE</text>
+<text x="203" y="494" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#606060" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  7 TABLES</text>
+<rect x="3275" y="338" width="3030" height="2670" fill="#FFFFFF" stroke="#303030" stroke-width="7"/>
+<rect x="3275" y="338" width="3030" height="204" fill="#FFFFFF" stroke="none"/>
+<text x="3353" y="425" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#303030" text-anchor="start">CATALOG DATABASE</text>
+<text x="3353" y="494" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#606060" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  8 TABLES</text>
+<rect x="6425" y="338" width="3030" height="2670" fill="#FFFFFF" stroke="#303030" stroke-width="7"/>
+<rect x="6425" y="338" width="3030" height="204" fill="#FFFFFF" stroke="none"/>
+<text x="6503" y="425" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#303030" text-anchor="start">PLANNING DATABASE</text>
+<text x="6503" y="494" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#606060" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  7 TABLES</text>
+<rect x="125" y="3158" width="3030" height="2670" fill="#FFFFFF" stroke="#303030" stroke-width="7"/>
+<rect x="125" y="3158" width="3030" height="204" fill="#FFFFFF" stroke="none"/>
+<text x="203" y="3245" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#303030" text-anchor="start">TRACKING DATABASE</text>
+<text x="203" y="3314" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#606060" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  7 TABLES</text>
+<rect x="3275" y="3158" width="3030" height="2670" fill="#FFFFFF" stroke="#303030" stroke-width="7"/>
+<rect x="3275" y="3158" width="3030" height="204" fill="#FFFFFF" stroke="none"/>
+<text x="3353" y="3245" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#303030" text-anchor="start">RECOMMENDATION DATABASE</text>
+<text x="3353" y="3314" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#606060" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  1 TABLES</text>
+<rect x="6425" y="3158" width="3030" height="2670" fill="#FFFFFF" stroke="#303030" stroke-width="7"/>
+<rect x="6425" y="3158" width="3030" height="204" fill="#FFFFFF" stroke="none"/>
+<text x="6503" y="3245" font-family="Arial, sans-serif" font-size="63" font-weight="700" fill="#303030" text-anchor="start">WORKER DATABASE</text>
+<text x="6503" y="3314" font-family="Arial, sans-serif" font-size="36" font-weight="400" fill="#606060" text-anchor="start">TARGET · LOGICAL SQL SERVER DB  |  3 TABLES</text>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,713 1635,713 1635,713 1587,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,1267 1635,1267 1635,713 1587,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,2081 1635,2081 1635,713 1587,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="3085,2081 3130,2081 3130,1737 3085,1737" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="197,1779 150,1779 150,713 197,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="197,1267 150,1267 150,713 197,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="6235,1695 6280,1695 6280,1225 6235,1225" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="4845,1695 4785,1695 4785,713 4737,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="6235,2081 6280,2081 6280,1225 6235,1225" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="4845,713 4785,713 4785,1435 4737,1435" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="3347,2249 3300,2249 3300,1863 3347,1863" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="4737,2249 4785,2249 4785,713 4845,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="7995,1955 7935,1955 7935,713 7887,713" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="9385,713 9430,713 9430,1955 9385,1955" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="7995,1611 7935,1611 7935,1183 7887,1183" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="7887,1611 7935,1611 7935,1183 7995,1183" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="0" points="197,4473 150,4473 150,4045 197,4045" marker-end="url(#end)"/>
+<polyline fill="none" stroke="#303030" stroke-opacity=".56" stroke-width="5" stroke-dasharray="" points="1695,4003 1635,4003 1635,3533 1587,3533" marker-end="url(#end)"/>
+<rect x="197" y="613" width="1390" height="510" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="197" y="613" width="1390" height="100" fill="#303030"/>
 <text x="233" y="683" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">Users</text>
-<text x="222" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="312" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="1557" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="757" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Email</text>
-<text x="1557" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(320)</text>
-<text x="222" y="836" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">UQ</text>
-<text x="312" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">NormalizedEmail</text>
-<text x="1557" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(320)</text>
-<rect x="202" y="841" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PasswordHash</text>
-<text x="1557" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(512)</text>
-<text x="312" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">DisplayName</text>
-<text x="1557" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(120)</text>
-<rect x="202" y="925" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Role</text>
-<text x="1557" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(24)</text>
-<text x="312" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Status</text>
-<text x="1557" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(24)</text>
-<rect x="202" y="1009" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CreatedAt</text>
-<text x="1557" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetimeoffset</text>
-<text x="312" y="1088" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UpdatedAt</text>
-<text x="1557" y="1088" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetimeoffset</text>
-<rect x="1695" y="613" width="1390" height="510" rx="16" fill="#FFFFFF" stroke="#7646AF" stroke-width="4"/>
-<path d="M1711 613 H3069 Q3085 613 3085 629 V713 H1695 V629 Q1695 613 1711 613" fill="#7646AF"/>
+<text x="222" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="312" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="1557" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="757" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Email</text>
+<text x="1557" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(320)</text>
+<text x="222" y="836" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">UQ</text>
+<text x="312" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">NormalizedEmail</text>
+<text x="1557" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(320)</text>
+<rect x="202" y="841" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PasswordHash</text>
+<text x="1557" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(512)</text>
+<text x="312" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">DisplayName</text>
+<text x="1557" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(120)</text>
+<rect x="202" y="925" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Role</text>
+<text x="1557" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(24)</text>
+<text x="312" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Status</text>
+<text x="1557" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(24)</text>
+<rect x="202" y="1009" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CreatedAt</text>
+<text x="1557" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetimeoffset</text>
+<text x="312" y="1088" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UpdatedAt</text>
+<text x="1557" y="1088" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetimeoffset</text>
+<rect x="1695" y="613" width="1390" height="510" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="1695" y="613" width="1390" height="100" fill="#303030"/>
 <text x="1731" y="683" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">UserProfiles</text>
-<text x="1720" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="1810" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">UserId</text>
-<text x="3055" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="1700" y="757" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">BirthYear</text>
-<text x="3055" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<text x="1810" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">TimeZone</text>
-<text x="3055" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(100)</text>
-<rect x="1700" y="841" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">WakeTime</text>
-<text x="3055" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<text x="1810" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">SleepTime</text>
-<text x="3055" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<rect x="1700" y="925" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PreferredMealFrequency</text>
-<text x="3055" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<text x="1810" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">FoodPreference</text>
-<text x="3055" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(500)</text>
-<rect x="1700" y="1009" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ProfileCompleted</text>
-<text x="3055" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<text x="1810" y="1088" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UpdatedAt</text>
-<text x="3055" y="1088" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetimeoffset</text>
-<rect x="1695" y="1167" width="1390" height="426" rx="16" fill="#FFFFFF" stroke="#7646AF" stroke-width="4"/>
-<path d="M1711 1167 H3069 Q3085 1167 3085 1183 V1267 H1695 V1183 Q1695 1167 1711 1167" fill="#7646AF"/>
+<text x="1720" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="1810" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">UserId</text>
+<text x="3055" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="1700" y="757" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">BirthYear</text>
+<text x="3055" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<text x="1810" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">TimeZone</text>
+<text x="3055" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(100)</text>
+<rect x="1700" y="841" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">WakeTime</text>
+<text x="3055" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<text x="1810" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">SleepTime</text>
+<text x="3055" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<rect x="1700" y="925" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PreferredMealFrequency</text>
+<text x="3055" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<text x="1810" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">FoodPreference</text>
+<text x="3055" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(500)</text>
+<rect x="1700" y="1009" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ProfileCompleted</text>
+<text x="3055" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<text x="1810" y="1088" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UpdatedAt</text>
+<text x="3055" y="1088" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetimeoffset</text>
+<rect x="1695" y="1167" width="1390" height="426" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="1695" y="1167" width="1390" height="100" fill="#303030"/>
 <text x="1731" y="1237" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">RefreshTokens</text>
-<text x="1720" y="1306" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="1810" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="3055" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="1700" y="1311" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1720" y="1348" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="1810" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="3055" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="1720" y="1390" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">UQ</text>
-<text x="1810" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">TokenHash</text>
-<text x="3055" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(64)</text>
-<rect x="1700" y="1395" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ExpiresAt</text>
-<text x="3055" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetimeoffset</text>
-<text x="1810" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RevokedAt</text>
-<text x="3055" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetimeoffset</text>
-<rect x="1700" y="1479" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ReplacedByTokenId</text>
-<text x="3055" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="1810" y="1558" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CreatedAt</text>
-<text x="3055" y="1558" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetimeoffset</text>
-<rect x="1695" y="1637" width="1390" height="300" rx="16" fill="#FFFFFF" stroke="#7646AF" stroke-width="4"/>
-<path d="M1711 1637 H3069 Q3085 1637 3085 1653 V1737 H1695 V1653 Q1695 1637 1711 1637" fill="#7646AF"/>
+<text x="1720" y="1306" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="1810" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="3055" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="1700" y="1311" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1720" y="1348" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="1810" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="3055" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="1720" y="1390" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">UQ</text>
+<text x="1810" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">TokenHash</text>
+<text x="3055" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(64)</text>
+<rect x="1700" y="1395" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ExpiresAt</text>
+<text x="3055" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetimeoffset</text>
+<text x="1810" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RevokedAt</text>
+<text x="3055" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetimeoffset</text>
+<rect x="1700" y="1479" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ReplacedByTokenId</text>
+<text x="3055" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="1810" y="1558" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CreatedAt</text>
+<text x="3055" y="1558" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetimeoffset</text>
+<rect x="1695" y="1637" width="1390" height="300" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="1695" y="1637" width="1390" height="100" fill="#303030"/>
 <text x="1731" y="1707" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">Allergies</text>
-<text x="1720" y="1776" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="1810" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="3055" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="1700" y="1781" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1720" y="1818" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">UQ</text>
-<text x="1810" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Code</text>
-<text x="3055" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(64)</text>
-<text x="1810" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Name</text>
-<text x="3055" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(200)</text>
-<rect x="1700" y="1865" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Severity</text>
-<text x="3055" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(24)</text>
-<rect x="1695" y="1981" width="1390" height="258" rx="16" fill="#FFFFFF" stroke="#7646AF" stroke-width="4"/>
-<path d="M1711 1981 H3069 Q3085 1981 3085 1997 V2081 H1695 V1997 Q1695 1981 1711 1981" fill="#7646AF"/>
+<text x="1720" y="1776" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="1810" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="3055" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="1700" y="1781" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1720" y="1818" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">UQ</text>
+<text x="1810" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Code</text>
+<text x="3055" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(64)</text>
+<text x="1810" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Name</text>
+<text x="3055" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(200)</text>
+<rect x="1700" y="1865" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Severity</text>
+<text x="3055" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(24)</text>
+<rect x="1695" y="1981" width="1390" height="258" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="1695" y="1981" width="1390" height="100" fill="#303030"/>
 <text x="1731" y="2051" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">UserAllergies</text>
-<text x="1720" y="2120" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="1810" y="2120" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="3055" y="2120" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="1700" y="2125" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1720" y="2162" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="1810" y="2162" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">AllergyId</text>
-<text x="3055" y="2162" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="1810" y="2204" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RecordedAtUtc</text>
-<text x="3055" y="2204" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="197" y="1679" width="1390" height="300" rx="16" fill="#FFFFFF" stroke="#7646AF" stroke-width="4"/>
-<path d="M213 1679 H1571 Q1587 1679 1587 1695 V1779 H197 V1695 Q197 1679 213 1679" fill="#7646AF"/>
+<text x="1720" y="2120" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="1810" y="2120" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="3055" y="2120" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="1700" y="2125" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1720" y="2162" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="1810" y="2162" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">AllergyId</text>
+<text x="3055" y="2162" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="1810" y="2204" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RecordedAtUtc</text>
+<text x="3055" y="2204" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="197" y="1679" width="1390" height="300" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="197" y="1679" width="1390" height="100" fill="#303030"/>
 <text x="233" y="1749" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">UserExcludedFoods</text>
-<text x="222" y="1818" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="312" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="1557" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="1823" width="1380" height="42" fill="#F4F7FB"/>
-<text x="222" y="1860" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="312" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="1557" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="312" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">FoodId</text>
-<text x="1557" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="1907" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="1944" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">FreeText</text>
-<text x="1557" y="1944" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(300)</text>
-<rect x="197" y="1167" width="1390" height="468" rx="16" fill="#FFFFFF" stroke="#7646AF" stroke-width="4"/>
-<path d="M213 1167 H1571 Q1587 1167 1587 1183 V1267 H197 V1183 Q197 1167 213 1167" fill="#7646AF"/>
+<text x="222" y="1818" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="312" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="1557" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="1823" width="1380" height="42" fill="#F7F7F7"/>
+<text x="222" y="1860" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="312" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="1557" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="312" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">FoodId</text>
+<text x="1557" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="1907" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="1944" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">FreeText</text>
+<text x="1557" y="1944" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(300)</text>
+<rect x="197" y="1167" width="1390" height="468" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="197" y="1167" width="1390" height="100" fill="#303030"/>
 <text x="233" y="1237" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">Reminders</text>
-<text x="222" y="1306" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="312" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="1557" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="1311" width="1380" height="42" fill="#F4F7FB"/>
-<text x="222" y="1348" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="312" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="1557" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="312" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Category</text>
-<text x="1557" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<rect x="202" y="1395" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Enabled</text>
-<text x="1557" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<text x="312" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PreferredTime</text>
-<text x="1557" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<rect x="202" y="1479" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">QuietStart</text>
-<text x="1557" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<text x="312" y="1558" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">QuietEnd</text>
-<text x="1557" y="1558" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<rect x="202" y="1563" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="1600" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UpdatedAtUtc</text>
-<text x="1557" y="1600" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="3347" y="613" width="1390" height="678" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M3363 613 H4721 Q4737 613 4737 629 V713 H3347 V629 Q3347 613 3363 613" fill="#CF684C"/>
+<text x="222" y="1306" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="312" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="1557" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="1311" width="1380" height="42" fill="#F7F7F7"/>
+<text x="222" y="1348" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="312" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="1557" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="312" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Category</text>
+<text x="1557" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<rect x="202" y="1395" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Enabled</text>
+<text x="1557" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<text x="312" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PreferredTime</text>
+<text x="1557" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<rect x="202" y="1479" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">QuietStart</text>
+<text x="1557" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<text x="312" y="1558" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">QuietEnd</text>
+<text x="1557" y="1558" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<rect x="202" y="1563" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="1600" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UpdatedAtUtc</text>
+<text x="1557" y="1600" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="3347" y="613" width="1390" height="678" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="3347" y="613" width="1390" height="100" fill="#303030"/>
 <text x="3383" y="683" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">Foods</text>
-<text x="3372" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="3462" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="4707" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="3352" y="757" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Name</text>
-<text x="4707" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(200)</text>
-<text x="3462" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">NormalizedName</text>
-<text x="4707" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(200)</text>
-<rect x="3352" y="841" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Category</text>
-<text x="4707" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(80)</text>
-<text x="3462" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Calories</text>
-<text x="4707" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(10,2)</text>
-<rect x="3352" y="925" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ProteinG</text>
-<text x="4707" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(9,2)</text>
-<text x="3462" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CarbohydrateG</text>
-<text x="4707" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(9,2)</text>
-<rect x="3352" y="1009" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">FatG</text>
-<text x="4707" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(9,2)</text>
-<text x="3462" y="1088" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsPlantBased</text>
-<text x="4707" y="1088" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="3352" y="1093" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="1130" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsWholeGrain</text>
-<text x="4707" y="1130" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<text x="3462" y="1172" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsLegume</text>
-<text x="4707" y="1172" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="3352" y="1177" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="1214" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsFish</text>
-<text x="4707" y="1214" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<text x="3462" y="1256" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsActive</text>
-<text x="4707" y="1256" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="4845" y="1125" width="1390" height="426" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M4861 1125 H6219 Q6235 1125 6235 1141 V1225 H4845 V1141 Q4845 1125 4861 1125" fill="#CF684C"/>
+<text x="3372" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="3462" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="4707" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="3352" y="757" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Name</text>
+<text x="4707" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(200)</text>
+<text x="3462" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">NormalizedName</text>
+<text x="4707" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(200)</text>
+<rect x="3352" y="841" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Category</text>
+<text x="4707" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(80)</text>
+<text x="3462" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Calories</text>
+<text x="4707" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(10,2)</text>
+<rect x="3352" y="925" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ProteinG</text>
+<text x="4707" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(9,2)</text>
+<text x="3462" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CarbohydrateG</text>
+<text x="4707" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(9,2)</text>
+<rect x="3352" y="1009" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">FatG</text>
+<text x="4707" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(9,2)</text>
+<text x="3462" y="1088" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsPlantBased</text>
+<text x="4707" y="1088" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="3352" y="1093" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="1130" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsWholeGrain</text>
+<text x="4707" y="1130" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<text x="3462" y="1172" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsLegume</text>
+<text x="4707" y="1172" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="3352" y="1177" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="1214" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsFish</text>
+<text x="4707" y="1214" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<text x="3462" y="1256" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsActive</text>
+<text x="4707" y="1256" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="4845" y="1125" width="1390" height="426" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="4845" y="1125" width="1390" height="100" fill="#303030"/>
 <text x="4881" y="1195" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">Recipes</text>
-<text x="4870" y="1264" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="4960" y="1264" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="6205" y="1264" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="4850" y="1269" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Name</text>
-<text x="6205" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(200)</text>
-<text x="4960" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">MealType</text>
-<text x="6205" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<rect x="4850" y="1353" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Description</text>
-<text x="6205" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(1000)</text>
-<text x="4960" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PrepMinutes</text>
-<text x="6205" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="4850" y="1437" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsPlantForward</text>
-<text x="6205" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<text x="4960" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsActive</text>
-<text x="6205" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="4845" y="1595" width="1390" height="342" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M4861 1595 H6219 Q6235 1595 6235 1611 V1695 H4845 V1611 Q4845 1595 4861 1595" fill="#CF684C"/>
+<text x="4870" y="1264" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="4960" y="1264" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="6205" y="1264" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="4850" y="1269" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Name</text>
+<text x="6205" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(200)</text>
+<text x="4960" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">MealType</text>
+<text x="6205" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<rect x="4850" y="1353" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Description</text>
+<text x="6205" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(1000)</text>
+<text x="4960" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PrepMinutes</text>
+<text x="6205" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="4850" y="1437" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsPlantForward</text>
+<text x="6205" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<text x="4960" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsActive</text>
+<text x="6205" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="4845" y="1595" width="1390" height="342" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="4845" y="1595" width="1390" height="100" fill="#303030"/>
 <text x="4881" y="1665" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">RecipeIngredients</text>
-<text x="4870" y="1734" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="4960" y="1734" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RecipeId</text>
-<text x="6205" y="1734" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="4850" y="1739" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4870" y="1776" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="4960" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">FoodId</text>
-<text x="6205" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="4960" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Amount</text>
-<text x="6205" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(10,2)</text>
-<rect x="4850" y="1823" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Unit</text>
-<text x="6205" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<text x="4960" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsOptional</text>
-<text x="6205" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="4845" y="1981" width="1390" height="258" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M4861 1981 H6219 Q6235 1981 6235 1997 V2081 H4845 V1997 Q4845 1981 4861 1981" fill="#CF684C"/>
+<text x="4870" y="1734" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="4960" y="1734" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RecipeId</text>
+<text x="6205" y="1734" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="4850" y="1739" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4870" y="1776" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="4960" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">FoodId</text>
+<text x="6205" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="4960" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Amount</text>
+<text x="6205" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(10,2)</text>
+<rect x="4850" y="1823" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Unit</text>
+<text x="6205" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<text x="4960" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsOptional</text>
+<text x="6205" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="4845" y="1981" width="1390" height="258" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="4845" y="1981" width="1390" height="100" fill="#303030"/>
 <text x="4881" y="2051" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">RecipeAllergens</text>
-<text x="4870" y="2120" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="4960" y="2120" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RecipeId</text>
-<text x="6205" y="2120" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="4850" y="2125" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="2162" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">AllergenCode</text>
-<text x="6205" y="2162" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(64)</text>
-<text x="4960" y="2204" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Evidence</text>
-<text x="6205" y="2204" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(200)</text>
-<rect x="3347" y="1335" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M3363 1335 H4721 Q4737 1335 4737 1351 V1435 H3347 V1351 Q3347 1335 3363 1335" fill="#CF684C"/>
+<text x="4870" y="2120" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="4960" y="2120" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RecipeId</text>
+<text x="6205" y="2120" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="4850" y="2125" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="2162" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">AllergenCode</text>
+<text x="6205" y="2162" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(64)</text>
+<text x="4960" y="2204" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Evidence</text>
+<text x="6205" y="2204" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(200)</text>
+<rect x="3347" y="1335" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="3347" y="1335" width="1390" height="100" fill="#303030"/>
 <text x="3383" y="1405" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">DietRules</text>
-<text x="3372" y="1474" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="3462" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="4707" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="3352" y="1479" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3372" y="1516" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">UQ</text>
-<text x="3462" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Code</text>
-<text x="4707" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(80)</text>
-<text x="3462" y="1558" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Name</text>
-<text x="4707" y="1558" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(200)</text>
-<rect x="3352" y="1563" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="1600" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Category</text>
-<text x="4707" y="1600" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(80)</text>
-<text x="3462" y="1642" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsMedicalSensitive</text>
-<text x="4707" y="1642" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="3352" y="1647" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="1684" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsActive</text>
-<text x="4707" y="1684" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="4845" y="613" width="1390" height="468" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M4861 613 H6219 Q6235 613 6235 629 V713 H4845 V629 Q4845 613 4861 613" fill="#CF684C"/>
+<text x="3372" y="1474" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="3462" y="1474" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="4707" y="1474" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="3352" y="1479" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3372" y="1516" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">UQ</text>
+<text x="3462" y="1516" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Code</text>
+<text x="4707" y="1516" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(80)</text>
+<text x="3462" y="1558" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Name</text>
+<text x="4707" y="1558" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(200)</text>
+<rect x="3352" y="1563" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="1600" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Category</text>
+<text x="4707" y="1600" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(80)</text>
+<text x="3462" y="1642" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsMedicalSensitive</text>
+<text x="4707" y="1642" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="3352" y="1647" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="1684" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsActive</text>
+<text x="4707" y="1684" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="4845" y="613" width="1390" height="468" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="4845" y="613" width="1390" height="100" fill="#303030"/>
 <text x="4881" y="683" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">RuleVersions</text>
-<text x="4870" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="4960" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="6205" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="4850" y="757" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4870" y="794" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="4960" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">DietRuleId</text>
-<text x="6205" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="4960" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">VersionNumber</text>
-<text x="6205" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="4850" y="841" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ParametersJson</text>
-<text x="6205" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(max)</text>
-<text x="4960" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">SourceUrl</text>
-<text x="6205" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(1000)</text>
-<rect x="4850" y="925" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">EvidenceLevel</text>
-<text x="6205" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<text x="4960" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PublishedAtUtc</text>
-<text x="6205" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="4850" y="1009" width="1380" height="42" fill="#F4F7FB"/>
-<text x="4960" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsCurrent</text>
-<text x="6205" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="3347" y="1763" width="1390" height="342" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M3363 1763 H4721 Q4737 1763 4737 1779 V1863 H3347 V1779 Q3347 1763 3363 1763" fill="#CF684C"/>
+<text x="4870" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="4960" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="6205" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="4850" y="757" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4870" y="794" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="4960" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">DietRuleId</text>
+<text x="6205" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="4960" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">VersionNumber</text>
+<text x="6205" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="4850" y="841" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ParametersJson</text>
+<text x="6205" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(max)</text>
+<text x="4960" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">SourceUrl</text>
+<text x="6205" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(1000)</text>
+<rect x="4850" y="925" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">EvidenceLevel</text>
+<text x="6205" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<text x="4960" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PublishedAtUtc</text>
+<text x="6205" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="4850" y="1009" width="1380" height="42" fill="#F7F7F7"/>
+<text x="4960" y="1046" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsCurrent</text>
+<text x="6205" y="1046" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="3347" y="1763" width="1390" height="342" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="3347" y="1763" width="1390" height="100" fill="#303030"/>
 <text x="3383" y="1833" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">RuleSetVersions</text>
-<text x="3372" y="1902" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="3462" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="4707" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="3352" y="1907" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="1944" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">SetName</text>
-<text x="4707" y="1944" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(160)</text>
-<text x="3462" y="1986" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Version</text>
-<text x="4707" y="1986" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="3352" y="1991" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="2028" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PublishedAtUtc</text>
-<text x="4707" y="2028" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<text x="3462" y="2070" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsCurrent</text>
-<text x="4707" y="2070" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="3347" y="2149" width="1390" height="258" rx="16" fill="#FFFFFF" stroke="#CF684C" stroke-width="4"/>
-<path d="M3363 2149 H4721 Q4737 2149 4737 2165 V2249 H3347 V2165 Q3347 2149 3363 2149" fill="#CF684C"/>
+<text x="3372" y="1902" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="3462" y="1902" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="4707" y="1902" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="3352" y="1907" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="1944" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">SetName</text>
+<text x="4707" y="1944" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(160)</text>
+<text x="3462" y="1986" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Version</text>
+<text x="4707" y="1986" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="3352" y="1991" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="2028" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PublishedAtUtc</text>
+<text x="4707" y="2028" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<text x="3462" y="2070" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsCurrent</text>
+<text x="4707" y="2070" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="3347" y="2149" width="1390" height="258" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="3347" y="2149" width="1390" height="100" fill="#303030"/>
 <text x="3383" y="2219" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">RuleSetVersionItems</text>
-<text x="3372" y="2288" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="3462" y="2288" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RuleSetVersionId</text>
-<text x="4707" y="2288" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="3352" y="2293" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3372" y="2330" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="3462" y="2330" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RuleVersionId</text>
-<text x="4707" y="2330" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="3462" y="2372" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Position</text>
-<text x="4707" y="2372" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="6497" y="613" width="1390" height="426" rx="16" fill="#FFFFFF" stroke="#AD7622" stroke-width="4"/>
-<path d="M6513 613 H7871 Q7887 613 7887 629 V713 H6497 V629 Q6497 613 6513 613" fill="#AD7622"/>
+<text x="3372" y="2288" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="3462" y="2288" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RuleSetVersionId</text>
+<text x="4707" y="2288" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="3352" y="2293" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3372" y="2330" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="3462" y="2330" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RuleVersionId</text>
+<text x="4707" y="2330" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="3462" y="2372" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Position</text>
+<text x="4707" y="2372" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="6497" y="613" width="1390" height="426" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="6497" y="613" width="1390" height="100" fill="#303030"/>
 <text x="6533" y="683" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">MealPlans</text>
-<text x="6522" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="6612" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="7857" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="6502" y="757" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="7857" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="6612" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">StartDate</text>
-<text x="7857" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="6502" y="841" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">EndDate</text>
-<text x="7857" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<text x="6612" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Revision</text>
-<text x="7857" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="6502" y="925" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Status</text>
-<text x="7857" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<text x="6612" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">GeneratedAtUtc</text>
-<text x="7857" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="7995" y="1855" width="1390" height="258" rx="16" fill="#FFFFFF" stroke="#AD7622" stroke-width="4"/>
-<path d="M8011 1855 H9369 Q9385 1855 9385 1871 V1955 H7995 V1871 Q7995 1855 8011 1855" fill="#AD7622"/>
+<text x="6522" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="6612" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="7857" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="6502" y="757" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="7857" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="6612" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">StartDate</text>
+<text x="7857" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="6502" y="841" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">EndDate</text>
+<text x="7857" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<text x="6612" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Revision</text>
+<text x="7857" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="6502" y="925" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Status</text>
+<text x="7857" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<text x="6612" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">GeneratedAtUtc</text>
+<text x="7857" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="7995" y="1855" width="1390" height="258" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="7995" y="1855" width="1390" height="100" fill="#303030"/>
 <text x="8031" y="1925" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">MealPlanDays</text>
-<text x="8020" y="1994" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="8110" y="1994" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="9355" y="1994" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="8000" y="1999" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8020" y="2036" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="8110" y="2036" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">MealPlanId</text>
-<text x="9355" y="2036" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="8110" y="2078" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Date</text>
-<text x="9355" y="2078" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="7995" y="613" width="1390" height="426" rx="16" fill="#FFFFFF" stroke="#AD7622" stroke-width="4"/>
-<path d="M8011 613 H9369 Q9385 613 9385 629 V713 H7995 V629 Q7995 613 8011 613" fill="#AD7622"/>
+<text x="8020" y="1994" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="8110" y="1994" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="9355" y="1994" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="8000" y="1999" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8020" y="2036" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="8110" y="2036" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">MealPlanId</text>
+<text x="9355" y="2036" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="8110" y="2078" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Date</text>
+<text x="9355" y="2078" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="7995" y="613" width="1390" height="426" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="7995" y="613" width="1390" height="100" fill="#303030"/>
 <text x="8031" y="683" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">PlannedMeals</text>
-<text x="8020" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="8110" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="9355" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="8000" y="757" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8020" y="794" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="8110" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">MealPlanDayId</text>
-<text x="9355" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="8110" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RecipeId</text>
-<text x="9355" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="8000" y="841" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">MealType</text>
-<text x="9355" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<text x="8110" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ScheduledTime</text>
-<text x="9355" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<rect x="8000" y="925" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Position</text>
-<text x="9355" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<text x="8110" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ReasonJson</text>
-<text x="9355" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(max)</text>
-<rect x="6497" y="1083" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#AD7622" stroke-width="4"/>
-<path d="M6513 1083 H7871 Q7887 1083 7887 1099 V1183 H6497 V1099 Q6497 1083 6513 1083" fill="#AD7622"/>
+<text x="8020" y="752" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="8110" y="752" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="9355" y="752" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="8000" y="757" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8020" y="794" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="8110" y="794" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">MealPlanDayId</text>
+<text x="9355" y="794" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="8110" y="836" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RecipeId</text>
+<text x="9355" y="836" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="8000" y="841" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="878" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">MealType</text>
+<text x="9355" y="878" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<text x="8110" y="920" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ScheduledTime</text>
+<text x="9355" y="920" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<rect x="8000" y="925" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="962" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Position</text>
+<text x="9355" y="962" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<text x="8110" y="1004" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ReasonJson</text>
+<text x="9355" y="1004" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(max)</text>
+<rect x="6497" y="1083" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="6497" y="1083" width="1390" height="100" fill="#303030"/>
 <text x="6533" y="1153" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">Challenges</text>
-<text x="6522" y="1222" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="6612" y="1222" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="7857" y="1222" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="6502" y="1227" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="1264" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="7857" y="1264" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="6612" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Title</text>
-<text x="7857" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(200)</text>
-<rect x="6502" y="1311" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">StartDate</text>
-<text x="7857" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<text x="6612" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">EndDate</text>
-<text x="7857" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="6502" y="1395" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Status</text>
-<text x="7857" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<rect x="7995" y="1511" width="1390" height="300" rx="16" fill="#FFFFFF" stroke="#AD7622" stroke-width="4"/>
-<path d="M8011 1511 H9369 Q9385 1511 9385 1527 V1611 H7995 V1527 Q7995 1511 8011 1511" fill="#AD7622"/>
+<text x="6522" y="1222" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="6612" y="1222" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="7857" y="1222" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="6502" y="1227" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="1264" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="7857" y="1264" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="6612" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Title</text>
+<text x="7857" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(200)</text>
+<rect x="6502" y="1311" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">StartDate</text>
+<text x="7857" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<text x="6612" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">EndDate</text>
+<text x="7857" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="6502" y="1395" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Status</text>
+<text x="7857" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<rect x="7995" y="1511" width="1390" height="300" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="7995" y="1511" width="1390" height="100" fill="#303030"/>
 <text x="8031" y="1581" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">ChallengeDays</text>
-<text x="8020" y="1650" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="8110" y="1650" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="9355" y="1650" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="8000" y="1655" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8020" y="1692" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="8110" y="1692" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ChallengeId</text>
-<text x="9355" y="1692" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="8110" y="1734" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Date</text>
-<text x="9355" y="1734" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="8000" y="1739" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Completed</text>
-<text x="9355" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="7995" y="1083" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#AD7622" stroke-width="4"/>
-<path d="M8011 1083 H9369 Q9385 1083 9385 1099 V1183 H7995 V1099 Q7995 1083 8011 1083" fill="#AD7622"/>
+<text x="8020" y="1650" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="8110" y="1650" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="9355" y="1650" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="8000" y="1655" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8020" y="1692" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="8110" y="1692" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ChallengeId</text>
+<text x="9355" y="1692" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="8110" y="1734" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Date</text>
+<text x="9355" y="1734" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="8000" y="1739" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Completed</text>
+<text x="9355" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="7995" y="1083" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="7995" y="1083" width="1390" height="100" fill="#303030"/>
 <text x="8031" y="1153" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">FmdSafetyAssessments</text>
-<text x="8020" y="1222" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="8110" y="1222" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="9355" y="1222" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="8000" y="1227" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="1264" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="9355" y="1264" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="8110" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">AssessedAtUtc</text>
-<text x="9355" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="8000" y="1311" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RiskCode</text>
-<text x="9355" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(64)</text>
-<text x="8110" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsEligible</text>
-<text x="9355" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="8000" y="1395" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ConsentConfirmed</text>
-<text x="9355" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="6497" y="1511" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#AD7622" stroke-width="4"/>
-<path d="M6513 1511 H7871 Q7887 1511 7887 1527 V1611 H6497 V1527 Q6497 1511 6513 1511" fill="#AD7622"/>
+<text x="8020" y="1222" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="8110" y="1222" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="9355" y="1222" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="8000" y="1227" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="1264" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="9355" y="1264" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="8110" y="1306" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">AssessedAtUtc</text>
+<text x="9355" y="1306" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="8000" y="1311" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="1348" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RiskCode</text>
+<text x="9355" y="1348" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(64)</text>
+<text x="8110" y="1390" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsEligible</text>
+<text x="9355" y="1390" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="8000" y="1395" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="1432" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ConsentConfirmed</text>
+<text x="9355" y="1432" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="6497" y="1511" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="6497" y="1511" width="1390" height="100" fill="#303030"/>
 <text x="6533" y="1581" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">FmdCycles</text>
-<text x="6522" y="1650" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="6612" y="1650" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="7857" y="1650" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="6502" y="1655" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="1692" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="7857" y="1692" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="6522" y="1734" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="6612" y="1734" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">SafetyAssessmentId</text>
-<text x="7857" y="1734" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="6502" y="1739" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">StartDate</text>
-<text x="7857" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<text x="6612" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">EndDate</text>
-<text x="7857" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="6502" y="1823" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Status</text>
-<text x="7857" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<rect x="197" y="3945" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#088DA3" stroke-width="4"/>
-<path d="M213 3945 H1571 Q1587 3945 1587 3961 V4045 H197 V3961 Q197 3945 213 3945" fill="#088DA3"/>
+<text x="6522" y="1650" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="6612" y="1650" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="7857" y="1650" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="6502" y="1655" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="1692" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="7857" y="1692" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="6522" y="1734" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="6612" y="1734" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">SafetyAssessmentId</text>
+<text x="7857" y="1734" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="6502" y="1739" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="1776" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">StartDate</text>
+<text x="7857" y="1776" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<text x="6612" y="1818" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">EndDate</text>
+<text x="7857" y="1818" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="6502" y="1823" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="1860" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Status</text>
+<text x="7857" y="1860" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<rect x="197" y="3945" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="197" y="3945" width="1390" height="100" fill="#303030"/>
 <text x="233" y="4015" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">MealLogs</text>
-<text x="222" y="4084" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="312" y="4084" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="1557" y="4084" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="4089" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="4126" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="1557" y="4126" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="312" y="4168" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ConsumedAtUtc</text>
-<text x="1557" y="4168" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="202" y="4173" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="4210" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">MealType</text>
-<text x="1557" y="4210" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<text x="312" y="4252" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Note</text>
-<text x="1557" y="4252" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(1000)</text>
-<rect x="202" y="4257" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="4294" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsDeleted</text>
-<text x="1557" y="4294" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="197" y="4373" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#088DA3" stroke-width="4"/>
-<path d="M213 4373 H1571 Q1587 4373 1587 4389 V4473 H197 V4389 Q197 4373 213 4373" fill="#088DA3"/>
+<text x="222" y="4084" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="312" y="4084" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="1557" y="4084" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="4089" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="4126" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="1557" y="4126" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="312" y="4168" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ConsumedAtUtc</text>
+<text x="1557" y="4168" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="202" y="4173" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="4210" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">MealType</text>
+<text x="1557" y="4210" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<text x="312" y="4252" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Note</text>
+<text x="1557" y="4252" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(1000)</text>
+<rect x="202" y="4257" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="4294" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsDeleted</text>
+<text x="1557" y="4294" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="197" y="4373" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="197" y="4373" width="1390" height="100" fill="#303030"/>
 <text x="233" y="4443" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">MealLogItems</text>
-<text x="222" y="4512" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="312" y="4512" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="1557" y="4512" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="4517" width="1380" height="42" fill="#F4F7FB"/>
-<text x="222" y="4554" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="312" y="4554" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">MealLogId</text>
-<text x="1557" y="4554" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="312" y="4596" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">FoodId</text>
-<text x="1557" y="4596" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="4601" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="4638" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RecipeId</text>
-<text x="1557" y="4638" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="312" y="4680" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Quantity</text>
-<text x="1557" y="4680" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(9,3)</text>
-<rect x="202" y="4685" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="4722" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Unit</text>
-<text x="1557" y="4722" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<rect x="1695" y="3433" width="1390" height="426" rx="16" fill="#FFFFFF" stroke="#088DA3" stroke-width="4"/>
-<path d="M1711 3433 H3069 Q3085 3433 3085 3449 V3533 H1695 V3449 Q1695 3433 1711 3433" fill="#088DA3"/>
+<text x="222" y="4512" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="312" y="4512" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="1557" y="4512" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="4517" width="1380" height="42" fill="#F7F7F7"/>
+<text x="222" y="4554" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="312" y="4554" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">MealLogId</text>
+<text x="1557" y="4554" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="312" y="4596" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">FoodId</text>
+<text x="1557" y="4596" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="4601" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="4638" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RecipeId</text>
+<text x="1557" y="4638" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="312" y="4680" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Quantity</text>
+<text x="1557" y="4680" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(9,3)</text>
+<rect x="202" y="4685" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="4722" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Unit</text>
+<text x="1557" y="4722" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<rect x="1695" y="3433" width="1390" height="426" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="1695" y="3433" width="1390" height="100" fill="#303030"/>
 <text x="1731" y="3503" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">ActivityLogs</text>
-<text x="1720" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="1810" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="3055" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="1700" y="3577" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="3055" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="1810" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ActivityType</text>
-<text x="3055" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<rect x="1700" y="3661" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">StartedAtUtc</text>
-<text x="3055" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<text x="1810" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">DurationMinutes</text>
-<text x="3055" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="1700" y="3745" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Intensity</text>
-<text x="3055" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<text x="1810" y="3824" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsDeleted</text>
-<text x="3055" y="3824" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="1695" y="4373" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#088DA3" stroke-width="4"/>
-<path d="M1711 4373 H3069 Q3085 4373 3085 4389 V4473 H1695 V4389 Q1695 4373 1711 4373" fill="#088DA3"/>
+<text x="1720" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="1810" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="3055" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="1700" y="3577" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="3055" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="1810" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ActivityType</text>
+<text x="3055" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<rect x="1700" y="3661" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">StartedAtUtc</text>
+<text x="3055" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<text x="1810" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">DurationMinutes</text>
+<text x="3055" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="1700" y="3745" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Intensity</text>
+<text x="3055" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<text x="1810" y="3824" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsDeleted</text>
+<text x="3055" y="3824" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="1695" y="4373" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="1695" y="4373" width="1390" height="100" fill="#303030"/>
 <text x="1731" y="4443" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">EatingWindowSnapshots</text>
-<text x="1720" y="4512" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="1810" y="4512" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="3055" y="4512" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="1700" y="4517" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="4554" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="3055" y="4554" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="1810" y="4596" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">LocalDate</text>
-<text x="3055" y="4596" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="1700" y="4601" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="4638" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">WindowStart</text>
-<text x="3055" y="4638" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<text x="1810" y="4680" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">WindowEnd</text>
-<text x="3055" y="4680" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">time</text>
-<rect x="1700" y="4685" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="4722" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">DurationHours</text>
-<text x="3055" y="4722" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(5,2)</text>
-<rect x="197" y="3433" width="1390" height="468" rx="16" fill="#FFFFFF" stroke="#088DA3" stroke-width="4"/>
-<path d="M213 3433 H1571 Q1587 3433 1587 3449 V3533 H197 V3449 Q197 3433 213 3433" fill="#088DA3"/>
+<text x="1720" y="4512" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="1810" y="4512" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="3055" y="4512" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="1700" y="4517" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="4554" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="3055" y="4554" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="1810" y="4596" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">LocalDate</text>
+<text x="3055" y="4596" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="1700" y="4601" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="4638" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">WindowStart</text>
+<text x="3055" y="4638" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<text x="1810" y="4680" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">WindowEnd</text>
+<text x="3055" y="4680" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">time</text>
+<rect x="1700" y="4685" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="4722" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">DurationHours</text>
+<text x="3055" y="4722" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(5,2)</text>
+<rect x="197" y="3433" width="1390" height="468" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="197" y="3433" width="1390" height="100" fill="#303030"/>
 <text x="233" y="3503" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">AdherenceScores</text>
-<text x="222" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="312" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="1557" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="3577" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="1557" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="312" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">LocalDate</text>
-<text x="1557" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="202" y="3661" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Version</text>
-<text x="1557" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<text x="312" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Score</text>
-<text x="1557" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(5,2)</text>
-<rect x="202" y="3745" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CoveragePercent</text>
-<text x="1557" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(5,2)</text>
-<text x="312" y="3824" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">IsPartial</text>
-<text x="1557" y="3824" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">bit</text>
-<rect x="202" y="3829" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="3866" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CalculatedAtUtc</text>
-<text x="1557" y="3866" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="1695" y="3903" width="1390" height="426" rx="16" fill="#FFFFFF" stroke="#088DA3" stroke-width="4"/>
-<path d="M1711 3903 H3069 Q3085 3903 3085 3919 V4003 H1695 V3919 Q1695 3903 1711 3903" fill="#088DA3"/>
+<text x="222" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="312" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="1557" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="3577" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="1557" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="312" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">LocalDate</text>
+<text x="1557" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="202" y="3661" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Version</text>
+<text x="1557" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<text x="312" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Score</text>
+<text x="1557" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(5,2)</text>
+<rect x="202" y="3745" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CoveragePercent</text>
+<text x="1557" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(5,2)</text>
+<text x="312" y="3824" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">IsPartial</text>
+<text x="1557" y="3824" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">bit</text>
+<rect x="202" y="3829" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="3866" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CalculatedAtUtc</text>
+<text x="1557" y="3866" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="1695" y="3903" width="1390" height="426" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="1695" y="3903" width="1390" height="100" fill="#303030"/>
 <text x="1731" y="3973" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">ScoreDimensions</text>
-<text x="1720" y="4042" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="1810" y="4042" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="3055" y="4042" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="1700" y="4047" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1720" y="4084" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#3B73AC" text-anchor="start">FK</text>
-<text x="1810" y="4084" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">AdherenceScoreId</text>
-<text x="3055" y="4084" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="1810" y="4126" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Code</text>
-<text x="3055" y="4126" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(40)</text>
-<rect x="1700" y="4131" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="4168" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Weight</text>
-<text x="3055" y="4168" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(5,4)</text>
-<text x="1810" y="4210" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RawScore</text>
-<text x="3055" y="4210" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(5,2)</text>
-<rect x="1700" y="4215" width="1380" height="42" fill="#F4F7FB"/>
-<text x="1810" y="4252" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">WeightedScore</text>
-<text x="3055" y="4252" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">decimal(5,2)</text>
-<text x="1810" y="4294" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ReasonCode</text>
-<text x="3055" y="4294" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(100)</text>
-<rect x="197" y="4801" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#088DA3" stroke-width="4"/>
-<path d="M213 4801 H1571 Q1587 4801 1587 4817 V4901 H197 V4817 Q197 4801 213 4801" fill="#088DA3"/>
+<text x="1720" y="4042" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="1810" y="4042" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="3055" y="4042" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="1700" y="4047" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1720" y="4084" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#696969" text-anchor="start">FK</text>
+<text x="1810" y="4084" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">AdherenceScoreId</text>
+<text x="3055" y="4084" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="1810" y="4126" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Code</text>
+<text x="3055" y="4126" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(40)</text>
+<rect x="1700" y="4131" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="4168" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Weight</text>
+<text x="3055" y="4168" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(5,4)</text>
+<text x="1810" y="4210" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RawScore</text>
+<text x="3055" y="4210" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(5,2)</text>
+<rect x="1700" y="4215" width="1380" height="42" fill="#F7F7F7"/>
+<text x="1810" y="4252" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">WeightedScore</text>
+<text x="3055" y="4252" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">decimal(5,2)</text>
+<text x="1810" y="4294" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ReasonCode</text>
+<text x="3055" y="4294" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(100)</text>
+<rect x="197" y="4801" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="197" y="4801" width="1390" height="100" fill="#303030"/>
 <text x="233" y="4871" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">WeeklyReports</text>
-<text x="222" y="4940" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="312" y="4940" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="1557" y="4940" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="202" y="4945" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="4982" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="1557" y="4982" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="312" y="5024" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">WeekStart</text>
-<text x="1557" y="5024" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<rect x="202" y="5029" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="5066" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">WeekEnd</text>
-<text x="1557" y="5066" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">date</text>
-<text x="312" y="5108" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">SummaryJson</text>
-<text x="1557" y="5108" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(max)</text>
-<rect x="202" y="5113" width="1380" height="42" fill="#F4F7FB"/>
-<text x="312" y="5150" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">GeneratedAtUtc</text>
-<text x="1557" y="5150" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="3347" y="3433" width="1390" height="426" rx="16" fill="#FFFFFF" stroke="#36845D" stroke-width="4"/>
-<path d="M3363 3433 H4721 Q4737 3433 4737 3449 V3533 H3347 V3449 Q3347 3433 3363 3433" fill="#36845D"/>
+<text x="222" y="4940" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="312" y="4940" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="1557" y="4940" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="202" y="4945" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="4982" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="1557" y="4982" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="312" y="5024" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">WeekStart</text>
+<text x="1557" y="5024" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<rect x="202" y="5029" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="5066" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">WeekEnd</text>
+<text x="1557" y="5066" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">date</text>
+<text x="312" y="5108" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">SummaryJson</text>
+<text x="1557" y="5108" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(max)</text>
+<rect x="202" y="5113" width="1380" height="42" fill="#F7F7F7"/>
+<text x="312" y="5150" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">GeneratedAtUtc</text>
+<text x="1557" y="5150" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="3347" y="3433" width="1390" height="426" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="3347" y="3433" width="1390" height="100" fill="#303030"/>
 <text x="3383" y="3503" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">RecommendationFeedback</text>
-<text x="3372" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="3462" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="4707" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="3352" y="3577" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="4707" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="3462" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">RequestId</text>
-<text x="4707" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="3352" y="3661" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ItemId</text>
-<text x="4707" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="3462" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Rating</text>
-<text x="4707" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="3352" y="3745" width="1380" height="42" fill="#F4F7FB"/>
-<text x="3462" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ReasonCode</text>
-<text x="4707" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(80)</text>
-<text x="3462" y="3824" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CreatedAtUtc</text>
-<text x="4707" y="3824" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="6497" y="3861" width="1390" height="258" rx="16" fill="#FFFFFF" stroke="#556B8E" stroke-width="4"/>
-<path d="M6513 3861 H7871 Q7887 3861 7887 3877 V3961 H6497 V3877 Q6497 3861 6513 3861" fill="#556B8E"/>
+<text x="3372" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="3462" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="4707" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="3352" y="3577" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="4707" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="3462" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">RequestId</text>
+<text x="4707" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="3352" y="3661" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ItemId</text>
+<text x="4707" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="3462" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Rating</text>
+<text x="4707" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="3352" y="3745" width="1380" height="42" fill="#F7F7F7"/>
+<text x="3462" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ReasonCode</text>
+<text x="4707" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(80)</text>
+<text x="3462" y="3824" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CreatedAtUtc</text>
+<text x="4707" y="3824" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="6497" y="3861" width="1390" height="258" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="6497" y="3861" width="1390" height="100" fill="#303030"/>
 <text x="6533" y="3931" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">ProcessedEvents</text>
-<text x="6612" y="4000" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">EventId</text>
-<text x="7857" y="4000" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="6502" y="4005" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="4042" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ConsumerName</text>
-<text x="7857" y="4042" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(120)</text>
-<text x="6612" y="4084" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">ProcessedAtUtc</text>
-<text x="7857" y="4084" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="6497" y="3433" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#556B8E" stroke-width="4"/>
-<path d="M6513 3433 H7871 Q7887 3433 7887 3449 V3533 H6497 V3449 Q6497 3433 6513 3433" fill="#556B8E"/>
+<text x="6612" y="4000" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">EventId</text>
+<text x="7857" y="4000" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="6502" y="4005" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="4042" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ConsumerName</text>
+<text x="7857" y="4042" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(120)</text>
+<text x="6612" y="4084" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">ProcessedAtUtc</text>
+<text x="7857" y="4084" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="6497" y="3433" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="6497" y="3433" width="1390" height="100" fill="#303030"/>
 <text x="6533" y="3503" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">OutboxMessages</text>
-<text x="6522" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="6612" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="7857" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="6502" y="3577" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">EventType</text>
-<text x="7857" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(120)</text>
-<text x="6612" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PayloadJson</text>
-<text x="7857" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(max)</text>
-<rect x="6502" y="3661" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CreatedAtUtc</text>
-<text x="7857" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<text x="6612" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PublishedAtUtc</text>
-<text x="7857" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<rect x="6502" y="3745" width="1380" height="42" fill="#F4F7FB"/>
-<text x="6612" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">PublishAttempts</text>
-<text x="7857" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">int</text>
-<rect x="7995" y="3433" width="1390" height="384" rx="16" fill="#FFFFFF" stroke="#556B8E" stroke-width="4"/>
-<path d="M8011 3433 H9369 Q9385 3433 9385 3449 V3533 H7995 V3449 Q7995 3433 8011 3433" fill="#556B8E"/>
+<text x="6522" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="6612" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="7857" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="6502" y="3577" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">EventType</text>
+<text x="7857" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(120)</text>
+<text x="6612" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PayloadJson</text>
+<text x="7857" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(max)</text>
+<rect x="6502" y="3661" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CreatedAtUtc</text>
+<text x="7857" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<text x="6612" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PublishedAtUtc</text>
+<text x="7857" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<rect x="6502" y="3745" width="1380" height="42" fill="#F7F7F7"/>
+<text x="6612" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">PublishAttempts</text>
+<text x="7857" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">int</text>
+<rect x="7995" y="3433" width="1390" height="384" fill="#FFFFFF" stroke="#303030" stroke-width="4"/>
+<rect x="7995" y="3433" width="1390" height="100" fill="#303030"/>
 <text x="8031" y="3503" font-family="Arial, sans-serif" font-size="49" font-weight="700" fill="#FFFFFF" text-anchor="start">AuditLogs</text>
-<text x="8020" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#9A5B00" text-anchor="start">PK</text>
-<text x="8110" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#23344A" text-anchor="start">Id</text>
-<text x="9355" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<rect x="8000" y="3577" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">UserId</text>
-<text x="9355" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">uniqueidentifier</text>
-<text x="8110" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Action</text>
-<text x="9355" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(120)</text>
-<rect x="8000" y="3661" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">OccurredAtUtc</text>
-<text x="9355" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">datetime2</text>
-<text x="8110" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">CorrelationId</text>
-<text x="9355" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(120)</text>
-<rect x="8000" y="3745" width="1380" height="42" fill="#F4F7FB"/>
-<text x="8110" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#23344A" text-anchor="start">Result</text>
-<text x="9355" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#63748C" text-anchor="end">nvarchar(50)</text>
-<rect x="140" y="6045" width="9320" height="180" rx="16" fill="#F1F5FA" stroke="#D5DFEB" stroke-width="3"/>
-<text x="180" y="6107" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#29405A" text-anchor="start">PK = PRIMARY KEY    |    FK = FOREIGN KEY (ONLY WITHIN SAME LOGICAL DB)    |    UQ = UNIQUE    |    ARROWS = LOCAL RELATIONSHIPS</text>
-<text x="180" y="6170" font-family="Arial, sans-serif" font-size="31" font-weight="400" fill="#577086" text-anchor="start">TARGET OWNERSHIP PROPOSAL · 18 SQL FK links · Cross-service IDs are scalar references, NOT relational joins.</text>
+<text x="8020" y="3572" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#636363" text-anchor="start">PK</text>
+<text x="8110" y="3572" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#313131" text-anchor="start">Id</text>
+<text x="9355" y="3572" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<rect x="8000" y="3577" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="3614" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">UserId</text>
+<text x="9355" y="3614" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">uniqueidentifier</text>
+<text x="8110" y="3656" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Action</text>
+<text x="9355" y="3656" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(120)</text>
+<rect x="8000" y="3661" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="3698" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">OccurredAtUtc</text>
+<text x="9355" y="3698" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">datetime2</text>
+<text x="8110" y="3740" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">CorrelationId</text>
+<text x="9355" y="3740" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(120)</text>
+<rect x="8000" y="3745" width="1380" height="42" fill="#F7F7F7"/>
+<text x="8110" y="3782" font-family="Arial, sans-serif" font-size="32" font-weight="400" fill="#313131" text-anchor="start">Result</text>
+<text x="9355" y="3782" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#727272" text-anchor="end">nvarchar(50)</text>
+<rect x="140" y="6045" width="9320" height="180" fill="#F7F7F7" stroke="#999999" stroke-width="3"/>
+<text x="180" y="6107" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#3C3C3C" text-anchor="start">PK = PRIMARY KEY    |    FK = FOREIGN KEY (ONLY WITHIN SAME LOGICAL DB)    |    UQ = UNIQUE    |    ARROWS = LOCAL RELATIONSHIPS</text>
+<text x="180" y="6170" font-family="Arial, sans-serif" font-size="31" font-weight="400" fill="#6B6B6B" text-anchor="start">TARGET OWNERSHIP PROPOSAL · 18 SQL FK links · Cross-service IDs are scalar references, NOT relational joins.</text>
 </svg>

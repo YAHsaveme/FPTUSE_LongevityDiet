@@ -69,4 +69,18 @@ foreach($p in $pdfs){
   Assert ($count -eq 1) "$p contains $count pages (expected 1)"
   Write-Host "PASS PDF $p (one page)"
 }
-Write-Host 'PASS: All editable Draw.io / DBML and vector one-page outputs validated.'
+# Monochrome acceptance gate: no blue/red/pastel RGB styles in editable Draw.io or ERD SVG files.
+foreach($name in @('01-c0-system-context.drawio','02-c1-container-architecture.drawio','05-c2-component-architecture.drawio','06-database-target-one-page.svg','06-database-current-one-page.svg')) {
+  $file=Join-Path $dir $name
+  $text=Get-Content -LiteralPath $file -Raw -Encoding UTF8
+  $colors=@([regex]::Matches($text,'#[0-9A-Fa-f]{6}\b'))
+  foreach($match in $colors) {
+    $hex=$match.Value.Substring(1).ToUpperInvariant()
+    Assert ($hex.Substring(0,2) -eq $hex.Substring(2,2) -and $hex.Substring(2,2) -eq $hex.Substring(4,2)) "Non-grayscale color in $name : #$hex"
+  }
+  if($name -like '*.drawio') {
+    Assert ($text -notmatch 'rounded=1;') "Nonstandard rounded node in $name"
+  }
+  Write-Host "PASS MONO $name | RGB grayscale only ($($colors.Count) values)"
+}
+Write-Host 'PASS: All editable one-page Draw.io / DBML sources and monochrome exports validated.'

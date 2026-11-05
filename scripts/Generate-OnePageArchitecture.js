@@ -8,21 +8,23 @@ const fs=require('fs'),path=require('path');
 const root=path.resolve(__dirname,'..');
 const dest=path.join(root,'docs','assignment','one-page');
 fs.mkdirSync(dest,{recursive:true});
+// Standard diagrams.net monochrome drafting rules: white background,
+// squared black outlines, grey secondary labels, and orthogonal relationships.
 const C={
-  ink:'#16243A',muted:'#52637A',line:'#6C819A',bg:'#F9FBFF',
-  blue:'#2563EB',blueBg:'#E8F1FF',purple:'#7C3AED',purpleBg:'#F3EDFF',
-  coral:'#C55A40',coralBg:'#FFF1EB',amber:'#B77916',amberBg:'#FFF5E0',
-  cyan:'#087CA7',cyanBg:'#E4F6FD',green:'#20815B',greenBg:'#E8F8EF',
-  navy:'#405477',navyBg:'#EDF1F8',orange:'#B96218',orangeBg:'#FFF1E2'
+  ink:'#171717',muted:'#555555',line:'#333333',bg:'#FFFFFF',
+  blue:'#333333',blueBg:'#FFFFFF',purple:'#333333',purpleBg:'#FFFFFF',
+  coral:'#333333',coralBg:'#FFFFFF',amber:'#333333',amberBg:'#FFFFFF',
+  cyan:'#333333',cyanBg:'#FFFFFF',green:'#333333',greenBg:'#FFFFFF',
+  navy:'#333333',navyBg:'#FFFFFF',orange:'#333333',orangeBg:'#FFFFFF'
 };
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 function create(name,w,h){
  let ns=[],es=[],id=1,idx=0;
  const uid=()=> 'c'+(++id);
  function shape(label,x,y,sw,sh,opts={}){
-  const key=opts.id||uid();const fill=opts.fill||'#FFFFFF',stroke=opts.stroke||C.line;
+  const key=opts.id||uid();const fill='#FFFFFF',stroke=C.line;
   const fmt=opts.font||30,weight=opts.bold?'1':'0';
-  const style=opts.text?'text;strokeColor=none;fillColor=none;':'rounded=1;arcSize=8;whiteSpace=wrap;html=1;glass=0;';
+  const style=opts.text?'text;strokeColor=none;fillColor=none;':'rounded=0;whiteSpace=wrap;html=1;glass=0;';
   const align=opts.align||'center';
   const common='fontFamily=Arial;fontSize='+fmt+';fontColor='+(opts.color||C.ink)+';fontStyle='+weight+';align='+align+';verticalAlign=middle;spacing=10;whiteSpace=wrap;html=1;';
   const sty=style+common+(opts.text?'':'fillColor='+fill+';strokeColor='+stroke+';strokeWidth='+(opts.strokeWidth||3)+';')+(opts.dashed?'dashed=1;dashPattern=8 6;':'')+(opts.extra||'');
@@ -30,7 +32,7 @@ function create(name,w,h){
   return key;
  }
  function edge(a,b,label='',opts={}){
-  const key=uid(), color=opts.color||C.line;
+  const key=uid(), color=C.line;
   const style='edgeStyle='+(opts.via?'segmentEdgeStyle':'orthogonalEdgeStyle')+';rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor='+color+';strokeWidth='+(opts.width||4)+';endArrow=block;endFill=1;'+(opts.dashed?'dashed=1;dashPattern=9 7;':'')+(opts.exit?'exitX='+opts.exit[0]+';exitY='+opts.exit[1]+';exitPerimeter=0;':'')+(opts.entry?'entryX='+opts.entry[0]+';entryY='+opts.entry[1]+';entryPerimeter=0;':'');
   const waypoints=opts.via?'<Array as="points">'+opts.via.map(([x,y])=>'<mxPoint x="'+x+'" y="'+y+'"/>').join('')+'</Array>':'';
   es.push('<mxCell id="'+key+'" value="'+esc(label)+'" style="'+esc(style)+'" edge="1" parent="1" source="'+a+'" target="'+b+'"><mxGeometry relative="1" as="geometry">'+waypoints+'</mxGeometry></mxCell>');
@@ -47,7 +49,7 @@ function create(name,w,h){
    shape('',100,263,w-200,4,{fill:'#BDD0E8',stroke:'#BDD0E8',strokeWidth:1});
  }
  function save(file){
-  const content='<mxfile host="app.diagrams.net" version="32.6.1"><diagram id="'+name.replaceAll(' ','-')+'" name="'+esc(name)+'"><mxGraphModel dx="1600" dy="900" grid="1" gridSize="20" guides="1" tooltips="1" connect="1" arrows="1" fold="0" page="1" pageScale="1" pageWidth="'+w+'" pageHeight="'+h+'" math="0" shadow="0"><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+es.join('')+ns.join('')+'</root></mxGraphModel></diagram></mxfile>';
+  const content='<mxfile host="app.diagrams.net" version="32.6.10"><diagram id="'+name.replaceAll(' ','-')+'" name="'+esc(name)+'"><mxGraphModel dx="1600" dy="900" grid="1" gridSize="20" guides="1" tooltips="1" connect="1" arrows="1" fold="0" page="1" pageScale="1" pageWidth="'+w+'" pageHeight="'+h+'" math="0" shadow="0"><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+es.join('')+ns.join('')+'</root></mxGraphModel></diagram></mxfile>';
   fs.writeFileSync(path.join(dest,file),content,'utf8');
   console.log(file,'page=',w+'x'+h,'nodes=',ns.length,'edges=',es.length);
  }

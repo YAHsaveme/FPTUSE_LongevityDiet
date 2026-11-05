@@ -2,6 +2,8 @@
 
 **Canonical submission: four main pages (C0, C1, C2, Target ERD).** Current physical ERD is supplemental evidence. Each PDF is exactly one page, with vector text for large-format zoom or printing.
 
+**Visual standard (2026-11-05):** traditional technical diagrams, strictly **monochrome** — white background, black/grey text and borders, square-cornered Draw.io shapes, orthogonal connections, dashed asynchronous lines; no colorful role or database backgrounds. The DBML ERD uses standard rectangular table blocks with dark neutral headers and clear PK/FK labels. All exports must pass the automatic monochrome validator; colors must not be reintroduced by regenerating.
+
 | View | Editable source | One-page export | Scope |
 | --- | --- | --- | --- |
 | C0 · System Context | [Draw.io](01-c0-system-context.drawio) | [PDF](01-c0-system-context.pdf) · [PNG](01-c0-system-context.png) | C4 Level 1 |
