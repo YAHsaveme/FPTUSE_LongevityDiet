@@ -1,128 +1,180 @@
-﻿/* PRN232 course-size C4 diagrams; evidence: actual src + docker-compose, not speculative microservices. */
-const fs=require('fs'),path=require('path'),dest=path.resolve(__dirname,'../docs/assignment/one-page');
-fs.mkdirSync(dest,{recursive:true});
-function esc(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function draw(title,sub,w,h){
- const cells=[],edges=[],idx={};let seq=1;
- function id(){return 'n'+(++seq);}
- function node(key,x,y,ww,hh,title,kind,desc='',config={}){
-  const z={id:id(),x,y,w:ww,h:hh};idx[key]=z;
-  const text='<b>'+esc(title)+'</b><br/><font color="#555555">['+esc(kind)+']'+(desc?'<br/>'+esc(desc):'')+'</font>';
-  const style='rounded=0;html=1;whiteSpace=wrap;fillColor=#FFFFFF;strokeColor=#333333;strokeWidth=3;fontFamily=Arial;fontSize='+(config.font||28)+';fontColor=#222222;align=center;verticalAlign=middle;spacing=12;shadow=0;';
-  cells.push('<mxCell id="'+z.id+'" value="'+esc(text)+'" style="'+esc(style)+'" vertex="1" parent="1"><mxGeometry x="'+x+'" y="'+y+'" width="'+ww+'" height="'+hh+'" as="geometry"/></mxCell>');
-  return key;
+// Native, editable Draw.io diagrams for PRN232 LongevityDiet.
+// Single-page C0/C1/C2 and course ERD sourced directly from DBML.
+// Every module, actor, table field, connector and label is a diagrams.net mxCell.
+'use strict';
+const fs=require('fs'),path=require('path'),OUT=path.resolve(__dirname,'../docs/assignment/one-page');
+const E=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function Diagram(name,subtitle,W,H){
+ const cells=[],edges=[],shapes=new Map();let seq=2;
+ function newid(){return 'd'+(++seq)}
+ function box(k,x,y,w,h,title,kind,description,options){
+  options=options||{};const id=newid(),fill=options.fill||'#FFFFFF';
+  const val=options.raw!==undefined?options.raw:'<b>'+E(title)+'</b>'+(kind?'<br/><font color="#555555">['+E(kind)+']</font>':'')+(description?'<br/><font color="#555555">'+E(description)+'</font>':'');
+  const style='rounded=0;whiteSpace=wrap;html=1;fillColor='+fill+';strokeColor=#222222;strokeWidth='+(options.sw||3)+';fontColor=#222222;fontSize='+(options.font||30)+';fontFamily=Arial;align=center;verticalAlign=middle;spacing=12;shadow=0;glass=0;';
+  cells.push('<mxCell id="'+id+'" value="'+E(val)+'" style="'+E(style)+'" vertex="1" parent="1"><mxGeometry x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" as="geometry"/></mxCell>');
+  shapes.set(k,{id,x,y,w,h});return k;
  }
- function text(x,y,ww,hh,value,size=27){
-  cells.push('<mxCell id="'+id()+'" value="'+esc(value)+'" style="text;html=1;whiteSpace=wrap;fillColor=none;strokeColor=none;fontFamily=Arial;fontSize='+size+';fontColor=#444444;align=left;verticalAlign=middle;spacing=5;" vertex="1" parent="1"><mxGeometry x="'+x+'" y="'+y+'" width="'+ww+'" height="'+hh+'" as="geometry"/></mxCell>');
+ function text(x,y,w,h,content,size,bold,align){
+  size=size||27;align=align||'left';const style='text;html=1;whiteSpace=wrap;fillColor=none;strokeColor=none;fontColor='+ (bold?'#222222':'#555555')+';fontFamily=Arial;fontSize='+size+';fontStyle='+(bold?'1':'0')+';align='+align+';verticalAlign=middle;spacing=1;';
+  cells.push('<mxCell id="'+newid()+'" value="'+E(content)+'" style="'+E(style)+'" vertex="1" parent="1"><mxGeometry x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" as="geometry"/></mxCell>');
  }
- function bound(x,y,ww,hh,title){
-  cells.unshift('<mxCell id="'+id()+'" value="'+esc(title)+'" style="rounded=0;html=1;fillColor=none;strokeColor=#777777;dashed=1;dashPattern=8 6;strokeWidth=2;fontFamily=Arial;fontSize=27;fontStyle=1;align=left;verticalAlign=top;spacing=17;" vertex="1" parent="1"><mxGeometry x="'+x+'" y="'+y+'" width="'+ww+'" height="'+hh+'" as="geometry"/></mxCell>');
+ function actor(k,x,y,name,desc){
+  const id=newid(),w=200,h=240;
+  const style='shape=umlActor;html=1;fillColor=#FFFFFF;strokeColor=#222222;strokeWidth=5;whiteSpace=wrap;';
+  cells.push('<mxCell id="'+id+'" value="" style="'+style+'" vertex="1" parent="1"><mxGeometry x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" as="geometry"/></mxCell>');
+  shapes.set(k,{id,x,y,w,h});
+  text(x-80,y+249,360,55,name,36,true,'center');
+  if(desc)text(x-160,y+312,510,95,desc,26,false,'center');
  }
- function link(a,b,label,ex,ent,via=[],dashed=false){
-  if(!idx[a]||!idx[b])throw Error('No link endpoint '+a+' -> '+b);
-  const points=via.length?'<Array as="points">'+via.map(p=>'<mxPoint x="'+p[0]+'" y="'+p[1]+'"/>').join('')+'</Array>':'';
-  const style='edgeStyle=segmentEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;strokeColor=#333333;strokeWidth=2.8;endArrow=block;endFill=1;fontSize=22;fontFamily=Arial;fontColor=#333333;labelBackgroundColor=#FFFFFF;html=1;'+(dashed?'dashed=1;dashPattern=8 6;':'')+'exitX='+ex[0]+';exitY='+ex[1]+';exitPerimeter=0;entryX='+ent[0]+';entryY='+ent[1]+';entryPerimeter=0;';
-  edges.push('<mxCell id="'+id()+'" value="'+esc(label)+'" style="'+esc(style)+'" edge="1" parent="1" source="'+idx[a].id+'" target="'+idx[b].id+'"><mxGeometry relative="1" as="geometry">'+points+'</mxGeometry></mxCell>');
+ function boundary(x,y,w,h,title){
+  const style='rounded=0;html=1;fillColor=none;strokeColor=#999999;dashed=1;dashPattern=9 7;strokeWidth=2;align=left;verticalAlign=top;fontColor=#333333;fontSize=31;fontStyle=1;fontFamily=Arial;spacing=18;';
+  cells.unshift('<mxCell id="'+newid()+'" value="'+E(title)+'" style="'+E(style)+'" vertex="1" parent="1"><mxGeometry x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" as="geometry"/></mxCell>');
  }
- function save(fn){
-  const xml='<mxfile host="app.diagrams.net" version="32.6.10"><diagram id="'+fn+'" name="'+esc(title)+'"><mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="0" page="1" pageScale="1" pageWidth="'+w+'" pageHeight="'+h+'" math="0" shadow="0"><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+edges.join('')+cells.join('')+'</root></mxGraphModel></diagram></mxfile>';
-  fs.writeFileSync(path.join(dest,fn),xml,'utf8');console.log('DRAWIO',fn,'shapes',cells.length,'links',edges.length);
+ function arrow(src,dst,start,end,way,opt){
+  opt=opt||{};way=way||[];
+  const A=shapes.get(src),B=shapes.get(dst);if(!A||!B)throw Error('Bad link '+src+' -> '+dst);
+  const style='edgeStyle=segmentEdgeStyle;rounded=0;html=1;orthogonalLoop=1;jettySize=auto;strokeColor=#444444;strokeWidth=3;'+(opt.dashed?'dashed=1;dashPattern=9 7;':'')+'startArrow='+(opt.startArrow||'none')+';endArrow='+(opt.endArrow||'block')+';endFill=1;exitX='+start[0]+';exitY='+start[1]+';exitPerimeter=0;entryX='+end[0]+';entryY='+end[1]+';entryPerimeter=0;';
+  const pts=way.length?'<Array as="points">'+way.map(p=>'<mxPoint x="'+p[0]+'" y="'+p[1]+'"/>').join('')+'</Array>':'';
+  edges.push('<mxCell id="'+newid()+'" value="" style="'+E(style)+'" edge="1" parent="1" source="'+A.id+'" target="'+B.id+'"><mxGeometry relative="1" as="geometry">'+pts+'</mxGeometry></mxCell>');
  }
- text(105,50,w-210,105,'<b>'+title+'</b>',53);
- text(115,158,w-230,90,sub,27);
- return {node,text,bound,link,save};
+ function save(filename){
+  const xml='<mxfile host="app.diagrams.net" version="32.6.10"><diagram id="'+E(filename)+'" name="'+E(name)+'"><mxGraphModel dx="1300" dy="860" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="0" page="1" pageScale="1" pageWidth="'+W+'" pageHeight="'+H+'" math="0" shadow="0"><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+edges.join('')+cells.join('')+'</root></mxGraphModel></diagram></mxfile>';
+  fs.writeFileSync(path.join(OUT,filename),xml,'utf8');
+  console.log(filename+': '+cells.length+' shapes, '+edges.length+' arrows');
+ }
+ text(115,60,W-230,115,name,55,true);
+ text(120,179,W-240,78,subtitle,28);
+ return {box,text,actor,boundary,arrow,save};
 }
 {
- const g=draw('C0 — SYSTEM CONTEXT','LongevityDiet • PRN232 • System-level interactions only',3300,1690);
- g.node('member',180,470,720,290,'Member','Person','Sign in • track activities • view educational scores', {font:34});
- g.node('admin',180,1010,720,290,'Administrator','Person','Manage access and monitor the application',{font:34});
- g.node('system',1470,620,1470,635,'LongevityDiet','Software System','Habit tracking, personal profiles, reminders and progress',{font:43});
- g.link('member','system','Uses',[1,.5],[0,.35],[[1150,615],[1150,842]]);
- g.link('admin','system','Administers',[1,.5],[0,.77],[[1270,1155],[1270,1109]]);
- g.text(175,1480,2970,100,'Legend: Person = human role; Software System = the product being studied. No internal APIs, workers or databases at C0.',27);
+ const g=Diagram('C0 - SYSTEM CONTEXT','LongevityDiet | Các vai trò và phần mềm, không mô tả thành phần kỹ thuật bên trong',3400,1850);
+ g.actor('member',350,465,'Member','Đăng nhập, hoạt động và xem gợi ý');
+ g.actor('admin',350,1090,'Administrator','Quản lý tài khoản và hệ thống');
+ g.box('system',1500,690,1390,570,'LongevityDiet','Software System','Hồ sơ, theo dõi hoạt động, nhắc nhở, gợi ý',{font:46});
+ g.arrow('member','system',[1,.55],[0,.25],[[1030,597],[1030,832]]);
+ g.arrow('admin','system',[1,.50],[0,.74],[[1130,1210],[1130,1112]]);
+ g.text(1100,733,330,62,'Sử dụng',30,true,'center');
+ g.text(1145,1010,320,68,'Quản trị',30,true,'center');
+ g.text(180,1655,2960,75,'C4 Level 1: hình người = tác nhân; khung chữ nhật = hệ thống. Không đưa API/Redis/SQL vào sơ đồ bối cảnh.',26);
  g.save('01-c0-system-context.drawio');
 }
 {
- const g=draw('C1 — CONTAINER DIAGRAM','Implemented REST + gRPC + event paths; separate boxes = independent runtime processes',4000,2510);
- g.bound(690,280,3170,2010,'LongevityDiet [Software System]');
- g.node('member',90,690,480,250,'Member','Person','Web browser',{font:32});
- g.node('web',875,570,620,275,'Web UI','Container • React/Vite','Pages and API client',{font:31});
- g.node('api',1750,570,635,275,'REST API','Container • ASP.NET Core','JWT • CRUD • Tracking • Reminders',{font:31});
- g.node('grpc',2900,490,630,255,'Recommendation gRPC','Container • ASP.NET Core','ActivityCoach.Recommend over HTTP/2',{font:28});
- g.node('worker',2900,1100,630,260,'Background Worker','Container • .NET','Processes events and schedules reminders',{font:29});
- g.node('redis',2570,1630,630,255,'Redis Streams','Container • Broker','Event publishing and consuming',{font:29});
- g.node('sql',1680,1650,700,260,'SQL Server','Container • Databases','Identity • Tracking • Worker contexts',{font:29});
- g.link('member','web','Uses',[1,.5],[0,.5]);
- g.link('web','api','JSON / HTTPS',[1,.5],[0,.5]);
- g.link('api','sql','EF Core',[.50,1],[.5,0],[[2065,1260],[2030,1260]]);
- g.link('api','redis','Event publish',[1,.83],[0,.28],[[2500,797],[2500,1701]],true);
- g.link('redis','worker','Consume identity events',[.75,0],[.25,1],[[3042,1505],[3057,1505]],true);
- g.link('worker','redis','Publish notification results',[.85,1],[1,.65],[[3650,1430],[3650,1795]],true);
- g.link('redis','api','Consume notification results',[0,.70],[1,.90],[[2430,1808],[2430,820]],true);
- g.link('worker','sql','DB writes',[.5,1],[.75,1],[[3215,2140],[2205,2140]]);
- g.link('api','grpc','gRPC / HTTP2 activity advice',[1,.25],[0,.53],[[2650,639],[2650,625]]);
- g.text(785,2320,3040,95,'Legend: Solid = synchronous REST/gRPC or EF Core access. Dashed = asynchronous Redis Streams: Identity request → Worker → notification result → API inbox.',24);
+ const g=Diagram('C1 - CONTAINER ARCHITECTURE','Các tiến trình ứng dụng, database và giao tiếp đồng bộ / bất đồng bộ',5100,2750);
+ g.boundary(965,320,3980,2160,'LongevityDiet [Software System]');
+ g.actor('member',275,495,'Member','Người dùng');
+ g.actor('admin',275,1080,'Administrator','Quản trị');
+ g.box('web',1210,700,720,315,'Web Application','React / Vite','Giao diện, API client',{font:37});
+ g.box('api',2290,700,830,315,'REST API','ASP.NET Core / JWT','Auth, Tracking, Notifications, gRPC client',{font:35});
+ g.box('grpc',3700,700,830,315,'Recommendation Service','gRPC HTTP/2','ActivityCoach.Recommend',{font:35});
+ g.box('sql',1210,1600,720,335,'SQL Server','Relational Data Store','Identity DB | Tracking DB | Worker DB',{font:35});
+ g.box('redis',2290,1600,830,335,'Redis Streams','Message Broker','Identity events | Worker results',{font:35});
+ g.box('worker',3700,1600,830,335,'Background Worker','.NET hosted process','Lịch nhắc, tiêu thụ sự kiện, trả kết quả',{font:35});
+ g.arrow('member','web',[1,.50],[0,.27],[[840,615],[840,785]]);
+ g.arrow('admin','web',[1,.50],[0,.78],[[920,1200],[920,945]]);
+ g.arrow('web','api',[1,.5],[0,.5]);
+ g.arrow('api','grpc',[1,.45],[0,.45]);
+ g.arrow('api','sql',[0,.80],[1,.54],[[2105,952],[2105,1781]]);
+ g.arrow('api','redis',[.33,1],[.33,0],[],{dashed:true});
+ g.arrow('redis','api',[.76,0],[.76,1],[],{dashed:true});
+ g.arrow('redis','worker',[1,.34],[0,.34],[],{dashed:true});
+ g.arrow('worker','redis',[0,.72],[1,.72],[],{dashed:true});
+ g.arrow('worker','sql',[.5,1],[.5,1],[[4115,2220],[1570,2220]]);
+ g.text(1950,753,310,60,'HTTPS / JWT',27,true,'center');
+ g.text(3200,753,405,60,'gRPC / HTTP2',27,true,'center');
+ g.text(1935,1320,155,60,'EF Core',27,true,'center');
+ g.text(2350,1250,165,60,'Publish',27,true);
+ g.text(2940,1250,290,60,'Receive',27,true);
+ g.text(3170,1550,440,62,'Consume events',26,true,'center');
+ g.text(3170,1870,440,62,'Publish results',26,true,'center');
+ g.text(2010,2130,1560,65,'Worker cũng ghi lịch nhắc vào SQL Server',26,true,'center');
+ g.text(1050,2510,3770,80,'Đường liền = HTTP/gRPC/SQL. Đường đứt = hai chiều Redis Streams. C1 mô tả container, không đi sâu vào class.',26);
  g.save('02-c1-container-architecture.drawio');
 }
 {
- const g=draw('C2 — REST API COMPONENTS',
-   'One existing container: authenticated REST endpoints, services, persistence and integration adapters',
-   6100,3020);
- g.bound(700,310,4550,2120,'LongevityDiet.API [Container • ASP.NET Core]');
- g.node('web',95,775,485,260,'Web UI','External Container','HTTPS / JWT (example: sign in)',{font:29});
- const cols=[800,1690,2580,3470,4360], width=750;
- const controllers=[
-  ['authc','Auth Controller','Register • login • refresh'],
-  ['profilec','Profile Controller','Profile operations'],
-  ['reminderc','Reminder Notifications Controller','Preferences and inbox'],
-  ['trackingc','Tracking Controller','Activities, goals and scores'],
-  ['recommendc','Recommendation Controller','User-scoped activity guidance']
+ const g=Diagram('C2 - REST API COMPONENTS','Một container: LongevityDiet.API | HTTP -> Controllers -> Services -> Adapter / Database',6700,3300);
+ g.boundary(900,325,4640,2435,'LongevityDiet.API [ASP.NET Core REST API]');
+ g.box('web',145,480,535,240,'Web UI','External Container','Authenticated requests',{font:34});
+ g.box('router',1170,490,4080,145,'Endpoint Routing + JWT Middleware','ASP.NET Core','Authorization | Validation | Rate Limiting',{font:34,fill:'#F2F2F2'});
+ const lanes=[
+  ['auth',1020,'AuthController','AuthenticationService','Sessions / JWT'],
+  ['profile',1880,'ProfileController','ProfileService','Profile'],
+  ['reminder',2740,'RemindersController','ReminderService','Prefs + notifications'],
+  ['tracking',3600,'TrackingController','TrackingService','Activities + LDAS'],
+  ['recommend',4460,'RecommendationController','ActivityCoach gRPC Client','Weekly advice']
  ];
- const services=[
-  ['auths','Authentication Service','JWT and refresh token rules'],
-  ['profiles','Profile Service','Account and profile validation'],
-  ['reminders','Reminder Service','Commit preferences + outbox'],
-  ['trackings','Tracking Service','Own weekly activity summary'],
-  ['grpcclient','ActivityCoach gRPC Client','Typed protobuf client; 3s deadline']
- ];
- controllers.forEach((a,i)=>g.node(a[0],cols[i],680,width,250,a[1],'Component',a[2],{font:28}));
- services.forEach((a,i)=>g.node(a[0],cols[i],1210,width,250,a[1],'Component',a[2],{font:27}));
- g.node('identitydb',1200,1790,1240,250,'Identity Persistence',
-   'Component • EF Core Repository','Users, profile, preferences, sessions, notifications, outbox',{font:27});
- g.node('bridge',2580,1790,750,250,'Identity Redis Bridge',
-   'Component • Hosted Service','Poll outbox; consume results into inbox',{font:26});
- g.node('trackingdb',3470,1790,750,250,'Tracking Persistence',
-   'Component • EF Core DbContext','Activities, goals and partial LDAS',{font:27});
- g.node('grpc',5380,1090,590,280,'Recommendation gRPC',
-   'External Container • HTTP/2','ActivityCoach.Recommend',{font:27});
- g.node('identitysql',1200,2585,1240,215,'Identity SQL Database',
-   'External Container • SQL Server','User and notification ownership',{font:27});
- g.node('redis',2580,2585,750,215,'Redis Streams',
-   'External Container • Broker','Two-way events with Worker',{font:27});
- g.node('trackingsql',3470,2585,750,215,'Tracking SQL Database',
-   'External Container • SQL Server','Activity and scoring ownership',{font:26});
- g.link('web','authc','HTTPS / JWT',[1,.45],[0,.52]);
- for(let i=0;i<5;i++)g.link(controllers[i][0],services[i][0],'Uses',[.5,1],[.5,0]);
- // Top gutter avoids crossing controller boxes and all vertical service arrows.
- g.link('recommendc','trackings','Fetch own weekly summary',[.10,0],[1,.5],
-        [[4300,590],[4300,1335]]);
- g.link('grpcclient','grpc','gRPC / HTTP2',[1,.5],[0,.5],
-        [[5300,1335],[5300,1230]]);
- g.link('auths','identitydb','Identity / token writes',[.5,1],[.19,0],
-        [[1175,1640],[1436,1640]]);
- g.link('profiles','identitydb','Profile reads / writes',[.5,1],[.70,0]);
- g.link('reminders','identitydb','Write preferences + outbox',[.05,1],[.95,0],
-        [[2617,1650],[2378,1650]]);
- g.link('bridge','identitydb','',[0,.5],[1,.5]);
- g.link('trackings','trackingdb','Read / write EF Core',[.5,1],[.5,0]);
- g.link('identitydb','identitysql','EF Core',[.5,1],[.5,0]);
- g.link('bridge','redis','Publish / consume',[.5,1],[.5,0],[],true);
- g.link('trackingdb','trackingsql','EF Core',[.5,1],[.5,0]);
- g.text(820,430,4120,90,
-   'Cross-cutting: JWT authorization • rate limiting • validation • tracing. Only numeric, member-scoped weekly aggregates reach gRPC.',
-   24);
- g.text(740,2860,5270,95,
-   'Identity and Tracking are distinct databases on the same SQL Server host. Dashed = asynchronous Redis Streams; other arrows = synchronous calls. External Worker is shown in C1.',
-   24);
+ lanes.forEach((l,i)=>{
+  const key=l[0],x=l[1];
+  g.box(key+'ctl',x,930,740,245,l[2],'Controller',l[4],{font:30});
+  g.box(key+'svc',x,1510,740,245,l[3],i===4?'gRPC Client':'Application Service',i===4?'Timeout 3s / numeric aggregates':l[4],{font:30});
+  g.arrow('router',key+'ctl',[(x+370-1170)/4080,1],[.5,0]);
+  g.arrow(key+'ctl',key+'svc',[.5,1],[.5,0]);
+ });
+ g.box('identity',1390,2090,1250,260,'Identity Persistence','EF Core DbContext','Users | Tokens | Preferences | Notifications | Outbox',{font:29});
+ g.box('bridge',2830,2090,740,260,'Identity Redis Bridge','Hosted Service','Poll Outbox / Write Inbox',{font:29});
+ g.box('trackingdb',3700,2090,810,260,'Tracking Persistence','EF Core DbContext','ActivityLogs | Goals | AdherenceScores',{font:29});
+ g.box('grpc',5735,1450,780,275,'Recommendation gRPC','External Container','ActivityCoach.Recommend',{font:31});
+ g.box('sqlIdentity',1390,2850,1250,220,'Identity SQL Database','External Data Store','Owned data and local FKs',{font:31});
+ g.box('redis',2830,2850,740,220,'Redis Streams','External Broker','Identity events / Worker results',{font:30});
+ g.box('sqlTracking',3700,2850,810,220,'Tracking SQL Database','External Data Store','Activity / scores',{font:31});
+ g.arrow('web','router',[1,.5],[0,.5]);
+ g.arrow('recommendctl','trackingsvc',[0,.68],[1,.55],[[4400,1096],[4400,1647]]);
+ g.arrow('recommendsvc','grpc',[1,.5],[0,.5]);
+ g.arrow('authsvc','identity',[.7,1],[.2,0],[[1538,1910],[1640,1910]]);
+ g.arrow('profilesvc','identity',[.5,1],[.73,0]);
+ g.arrow('remindersvc','identity',[.1,1],[.94,0],[[2814,1910],[2565,1910]]);
+ g.arrow('bridge','identity',[0,.55],[1,.55]);
+ g.arrow('trackingsvc','trackingdb',[.52,1],[.52,0]);
+ g.arrow('identity','sqlIdentity',[.5,1],[.5,0]);
+ g.arrow('bridge','redis',[.5,1],[.5,0],[],{dashed:true});
+ g.arrow('trackingdb','sqlTracking',[.5,1],[.5,0]);
+ g.text(1000,3160,5490,75,'Đường liền = lời gọi nội bộ / gRPC / EF Core. Đường đứt = Redis events. Worker ngoài phạm vi C2 (xem C1).',26);
  g.save('03-c2-api-components.drawio');
+}
+{
+ const source=fs.readFileSync(path.join(OUT,'04-database-core.dbml'),'utf8');
+ const tables=new Map();
+ for(const m of source.matchAll(/^Table\s+(\w+)\.(\w+)\s*\{([\s\S]*?)^\}/gm)){
+  const fields=[];
+  m[3].split(/\r?\n/).forEach(row=>{
+   const z=row.trim().match(/^(\w+)\s+([a-zA-Z]\w*(?:\([^\)]*\))?)(.*)$/);
+   if(z)fields.push({name:z[1],type:z[2],pk:/\bpk\b/.test(z[3]),unique:/\bunique\b/.test(z[3])});
+  });
+  tables.set(m[1]+'.'+m[2],{db:m[1],name:m[2],fields});
+ }
+ if(tables.size!==10)throw Error('Expected 10 tables in DBML, got '+tables.size);
+ const g=Diagram('CORE DATABASE ERD | EDITABLE DRAW.IO','Nguồn DBML thực tế | 10 bảng tiêu biểu | chỉ FK nội bộ, không nối UserId xuyên cơ sở dữ liệu',5850,3120);
+ g.boundary(105,335,2410,2450,'IDENTITY DB - DbContext Identity');
+ g.boundary(2655,335,1980,2450,'TRACKING DB - DbContext Tracking');
+ g.boundary(4775,335,970,2450,'WORKER DB - DbContext Worker');
+ const pos={
+  'identity.Users':[920,580,900],
+  'identity.UserProfiles':[250,1230,850],
+  'identity.RefreshTokens':[1430,1230,850],
+  'identity.ReminderPreferences':[250,1910,850],
+  'identity.UserNotifications':[1430,1910,850],
+  'tracking.ActivityLogs':[2790,635,790],
+  'tracking.ActivityGoals':[3720,635,790],
+  'tracking.AdherenceScores':[2790,1555,790],
+  'tracking.ScoreDimensions':[3720,1555,790],
+  'worker.ReminderSchedules':[4870,1170,790]
+ };
+ for(const [k,t] of tables){
+  const p=pos[k];if(!p)throw Error('Missing table geometry: '+k);
+  const [x,y,w]=p,rowH=58,h=100+rowH*t.fields.length+22;
+  g.box(k,x,y,w,h,'','','',{raw:'',sw:3});
+  g.box(k+'_head',x+2,y+2,w-4,90,t.name,'','',{fill:'#EEEEEE',font:36,sw:1});
+  t.fields.forEach((f,i)=>{
+   const isFk=(k.startsWith('identity.')&&f.name==='UserId'&&t.name!=='Users')||(k==='tracking.ScoreDimensions'&&f.name==='AdherenceScoreId');
+   const tag=f.pk?(isFk?'PK/FK':'PK'):(isFk?'FK':f.unique?'UQ':'');
+   g.text(x+25,y+102+i*rowH,w-40,rowH,tag+'   '+f.name+' : '+f.type,29,!!f.pk);
+  });
+ }
+ const rel=(from,to,start,end,via,one)=>g.arrow(from,to,start,end,via,{startArrow:'ERone',endArrow:one?'ERone':'ERmany'});
+ rel('identity.Users','identity.UserProfiles',[.15,1],[.55,0],[[1055,1120],[718,1120]],true);
+ rel('identity.Users','identity.RefreshTokens',[.82,1],[.43,0],[[1658,1110],[1796,1110]],false);
+ rel('identity.Users','identity.ReminderPreferences',[0,.42],[0,.55],[[180,770],[180,2130]],true);
+ rel('identity.Users','identity.UserNotifications',[1,.48],[1,.55],[[2390,778],[2390,2130]],false);
+ rel('tracking.AdherenceScores','tracking.ScoreDimensions',[1,.56],[0,.56],[],false);
+ g.text(150,2900,5480,100,'PK = khóa chính | FK = khóa ngoại SQL trong cùng DB | 1:1 hoặc 1:N theo ký hiệu ER. UserId trong Tracking/Worker là tham chiếu logic.',26);
+ g.save('04-database-core.drawio');
 }

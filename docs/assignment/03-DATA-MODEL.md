@@ -5,6 +5,7 @@ It does not demand 33 business tables or six separately deployed databases.
 
 ## Core ERD
 
+[Editable Draw.io](one-page/04-database-core.drawio) |
 [Editable DBML](one-page/04-database-core.dbml) |
 [one-page PDF](one-page/04-database-core.pdf) |
 [vector SVG](one-page/04-database-core.svg).

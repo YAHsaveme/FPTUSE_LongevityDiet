@@ -5,7 +5,7 @@ Student submission entry point: [00-ASSIGNMENT-DOCUMENT.md](00-ASSIGNMENT-DOCUME
 ## Only four primary diagrams
 
 Use [one-page/README.md](one-page/README.md) for editable Draw.io C0/C1/C2,
-DBML core ERD and the matching vector PDFs.
+editable Draw.io core ERD (also sourced from DBML), and the matching vector PDFs.
 
 ## Short reading order
 
