@@ -12,7 +12,8 @@ if($LASTEXITCODE -ne 0){ throw 'Generator failed' }
 $names=@('07-c2-daily-nutrition-target','08-erd-nutrition-profile-safety-target',
 '09-erd-food-daily-plans-target','10-erd-checkins-trends-target','11-daily-care-loop-target',
 '12-erd-cross-domain-foreign-keys-target','13-fk-profile-safety-target',
-'14-fk-food-daily-plans-target','15-fk-checkins-trends-target')
+'14-fk-food-daily-plans-target','15-fk-checkins-trends-target',
+'16-c2-service-dependencies-target')
 foreach($n in $names){
  $src=Join-Path $base ($n+'.drawio')
  $pdf=Join-Path $base ($n+'.pdf')
@@ -25,7 +26,7 @@ foreach($n in $names){
  $ErrorActionPreference=$prior
  if($pdfExit -ne 0 -or !(Test-Path $pdf) -or (Get-Item $pdf).Length -lt 1000){ throw "PDF export failure $n" }
  if($svgExit -ne 0 -or !(Test-Path $svg) -or (Get-Item $svg).Length -lt 1000){ throw "SVG export failure $n" }
- if($n -in @('07-c2-daily-nutrition-target','10-erd-checkins-trends-target','11-daily-care-loop-target','12-erd-cross-domain-foreign-keys-target')){
+ if($true){ # Keep every local visual preview synchronized with the native diagram; avoids stale connector views.
   $png=Join-Path $preview ($n+'.png')
   $prior=$ErrorActionPreference;$ErrorActionPreference='Continue'
   & $Drawio --export --format png --scale 0.9 --output $png $src 2>$null | Out-Null

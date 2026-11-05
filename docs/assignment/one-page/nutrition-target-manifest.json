@@ -2,16 +2,16 @@
   "status": "TARGET_DESIGN_ONLY_NOT_IMPLEMENTED",
   "database": "LongevityTrackingDb",
   "schema": "nutrition",
-  "tableCount": 39,
-  "fkCount": 50,
+  "tableCount": 52,
+  "fkCount": 71,
   "groupCounts": {
-    "PROFILE": 10,
-    "PLANS": 14,
-    "FEEDBACK": 15
+    "PROFILE": 14,
+    "PLANS": 20,
+    "FEEDBACK": 18
   },
   "files": [
     "07-c2-daily-nutrition-target.drawio",
-    "08-nutrition-target-39-tables.dbml",
+    "08-nutrition-target-52-tables.dbml",
     "08-erd-nutrition-profile-safety-target.drawio",
     "09-erd-food-daily-plans-target.drawio",
     "10-erd-checkins-trends-target.drawio",
@@ -19,6 +19,7 @@
     "12-erd-cross-domain-foreign-keys-target.drawio",
     "13-fk-profile-safety-target.drawio",
     "14-fk-food-daily-plans-target.drawio",
-    "15-fk-checkins-trends-target.drawio"
+    "15-fk-checkins-trends-target.drawio",
+    "16-c2-service-dependencies-target.drawio"
   ]
 }

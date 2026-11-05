@@ -43,12 +43,12 @@
 The C2 target reuses the existing ASP.NET Core REST container at :8080, Nginx UI, Redis and Worker. Proposed nutrition tables live in **nutrition schema within existing LongevityTrackingDb** so no fourth database is assumed in C1. This is an implementation proposal, not a schema migration that has already occurred.
 
 ## E. Physical/ERD contract (proposed)
-- **39 proposed tables**, **50 proposed same-database FKs**, split into three clear table-catalog Draw.io views and four separate Draw.io FK audit views (9 + 14 + 14 + 13 arrows). Each arrow has explicit source FK and target PK; the single editable DBML remains the authoritative proposed schema. All referenced PKs and FK columns exist in DBML.
-- Baseline & safety 10: NutritionProfiles, Allergens, UserAllergies, HealthConditions, UserConditions, MedicationContexts, DietPreferences, NutritionGoals, RiskAssessments, HealthConsents.
-- Food & plan 14: Foods, Nutrients, FoodNutrients, FoodAllergens, Recipes, RecipeIngredients, RecipeAllergens, DietPrograms, ProgramVersions, ProgramDays, ScheduledMeals, ScheduledMealItems, MealReplacements, PlanSafetyChecks.
-- Feedback & review 15: MealIntakes, MealIntakeItems, QuestionnaireTemplates, QuestionnaireQuestions, QuestionOptions, CheckinSchedules, CheckinSubmissions, CheckinAnswers, HealthObservations, SymptomReports, NutritionReviews, PlanChangeHistory, PromptDeliveries, SafetyIncidents, NutritionOutbox.
+- **52 proposed tables**, **71 proposed same-database FKs**, split into three clear table-catalog Draw.io views and four separate Draw.io FK audit views (14 + 22 + 16 + 19 arrows). Each arrow has explicit source FK and target PK; the single editable DBML remains the authoritative proposed schema. All referenced PKs and FK columns exist in DBML.
+- Baseline & safety 14: NutritionProfiles, Allergens, UserAllergies, HealthConditions, UserConditions, MedicationContexts, DietPreferences, NutritionGoals, RiskAssessments, HealthConsents, **UserFoodIntolerances, NutritionRiskFactors, AssessmentRiskFactors, ClinicalReviewCases**. Risk classification is multi-label; food intolerances are not confused with IgE-mediated allergies.
+- Food & plan 20: Foods, Nutrients, FoodNutrients, FoodAllergens, Recipes, RecipeIngredients, RecipeAllergens, DietPrograms, ProgramVersions, ProgramDays, ScheduledMeals, ScheduledMealItems, MealReplacements, PlanSafetyChecks, **FoodDataSources, FoodSourceLinks, RecipeCrossContactRisks, NutritionTargetRanges, DayNutrientEstimates, PlanSelectionDecisions**. Each day stores safety/publication status, portions and verified nutrient provenance.
+- Feedback & review 18: MealIntakes, MealIntakeItems, QuestionnaireTemplates, QuestionnaireQuestions, QuestionOptions, CheckinSchedules, CheckinSubmissions, CheckinAnswers, HealthObservations, SymptomReports, NutritionReviews, PlanChangeHistory, PromptDeliveries, SafetyIncidents, NutritionOutbox, **CheckinAnswerSelections, HealthDataAuditEvents, WeeklyAssessments**. Multiple checkbox options, missing/declined responses, observed measurements and weekly reviews are distinct.
 - Identity `Users.Id` lives in `LongevityDietDb`; `NutritionProfiles.UserId` and `MealIntakes.UserId` are **logical cross-database IDs, not enforceable SQL Server FKs**. Prefer authenticated ownership checking in services. No phantom FK lines.
-- Suggested DB constraints: UNIQUE (NutritionProfiles.UserId); UNIQUE (ProgramDays.ProgramVersionId, LocalDate); UNIQUE (ScheduledMeals.ProgramDayId, MealType, LocalTime) where applicable; CHECK amounts nonnegative and severity in an enumerated domain; referential integrity in same database; retention and delete cascade rules must be privacy-reviewed.
+- The **proposed DBML** now explicitly defines UNIQUE (NutritionProfiles.UserId), UNIQUE (ProgramDays.ProgramVersionId, LocalDate), UNIQUE (ScheduledMeals.ProgramDayId, MealType, LocalTime), idempotent delivery keys, essential NOT NULL columns and CHECK rules on positive portions, nutrient range ordering, dates and symptom severity. The constraint values are **design assumptions** subject to clinical/domain review, not applied migrations. Retention, cascade deletion and protected health information access must be privacy-reviewed.
 - Plan a migration strategy, indexes for `(ProfileId,LocalDate)` and `(ProgramVersionId,LocalDate)`, optimistic concurrency, idempotent check-in writes, row ownership checks, encrypted sensitive data, consent audit/versioning and purpose-limited access. **Not yet implemented.**
 
 ## F. Acceptance tests before stating it works
@@ -67,18 +67,20 @@ The C2 target reuses the existing ASP.NET Core REST container at :8080, Nginx UI
 - US FDA, Food Allergies and cross-contact: https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods/food-allergies
 - ADA, Standards of Care in Diabetes 2026 (medical nutrition therapy, shared decision-making): https://diabetesjournals.org/care/article/49/Supplement_1/S89/163932
 - ESPEN 2022 practical guideline on nutrition/hydration in older adults: https://pubmed.ncbi.nlm.nih.gov/35306388/
-- KDIGO 2024 CKD nutrition clinical tailoring: https://doi.org/10.1016/j.kint.2023.10.016
+- NIDDK / NIH, individualized clinical nutrition for chronic kidney disease: https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease
 - NCI NIH ASA24 dietary records and multiple day recall methodology: https://epi.grants.cancer.gov/asa24/respondent/methodology.html
 - WHO digital health intervention taxonomy (self-monitoring, targeted prompts, consent): https://smart.who.int/base/CodeSystem-CDHIv2.html
 
 ## H. Deliverables and implementation status
 - `one-page/07-c2-daily-nutrition-target.drawio` – PROPOSED C2 components and data ownership.
-- `one-page/08-nutrition-target-39-tables.dbml` – source-of-truth candidate FK graph.
+- `one-page/08-nutrition-target-52-tables.dbml` – source-of-truth candidate FK graph with uniqueness constraints for calendar coverage, idempotency and multi-choice answers.
 - `one-page/08-erd-nutrition-profile-safety-target.drawio` – onboarding, restrictions, consent.
 - `one-page/09-erd-food-daily-plans-target.drawio` – food, allergens, recipe, calendar days, multiple meals.
 - `one-page/10-erd-checkins-trends-target.drawio` – intake, questionnaires, symptoms, assessments and reminders.
 - `one-page/11-daily-care-loop-target.drawio` – explicit baseline → schedule → meal → feedback → next day.
-- `one-page/12-erd-cross-domain-foreign-keys-target.drawio` – 13 explicit cross-sheet SQL FK arrows (not cross-database).
-- `one-page/13-fk-profile-safety-target.drawio`, `14-fk-food-daily-plans-target.drawio`, `15-fk-checkins-trends-target.drawio` – 9 + 14 + 14 clear local FK rows. Together with 12, these show **all 50 FKs, one arrow per relationship**, without a tangled connector network.
+- `one-page/12-erd-cross-domain-foreign-keys-target.drawio` – 19 explicit cross-sheet SQL FK arrows (not cross-database).
+- `one-page/13-fk-profile-safety-target.drawio`, `14-fk-food-daily-plans-target.drawio`, `15-fk-checkins-trends-target.drawio` – 14 + 22 + 16 clear local FK rows. Together with 12, these show **all 71 FKs, one arrow per relationship**, without a tangled connector network.
+- `one-page/16-c2-service-dependencies-target.drawio` – 13 explicit inter-component calls showing the safety gate, clinician-review escalation, meal/check-in feedback, future plan revision and Redis/Worker delivery.
 - Existing 01–06 as-is current-code architectural diagrams are intentionally **not overwritten**.
-- **No source API endpoints, EF migrations, food database, clinical rule engine, recommendation model or UI implementation are implied by these new diagrams.**
+- **No source API endpoints, EF migrations, food database, clinical rule engine, recommendation model or UI implementation are implied by these new diagrams.** The 52 tables and 71 FKs are a **design proposal**, not existing SQL schema or medical validation.
+- Explicit system acceptance is still required: zero missing local dates across 7/14/30-day calendar boundaries, mandatory allergy/cross-contact gate before publishing any meal, high-risk hold with human review, correct check-in consent/quiet hours, no mistaken inference from missing answers, preservation of all original historical days, and user-level privacy isolation.

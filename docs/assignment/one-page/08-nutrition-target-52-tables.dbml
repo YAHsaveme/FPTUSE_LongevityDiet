@@ -4,10 +4,13 @@
 Project LongevityDiet_Nutrition_Target { database_type: "SQLServer" }
 Table nutrition.NutritionProfiles {
   Id uniqueidentifier [pk]
-  UserId uniqueidentifier
-  TimeZoneId nvarchar(300)
+  UserId uniqueidentifier [not null]
+  TimeZoneId nvarchar(300) [not null]
   OnboardingState nvarchar(300)
   UpdatedAtUtc datetime2
+  indexes {
+    (UserId) [unique]
+  }
 }
 Table nutrition.Allergens {
   Id uniqueidentifier [pk]
@@ -17,11 +20,14 @@ Table nutrition.Allergens {
 }
 Table nutrition.UserAllergies {
   Id uniqueidentifier [pk]
-  ProfileId uniqueidentifier
-  AllergenId uniqueidentifier
-  Status nvarchar(300)
+  ProfileId uniqueidentifier [not null]
+  AllergenId uniqueidentifier [not null]
+  Status nvarchar(300) [not null]
   Severity nvarchar(300)
   VerifiedAtUtc datetime2
+  indexes {
+    (ProfileId, AllergenId) [unique]
+  }
 }
 Table nutrition.HealthConditions {
   Id uniqueidentifier [pk]
@@ -35,12 +41,15 @@ Table nutrition.UserConditions {
   ConditionId uniqueidentifier
   SelfReported bit
   ReviewedAtUtc datetime2
+  indexes {
+    (ProfileId, ConditionId) [unique]
+  }
 }
 Table nutrition.MedicationContexts {
   Id uniqueidentifier [pk]
   ProfileId uniqueidentifier
   DrugName nvarchar(300)
-  MealTimingNotes nvarchar(300)
+  MealTimingNotes nvarchar(max)
   Verified bit
 }
 Table nutrition.DietPreferences {
@@ -63,89 +72,179 @@ Table nutrition.RiskAssessments {
   RiskTier nvarchar(300)
   PolicyVersion nvarchar(300)
   ReviewStatus nvarchar(300)
+  RiskTagsJson nvarchar(max)
+  AssessedAtUtc datetime2
+  EscalationState nvarchar(300)
 }
 Table nutrition.HealthConsents {
   Id uniqueidentifier [pk]
-  ProfileId uniqueidentifier
-  Purpose nvarchar(300)
-  GrantedAtUtc datetime2
+  ProfileId uniqueidentifier [not null]
+  Purpose nvarchar(300) [not null]
+  GrantedAtUtc datetime2 [not null]
   RevokedAtUtc datetime2
+}
+Table nutrition.UserFoodIntolerances {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier [not null]
+  FoodId uniqueidentifier
+  Label nvarchar(300)
+  Reaction nvarchar(300)
+  EvidenceState nvarchar(300) [not null]
+  ReviewedAtUtc datetime2
+  indexes {
+    (ProfileId, FoodId) [unique]
+  }
+}
+Table nutrition.NutritionRiskFactors {
+  Id uniqueidentifier [pk]
+  Code nvarchar(300)
+  Category nvarchar(300)
+  Description nvarchar(300)
+  RuleSource nvarchar(300)
+}
+Table nutrition.AssessmentRiskFactors {
+  Id uniqueidentifier [pk]
+  AssessmentId uniqueidentifier
+  FactorId uniqueidentifier
+  EvidenceState nvarchar(300)
+  Reason nvarchar(300)
+  indexes {
+    (AssessmentId, FactorId) [unique]
+  }
+}
+Table nutrition.ClinicalReviewCases {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier [not null]
+  AssessmentId uniqueidentifier
+  ReasonCode nvarchar(300)
+  Status nvarchar(300) [not null]
+  ReviewerRef nvarchar(300)
+  ReviewedAtUtc datetime2
 }
 Table nutrition.Foods {
   Id uniqueidentifier [pk]
-  LocalName nvarchar(300)
+  LocalName nvarchar(300) [not null]
   Region nvarchar(300)
   SourceVersion nvarchar(300)
   Verified bit
+  indexes {
+    (LocalName, Region) [unique]
+  }
 }
 Table nutrition.Nutrients {
   Id uniqueidentifier [pk]
   Code nvarchar(300)
   Unit nvarchar(300)
   SourceVersion nvarchar(300)
+  indexes {
+    (Code) [unique]
+  }
 }
 Table nutrition.FoodNutrients {
   Id uniqueidentifier [pk]
-  FoodId uniqueidentifier
-  NutrientId uniqueidentifier
-  AmountPer100g decimal(10,3)
+  FoodId uniqueidentifier [not null]
+  NutrientId uniqueidentifier [not null]
+  AmountPer100g decimal(10,3) [not null]
+  indexes {
+    (FoodId, NutrientId) [unique]
+  }
+  checks {
+    `AmountPer100g >= 0`
+  }
 }
 Table nutrition.FoodAllergens {
   Id uniqueidentifier [pk]
-  FoodId uniqueidentifier
-  AllergenId uniqueidentifier
-  Presence nvarchar(300)
+  FoodId uniqueidentifier [not null]
+  AllergenId uniqueidentifier [not null]
+  Presence nvarchar(300) [not null]
   SourceConfidence nvarchar(300)
+  indexes {
+    (FoodId, AllergenId) [unique]
+  }
 }
 Table nutrition.Recipes {
   Id uniqueidentifier [pk]
-  LocalName nvarchar(300)
+  LocalName nvarchar(300) [not null]
   ServingYield decimal(10,3)
   Verified bit
 }
 Table nutrition.RecipeIngredients {
   Id uniqueidentifier [pk]
-  RecipeId uniqueidentifier
-  FoodId uniqueidentifier
-  AmountGrams decimal(10,3)
+  RecipeId uniqueidentifier [not null]
+  FoodId uniqueidentifier [not null]
+  AmountGrams decimal(10,3) [not null]
+  indexes {
+    (RecipeId, FoodId) [unique]
+  }
+  checks {
+    `AmountGrams > 0`
+  }
 }
 Table nutrition.RecipeAllergens {
   Id uniqueidentifier [pk]
   RecipeId uniqueidentifier
   AllergenId uniqueidentifier
   Presence nvarchar(300)
+  indexes {
+    (RecipeId, AllergenId) [unique]
+  }
 }
 Table nutrition.DietPrograms {
   Id uniqueidentifier [pk]
-  ProfileId uniqueidentifier
-  StartLocalDate date
-  EndLocalDate date
-  Status nvarchar(300)
+  ProfileId uniqueidentifier [not null]
+  StartLocalDate date [not null]
+  EndLocalDate date [not null]
+  Status nvarchar(300) [not null]
+  checks {
+    `StartLocalDate <= EndLocalDate`
+  }
 }
 Table nutrition.ProgramVersions {
   Id uniqueidentifier [pk]
-  ProgramId uniqueidentifier
-  VersionNumber int
+  ProgramId uniqueidentifier [not null]
+  VersionNumber int [not null]
   RulesVersion nvarchar(300)
-  ApprovalState nvarchar(300)
+  ApprovalState nvarchar(300) [not null]
+  EffectiveFromLocalDate date
+  ApprovedAtUtc datetime2
+  indexes {
+    (ProgramId, VersionNumber) [unique]
+  }
 }
 Table nutrition.ProgramDays {
   Id uniqueidentifier [pk]
-  ProgramVersionId uniqueidentifier
-  LocalDate date
-  TimeZoneId nvarchar(300)
+  ProgramVersionId uniqueidentifier [not null]
+  LocalDate date [not null]
+  TimeZoneId nvarchar(300) [not null]
+  PublicationState nvarchar(300) [not null]
+  SafetyStatus nvarchar(300) [not null]
+  GeneratedAtUtc datetime2
+  indexes {
+    (ProgramVersionId, LocalDate) [unique]
+  }
 }
 Table nutrition.ScheduledMeals {
   Id uniqueidentifier [pk]
-  ProgramDayId uniqueidentifier
-  MealType nvarchar(300)
-  LocalTime time
+  ProgramDayId uniqueidentifier [not null]
+  MealType nvarchar(300) [not null]
+  LocalTime time [not null]
+  Status nvarchar(300)
+  TargetEnergyKcal decimal(10,3)
+  indexes {
+    (ProgramDayId, MealType, LocalTime) [unique]
+  }
 }
 Table nutrition.ScheduledMealItems {
   Id uniqueidentifier [pk]
-  ScheduledMealId uniqueidentifier
-  RecipeId uniqueidentifier
-  ServingQuantity decimal(10,3)
+  ScheduledMealId uniqueidentifier [not null]
+  RecipeId uniqueidentifier [not null]
+  ServingQuantity decimal(10,3) [not null]
+  PortionUnit nvarchar(300) [not null]
+  IngredientSnapshotVersion nvarchar(300)
+  AllergenGate nvarchar(300) [not null]
+  checks {
+    `ServingQuantity > 0`
+  }
 }
 Table nutrition.MealReplacements {
   Id uniqueidentifier [pk]
@@ -155,23 +254,87 @@ Table nutrition.MealReplacements {
 }
 Table nutrition.PlanSafetyChecks {
   Id uniqueidentifier [pk]
-  ProgramVersionId uniqueidentifier
-  CheckCode nvarchar(300)
-  Result nvarchar(300)
+  ProgramVersionId uniqueidentifier [not null]
+  CheckCode nvarchar(300) [not null]
+  Result nvarchar(300) [not null]
   PolicyVersion nvarchar(300)
+}
+Table nutrition.FoodDataSources {
+  Id uniqueidentifier [pk]
+  Citation nvarchar(300)
+  Version nvarchar(300)
+  Locale nvarchar(300)
+  License nvarchar(300)
+  ReviewedAtUtc datetime2
+}
+Table nutrition.FoodSourceLinks {
+  Id uniqueidentifier [pk]
+  FoodId uniqueidentifier
+  SourceId uniqueidentifier
+  Confidence nvarchar(300)
+  VerifiedAtUtc datetime2
+}
+Table nutrition.RecipeCrossContactRisks {
+  Id uniqueidentifier [pk]
+  RecipeId uniqueidentifier [not null]
+  AllergenId uniqueidentifier [not null]
+  RiskState nvarchar(300) [not null]
+  Mitigation nvarchar(300)
+  ReviewedAtUtc datetime2
+  indexes {
+    (RecipeId, AllergenId) [unique]
+  }
+}
+Table nutrition.NutritionTargetRanges {
+  Id uniqueidentifier [pk]
+  ProgramVersionId uniqueidentifier
+  NutrientId uniqueidentifier
+  LowerPerDay decimal(10,3)
+  UpperPerDay decimal(10,3)
+  RuleReference nvarchar(300)
+  ApprovalState nvarchar(300)
+  checks {
+    `LowerPerDay >= 0`
+    `UpperPerDay >= LowerPerDay`
+  }
+}
+Table nutrition.DayNutrientEstimates {
+  Id uniqueidentifier [pk]
+  ProgramDayId uniqueidentifier
+  NutrientId uniqueidentifier
+  TotalAmount decimal(10,3)
+  Completeness nvarchar(300)
+  CalculatedAtUtc datetime2
+  indexes {
+    (ProgramDayId, NutrientId) [unique]
+  }
+  checks {
+    `TotalAmount >= 0`
+  }
+}
+Table nutrition.PlanSelectionDecisions {
+  Id uniqueidentifier [pk]
+  ScheduledMealItemId uniqueidentifier [not null]
+  AssessmentId uniqueidentifier
+  Allowed bit [not null]
+  RuleVersion nvarchar(300)
+  ReasonCode nvarchar(300)
 }
 Table nutrition.MealIntakes {
   Id uniqueidentifier [pk]
-  ProgramDayId uniqueidentifier
-  UserId uniqueidentifier
+  ProgramDayId uniqueidentifier [not null]
+  UserId uniqueidentifier [not null]
   EatenAtUtc datetime2
-  Status nvarchar(300)
+  Status nvarchar(300) [not null]
 }
 Table nutrition.MealIntakeItems {
   Id uniqueidentifier [pk]
   MealIntakeId uniqueidentifier
   FoodId uniqueidentifier
   AmountGrams decimal(10,3)
+  checks {
+    `AmountGrams >= 0`
+  }
 }
 Table nutrition.QuestionnaireTemplates {
   Id uniqueidentifier [pk]
@@ -183,9 +346,12 @@ Table nutrition.QuestionnaireTemplates {
 Table nutrition.QuestionnaireQuestions {
   Id uniqueidentifier [pk]
   TemplateId uniqueidentifier
-  Prompt nvarchar(300)
+  Prompt nvarchar(max)
   InputType nvarchar(300)
   SortOrder int
+  indexes {
+    (TemplateId, SortOrder) [unique]
+  }
 }
 Table nutrition.QuestionOptions {
   Id uniqueidentifier [pk]
@@ -202,22 +368,30 @@ Table nutrition.CheckinSchedules {
   QuietStart time
   QuietEnd time
   MaxPerDay int
+  checks {
+    `MaxPerDay >= 0`
+    `MaxPerDay <= 12`
+  }
 }
 Table nutrition.CheckinSubmissions {
   Id uniqueidentifier [pk]
-  ProfileId uniqueidentifier
-  TemplateId uniqueidentifier
-  LocalDate date
-  Phase nvarchar(300)
+  ProfileId uniqueidentifier [not null]
+  TemplateId uniqueidentifier [not null]
+  LocalDate date [not null]
+  Phase nvarchar(300) [not null]
+  SubmittedAtUtc datetime2
+  ResponseStatus nvarchar(300) [not null]
 }
 Table nutrition.CheckinAnswers {
   Id uniqueidentifier [pk]
-  SubmissionId uniqueidentifier
-  QuestionId uniqueidentifier
+  SubmissionId uniqueidentifier [not null]
+  QuestionId uniqueidentifier [not null]
   OptionId uniqueidentifier
   NumericValue decimal(10,3)
   BooleanValue bit
-  FreeText nvarchar(300)
+  FreeText nvarchar(max)
+  AnswerState nvarchar(300) [not null]
+  RecordedAtUtc datetime2
 }
 Table nutrition.HealthObservations {
   Id uniqueidentifier [pk]
@@ -227,6 +401,8 @@ Table nutrition.HealthObservations {
   MetricValue decimal(10,3)
   Unit nvarchar(300)
   MeasuredAtUtc datetime2
+  SourceType nvarchar(300)
+  QualityFlag nvarchar(300)
 }
 Table nutrition.SymptomReports {
   Id uniqueidentifier [pk]
@@ -235,13 +411,19 @@ Table nutrition.SymptomReports {
   SymptomCode nvarchar(300)
   Severity int
   OnsetAtUtc datetime2
+  checks {
+    `Severity >= 0`
+    `Severity <= 5`
+  }
 }
 Table nutrition.NutritionReviews {
   Id uniqueidentifier [pk]
-  ProfileId uniqueidentifier
-  ProgramVersionId uniqueidentifier
-  ReviewStatus nvarchar(300)
+  ProfileId uniqueidentifier [not null]
+  ProgramVersionId uniqueidentifier [not null]
+  ReviewStatus nvarchar(300) [not null]
   ReviewedAtUtc datetime2
+  DecisionReason nvarchar(300)
+  DataCoveragePercent decimal(10,3)
 }
 Table nutrition.PlanChangeHistory {
   Id uniqueidentifier [pk]
@@ -252,11 +434,16 @@ Table nutrition.PlanChangeHistory {
 }
 Table nutrition.PromptDeliveries {
   Id uniqueidentifier [pk]
-  ScheduleId uniqueidentifier
+  ScheduleId uniqueidentifier [not null]
   SentAtUtc datetime2
   Channel nvarchar(300)
   DeliveryStatus nvarchar(300)
-  IdempotencyKey nvarchar(300)
+  IdempotencyKey nvarchar(300) [not null]
+  RetryCount int
+  QuietHoursObserved bit
+  indexes {
+    (IdempotencyKey) [unique]
+  }
 }
 Table nutrition.SafetyIncidents {
   Id uniqueidentifier [pk]
@@ -264,6 +451,8 @@ Table nutrition.SafetyIncidents {
   SubmissionId uniqueidentifier
   Severity nvarchar(300)
   EscalatedAtUtc datetime2
+  ActionState nvarchar(300)
+  ResolvedAtUtc datetime2
 }
 Table nutrition.NutritionOutbox {
   Id uniqueidentifier [pk]
@@ -271,6 +460,31 @@ Table nutrition.NutritionOutbox {
   EventType nvarchar(300)
   CreatedAtUtc datetime2
   PublishedAtUtc datetime2
+}
+Table nutrition.CheckinAnswerSelections {
+  Id uniqueidentifier [pk]
+  AnswerId uniqueidentifier [not null]
+  OptionId uniqueidentifier [not null]
+  SelectedAtUtc datetime2
+  indexes {
+    (AnswerId, OptionId) [unique]
+  }
+}
+Table nutrition.HealthDataAuditEvents {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  ActorUserId uniqueidentifier
+  Action nvarchar(300)
+  Purpose nvarchar(300)
+  OccurredAtUtc datetime2
+}
+Table nutrition.WeeklyAssessments {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  ProgramVersionId uniqueidentifier
+  StartLocalDate date
+  EndLocalDate date
+  ResultState nvarchar(300)
 }
 Ref: nutrition.UserAllergies.ProfileId > nutrition.NutritionProfiles.Id
 Ref: nutrition.UserAllergies.AllergenId > nutrition.Allergens.Id
@@ -281,6 +495,12 @@ Ref: nutrition.DietPreferences.ProfileId > nutrition.NutritionProfiles.Id
 Ref: nutrition.NutritionGoals.ProfileId > nutrition.NutritionProfiles.Id
 Ref: nutrition.RiskAssessments.ProfileId > nutrition.NutritionProfiles.Id
 Ref: nutrition.HealthConsents.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.UserFoodIntolerances.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.UserFoodIntolerances.FoodId > nutrition.Foods.Id
+Ref: nutrition.AssessmentRiskFactors.AssessmentId > nutrition.RiskAssessments.Id
+Ref: nutrition.AssessmentRiskFactors.FactorId > nutrition.NutritionRiskFactors.Id
+Ref: nutrition.ClinicalReviewCases.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.ClinicalReviewCases.AssessmentId > nutrition.RiskAssessments.Id
 Ref: nutrition.FoodNutrients.FoodId > nutrition.Foods.Id
 Ref: nutrition.FoodNutrients.NutrientId > nutrition.Nutrients.Id
 Ref: nutrition.FoodAllergens.FoodId > nutrition.Foods.Id
@@ -298,6 +518,16 @@ Ref: nutrition.ScheduledMealItems.RecipeId > nutrition.Recipes.Id
 Ref: nutrition.MealReplacements.ScheduledMealItemId > nutrition.ScheduledMealItems.Id
 Ref: nutrition.MealReplacements.RecipeId > nutrition.Recipes.Id
 Ref: nutrition.PlanSafetyChecks.ProgramVersionId > nutrition.ProgramVersions.Id
+Ref: nutrition.FoodSourceLinks.FoodId > nutrition.Foods.Id
+Ref: nutrition.FoodSourceLinks.SourceId > nutrition.FoodDataSources.Id
+Ref: nutrition.RecipeCrossContactRisks.RecipeId > nutrition.Recipes.Id
+Ref: nutrition.RecipeCrossContactRisks.AllergenId > nutrition.Allergens.Id
+Ref: nutrition.NutritionTargetRanges.ProgramVersionId > nutrition.ProgramVersions.Id
+Ref: nutrition.NutritionTargetRanges.NutrientId > nutrition.Nutrients.Id
+Ref: nutrition.DayNutrientEstimates.ProgramDayId > nutrition.ProgramDays.Id
+Ref: nutrition.DayNutrientEstimates.NutrientId > nutrition.Nutrients.Id
+Ref: nutrition.PlanSelectionDecisions.ScheduledMealItemId > nutrition.ScheduledMealItems.Id
+Ref: nutrition.PlanSelectionDecisions.AssessmentId > nutrition.RiskAssessments.Id
 Ref: nutrition.MealIntakes.ProgramDayId > nutrition.ProgramDays.Id
 Ref: nutrition.MealIntakeItems.MealIntakeId > nutrition.MealIntakes.Id
 Ref: nutrition.MealIntakeItems.FoodId > nutrition.Foods.Id
@@ -322,3 +552,8 @@ Ref: nutrition.PlanChangeHistory.ToVersionId > nutrition.ProgramVersions.Id
 Ref: nutrition.PromptDeliveries.ScheduleId > nutrition.CheckinSchedules.Id
 Ref: nutrition.SafetyIncidents.ProfileId > nutrition.NutritionProfiles.Id
 Ref: nutrition.SafetyIncidents.SubmissionId > nutrition.CheckinSubmissions.Id
+Ref: nutrition.CheckinAnswerSelections.AnswerId > nutrition.CheckinAnswers.Id
+Ref: nutrition.CheckinAnswerSelections.OptionId > nutrition.QuestionOptions.Id
+Ref: nutrition.HealthDataAuditEvents.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.WeeklyAssessments.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.WeeklyAssessments.ProgramVersionId > nutrition.ProgramVersions.Id

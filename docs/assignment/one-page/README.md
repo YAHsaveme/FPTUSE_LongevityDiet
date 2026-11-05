@@ -99,25 +99,26 @@ D:\PRN232\_LongevityDiet_C1C2_ERD_Audit_2026-11-05.
 ## Research-backed daily nutrition design — PROPOSAL, NOT RUNNING CODE
 
 **Do not confuse these files with the implemented 01–06 views.** The actual EF Core
-model remains 18 deployed/mapped table types; the following 39 nutrition tables,
-50 FKs and 7 REST feature areas are design targets requiring code, migrations,
+model remains 18 mapped EF Core table types; the following **52 proposed nutrition tables**,
+**71 proposed FKs** and seven REST feature areas are design targets requiring code, migrations,
 food-source verification, user testing and professional review before use.
 
 | Proposed artifact | Editable Draw.io | Printable PDF |
 | --- | --- | --- |
 | Nutrition C2 (7 API feature lanes, data ownership) | [07 C2 target](07-c2-daily-nutrition-target.drawio) | [PDF](07-c2-daily-nutrition-target.pdf) |
-| Baseline, allergy, safety & consent (10 table fields) | [08 Table Catalog](08-erd-nutrition-profile-safety-target.drawio) | [PDF](08-erd-nutrition-profile-safety-target.pdf) |
-| Foods, recipes & every-day plan (14 table fields) | [09 Table Catalog](09-erd-food-daily-plans-target.drawio) | [PDF](09-erd-food-daily-plans-target.pdf) |
-| Meal logs, questionnaires & trends (15 table fields) | [10 Table Catalog](10-erd-checkins-trends-target.drawio) | [PDF](10-erd-checkins-trends-target.pdf) |
+| Baseline, allergy, safety & consent (14 table models) | [08 Table Catalog](08-erd-nutrition-profile-safety-target.drawio) | [PDF](08-erd-nutrition-profile-safety-target.pdf) |
+| Foods, recipes & every-day plan (20 table models) | [09 Table Catalog](09-erd-food-daily-plans-target.drawio) | [PDF](09-erd-food-daily-plans-target.pdf) |
+| Meal logs, questionnaires & trends (18 table models) | [10 Table Catalog](10-erd-checkins-trends-target.drawio) | [PDF](10-erd-checkins-trends-target.pdf) |
 | Baseline → every day → feedback → future plan loop | [11 Daily Care Loop](11-daily-care-loop-target.drawio) | [PDF](11-daily-care-loop-target.pdf) |
-| Cross-sheet FK audit, 13 arrows | [12 Cross-sheet FKs](12-erd-cross-domain-foreign-keys-target.drawio) | [PDF](12-erd-cross-domain-foreign-keys-target.pdf) |
-| Profile/safety local FK audit, 9 arrows | [13 Profile FKs](13-fk-profile-safety-target.drawio) | [PDF](13-fk-profile-safety-target.pdf) |
-| Food/plan local FK audit, 14 arrows | [14 Food FKs](14-fk-food-daily-plans-target.drawio) | [PDF](14-fk-food-daily-plans-target.pdf) |
-| Check-in/trend local FK audit, 14 arrows | [15 Tracking FKs](15-fk-checkins-trends-target.drawio) | [PDF](15-fk-checkins-trends-target.pdf) |
+| Cross-sheet FK audit, 19 arrows | [12 Cross-sheet FKs](12-erd-cross-domain-foreign-keys-target.drawio) | [PDF](12-erd-cross-domain-foreign-keys-target.pdf) |
+| Profile/safety local FK audit, 14 arrows | [13 Profile FKs](13-fk-profile-safety-target.drawio) | [PDF](13-fk-profile-safety-target.pdf) |
+| Food/plan local FK audit, 22 arrows | [14 Food FKs](14-fk-food-daily-plans-target.drawio) | [PDF](14-fk-food-daily-plans-target.pdf) |
+| Check-in/trend local FK audit, 16 arrows | [15 Tracking FKs](15-fk-checkins-trends-target.drawio) | [PDF](15-fk-checkins-trends-target.pdf) |
+| C2 service-to-service call contracts (13 arrows) | [16 Dependencies](16-c2-service-dependencies-target.drawio) | [PDF](16-c2-service-dependencies-target.pdf) |
 
-The **[39-table target DBML](08-nutrition-target-39-tables.dbml)** is the single
-complete FK reference (50 proposed FKs). Detailed table catalogs deliberately
-have **no connector spaghetti**. Instead, 12–15 enumerate **all 50 FK arrows**
+The **[52-table target DBML](08-nutrition-target-52-tables.dbml)** is the single
+complete FK reference (71 proposed FKs). Detailed table catalogs deliberately
+have no crossing connector spaghetti. Instead, 12–15 enumerate **all 71 FK arrows**
 with explicit, attached child and parent endpoints, one relationship per row.
 `UserId` pointing to Identity is a logical reference, not a cross-database FK.
 
