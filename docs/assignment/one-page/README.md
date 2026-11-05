@@ -1,62 +1,79 @@
-# LongevityDiet PRN232 — Draw.io diagrams (editable)
+# PRN232 LongevityDiet — four architecture/data views + one end-to-end sequence
 
-All FOUR submission diagrams are **native diagrams.net / Draw.io files** in
-this folder, on one large page each. Use Draw.io Desktop to open, zoom,
-select, edit and reroute the shapes and arrows.
+Five **native, editable, one-page Draw.io diagrams**. C0/C1/C2 use the
+appropriate C4 abstraction levels; the separate sequence view is for
+following requests, responses and asynchronous events from beginning to end.
 
-| View | Editable Draw.io | One-page PDF | Content |
+| View | Edit in Draw.io | PDF | Purpose |
 | --- | --- | --- | --- |
-| C0 — System Context | [01-c0-system-context.drawio](01-c0-system-context.drawio) | [PDF](01-c0-system-context.pdf) | Visible UML stick-figure actors Member + Administrator, and one LongevityDiet system |
-| C1 — Container Architecture | [02-c1-container-architecture.drawio](02-c1-container-architecture.drawio) | [PDF](02-c1-container-architecture.pdf) | Web, REST API, gRPC, SQL Server, Redis Streams and Worker; synchronous and asynchronous connections |
-| C2 — REST API Components | [03-c2-api-components.drawio](03-c2-api-components.drawio) | [PDF](03-c2-api-components.pdf) | One ASP.NET Core API container, five Controller/Service modules, EF Core and gRPC/Redis adapters |
-| Core Database ERD | [04-database-core.drawio](04-database-core.drawio) | [PDF](04-database-core.pdf) | 10 representative entity tables, native editable table cells and only local database relationships |
+| C0 context | [01-c0-system-context.drawio](01-c0-system-context.drawio) | [PDF](01-c0-system-context.pdf) | Real UML actor glyphs: Member, Administrator; one system |
+| C1 containers | [02-c1-container-architecture.drawio](02-c1-container-architecture.drawio) | [PDF](02-c1-container-architecture.pdf) | Web, REST, gRPC, SQL Server, Redis Streams, Worker |
+| C2 components | [03-c2-api-components.drawio](03-c2-api-components.drawio) | [PDF](03-c2-api-components.pdf) | Modules within LongevityDiet.API only; routing, controllers, services, persistence and adapters |
+| Core ERD | [04-database-core.drawio](04-database-core.drawio) | [PDF](04-database-core.pdf) | 10 representative real entity tables; 5 local FK relationships |
+| **End-to-end execution** | [05-runtime-end-to-end.drawio](05-runtime-end-to-end.drawio) | [PDF](05-runtime-end-to-end.pdf) | **10 explicit synchronous steps + 19 asynchronous steps**, including return paths |
 
-**DBML source of truth for the ERD:** [04-database-core.dbml](04-database-core.dbml).
-You can open it in VS Code using dbdiagram's DBML extension. The separate
-[04-database-core.svg](04-database-core.svg) is a vector rendering of that source.
+The editable [04-database-core.dbml](04-database-core.dbml) remains the
+**source of truth for the simplified ERD**. The complete physical schema comes
+from the 18 mapped entity tables and EF Core migrations, **not** this teaching
+view. No FK between separate physical databases is claimed.
 
-## What makes this different from the previous diagrams?
+## How to read the models
 
-- Black/white technical notation; square-cornered native Draw.io shapes, no AI-generated flattened image.
-- Actual Draw.io UML Actor glyphs are present in C0 and C1.
-- Orthogonal arrows are connected to real shapes through fixed ports and explicit routing lanes.
-- Arrow labels and explanatory text sit in separate whitespace, not on top of connectors.
-- C0 shows only people and the software system.
-- C1 shows runtime containers, including a real HTTP/2 REST-to-gRPC call.
-- C2 covers **one container** (LongevityDiet.API), not six hypothetical microservices.
-- The ERD is a **ten-table teaching view**, not an entire physical SQL migration. The source code has 18 mapped EF Core tables and retains every migration and Outbox/Inbox table. No cross-database UserId foreign keys are claimed.
+**C0:** Member and Administrator use the LongevityDiet software system.
+No internal code, Redis or SQL belongs in the context diagram.
 
-## Verification
+**C1:** Solid lines show HTTP, gRPC and SQL requests/dependencies; responses
+are implied for synchronous calls. Dashed lines show Redis Streams publish
+and consume directions. The Worker is a separate runtime container.
 
-Run from the repository root:
+**C2:** Exactly one container (LongevityDiet.API) is decomposed:
+- The authentication endpoints are anonymous; protected member endpoints
+  require JWT, with rate limits and authorization rules.
+- Auth and Profile use Identity persistence.
+- ReminderService commits preferences + IdentityOutbox in the Identity DB;
+  IdentityRedisBridge publishes events and consumes notification results.
+- TrackingService uses Tracking DB.
+- RecommendationController reads the authenticated member's weekly summary
+  via TrackingService, then uses the typed ActivityCoach gRPC client.
+
+**Execution sequence:** View [05-runtime-end-to-end.drawio](05-runtime-end-to-end.drawio)
+for the entire request and return path instead of adding sequencing details
+to C4.
+- A (10 steps): Member → Web → authenticated REST → TrackingService →
+  Tracking DB → REST → gRPC (HTTP/2) → REST → Web → Member.
+- B (19 steps): Member → Web → REST → Identity DB (preferences + outbox) →
+  Redis → Worker → Worker DB → WorkerOutbox → Redis → IdentityRedisBridge →
+  IdentityInbox + notification → Web polls REST → Member.
+  It is **asynchronous**, so a reminder can be delivered later.
+
+## Regenerate and check
+
+In a PowerShell window at the repo root:
 
     powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Export-CourseDiagrams.ps1
+    node .\scripts\Validate-CourseLinks.js
 
-The command regenerates Draw.io from the vetted project model and the actual
-DBML, uses Draw.io Desktop to export all four PDFs, then checks:
+The export uses Draw.io Desktop (not an AI-generated raster image), then
+checks the five editable sources and their one-page PDFs. Dedicated QA checks:
+- Validate-CourseDiagrams.js: geometry, relationships, DBML and monochrome;
+- Validate-CourseRouting.js: C0/C1/C2/ERD connected shape clearance;
+- Validate-EndToEndFlow.js: 29 explicit directional sequence messages,
+  13 lifelines, actor glyphs, text clearance, and covered source-code constructs.
 
-- Four native editable Draw.io files, exactly one page each;
-- structural shape/arrow references and no unrelated overlapping module/table boxes;
-- two native Actor shapes at both C0 and C1;
-- clearance of text boxes from explicitly routed orthogonal connector spans;
-- 10 modeled core DBML tables, 5 local relationships, no cross-database SQL FKs;
-- four one-page vector PDFs.
+Preview PNGs are generated outside the repo, under
+D:\PRN232\_diagram_toolkit_sources\course-c4-previews.
 
-PNG previews are exported to D:\PRN232\_diagram_toolkit_sources\course-c4-previews
-outside the Git repository to avoid duplicate source assets.
+## Scope and evidence
 
-## Scope and limits
+REST → gRPC was exercised in integration tests using a real Kestrel HTTP/2
+listener and SQLite test databases. Redis/Worker tests previously used real
+Redis + SQLite. These results do **not** prove a complete Docker Compose +
+SQL Server deployment or fully populated LDAS meal/eating-window scoring.
+See [Runtime Connectivity Evidence](../04-RUNTIME-CONNECTIVITY.md).
 
-The REST -> gRPC integration has passed a real Kestrel HTTP/2 integration test
-with SQLite test databases and an authenticated user's activity summary. The
-Redis Worker notification path was exercised with real Redis and SQLite in the
-existing smoke tests. This does not establish a full Docker Compose / production
-SQL Server rollout. See [04-RUNTIME-CONNECTIVITY.md](../04-RUNTIME-CONNECTIVITY.md).
+Reviewed references: [C4 diagrams](https://c4model.com/diagrams);
+[Draw.io connector waypoints](https://www.drawio.com/docs/manual/connectors/waypoints-connectors/);
+[DBML documentation](https://dbml.dbdiagram.io/docs/).
 
-For reference: [C4 System Context](https://c4model.com/diagrams/system-context),
-[C4 Containers](https://c4model.com/diagrams/container),
-[C4 Components](https://c4model.com/diagrams/component) and
-[Draw.io connector waypoints](https://www.drawio.com/docs/manual/connectors/waypoints-connectors/).
-
-**Historical originals remain recoverable** from Git and from the verified
-external backup at D:\PRN232\_drawio_professional_redesign_2026-11-05_backup.
+Pre-edit backup with original diagrams, scripts and full Git history was
+verified at D:\PRN232\_C4_flow_audit_2026-11-05.

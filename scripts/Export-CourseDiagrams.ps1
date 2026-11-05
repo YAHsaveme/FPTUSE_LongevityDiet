@@ -11,7 +11,9 @@ New-Item -ItemType Directory -Force $previews | Out-Null
 if($LASTEXITCODE -ne 0){throw 'Draw.io diagram generator failed'}
 & node (Join-Path $Root 'scripts\Render-CourseDbml.js')
 if($LASTEXITCODE -ne 0){throw 'DBML SVG renderer failed'}
-foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core')){
+& node (Join-Path $Root 'scripts\Generate-EndToEndFlow.js')
+if($LASTEXITCODE -ne 0){throw 'End-to-end Draw.io sequence generation failed'}
+foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','05-runtime-end-to-end')){
   $source=Join-Path $dir ($name+'.drawio')
   $pdf=Join-Path $dir ($name+'.pdf')
   $png=Join-Path $previews ($name+'.png')
@@ -19,8 +21,12 @@ foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-
   & $Drawio --export --format pdf --output $pdf $source 2>$null | Out-Null
   $ErrorActionPreference=$prior
   if(!(Test-Path -LiteralPath $pdf) -or (Get-Item $pdf).Length -lt 1000){throw "Draw.io PDF export failed: $name"}
+  # Runtime sequence is much larger than C4. Keep only its *preview* small;
+  # the editable Draw.io and vector PDF preserve full one-page resolution.
+  $previewScale=if($name -eq '05-runtime-end-to-end'){'0.30'}else{'0.85'}
+  if(Test-Path -LiteralPath $png){Remove-Item -LiteralPath $png -Force}
   $prior=$ErrorActionPreference;$ErrorActionPreference='Continue'
-  & $Drawio --export --format png --scale 0.85 --output $png $source 2>$null | Out-Null
+  & $Drawio --export --format png --scale $previewScale --output $png $source 2>$null | Out-Null
   $ErrorActionPreference=$prior
   if(!(Test-Path -LiteralPath $png) -or (Get-Item $png).Length -lt 1000){throw "Draw.io PNG preview export failed: $name"}
   $data=[Text.Encoding]::GetEncoding(28591).GetString([IO.File]::ReadAllBytes($pdf))
@@ -32,4 +38,6 @@ foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-
 if($LASTEXITCODE -ne 0){throw 'Course diagram quality gate failed'}
 & node (Join-Path $Root 'scripts\Validate-CourseRouting.js')
 if($LASTEXITCODE -ne 0){throw 'Orthogonal connector and label clearance QA failed'}
+& node (Join-Path $Root 'scripts\Validate-EndToEndFlow.js')
+if($LASTEXITCODE -ne 0){throw 'Complete runtime sequence validation failed'}
 Write-Host 'ALL_DRAWIO_ARTIFACTS=PASS'

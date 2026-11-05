@@ -79,7 +79,7 @@ function Diagram(name,subtitle,W,H){
  g.arrow('redis','worker',[1,.34],[0,.34],[],{dashed:true});
  g.arrow('worker','redis',[0,.72],[1,.72],[],{dashed:true});
  g.arrow('worker','sql',[.5,1],[.5,1],[[4115,2220],[1570,2220]]);
- g.text(1950,753,310,60,'HTTPS / JWT',27,true,'center');
+ g.text(1950,753,310,60,'HTTPS / JSON',27,true,'center');
  g.text(3200,753,405,60,'gRPC / HTTP2',27,true,'center');
  g.text(1935,1320,155,60,'EF Core',27,true,'center');
  g.text(2350,1250,165,60,'Publish',27,true);
@@ -87,18 +87,18 @@ function Diagram(name,subtitle,W,H){
  g.text(3170,1550,440,62,'Consume events',26,true,'center');
  g.text(3170,1870,440,62,'Publish results',26,true,'center');
  g.text(2010,2130,1560,65,'Worker cũng ghi lịch nhắc vào SQL Server',26,true,'center');
- g.text(1050,2510,3770,80,'Đường liền = HTTP/gRPC/SQL. Đường đứt = hai chiều Redis Streams. C1 mô tả container, không đi sâu vào class.',26);
+ g.text(1050,2510,3770,80,'Solid = request/response HTTP, gRPC and SQL calls. Dashed = two-way Redis events. JWT protects member endpoints; auth endpoints are anonymous.',26);
  g.save('02-c1-container-architecture.drawio');
 }
 {
- const g=Diagram('C2 - REST API COMPONENTS','Một container: LongevityDiet.API | HTTP -> Controllers -> Services -> Adapter / Database',6700,3300);
+ const g=Diagram('C2 - REST API COMPONENTS','One ASP.NET Core API: routing -> controller -> services -> persistence / gRPC / Redis',6700,3480);
  g.boundary(900,325,4640,2435,'LongevityDiet.API [ASP.NET Core REST API]');
  g.box('web',145,480,535,240,'Web UI','External Container','Authenticated requests',{font:34});
- g.box('router',1170,490,4080,145,'Endpoint Routing + JWT Middleware','ASP.NET Core','Authorization | Validation | Rate Limiting',{font:34,fill:'#F2F2F2'});
+ g.box('router',1170,490,4080,145,'Routing + Authorization Policies','ASP.NET Core','Auth endpoints anonymous | Member endpoints JWT | Validation and Rate Limits',{font:34,fill:'#F2F2F2'});
  const lanes=[
   ['auth',1020,'AuthController','AuthenticationService','Sessions / JWT'],
   ['profile',1880,'ProfileController','ProfileService','Profile'],
-  ['reminder',2740,'RemindersController','ReminderService','Prefs + notifications'],
+  ['reminder',2740,'ReminderNotificationsController','ReminderService','Prefs + notifications'],
   ['tracking',3600,'TrackingController','TrackingService','Activities + LDAS'],
   ['recommend',4460,'RecommendationController','ActivityCoach gRPC Client','Weekly advice']
  ];
@@ -127,7 +127,9 @@ function Diagram(name,subtitle,W,H){
  g.arrow('identity','sqlIdentity',[.5,1],[.5,0]);
  g.arrow('bridge','redis',[.5,1],[.5,0],[],{dashed:true});
  g.arrow('trackingdb','sqlTracking',[.5,1],[.5,0]);
- g.text(1000,3160,5490,75,'Đường liền = lời gọi nội bộ / gRPC / EF Core. Đường đứt = Redis events. Worker ngoài phạm vi C2 (xem C1).',26);
+ g.text(1020,3130,5520,60,'A. RecommendationController -> TrackingService (own summary) -> gRPC Client -> Recommendation Service -> JSON response.',26);
+ g.text(1020,3210,5520,60,'B. ReminderService -> Identity DB (preferences + outbox) -> Bridge -> Redis -> Worker -> Redis -> Bridge -> notification inbox.',26);
+ g.text(1020,3290,5520,58,'Solid = synchronous calls / EF Core; dashed = Redis events. The Worker is external to C2 and shown in C1.',25);
  g.save('03-c2-api-components.drawio');
 }
 {

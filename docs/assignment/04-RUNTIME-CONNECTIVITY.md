@@ -36,3 +36,24 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Run-Member1RedisSmok
 ```
 
 Chỉ chạy nếu Docker đã sẵn sàng và ổ hệ thống đủ dung lượng. Không xóa volume hoặc database thật để đạt kết quả kiểm thử.
+
+## Complete request/response and asynchronous sequence
+
+The native Draw.io [end-to-end runtime view](one-page/05-runtime-end-to-end.drawio)
+uses 10 ordered synchronous arrows and 19 ordered asynchronous arrows to
+document each request, response, broker event and notification query. Its
+sequence is verified against the real REST controller, TrackingService,
+gRPC contract, Identity outbox/bridge, Worker and ReminderService.
+
+Key implementation distinction: IdentityRedisBridge consumes Worker results
+and calls ReminderService.PersistNotificationResultAsync. ReminderService
+then writes IdentityInbox and UserNotification in the Identity database.
+The bridge does not write those EF Core entities directly.
+
+For the member's activity advice, Auth register/login are anonymous;
+GET /api/v1/recommendations/activity requires JWT. Only numeric activity
+aggregates are forwarded via HTTP/2 to ActivityCoach.Recommend. Responses
+return to the same Web user, with HTTP 503 when gRPC is unavailable.
+
+Full Docker Compose + SQL Server runtime remains outside the currently
+verified test evidence; no architecture diagram can replace that check.

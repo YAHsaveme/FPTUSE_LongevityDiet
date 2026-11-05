@@ -1,22 +1,17 @@
-# LongevityDiet — Documentation for PRN232
+# LongevityDiet — PRN232 documentation
 
-Start with [PRN232 assignment summary](assignment/00-ASSIGNMENT-DOCUMENT.md).
+Start with the [PRN232 assignment](assignment/00-ASSIGNMENT-DOCUMENT.md).
 
-## Minimal reading path
+## Quick navigation
 
-1. [Assignment requirements, scope and demo](assignment/README.md).
-2. [Four official-scale diagrams](assignment/one-page/README.md):
-   C0 System Context, C1 Containers, C2 REST API components and Draw.io core ERD (with DBML source).
-3. [Real runtime connectivity and limits](assignment/04-RUNTIME-CONNECTIVITY.md).
-4. [Docker, asynchronous workflow and demo supporting diagrams](architecture/README.md).
-4. [Project status](PROJECT-STATUS.md) and [four-week team tasks](task/README.md).
-5. [API/gRPC/event contracts](07-API-GRPC-EVENTS.md).
-6. [Database and test/deployment notes](06-DATABASE-DESIGN.md),
-   [09-TEST-DEPLOY-DEMO.md](09-TEST-DEPLOY-DEMO.md).
+1. [Assignment guide](assignment/README.md)
+2. [C0/C1/C2, DBML ERD and end-to-end sequences](assignment/one-page/README.md)
+3. [Live connectivity evidence and limitations](assignment/04-RUNTIME-CONNECTIVITY.md)
+4. [Docker and Redis supporting views](architecture/README.md)
+5. [Project status](PROJECT-STATUS.md) and [team task evidence](task/README.md)
+6. [API/gRPC/event contracts](07-API-GRPC-EVENTS.md)
+7. [Database notes](06-DATABASE-DESIGN.md) and [test/deployment plan](09-TEST-DEPLOY-DEMO.md)
 
-Source code is under ../src and ../tests; Docker Compose is at the repository root.
-Database migrations in the source projects, not the ten-table teaching ERD,
-remain authoritative.
-
-The original larger planning designs have been backed up outside the repository
-rather than presented as deployed coursework features.
+The simplified ERD is educational; EF Core migrations under src are the
+source of truth for the physical database. The complete runtime sequence
+is separate from C4 to avoid overloaded architecture diagrams.
