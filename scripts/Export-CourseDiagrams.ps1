@@ -29,6 +29,18 @@ foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-
   & $Drawio --export --format png --scale $previewScale --output $png $source 2>$null | Out-Null
   $ErrorActionPreference=$prior
   if(!(Test-Path -LiteralPath $png) -or (Get-Item $png).Length -lt 1000){throw "Draw.io PNG preview export failed: $name"}
+  # Audit actual rendered connector paths, not only the editable XML geometry.
+  # Keep large SVG previews outside Git; the test catches edge-edge crossings.
+  if($name -ne '05-runtime-end-to-end'){
+    $svg=Join-Path $previews ($name+'.svg')
+    $prior=$ErrorActionPreference;$ErrorActionPreference='Continue'
+    & $Drawio --export --format svg --output $svg $source 2>$null | Out-Null
+    $svgResult=$LASTEXITCODE
+    $ErrorActionPreference=$prior
+    if($svgResult -ne 0 -or !(Test-Path -LiteralPath $svg) -or (Get-Item $svg).Length -lt 1000){
+      throw "Draw.io SVG path export failed: $name"
+    }
+  }
   $data=[Text.Encoding]::GetEncoding(28591).GetString([IO.File]::ReadAllBytes($pdf))
   $pages=[regex]::Matches($data,'/Type\s*/Page\b').Count
   if($pages -ne 1){throw "$name has $pages PDF pages, expected exactly one"}
@@ -40,4 +52,6 @@ if($LASTEXITCODE -ne 0){throw 'Course diagram quality gate failed'}
 if($LASTEXITCODE -ne 0){throw 'Orthogonal connector and label clearance QA failed'}
 & node (Join-Path $Root 'scripts\Validate-EndToEndFlow.js')
 if($LASTEXITCODE -ne 0){throw 'Complete runtime sequence validation failed'}
+& node (Join-Path $Root 'scripts\Validate-RenderedSvg.js') $previews
+if($LASTEXITCODE -ne 0){throw 'Actual Draw.io SVG connector crossing or label collision detected'}
 Write-Host 'ALL_DRAWIO_ARTIFACTS=PASS'

@@ -59,6 +59,10 @@ checks the five editable sources and their one-page PDFs. Dedicated QA checks:
 - Validate-CourseRouting.js: C0/C1/C2/ERD connected shape clearance;
 - Validate-EndToEndFlow.js: 29 explicit directional sequence messages,
   13 lifelines, actor glyphs, text clearance, and covered source-code constructs.
+- Validate-RenderedSvg.js: after Draw.io Desktop exports vector SVG previews,
+  inspect the **actually rendered** connector segments for connector-to-connector
+  crossings, overlapping segments, diagonal bends and contact with text labels.
+  This last check runs locally with Export-CourseDiagrams.ps1, not in GitHub CI.
 
 Preview PNGs are generated outside the repo, under
 D:\PRN232\_diagram_toolkit_sources\course-c4-previews.

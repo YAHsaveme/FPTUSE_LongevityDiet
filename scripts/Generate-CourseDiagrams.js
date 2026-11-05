@@ -1,4 +1,4 @@
-// Native, editable Draw.io diagrams for PRN232 LongevityDiet.
+﻿// Native, editable Draw.io diagrams for PRN232 LongevityDiet.
 // Single-page C0/C1/C2 and course ERD sourced directly from DBML.
 // Every module, actor, table field, connector and label is a diagrams.net mxCell.
 'use strict';
@@ -59,65 +59,79 @@ function Diagram(name,subtitle,W,H){
  g.save('01-c0-system-context.drawio');
 }
 {
- const g=Diagram('C1 - CONTAINER ARCHITECTURE','Các tiến trình ứng dụng, database và giao tiếp đồng bộ / bất đồng bộ',5100,2750);
- g.boundary(965,320,3980,2160,'LongevityDiet [Software System]');
- g.actor('member',275,495,'Member','Người dùng');
- g.actor('admin',275,1080,'Administrator','Quản trị');
- g.box('web',1210,700,720,315,'Web Application','React / Vite','Giao diện, API client',{font:37});
- g.box('api',2290,700,830,315,'REST API','ASP.NET Core / JWT','Auth, Tracking, Notifications, gRPC client',{font:35});
- g.box('grpc',3700,700,830,315,'Recommendation Service','gRPC HTTP/2','ActivityCoach.Recommend',{font:35});
- g.box('sql',1210,1600,720,335,'SQL Server','Relational Data Store','Identity DB | Tracking DB | Worker DB',{font:35});
- g.box('redis',2290,1600,830,335,'Redis Streams','Message Broker','Identity events | Worker results',{font:35});
- g.box('worker',3700,1600,830,335,'Background Worker','.NET hosted process','Lịch nhắc, tiêu thụ sự kiện, trả kết quả',{font:35});
- g.arrow('member','web',[1,.50],[0,.27],[[840,615],[840,785]]);
- g.arrow('admin','web',[1,.50],[0,.78],[[920,1200],[920,945]]);
- g.arrow('web','api',[1,.5],[0,.5]);
- g.arrow('api','grpc',[1,.45],[0,.45]);
- g.arrow('api','sql',[0,.80],[1,.54],[[2105,952],[2105,1781]]);
- g.arrow('api','redis',[.33,1],[.33,0],[],{dashed:true});
- g.arrow('redis','api',[.76,0],[.76,1],[],{dashed:true});
- g.arrow('redis','worker',[1,.34],[0,.34],[],{dashed:true});
- g.arrow('worker','redis',[0,.72],[1,.72],[],{dashed:true});
- g.arrow('worker','sql',[.5,1],[.5,1],[[4115,2220],[1570,2220]]);
- g.text(1950,753,310,60,'HTTPS / JSON',27,true,'center');
- g.text(3200,753,405,60,'gRPC / HTTP2',27,true,'center');
- g.text(1935,1320,155,60,'EF Core',27,true,'center');
- g.text(2350,1250,165,60,'Publish',27,true);
- g.text(2940,1250,290,60,'Receive',27,true);
- g.text(3170,1550,440,62,'Consume events',26,true,'center');
- g.text(3170,1870,440,62,'Publish results',26,true,'center');
- g.text(2010,2130,1560,65,'Worker cũng ghi lịch nhắc vào SQL Server',26,true,'center');
- g.text(1050,2510,3770,80,'Solid = request/response HTTP, gRPC and SQL calls. Dashed = two-way Redis events. JWT protects member endpoints; auth endpoints are anonymous.',26);
+ const g=Diagram('C1 - CONTAINER ARCHITECTURE','Processes, independent services, Redis events and three logical SQL databases',5300,3450);
+ g.boundary(950,320,4170,2950,'LongevityDiet [Software System]');
+ g.actor('member',275,500,'Member','Người dùng');
+ g.actor('admin',275,1110,'Administrator','Quản trị');
+ // Application containers: visual reading order, left -> right.
+ g.box('web',1240,725,710,310,'Web Application','React / Vite','Giao diện và API client',{font:36});
+ g.box('api',2390,725,830,310,'REST API','ASP.NET Core / JWT','Auth, Tracking, Notifications, gRPC client',{font:35});
+ g.box('grpc',3790,725,850,310,'Recommendation Service','gRPC HTTP/2','ActivityCoach.Recommend',{font:35});
+ // Async processing, beneath the backend.
+ g.box('redis',2390,1650,830,315,'Redis Streams','Message Broker','Identity events | Worker results',{font:35});
+ g.box('worker',3790,1650,850,315,'Background Worker','.NET hosted service','Lịch nhắc, xử lý sự kiện, trả kết quả',{font:34});
+ // One SQL Server host. Split logical ownership explicitly so Worker does
+ // not need an unreadable long U-shaped cross-page SQL arrow.
+ g.boundary(1130,2310,3600,840,'SQL Server instance [one host / three logical databases]');
+ g.box('identity',1250,2550,900,330,'Identity Database','SQL Server + EF Core','Users, Profiles, Preferences, Outbox, Notifications',{font:33});
+ g.box('trackingdb',2390,2550,830,330,'Tracking Database','SQL Server + EF Core','Activity logs, goals and scores',{font:33});
+ g.box('workerdb',3790,2550,850,330,'Worker Database','SQL Server + EF Core','Reminder schedules, worker outbox / inbox',{font:32});
+ g.arrow('member','web',[1,.50],[0,.29],[[850,620],[850,815]]);
+ g.arrow('admin','web',[1,.50],[0,.78],[[930,1230],[930,967]]);
+ g.arrow('web','api',[1,.50],[0,.50]);
+ g.arrow('api','grpc',[1,.50],[0,.50]);
+ // Dedicated vertical data access gutters either side of the broker.
+ g.arrow('api','identity',[0,.62],[.50,0],[[2160,917],[2160,2490],[1700,2490]]);
+ g.arrow('api','trackingdb',[0,.90],[.50,0],[[2270,1004],[2270,2410],[2805,2410]]);
+ g.arrow('api','redis',[.30,1],[.30,0],[],{dashed:true});
+ g.arrow('redis','api',[.75,0],[.75,1],[],{dashed:true});
+ g.arrow('redis','worker',[1,.35],[0,.35],[],{dashed:true});
+ g.arrow('worker','redis',[0,.70],[1,.70],[],{dashed:true});
+ g.arrow('worker','workerdb',[.50,1],[.50,0]);
+ // Labels are deliberately placed in whitespace rather than on connector paths.
+ g.text(1975,790,360,67,'HTTPS / JSON',27,true,'center');
+ g.text(3280,790,430,67,'gRPC / HTTP2',27,true,'center');
+ g.text(1630,2395,390,60,'Identity / EF Core',25,true,'center');
+ g.text(2440,2335,370,60,'Tracking / EF Core',25,true,'center');
+ g.text(2410,1340,210,70,'Publish',26,true,'center');
+ g.text(3050,1340,230,70,'Receive',26,true,'center');
+ g.text(3310,1655,390,64,'Consume events',26,true,'center');
+ g.text(3310,1920,390,64,'Publish results',26,true,'center');
+ g.text(4270,2200,410,68,'Worker persists schedules',25,true,'center');
+ g.text(1050,3300,3910,96,'Solid arrows: synchronous API/gRPC/EF Core calls; dashed arrows: Redis publish/consume. SQL boxes share one physical SQL Server instance.',26);
  g.save('02-c1-container-architecture.drawio');
 }
+
 {
- const g=Diagram('C2 - REST API COMPONENTS','One ASP.NET Core API: routing -> controller -> services -> persistence / gRPC / Redis',6700,3480);
- g.boundary(900,325,4640,2435,'LongevityDiet.API [ASP.NET Core REST API]');
+ const g=Diagram('C2 - REST API COMPONENTS','One ASP.NET Core API: routing -> controller -> services -> persistence / gRPC / Redis',7300,3480);
+ g.boundary(900,325,5230,2435,'LongevityDiet.API [ASP.NET Core REST API]');
  g.box('web',145,480,535,240,'Web UI','External Container','Authenticated requests',{font:34});
- g.box('router',1170,490,4080,145,'Routing + Authorization Policies','ASP.NET Core','Auth endpoints anonymous | Member endpoints JWT | Validation and Rate Limits',{font:34,fill:'#F2F2F2'});
+ g.box('router',1170,490,4780,145,'Routing + Authorization Policies','ASP.NET Core','Auth endpoints anonymous | Member endpoints JWT | Validation and Rate Limits',{font:34,fill:'#F2F2F2'});
  const lanes=[
   ['auth',1020,'AuthController','AuthenticationService','Sessions / JWT'],
   ['profile',1880,'ProfileController','ProfileService','Profile'],
   ['reminder',2740,'ReminderNotificationsController','ReminderService','Prefs + notifications'],
   ['tracking',3600,'TrackingController','TrackingService','Activities + LDAS'],
-  ['recommend',4460,'RecommendationController','ActivityCoach gRPC Client','Weekly advice']
+  ['recommend',4860,'RecommendationController','ActivityCoach gRPC Client','Weekly advice']
  ];
  lanes.forEach((l,i)=>{
   const key=l[0],x=l[1];
   g.box(key+'ctl',x,930,740,245,l[2],'Controller',l[4],{font:30});
   g.box(key+'svc',x,1510,740,245,l[3],i===4?'gRPC Client':'Application Service',i===4?'Timeout 3s / numeric aggregates':l[4],{font:30});
-  g.arrow('router',key+'ctl',[(x+370-1170)/4080,1],[.5,0]);
+  g.arrow('router',key+'ctl',[(x+370-1170)/4780,1],[.5,0]);
   g.arrow(key+'ctl',key+'svc',[.5,1],[.5,0]);
  });
  g.box('identity',1390,2090,1250,260,'Identity Persistence','EF Core DbContext','Users | Tokens | Preferences | Notifications | Outbox',{font:29});
  g.box('bridge',2830,2090,740,260,'Identity Redis Bridge','Hosted Service','Poll Outbox / Write Inbox',{font:29});
  g.box('trackingdb',3700,2090,810,260,'Tracking Persistence','EF Core DbContext','ActivityLogs | Goals | AdherenceScores',{font:29});
- g.box('grpc',5735,1450,780,275,'Recommendation gRPC','External Container','ActivityCoach.Recommend',{font:31});
+ g.box('grpc',6370,1450,780,275,'Recommendation gRPC','External Container','ActivityCoach.Recommend',{font:31});
  g.box('sqlIdentity',1390,2850,1250,220,'Identity SQL Database','External Data Store','Owned data and local FKs',{font:31});
  g.box('redis',2830,2850,740,220,'Redis Streams','External Broker','Identity events / Worker results',{font:30});
  g.box('sqlTracking',3700,2850,810,220,'Tracking SQL Database','External Data Store','Activity / scores',{font:31});
  g.arrow('web','router',[1,.5],[0,.5]);
- g.arrow('recommendctl','trackingsvc',[0,.68],[1,.55],[[4400,1096],[4400,1647]]);
+ g.arrow('recommendctl','trackingsvc',[0,.68],[1,.55],[[4610,1096],[4610,1647]]);
+ g.text(4370,1285,220,110,'Read own weekly summary',24,true,'center');
+ g.text(5670,1520,350,85,'gRPC / HTTP2',27,true,'center');
  g.arrow('recommendsvc','grpc',[1,.5],[0,.5]);
  g.arrow('authsvc','identity',[.7,1],[.2,0],[[1538,1910],[1640,1910]]);
  g.arrow('profilesvc','identity',[.5,1],[.73,0]);
@@ -174,8 +188,8 @@ function Diagram(name,subtitle,W,H){
  const rel=(from,to,start,end,via,one)=>g.arrow(from,to,start,end,via,{startArrow:'ERone',endArrow:one?'ERone':'ERmany'});
  rel('identity.Users','identity.UserProfiles',[.15,1],[.55,0],[[1055,1120],[718,1120]],true);
  rel('identity.Users','identity.RefreshTokens',[.82,1],[.43,0],[[1658,1110],[1796,1110]],false);
- rel('identity.Users','identity.ReminderPreferences',[0,.42],[0,.55],[[180,770],[180,2130]],true);
- rel('identity.Users','identity.UserNotifications',[1,.48],[1,.55],[[2390,778],[2390,2130]],false);
+ rel('identity.Users','identity.ReminderPreferences',[.33,1],[.55,0],[[1217,1760],[718,1760]],true);
+ rel('identity.Users','identity.UserNotifications',[.45,1],[.50,0],[[1325,1810],[1855,1810]],false);
  rel('tracking.AdherenceScores','tracking.ScoreDimensions',[1,.56],[0,.56],[],false);
  g.text(150,2900,5480,100,'PK = khóa chính | FK = khóa ngoại SQL trong cùng DB | 1:1 hoặc 1:N theo ký hiệu ER. UserId trong Tracking/Worker là tham chiếu logic.',26);
  g.save('04-database-core.drawio');
