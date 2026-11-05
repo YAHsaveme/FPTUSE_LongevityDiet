@@ -195,8 +195,10 @@ It creates a local ignored `.env` with generated development secrets when needed
 
 ## Build and test
 
+Build/cache folders (`bin`, `obj`, `node_modules`, and `dist`) are **generated files**, not source code. They may be safely removed to save disk space for this school project. Restore them with the commands below when building or running again. Never delete `src` code, EF migrations, `*.csproj`, `package-lock.json`, or any diagrams to achieve a similar cleanup.
+
 ```powershell
-cd D:\PRN232\PRN232_LongevityDiet
+cd D:\PRN232\FPTUSE_LongevityDiet
 dotnet restore
 dotnet build .\LongevityDiet.sln
 dotnet test .\LongevityDiet.sln --no-build
