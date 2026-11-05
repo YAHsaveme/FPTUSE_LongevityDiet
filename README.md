@@ -1,4 +1,4 @@
-# Longevity Diet Companion
+﻿# Longevity Diet Companion
 
 ## Project description
 
@@ -73,25 +73,18 @@ PRN232_LongevityDiet/
 
 ## System architecture
 
-- `docs/assignment/README.md` - Assignment-facing documentation pack.
-- `docs/assignment/00-ASSIGNMENT-DOCUMENT.md` - submission entry point: Context -> Problems -> Solutions -> Actors/Features -> C0/C1 -> Technology -> Conceptual ERD -> Physical DB -> PRN232 coverage.
-- `docs/05-SYSTEM-ARCHITECTURE.md` - detailed engineering architecture.
-- `docs/architecture/README.md` - extended internal architecture diagram set.
-- `docs/architecture/02-container-architecture.drawio`
-- `docs/10-PRN232-TRACEABILITY.md`
+For the PRN232 final assignment, use [four course-sized diagrams](docs/assignment/one-page/README.md).
+They comprise C0 Context, C1 Containers, C2 REST API Components, and a ten-table core ERD in DBML.
 
-The canonical diagram set covers:
-- System Context;
-- Container Architecture;
-- Docker Deployment;
-- API Component view;
-- Recommendation dynamic flow;
-- Transactional Outbox + Redis flow;
-- PRN232 requirement coverage;
-- deliverables/demo assessment;
-- end-to-end demo flow;
-- Production Secure Deployment.
+Three optional supporting technical diagrams are available:
+[Docker deployment](docs/architecture/03-docker-deployment.drawio),
+[Redis event flow](docs/architecture/06-outbox-redis-dynamic.drawio), and
+[end-to-end demonstration](docs/architecture/09-end-to-end-demo-flow.drawio).
 
+See the [assignment summary](docs/assignment/00-ASSIGNMENT-DOCUMENT.md)
+and [PRN232 traceability](docs/10-PRN232-TRACEABILITY.md) for the grading evidence.
+The old six-service and 33-table design proposals have been archived externally
+and must not be confused with implemented runtime functionality.
 ## Current implementation status
 
 ### Completed engineering baseline
@@ -276,21 +269,14 @@ The project distinguishes:
 See `docs/01-BOOK-RESEARCH.md` and `docs/11-BOOK-TO-SOFTWARE-TRACEABILITY.md`.
 
 
-## Architecture diagrams — ONE PAGE each (Draw.io + DBML, November 2026)
+## Architecture diagrams — PRN232 course-size views (2026-11-05)
 
-**Canonical submission diagrams:** [all one-page files and instructions](docs/assignment/one-page/README.md).
+**Canonical assignment**: [four editable one-page diagrams and validation](docs/assignment/one-page/README.md).
 
-- [C0 Context, editable Draw.io](docs/assignment/one-page/01-c0-system-context.drawio) · [PDF, one page](docs/assignment/one-page/01-c0-system-context.pdf)
-- [C1 Container TARGET, editable Draw.io](docs/assignment/one-page/02-c1-container-architecture.drawio) · [PDF, one page](docs/assignment/one-page/02-c1-container-architecture.pdf)
-- [C2 consolidated Component TARGET, editable Draw.io](docs/assignment/one-page/05-c2-component-architecture.drawio) · [PDF, one page](docs/assignment/one-page/05-c2-component-architecture.pdf)
-- [Target Database Diagram, editable DBML](docs/assignment/one-page/06-database-target.dbml) · [one-page vector ERD PDF](docs/assignment/one-page/06-database-target-one-page.pdf) · [SVG](docs/assignment/one-page/06-database-target-one-page.svg)
-- [Current EF Core schema, editable DBML](docs/assignment/one-page/06-database-current.dbml) · [one-page PDF](docs/assignment/one-page/06-database-current-one-page.pdf) (supporting diagnostic, not an extra main submission page)
-- [Architecture rationale and 33/33 target table mapping](docs/assignment/06-C2-AND-DATABASE-MAPPING.md); [Cloudflare D1 security/migration guide](docs/security/CLOUDFLARE-REFRESH-TOKENS.md).
+- [C0 System Context (Draw.io)](docs/assignment/one-page/01-c0-system-context.drawio) and [PDF](docs/assignment/one-page/01-c0-system-context.pdf)
+- [C1 Container (Draw.io)](docs/assignment/one-page/02-c1-container-architecture.drawio) and [PDF](docs/assignment/one-page/02-c1-container-architecture.pdf)
+- [C2 REST API Components (Draw.io)](docs/assignment/one-page/03-c2-api-components.drawio) and [PDF](docs/assignment/one-page/03-c2-api-components.pdf)
+- [Core ERD (DBML)](docs/assignment/one-page/04-database-core.dbml) and [one-page PDF](docs/assignment/one-page/04-database-core.pdf)
 
-The CURRENT code currently maps **18 entity tables across three EF Core DbContexts** (Identity, Tracking and Worker). Redis + SQLite E2E smoke passed, but live SQL Server E2E is still an acceptance gap. **C1 and C2 depict the approved six-service TARGET**, not a claim those separate processes/databases are deployed. The Cloudflare D1 refresh-session store remains a feature-flagged **OFF-by-default** prototype.
-
-All four principal diagrams are single-page; vector PDF/SVG supports detailed zoom. Superseded 8-page C2 and 9-page Draw.io ERD are retired to an out-of-repo backup; supplemental engineering diagrams under `docs/architecture` remain.
-
-Diagram validation: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Validate-OnePageDiagrams.ps1`. API, Redis and Cloudflare tests remain separate from diagram validation.
-
+The DBML shows **10 core tables chosen from 18 mapped EF Core tables**. It is an assignment reading view, not a complete database migration. C2 covers **one existing REST API container** rather than six proposed microservices. The independent gRPC project exists, but the REST→gRPC invocation is not yet wired; do not claim it was demonstrated. Supporting deployment and event flow diagrams live in [docs/architecture](docs/architecture/README.md).
 To opt in *after provisioning and verifying* a Cloudflare Worker + D1, set secret environment variables `CloudflareSessions__Enabled=true`, `CloudflareSessions__BaseUrl=https://YOUR_PRIVATE_WORKER_HOST/` and `CloudflareSessions__ServiceBearer=<FROM_SECURE_SECRET_MANAGER>`; do **not** put credentials into Git or `appsettings.json`. See the migration guide before switching live sessions.

@@ -1,0 +1,100 @@
+// LongevityDiet — PRN232 student project; core entities only (10 of 18 current EF Core tables).
+// These are ACTUAL model names and selected properties, not six proposed microservice databases.
+// Prefixes identity / tracking / worker are VISUAL OWNERSHIP GROUPS (three DbContexts/databases),
+// not cross-database SQL schemas. Do not generate production migrations from this reduced teaching view.
+// Other 8 technical tables (outbox, inbox, scoring configuration/signals, dispatch/processed events)
+// remain in source code and migrations. See src/ for authoritative full schema.
+
+Project LongevityDiet_CourseCore {
+  database_type: 'SQLServer'
+  Note: 'PRN232 learning ERD: 10 core entities, representative columns only; actual code maps 18 EF Core tables. All FKs shown are local to a database.'
+}
+
+Table identity.Users {
+  Id uniqueidentifier [pk]
+  Email nvarchar(320) [not null]
+  DisplayName nvarchar(120)
+  PasswordHash nvarchar(512)
+  Role nvarchar(24)
+  Status nvarchar(24)
+}
+
+Table identity.UserProfiles {
+  UserId uniqueidentifier [pk]
+  BirthYear int
+  TimeZone nvarchar(100)
+  FoodPreference nvarchar(500)
+}
+
+Table identity.RefreshTokens {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [not null]
+  TokenHash nvarchar(64) [unique]
+  ExpiresAt datetimeoffset
+  RevokedAt datetimeoffset
+}
+
+Table identity.ReminderPreferences {
+  UserId uniqueidentifier [pk]
+  OptedIn bit
+  ActivityEnabled bit
+  ActivityTime time
+  QuietStart time
+  QuietEnd time
+}
+
+Table identity.UserNotifications {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [not null]
+  Category nvarchar(32)
+  Title nvarchar(120)
+  ReadAtUtc datetime2
+}
+
+Table tracking.ActivityLogs {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Identity DB logical ID; NOT a SQL FK']
+  Kind nvarchar(24)
+  DurationMinutes int
+  StartedAtUtc datetime2
+  IsDeleted bit
+}
+
+Table tracking.ActivityGoals {
+  UserId uniqueidentifier [pk, note: 'Identity DB logical ID; NOT a SQL FK']
+  WeeklyMinutesTarget int
+  WeeklyStrengthSessionsTarget int
+}
+
+Table tracking.AdherenceScores {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Identity DB logical ID; NOT a SQL FK']
+  LocalDate date
+  Version nvarchar(40)
+  Score decimal(5,2) [note: 'Nullable when data is missing']
+  IsPartial bit
+}
+
+Table tracking.ScoreDimensions {
+  Id uniqueidentifier [pk]
+  AdherenceScoreId uniqueidentifier [not null]
+  Code nvarchar(32)
+  RawScore decimal(5,2)
+  WeightedScore decimal(5,2)
+}
+
+Table worker.ReminderSchedules {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Identity DB logical ID; NOT a SQL FK']
+  Category nvarchar(32)
+  Enabled bit
+  TimeZone nvarchar(100)
+  NextDueUtc datetime2
+}
+
+// These are the local relational constraints present in the EF Core model.
+Ref: identity.UserProfiles.UserId - identity.Users.Id
+Ref: identity.RefreshTokens.UserId > identity.Users.Id
+Ref: identity.ReminderPreferences.UserId - identity.Users.Id
+Ref: identity.UserNotifications.UserId > identity.Users.Id
+Ref: tracking.ScoreDimensions.AdherenceScoreId > tracking.AdherenceScores.Id

@@ -1,74 +1,23 @@
-# Assignment Foundation Pack
+# PRN232 Final Assignment — LongevityDiet
 
-This folder is the **basic PRN232 Assignment documentation pack** for Longevity Diet Companion (LDC).
+Student submission entry point: [00-ASSIGNMENT-DOCUMENT.md](00-ASSIGNMENT-DOCUMENT.md)
 
-It is intentionally smaller than the internal engineering documentation under `docs/`.
+## Only four primary diagrams
 
-## Required reading order
+Use [one-page/README.md](one-page/README.md) for editable Draw.io C0/C1/C2,
+DBML core ERD and the matching vector PDFs.
 
-0. `00-ASSIGNMENT-DOCUMENT.md` **(recommended submission entry point)**
-   - Context -> Problems -> Solutions
-   - Main Actors -> Main Features
-   - C0 System Context -> C1 Container Architecture
-   - Technology -> Conceptual ERD -> Physical Database
-   - PRN232 mandatory requirements, deliverables, demo evidence and assessment mapping
-   - Scope and implementation status
+## Short reading order
 
-1. `01-ASSIGNMENT-FOUNDATION.md`
-   - Detailed product foundation and technology summary
+1. [Assignment summary and evidence](00-ASSIGNMENT-DOCUMENT.md)
+2. [C4 architecture and real connectivity](02-SYSTEM-ARCHITECTURE-C4.md)
+3. [Ten-table core database model](03-DATA-MODEL.md)
+4. [Four student-facing diagrams](one-page/README.md)
+5. [Docker deployment and async support views](../architecture/README.md)
 
-2. `02-SYSTEM-ARCHITECTURE-C4.md`
-   - Assignment C0: System Context
-   - Assignment C1: Container Architecture
-   - Relationships and architecture rules
+The previous 33-table target DBML, six-service atlas, repeated PNGs and obsolete
+design reports were archived out of the project; source code and migrations
+were not deleted.
 
-3. `03-DATA-MODEL.md`
-   - Conceptual ERD
-   - Physical database design
-   - Implemented-vs-target status
-
-4. `04-DIAGRAM-QA-REPORT.md`
-   - Geometry/arrow/text quality gates
-   - Visual polish summary
-   - Final validation criteria
-
-5. `05-C4-COMPLIANCE-CHECKLIST.md`
-   - Official C4 review checklist mapping
-   - Correct C0/C1 abstraction rules
-   - Queue/topic modelling rule for Redis Streams
-   - Automated quality-gate summary
-
-## Canonical one-page diagram set (Draw.io and DBML)
-
-All submission diagrams now live together in **[one-page/README.md](one-page/README.md)**. Open the linked PDF for vector zoom; edit the Draw.io XML or DBML source, not the exported preview.
-
-- **C0:** [Draw.io](one-page/01-c0-system-context.drawio) | [1-page PDF](one-page/01-c0-system-context.pdf)
-- **C1 Target:** [Draw.io](one-page/02-c1-container-architecture.drawio) | [1-page PDF](one-page/02-c1-container-architecture.pdf)
-- **C2 Target, six bounded services:** [Draw.io](one-page/05-c2-component-architecture.drawio) | [1-page PDF](one-page/05-c2-component-architecture.pdf)
-- **Target Database:** [DBML](one-page/06-database-target.dbml) | [1-page ERD PDF](one-page/06-database-target-one-page.pdf) | [SVG](one-page/06-database-target-one-page.svg)
-- **Current EF Core database mapping (reference):** [DBML](one-page/06-database-current.dbml) | [1-page PDF](one-page/06-database-current-one-page.pdf)
-
-The historical multipage diagrams and old Draw.io ERDs have been retired from the main assignment tree; backup and Git history remain available. Distinct engineering Dynamic/Deployment views in `docs/architecture/` are retained. Official C4 recommends one container per component view; C2 is a clearly marked consolidated **atlas**, not a claim that all components are deployed in one process.
-
-C4 semantic source:
-- `c4/workspace.dsl`
-
-## C4 naming note
-
-The Assignment asks for two levels named **C0** and **C1**. In this pack:
-- **C0 = System Context** for the Assignment.
-- **C1 = Container Architecture** for the Assignment.
-
-The official C4 model normally names these views **System Context** and **Container** rather than relying on C0/C1 numbering. This note removes ambiguity while preserving the Assignment terminology.
-
-## Sources used
-
-- Official C4 Model: https://c4model.com/
-- C4 skill: https://github.com/bitsmuggler/c4-skill
-- Vendored C4 skill snapshot: `.agents/vendor/c4-skill` at commit `d9dd48987054d6633da031fe3624afc2cb1da4eb`
-- BMAD Explore and Validate: https://docs.bmad-method.org/plan/explore-and-validate-an-idea/
-- Project code, Docker Compose and existing Longevity Diet Companion requirements are the implementation source of truth.
-
-## Visual-reference rule
-
-The team-supplied architecture image is used only as a composition reference for spacing, hierarchy and readability. The submitted diagrams are original to Longevity Diet Companion and intentionally do **not** copy the other team's Mobile App, Cloudinary, Google AI, RabbitMQ, Brevo, Diet/Identity/Progress microservices, or split databases. The target project remains web-only.
+The PDF rubric does not mandate a YARP Gateway, six independent REST microservices,
+or six separate SQL databases. Do not present them as coursework requirements.
