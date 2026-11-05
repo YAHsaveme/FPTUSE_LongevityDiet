@@ -21,6 +21,12 @@ type Summary = {
   weeklyMinutesTarget: number; weeklyStrengthSessionsTarget: number
   minutesProgressPercent: number; strengthProgressPercent: number
 }
+type Advice = {
+  weekStart: string; weekEnd: string; completedMinutes: number; weeklyMinutesGoal: number
+  strengthSessions: number; weeklyStrengthGoal: number; status: string
+  remainingMinutes: number; remainingStrengthSessions: number
+  guidance: string; disclaimer: string
+}
 type Dimension = { code: string; weight: number; rawScore: number | null; reasonCode: string }
 type Score = {
   localDate: string; version: string; score: number | null
@@ -78,6 +84,13 @@ export function ActivityTrackingPage() {
   })
   const goalMinutes = goalDraft?.weeklyMinutesTarget ?? goal.data?.weeklyMinutesTarget ?? 150
   const goalStrength = goalDraft?.weeklyStrengthSessionsTarget ?? goal.data?.weeklyStrengthSessionsTarget ?? 2
+  const advice = useQuery({
+    queryKey: ['activity-advice'],
+    enabled: summary.isSuccess,
+    retry: false,
+    staleTime: 60_000,
+    queryFn: async () => (await api.get<Advice>('/recommendations/activity')).data,
+  })
   const score = useQuery({
     queryKey: ['ldas', localToday],
     enabled: profile.isSuccess,
@@ -87,6 +100,7 @@ export function ActivityTrackingPage() {
     await Promise.all([
       qc.invalidateQueries({ queryKey: ['activities'] }),
       qc.invalidateQueries({ queryKey: ['activity-summary'] }),
+      qc.invalidateQueries({ queryKey: ['activity-advice'] }),
       qc.invalidateQueries({ queryKey: ['ldas'] }),
     ])
   }
@@ -186,6 +200,16 @@ export function ActivityTrackingPage() {
           </div>
         </section>
       </div>
+      <section className="tracking-panel">
+        <h2>Gợi ý hoạt động tuần này (REST → gRPC)</h2>
+        {advice.isLoading ? <p>Đang tính gợi ý từ tiến độ thực tế...</p> :
+          advice.isError ? <p role="alert">Dịch vụ gợi ý tạm thời không khả dụng. {getApiErrorMessage(advice.error)}</p> :
+            advice.data ? <div className="tracking-summary">
+              <strong>{advice.data.remainingMinutes} phút và {advice.data.remainingStrengthSessions} buổi sức mạnh còn lại</strong>
+              <p>{advice.data.guidance}</p>
+              <small>{advice.data.disclaimer}</small>
+            </div> : null}
+      </section>
       <section className="tracking-panel">
         <h2>LDAS • {score.data?.version ?? 'ldas-v1'}</h2>
         {score.isLoading ? <p>Đang tính từ dữ liệu đã lưu...</p> :

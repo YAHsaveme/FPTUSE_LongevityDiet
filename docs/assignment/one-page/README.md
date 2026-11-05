@@ -25,10 +25,14 @@ UserId values are not SQL foreign keys.
 
 ## Implementation honesty
 
-Docker Compose contains an independent Recommendation.Grpc service.
-The current REST API does not yet wire a gRPC client call. Therefore the
-REST→gRPC arrow in C1 is labeled PLANNED and dashed. For final grading,
-implement and demonstrate the call instead of treating the diagram as proof.
+The independent Recommendation.Grpc service implements ActivityCoach.Recommend
+over HTTP/2 from a shared .proto contract. The JWT-protected REST endpoint
+GET /api/v1/recommendations/activity obtains the signed-in member's real
+weekly activity summary and invokes the typed gRPC client (3-second deadline).
+The Web Activity screen displays the response; failures return HTTP 503 rather
+than made-up advice. A real HTTP/2 Kestrel ↔ REST API integration test passed
+using SQLite test databases; deployment on SQL Server/Docker Compose is a
+separate unverified acceptance gate.
 
 ## Edit and reproduce
 

@@ -4,6 +4,7 @@ const root=path.resolve(__dirname,'..');
 const docs=['README.md','AGENTS.md','docs/README.md','docs/architecture/README.md',
  'docs/assignment/README.md','docs/assignment/00-ASSIGNMENT-DOCUMENT.md',
  'docs/assignment/02-SYSTEM-ARCHITECTURE-C4.md','docs/assignment/03-DATA-MODEL.md',
+ 'docs/assignment/04-RUNTIME-CONNECTIVITY.md',
  'docs/assignment/one-page/README.md'];
 let failures=[],links=0;
 for(const f of docs){

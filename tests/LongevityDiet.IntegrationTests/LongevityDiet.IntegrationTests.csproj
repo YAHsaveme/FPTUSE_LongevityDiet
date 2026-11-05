@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\LongevityDiet.API\LongevityDiet.API.csproj" />
+    <ProjectReference Include="..\..\src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj" Aliases="GrpcServer" />
     <ProjectReference Include="..\..\src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj" />
     <ProjectReference Include="..\..\src\LongevityDiet.Worker\LongevityDiet.Worker.csproj" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-/* PRN232 course-size C4 diagrams; evidence: actual src + docker-compose, not speculative microservices. */
+﻿/* PRN232 course-size C4 diagrams; evidence: actual src + docker-compose, not speculative microservices. */
 const fs=require('fs'),path=require('path'),dest=path.resolve(__dirname,'../docs/assignment/one-page');
 fs.mkdirSync(dest,{recursive:true});
 function esc(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -43,12 +43,12 @@ function draw(title,sub,w,h){
  g.save('01-c0-system-context.drawio');
 }
 {
- const g=draw('C1 — CONTAINER DIAGRAM','Code and Docker Compose scope; dashed relationship to gRPC is NOT yet implemented in REST API',4000,2510);
+ const g=draw('C1 — CONTAINER DIAGRAM','Implemented REST + gRPC + event paths; separate boxes = independent runtime processes',4000,2510);
  g.bound(690,280,3170,2010,'LongevityDiet [Software System]');
  g.node('member',90,690,480,250,'Member','Person','Web browser',{font:32});
  g.node('web',875,570,620,275,'Web UI','Container • React/Vite','Pages and API client',{font:31});
  g.node('api',1750,570,635,275,'REST API','Container • ASP.NET Core','JWT • CRUD • Tracking • Reminders',{font:31});
- g.node('grpc',2900,490,630,255,'Recommendation gRPC','Container • ASP.NET Core','Independent service skeleton',{font:28});
+ g.node('grpc',2900,490,630,255,'Recommendation gRPC','Container • ASP.NET Core','ActivityCoach.Recommend over HTTP/2',{font:28});
  g.node('worker',2900,1100,630,260,'Background Worker','Container • .NET','Processes events and schedules reminders',{font:29});
  g.node('redis',2570,1630,630,255,'Redis Streams','Container • Broker','Event publishing and consuming',{font:29});
  g.node('sql',1680,1650,700,260,'SQL Server','Container • Databases','Identity • Tracking • Worker contexts',{font:29});
@@ -56,35 +56,73 @@ function draw(title,sub,w,h){
  g.link('web','api','JSON / HTTPS',[1,.5],[0,.5]);
  g.link('api','sql','EF Core',[.50,1],[.5,0],[[2065,1260],[2030,1260]]);
  g.link('api','redis','Event publish',[1,.83],[0,.28],[[2500,797],[2500,1701]],true);
- g.link('redis','worker','Streams',[1,.3],[0,.8],[[2800,1706],[2800,1308]],true);
+ g.link('redis','worker','Consume identity events',[.75,0],[.25,1],[[3042,1505],[3057,1505]],true);
+ g.link('worker','redis','Publish notification results',[.85,1],[1,.65],[[3650,1430],[3650,1795]],true);
+ g.link('redis','api','Consume notification results',[0,.70],[1,.90],[[2430,1808],[2430,820]],true);
  g.link('worker','sql','DB writes',[.5,1],[.75,1],[[3215,2140],[2205,2140]]);
- g.link('api','grpc','Planned gRPC call',[1,.25],[0,.53],[[2650,639],[2650,625]],true);
- g.text(785,2320,3040,95,'Legend: Solid = working calls/data access. Dashed = async events or explicitly planned gRPC invocation. gRPC service exists, but API call wiring is pending.',24);
+ g.link('api','grpc','gRPC / HTTP2 activity advice',[1,.25],[0,.53],[[2650,639],[2650,625]]);
+ g.text(785,2320,3040,95,'Legend: Solid = synchronous REST/gRPC or EF Core access. Dashed = asynchronous Redis Streams: Identity request → Worker → notification result → API inbox.',24);
  g.save('02-c1-container-architecture.drawio');
 }
 {
- const g=draw('C2 — REST API COMPONENTS','Scope: one container, LongevityDiet.API; API → Service → Repository / EF Core',5000,2540);
- g.bound(670,300,3580,1920,'LongevityDiet.API [Container • ASP.NET Core]');
- g.node('web',100,620,460,250,'Web UI','External Container','Calls REST endpoints',{font:29});
- const x=[800,1670,2540,3410],w=720;
- const ctl=[['authc','Auth Controller','Register • login • refresh'],['profilec','Profile Controller','Profile operations'],['trackingc','Tracking Controller','Activity and scores'],['reminderc','Reminder/Notifications Controller','Preferences and user inbox']];
- const svc=[['auths','Authentication Service','JWT and refresh tokens'],['profiles','Profile Service','Profile validation'],['trackings','Tracking Service','Summaries and LDAS'],['reminders','Reminder Service','Preferences and notifications']];
- ctl.forEach((a,i)=>g.node(a[0],x[i],595,w,225,a[1],'Component',a[2],{font:27}));
- svc.forEach((a,i)=>g.node(a[0],x[i],1070,w,235,a[1],'Component',a[2],{font:28}));
- g.node('identitydb',1170,1570,840,235,'Identity Repository','Component • EF Core DbContext','Users, profiles, tokens, notifications',{font:26});
- g.node('trackingdb',2530,1570,840,235,'Tracking Repository','Component • EF Core DbContext','Activity logs and score snapshots',{font:26});
- g.node('bridge',3420,1570,680,235,'Redis Event Bridge','Component • Hosted Service','Outbox and notification events',{font:26});
- g.node('redis',4420,1370,475,275,'Redis Streams','External Container','Message broker',{font:27});
- g.node('sql',1760,2300,1280,170,'SQL Server','External Container','Two API-owned SQL databases',{font:27});
- g.link('web','authc','HTTPS',[1,.40],[0,.45],[[650,720],[650,696]]);
- for(let i=0;i<4;i++)g.link(ctl[i][0],svc[i][0],'Uses',[.5,1],[.5,0]);
- g.link('auths','identitydb','Persists',[.5,1],[.28,0],[[1160,1480],[1405,1480]]);
- g.link('profiles','identitydb','Persists',[.23,1],[.80,0],[[1835,1470],[1842,1470]]);
- g.link('trackings','trackingdb','Reads/writes',[.5,1],[.5,0]);
- g.link('reminders','bridge','Publishes',[.5,1],[.5,0]);
- g.link('bridge','redis','Redis Streams',[1,.4],[0,.5],[[4340,1664],[4340,1507]],true);
- g.link('identitydb','sql','EF Core',[.45,1],[.27,0],[[1548,2150],[2106,2150]]);
- g.link('trackingdb','sql','EF Core',[.5,1],[.8,0],[[2950,2150],[2784,2150]]);
- g.text(790,423,3220,95,'Cross-cutting: JWT/authorization, validation, rate limits, logging, exceptions and health checks. gRPC client not yet wired.',24);
+ const g=draw('C2 — REST API COMPONENTS',
+   'One existing container: authenticated REST endpoints, services, persistence and integration adapters',
+   6100,3020);
+ g.bound(700,310,4550,2120,'LongevityDiet.API [Container • ASP.NET Core]');
+ g.node('web',95,775,485,260,'Web UI','External Container','HTTPS / JWT (example: sign in)',{font:29});
+ const cols=[800,1690,2580,3470,4360], width=750;
+ const controllers=[
+  ['authc','Auth Controller','Register • login • refresh'],
+  ['profilec','Profile Controller','Profile operations'],
+  ['reminderc','Reminder Notifications Controller','Preferences and inbox'],
+  ['trackingc','Tracking Controller','Activities, goals and scores'],
+  ['recommendc','Recommendation Controller','User-scoped activity guidance']
+ ];
+ const services=[
+  ['auths','Authentication Service','JWT and refresh token rules'],
+  ['profiles','Profile Service','Account and profile validation'],
+  ['reminders','Reminder Service','Commit preferences + outbox'],
+  ['trackings','Tracking Service','Own weekly activity summary'],
+  ['grpcclient','ActivityCoach gRPC Client','Typed protobuf client; 3s deadline']
+ ];
+ controllers.forEach((a,i)=>g.node(a[0],cols[i],680,width,250,a[1],'Component',a[2],{font:28}));
+ services.forEach((a,i)=>g.node(a[0],cols[i],1210,width,250,a[1],'Component',a[2],{font:27}));
+ g.node('identitydb',1200,1790,1240,250,'Identity Persistence',
+   'Component • EF Core Repository','Users, profile, preferences, sessions, notifications, outbox',{font:27});
+ g.node('bridge',2580,1790,750,250,'Identity Redis Bridge',
+   'Component • Hosted Service','Poll outbox; consume results into inbox',{font:26});
+ g.node('trackingdb',3470,1790,750,250,'Tracking Persistence',
+   'Component • EF Core DbContext','Activities, goals and partial LDAS',{font:27});
+ g.node('grpc',5380,1090,590,280,'Recommendation gRPC',
+   'External Container • HTTP/2','ActivityCoach.Recommend',{font:27});
+ g.node('identitysql',1200,2585,1240,215,'Identity SQL Database',
+   'External Container • SQL Server','User and notification ownership',{font:27});
+ g.node('redis',2580,2585,750,215,'Redis Streams',
+   'External Container • Broker','Two-way events with Worker',{font:27});
+ g.node('trackingsql',3470,2585,750,215,'Tracking SQL Database',
+   'External Container • SQL Server','Activity and scoring ownership',{font:26});
+ g.link('web','authc','HTTPS / JWT',[1,.45],[0,.52]);
+ for(let i=0;i<5;i++)g.link(controllers[i][0],services[i][0],'Uses',[.5,1],[.5,0]);
+ // Top gutter avoids crossing controller boxes and all vertical service arrows.
+ g.link('recommendc','trackings','Fetch own weekly summary',[.10,0],[1,.5],
+        [[4300,590],[4300,1335]]);
+ g.link('grpcclient','grpc','gRPC / HTTP2',[1,.5],[0,.5],
+        [[5300,1335],[5300,1230]]);
+ g.link('auths','identitydb','Identity / token writes',[.5,1],[.19,0],
+        [[1175,1640],[1436,1640]]);
+ g.link('profiles','identitydb','Profile reads / writes',[.5,1],[.70,0]);
+ g.link('reminders','identitydb','Write preferences + outbox',[.05,1],[.95,0],
+        [[2617,1650],[2378,1650]]);
+ g.link('bridge','identitydb','',[0,.5],[1,.5]);
+ g.link('trackings','trackingdb','Read / write EF Core',[.5,1],[.5,0]);
+ g.link('identitydb','identitysql','EF Core',[.5,1],[.5,0]);
+ g.link('bridge','redis','Publish / consume',[.5,1],[.5,0],[],true);
+ g.link('trackingdb','trackingsql','EF Core',[.5,1],[.5,0]);
+ g.text(820,430,4120,90,
+   'Cross-cutting: JWT authorization • rate limiting • validation • tracing. Only numeric, member-scoped weekly aggregates reach gRPC.',
+   24);
+ g.text(740,2860,5270,95,
+   'Identity and Tracking are distinct databases on the same SQL Server host. Dashed = asynchronous Redis Streams; other arrows = synchronous calls. External Worker is shown in C1.',
+   24);
  g.save('03-c2-api-components.drawio');
 }

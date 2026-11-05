@@ -12,6 +12,7 @@ DBML core ERD and the matching vector PDFs.
 1. [Assignment summary and evidence](00-ASSIGNMENT-DOCUMENT.md)
 2. [C4 architecture and real connectivity](02-SYSTEM-ARCHITECTURE-C4.md)
 3. [Ten-table core database model](03-DATA-MODEL.md)
+4. [Real runtime connectivity and remaining limits](04-RUNTIME-CONNECTIVITY.md)
 4. [Four student-facing diagrams](one-page/README.md)
 5. [Docker deployment and async support views](../architecture/README.md)
 

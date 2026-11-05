@@ -14,6 +14,7 @@ using LongevityDiet.Repositories.Repositories;
 using LongevityDiet.Services.Identity;
 using LongevityDiet.Services.Reminders;
 using LongevityDiet.Tracking;
+using LongevityDiet.Recommendation.Contracts;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -117,6 +118,22 @@ try
         options.UseSqlServer(trackingConnection, sql => sql.EnableRetryOnFailure()));
     builder.Services.AddScoped<ITrackingUserContext, IdentityTrackingUserContext>();
     builder.Services.AddScoped<TrackingService>();
+
+    // Resolve the final configuration via DI, including host-level test overrides.
+    // Only aggregate activity counts are sent to the independent gRPC service.
+    builder.Services.AddGrpcClient<ActivityCoach.ActivityCoachClient>((services, options) =>
+    {
+        var configuration = services.GetRequiredService<IConfiguration>();
+        var recommendationUrl = configuration["Grpc:RecommendationUrl"];
+        if (string.IsNullOrWhiteSpace(recommendationUrl) &&
+            services.GetRequiredService<IHostEnvironment>().IsEnvironment("Testing"))
+            recommendationUrl = "http://localhost:5010";
+        if (!Uri.TryCreate(recommendationUrl, UriKind.Absolute, out var address) ||
+            address.Scheme is not ("http" or "https") ||
+            !string.IsNullOrEmpty(address.UserInfo))
+            throw new InvalidOperationException("Grpc:RecommendationUrl must be an absolute HTTP(S) address.");
+        options.Address = address;
+    });
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     // Default SQL persistence is intentionally unchanged until Cloudflare D1

@@ -7,7 +7,8 @@ Start with [PRN232 assignment summary](assignment/00-ASSIGNMENT-DOCUMENT.md).
 1. [Assignment requirements, scope and demo](assignment/README.md).
 2. [Four official-scale diagrams](assignment/one-page/README.md):
    C0 System Context, C1 Containers, C2 REST API components and core DBML ERD.
-3. [Docker, asynchronous workflow and demo supporting diagrams](architecture/README.md).
+3. [Real runtime connectivity and limits](assignment/04-RUNTIME-CONNECTIVITY.md).
+4. [Docker, asynchronous workflow and demo supporting diagrams](architecture/README.md).
 4. [Project status](PROJECT-STATUS.md) and [four-week team tasks](task/README.md).
 5. [API/gRPC/event contracts](07-API-GRPC-EVENTS.md).
 6. [Database and test/deployment notes](06-DATABASE-DESIGN.md),

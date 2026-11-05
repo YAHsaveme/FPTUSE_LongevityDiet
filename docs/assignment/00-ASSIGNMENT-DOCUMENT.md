@@ -18,7 +18,7 @@ Administrators are authorized system users.
 | JWT authentication, search/filter/sort/pagination | Identity/Auth and activity endpoints; verify each in Swagger |
 | Background job | LongevityDiet.Worker schedules reminders |
 | Redis or Kafka: producer AND consumer | Redis Streams; Identity Outbox and Worker consumer/notification result |
-| Independent gRPC service and API interaction | Recommendation.Grpc project exists; **actual REST→gRPC call still requires wiring and E2E evidence** |
+| Independent gRPC service and API interaction | ActivityCoach.Recommend called by JWT-protected REST endpoint; real HTTP/2 Kestrel-to-REST integration PASS (SQLite test DB). Docker/SQL Server E2E still outstanding |
 | EF Core / relational database | SQL Server; Identity, Tracking and Worker DbContexts; migrations retained |
 | Docker Compose or public cloud | docker-compose.yml and Dockerfiles; full live SQL Server deployment validation still pending |
 | API documentation | OpenAPI/Swagger |
@@ -47,5 +47,6 @@ history is authoritative. Omitted outbox and bookkeeping tables still exist.
 
 Demo register/login → profile → activity tracking → reminder preference →
 Redis event → Worker → notification read. Show JWT, Swagger, Redis streams
-and Docker evidence; do not claim REST→gRPC integration was demonstrated
-until that call is actually implemented and tested.
+and Docker evidence; the REST→gRPC interaction is now implemented and
+covered by a real HTTP/2 integration test, while live Docker/SQL Server
+deployment still requires separate verification.
