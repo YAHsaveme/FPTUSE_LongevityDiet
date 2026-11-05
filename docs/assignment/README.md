@@ -20,6 +20,7 @@ This is a companion sequence diagram, not a replacement for C0/C1/C2.
 4. [Actual connections, test evidence and remaining limits](04-RUNTIME-CONNECTIVITY.md)
 5. [Six editable Draw.io diagrams and one-page PDFs](one-page/README.md)
 6. [Deployment and supplementary runtime views](../architecture/README.md)
+7. [Research-backed LONGITUDINAL NUTRITION TARGET (not yet implemented)](05-LONGITUDINAL-NUTRITION-TARGET.md): daily meals, allergies, health questionnaires, safety and proposed 39-table model
 
 The PDF rubric does not require six REST microservices, six databases or a
 separate gateway. The existing EF migrations and source code remain

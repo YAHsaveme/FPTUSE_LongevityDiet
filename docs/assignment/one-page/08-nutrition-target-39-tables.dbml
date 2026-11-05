@@ -1,0 +1,324 @@
+// TARGET DESIGN, NOT IMPLEMENTED SQL TABLES / MIGRATIONS.
+// SQL Server LongevityTrackingDb, proposed schema nutrition.
+// UserId refers logically to Users in LongevityDietDb (NO cross-database SQL FK).
+Project LongevityDiet_Nutrition_Target { database_type: "SQLServer" }
+Table nutrition.NutritionProfiles {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  TimeZoneId nvarchar(300)
+  OnboardingState nvarchar(300)
+  UpdatedAtUtc datetime2
+}
+Table nutrition.Allergens {
+  Id uniqueidentifier [pk]
+  Code nvarchar(300)
+  DisplayName nvarchar(300)
+  SourceVersion nvarchar(300)
+}
+Table nutrition.UserAllergies {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  AllergenId uniqueidentifier
+  Status nvarchar(300)
+  Severity nvarchar(300)
+  VerifiedAtUtc datetime2
+}
+Table nutrition.HealthConditions {
+  Id uniqueidentifier [pk]
+  Code nvarchar(300)
+  DisplayName nvarchar(300)
+  SourceVersion nvarchar(300)
+}
+Table nutrition.UserConditions {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  ConditionId uniqueidentifier
+  SelfReported bit
+  ReviewedAtUtc datetime2
+}
+Table nutrition.MedicationContexts {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  DrugName nvarchar(300)
+  MealTimingNotes nvarchar(300)
+  Verified bit
+}
+Table nutrition.DietPreferences {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  DietPattern nvarchar(300)
+  DislikedFoods nvarchar(300)
+  BudgetVnd int
+}
+Table nutrition.NutritionGoals {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  GoalCode nvarchar(300)
+  EffectiveFrom date
+  Priority int
+}
+Table nutrition.RiskAssessments {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  RiskTier nvarchar(300)
+  PolicyVersion nvarchar(300)
+  ReviewStatus nvarchar(300)
+}
+Table nutrition.HealthConsents {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  Purpose nvarchar(300)
+  GrantedAtUtc datetime2
+  RevokedAtUtc datetime2
+}
+Table nutrition.Foods {
+  Id uniqueidentifier [pk]
+  LocalName nvarchar(300)
+  Region nvarchar(300)
+  SourceVersion nvarchar(300)
+  Verified bit
+}
+Table nutrition.Nutrients {
+  Id uniqueidentifier [pk]
+  Code nvarchar(300)
+  Unit nvarchar(300)
+  SourceVersion nvarchar(300)
+}
+Table nutrition.FoodNutrients {
+  Id uniqueidentifier [pk]
+  FoodId uniqueidentifier
+  NutrientId uniqueidentifier
+  AmountPer100g decimal(10,3)
+}
+Table nutrition.FoodAllergens {
+  Id uniqueidentifier [pk]
+  FoodId uniqueidentifier
+  AllergenId uniqueidentifier
+  Presence nvarchar(300)
+  SourceConfidence nvarchar(300)
+}
+Table nutrition.Recipes {
+  Id uniqueidentifier [pk]
+  LocalName nvarchar(300)
+  ServingYield decimal(10,3)
+  Verified bit
+}
+Table nutrition.RecipeIngredients {
+  Id uniqueidentifier [pk]
+  RecipeId uniqueidentifier
+  FoodId uniqueidentifier
+  AmountGrams decimal(10,3)
+}
+Table nutrition.RecipeAllergens {
+  Id uniqueidentifier [pk]
+  RecipeId uniqueidentifier
+  AllergenId uniqueidentifier
+  Presence nvarchar(300)
+}
+Table nutrition.DietPrograms {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  StartLocalDate date
+  EndLocalDate date
+  Status nvarchar(300)
+}
+Table nutrition.ProgramVersions {
+  Id uniqueidentifier [pk]
+  ProgramId uniqueidentifier
+  VersionNumber int
+  RulesVersion nvarchar(300)
+  ApprovalState nvarchar(300)
+}
+Table nutrition.ProgramDays {
+  Id uniqueidentifier [pk]
+  ProgramVersionId uniqueidentifier
+  LocalDate date
+  TimeZoneId nvarchar(300)
+}
+Table nutrition.ScheduledMeals {
+  Id uniqueidentifier [pk]
+  ProgramDayId uniqueidentifier
+  MealType nvarchar(300)
+  LocalTime time
+}
+Table nutrition.ScheduledMealItems {
+  Id uniqueidentifier [pk]
+  ScheduledMealId uniqueidentifier
+  RecipeId uniqueidentifier
+  ServingQuantity decimal(10,3)
+}
+Table nutrition.MealReplacements {
+  Id uniqueidentifier [pk]
+  ScheduledMealItemId uniqueidentifier
+  RecipeId uniqueidentifier
+  Reason nvarchar(300)
+}
+Table nutrition.PlanSafetyChecks {
+  Id uniqueidentifier [pk]
+  ProgramVersionId uniqueidentifier
+  CheckCode nvarchar(300)
+  Result nvarchar(300)
+  PolicyVersion nvarchar(300)
+}
+Table nutrition.MealIntakes {
+  Id uniqueidentifier [pk]
+  ProgramDayId uniqueidentifier
+  UserId uniqueidentifier
+  EatenAtUtc datetime2
+  Status nvarchar(300)
+}
+Table nutrition.MealIntakeItems {
+  Id uniqueidentifier [pk]
+  MealIntakeId uniqueidentifier
+  FoodId uniqueidentifier
+  AmountGrams decimal(10,3)
+}
+Table nutrition.QuestionnaireTemplates {
+  Id uniqueidentifier [pk]
+  Name nvarchar(300)
+  Phase nvarchar(300)
+  Version int
+  Active bit
+}
+Table nutrition.QuestionnaireQuestions {
+  Id uniqueidentifier [pk]
+  TemplateId uniqueidentifier
+  Prompt nvarchar(300)
+  InputType nvarchar(300)
+  SortOrder int
+}
+Table nutrition.QuestionOptions {
+  Id uniqueidentifier [pk]
+  QuestionId uniqueidentifier
+  Code nvarchar(300)
+  DisplayText nvarchar(300)
+}
+Table nutrition.CheckinSchedules {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  TemplateId uniqueidentifier
+  LocalTime time
+  Enabled bit
+  QuietStart time
+  QuietEnd time
+  MaxPerDay int
+}
+Table nutrition.CheckinSubmissions {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  TemplateId uniqueidentifier
+  LocalDate date
+  Phase nvarchar(300)
+}
+Table nutrition.CheckinAnswers {
+  Id uniqueidentifier [pk]
+  SubmissionId uniqueidentifier
+  QuestionId uniqueidentifier
+  OptionId uniqueidentifier
+  NumericValue decimal(10,3)
+  BooleanValue bit
+  FreeText nvarchar(300)
+}
+Table nutrition.HealthObservations {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  SubmissionId uniqueidentifier
+  MetricCode nvarchar(300)
+  MetricValue decimal(10,3)
+  Unit nvarchar(300)
+  MeasuredAtUtc datetime2
+}
+Table nutrition.SymptomReports {
+  Id uniqueidentifier [pk]
+  SubmissionId uniqueidentifier
+  MealIntakeId uniqueidentifier
+  SymptomCode nvarchar(300)
+  Severity int
+  OnsetAtUtc datetime2
+}
+Table nutrition.NutritionReviews {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  ProgramVersionId uniqueidentifier
+  ReviewStatus nvarchar(300)
+  ReviewedAtUtc datetime2
+}
+Table nutrition.PlanChangeHistory {
+  Id uniqueidentifier [pk]
+  ReviewId uniqueidentifier
+  FromVersionId uniqueidentifier
+  ToVersionId uniqueidentifier
+  ChangeReason nvarchar(300)
+}
+Table nutrition.PromptDeliveries {
+  Id uniqueidentifier [pk]
+  ScheduleId uniqueidentifier
+  SentAtUtc datetime2
+  Channel nvarchar(300)
+  DeliveryStatus nvarchar(300)
+  IdempotencyKey nvarchar(300)
+}
+Table nutrition.SafetyIncidents {
+  Id uniqueidentifier [pk]
+  ProfileId uniqueidentifier
+  SubmissionId uniqueidentifier
+  Severity nvarchar(300)
+  EscalatedAtUtc datetime2
+}
+Table nutrition.NutritionOutbox {
+  Id uniqueidentifier [pk]
+  AggregateId uniqueidentifier
+  EventType nvarchar(300)
+  CreatedAtUtc datetime2
+  PublishedAtUtc datetime2
+}
+Ref: nutrition.UserAllergies.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.UserAllergies.AllergenId > nutrition.Allergens.Id
+Ref: nutrition.UserConditions.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.UserConditions.ConditionId > nutrition.HealthConditions.Id
+Ref: nutrition.MedicationContexts.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.DietPreferences.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.NutritionGoals.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.RiskAssessments.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.HealthConsents.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.FoodNutrients.FoodId > nutrition.Foods.Id
+Ref: nutrition.FoodNutrients.NutrientId > nutrition.Nutrients.Id
+Ref: nutrition.FoodAllergens.FoodId > nutrition.Foods.Id
+Ref: nutrition.FoodAllergens.AllergenId > nutrition.Allergens.Id
+Ref: nutrition.RecipeIngredients.RecipeId > nutrition.Recipes.Id
+Ref: nutrition.RecipeIngredients.FoodId > nutrition.Foods.Id
+Ref: nutrition.RecipeAllergens.RecipeId > nutrition.Recipes.Id
+Ref: nutrition.RecipeAllergens.AllergenId > nutrition.Allergens.Id
+Ref: nutrition.DietPrograms.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.ProgramVersions.ProgramId > nutrition.DietPrograms.Id
+Ref: nutrition.ProgramDays.ProgramVersionId > nutrition.ProgramVersions.Id
+Ref: nutrition.ScheduledMeals.ProgramDayId > nutrition.ProgramDays.Id
+Ref: nutrition.ScheduledMealItems.ScheduledMealId > nutrition.ScheduledMeals.Id
+Ref: nutrition.ScheduledMealItems.RecipeId > nutrition.Recipes.Id
+Ref: nutrition.MealReplacements.ScheduledMealItemId > nutrition.ScheduledMealItems.Id
+Ref: nutrition.MealReplacements.RecipeId > nutrition.Recipes.Id
+Ref: nutrition.PlanSafetyChecks.ProgramVersionId > nutrition.ProgramVersions.Id
+Ref: nutrition.MealIntakes.ProgramDayId > nutrition.ProgramDays.Id
+Ref: nutrition.MealIntakeItems.MealIntakeId > nutrition.MealIntakes.Id
+Ref: nutrition.MealIntakeItems.FoodId > nutrition.Foods.Id
+Ref: nutrition.QuestionnaireQuestions.TemplateId > nutrition.QuestionnaireTemplates.Id
+Ref: nutrition.QuestionOptions.QuestionId > nutrition.QuestionnaireQuestions.Id
+Ref: nutrition.CheckinSchedules.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.CheckinSchedules.TemplateId > nutrition.QuestionnaireTemplates.Id
+Ref: nutrition.CheckinSubmissions.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.CheckinSubmissions.TemplateId > nutrition.QuestionnaireTemplates.Id
+Ref: nutrition.CheckinAnswers.SubmissionId > nutrition.CheckinSubmissions.Id
+Ref: nutrition.CheckinAnswers.QuestionId > nutrition.QuestionnaireQuestions.Id
+Ref: nutrition.CheckinAnswers.OptionId > nutrition.QuestionOptions.Id
+Ref: nutrition.HealthObservations.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.HealthObservations.SubmissionId > nutrition.CheckinSubmissions.Id
+Ref: nutrition.SymptomReports.SubmissionId > nutrition.CheckinSubmissions.Id
+Ref: nutrition.SymptomReports.MealIntakeId > nutrition.MealIntakes.Id
+Ref: nutrition.NutritionReviews.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.NutritionReviews.ProgramVersionId > nutrition.ProgramVersions.Id
+Ref: nutrition.PlanChangeHistory.ReviewId > nutrition.NutritionReviews.Id
+Ref: nutrition.PlanChangeHistory.FromVersionId > nutrition.ProgramVersions.Id
+Ref: nutrition.PlanChangeHistory.ToVersionId > nutrition.ProgramVersions.Id
+Ref: nutrition.PromptDeliveries.ScheduleId > nutrition.CheckinSchedules.Id
+Ref: nutrition.SafetyIncidents.ProfileId > nutrition.NutritionProfiles.Id
+Ref: nutrition.SafetyIncidents.SubmissionId > nutrition.CheckinSubmissions.Id
