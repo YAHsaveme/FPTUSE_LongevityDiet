@@ -1,22 +1,25 @@
 # C2 Component Architecture & Complete Database Map
 
-**Snapshot:** YAHsaveme/FPTUSE_LongevityDiet `main`, commit `1962735c02b61b69a0697741fab4173362cade33` (2026-10-26).
+**Historical target design snapshot:** `main` commit `1962735` (2026-10-26). **Current implemented model reconciled:** 2026-11-05, branch `feature/member1-weeks2-4-implementation`. Target semantics are proposals, not production migration claims.
 
-## Files for diagrams.net / draw.io
+## Canonical files — one page per diagram
 
-- [05-c2-component-architecture.drawio](extended-diagrams/05-c2-component-architecture.drawio) — eight editable C4 **Level 3 / Component** pages: implemented Current REST API and seven explicitly **Target** component boundaries (Gateway, Identity, Catalog, Planning, Tracking, Recommendation, Worker).
-- [06-all-database-erd.drawio](extended-diagrams/06-all-database-erd.drawio) — nine editable pages: index, actual SQL database, six target SQL databases, optional Cloudflare D1 design.
-- Prior teacher-facing C0, C1, conceptual ERD and 33-table physical data view remain unchanged in diagrams 01-04.
+- [C0 editable Draw.io](one-page/01-c0-system-context.drawio) — **one page**, official C4 System Context.
+- [C1 editable Draw.io](one-page/02-c1-container-architecture.drawio) — **one page**, target container diagram.
+- [C2 editable Draw.io](one-page/05-c2-component-architecture.drawio) — **one page**, explicit six-service component **atlas**; formal C4 Level-3 scope normally covers one container per diagram, so this is a consolidated assignment-specific overview.
+- [Target database source in DBML](one-page/06-database-target.dbml) — **33 entity types / 6 logical target databases**, [one-page ERD PDF](one-page/06-database-target-one-page.pdf).
+- [Current mapped database source in DBML](one-page/06-database-current.dbml) — **18 mapped tables / 3 EF DbContexts**, [one-page ERD PDF](one-page/06-database-current-one-page.pdf).
+- [Full file index and editing guidance](one-page/README.md). Superseded 8-page C2 and 9-page Draw.io ERD were archived out of the project, never mixed with new editable DBML sources.
 
 ## Distinguish implementation and design
 
 | Area | In current source and Compose | In Target ADR-005 |
 | --- | --- | --- |
-| Runtime REST | One ASP.NET Core 9 API, `AuthController` and `ProfileController` | YARP Gateway + Identity, Catalog, Planning and Tracking services |
-| SQL storage | `LongevityDietDb` with `Users`, `UserProfiles`, `RefreshTokens` — one DbContext | Six **logical** service-owned SQL databases; may share one SQL Server instance |
+| Runtime REST | One ASP.NET Core 9 API with Auth, Profile, Tracking and Reminder/Notification controllers | YARP Gateway + independent Identity, Catalog, Planning and Tracking services |
+| SQL storage | 3 EF Core DbContexts and **18 mapped entity tables** (Identity, Tracking, Reminder Worker); SQL Server live E2E still pending | Six **logical** service-owned SQL databases; may share one SQL Server instance |
 | Recommendation | Separate gRPC host skeleton | Safety filter, ranking, local read models, service-owned database |
-| Worker | Separate Worker process skeleton | Redis Streams consumer groups, idempotency, retries, job execution |
-| Messaging | Redis configured in Compose | Outbox per publishing service, Redis Streams, consumer inbox |
+| Worker | Separate Worker with implemented timezone-aware reminder scheduling, consumer group and outbox/inbox, tested against Redis + SQLite | Extended target workflows, retries and independent service operations |
+| Messaging | Redis Streams + Identity/Tracking Outbox and Worker notification return path tested in a Redis E2E smoke (SQLite DBs) | Integration event contracts across six service owners |
 | Cloudflare | Optional .NET adapter + Worker prototype built, feature flag OFF; **no live D1 configured** | Cloudflare D1 session-hash store; requires real deployment, migration and E2E |
 
 The C2 Target diagrams are **logical component proposals**, not claims of implemented controllers, repositories, migrations, network ports or APIs.
@@ -48,9 +51,9 @@ The target schema for Recommendation snapshots and Worker job state is not yet s
 
 ## Visual / structural verification
 
-Run: `powershell -File scripts/Validate-C2DbDiagrams.ps1` from anywhere.
+Run: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Validate-OnePageDiagrams.ps1` from the project root; this checks single-page Draw.io, DBML, local FKs and one-page PDFs.
 
-This verifies XML parsing, page counts, valid edge references and canvas bounds. It does **not** assert pixel-perfect typography or that proposed target features already run; open both diagrams in diagrams.net or draw.io Desktop for visual proof. The current four original diagrams remain canonical for assignment C0/C1/conceptual and aggregate physical design.
+This verifies XML parsing, page counts, valid edge references and canvas bounds. It does **not** assert pixel-perfect typography or that proposed target features already run; open both diagrams in diagrams.net or draw.io Desktop for visual proof. The four canonical *submission* pages are now C0, C1, C2 and Target Database ERD under `one-page/`. Historical assignment diagrams were retired to an external backup and Git history.
 
 ## Grounding
 

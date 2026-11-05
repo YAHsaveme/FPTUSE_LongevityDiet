@@ -1,0 +1,213 @@
+Project LongevityDiet_Current {
+  database_type: 'SQLServer'
+  Note: 'Current implemented EF Core entity sets. Three distinct DbContexts and logical SQL DBs; not the six-service target.'
+}
+
+Table current_identity.Users {
+  Id uniqueidentifier [pk]
+  Email nvarchar(320)
+  NormalizedEmail nvarchar(320) [unique]
+  PasswordHash nvarchar(512)
+  DisplayName nvarchar(120)
+  Role nvarchar(24)
+  Status nvarchar(24)
+  CreatedAt datetimeoffset
+  UpdatedAt datetimeoffset
+}
+
+Table current_identity.UserProfiles {
+  UserId uniqueidentifier [pk]
+  BirthYear int
+  TimeZone nvarchar(100)
+  WakeTime time
+  SleepTime time
+  PreferredMealFrequency int
+  FoodPreference nvarchar(500)
+  ProfileCompleted bit
+  UpdatedAt datetimeoffset
+}
+
+Table current_identity.RefreshTokens {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  TokenHash nvarchar(64) [unique]
+  CreatedAt datetimeoffset
+  ExpiresAt datetimeoffset
+  RevokedAt datetimeoffset
+  ReplacedByTokenId uniqueidentifier
+}
+
+Table current_identity.ReminderPreferences {
+  UserId uniqueidentifier [pk]
+  OptedIn bit
+  MealLoggingEnabled bit
+  ActivityEnabled bit
+  ChallengeEnabled bit
+  WeeklySummaryEnabled bit
+  MealTime time
+  ActivityTime time
+  ChallengeTime time
+  WeeklySummaryTime time
+  QuietStart time
+  QuietEnd time
+  Version int
+  UpdatedAtUtc datetimeoffset
+}
+
+Table current_identity.UserNotifications {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  Category nvarchar(32)
+  Title nvarchar(120)
+  Body nvarchar(500)
+  DeepLink nvarchar(120)
+  DeduplicationKey nvarchar(160)
+  CreatedAtUtc datetime2
+  ReadAtUtc datetime2
+  indexes {
+    (UserId,DeduplicationKey) [unique]
+  }
+}
+
+Table current_identity.IdentityOutbox {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  EventType nvarchar(96)
+  PayloadJson nvarchar(4096)
+  CreatedAtUtc datetime2
+  PublishedAtUtc datetime2
+  PublishAttempts int
+}
+
+Table current_identity.IdentityInbox {
+  EventId uniqueidentifier [pk]
+  ReceivedAtUtc datetime2
+}
+
+Table current_tracking.ActivityLogs {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  Kind nvarchar(24)
+  StartedAtUtc datetime2
+  DurationMinutes int
+  Note nvarchar(800)
+  IsDeleted bit
+  CreatedAtUtc datetimeoffset
+  UpdatedAtUtc datetimeoffset
+}
+
+Table current_tracking.ActivityGoals {
+  UserId uniqueidentifier [pk]
+  WeeklyMinutesTarget int
+  WeeklyStrengthSessionsTarget int
+  UpdatedAtUtc datetimeoffset
+}
+
+Table current_tracking.ScoreConfigurationVersions {
+  Version nvarchar(40) [pk]
+  Published bit
+  PublishedAtUtc datetimeoffset
+  ActivityWeight decimal(5,4)
+  MealWeight decimal(5,4)
+  EatingWindowWeight decimal(5,4)
+  SourceReference nvarchar(512)
+}
+
+Table current_tracking.AdherenceScores {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  LocalDate date
+  Version nvarchar(40)
+  Score decimal(5,2)
+  CoveragePercent decimal(5,2)
+  IsPartial bit
+  MissingDataJson nvarchar(512)
+  CalculatedAtUtc datetimeoffset
+  indexes {
+    (UserId,LocalDate,Version) [unique]
+  }
+}
+
+Table current_tracking.ScoreDimensions {
+  Id uniqueidentifier [pk]
+  AdherenceScoreId uniqueidentifier
+  Code nvarchar(32)
+  Weight decimal(5,4)
+  RawScore decimal(5,2)
+  WeightedScore decimal(5,2)
+  ReasonCode nvarchar(128)
+  indexes {
+    (AdherenceScoreId,Code) [unique]
+  }
+}
+
+Table current_tracking.TrackingScoreSignals {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  LocalDate date
+  DimensionCode nvarchar(32)
+  Percent decimal(5,2)
+  SourceEventId uniqueidentifier [unique]
+  SourceVersion nvarchar(64)
+  ReceivedAtUtc datetimeoffset
+  indexes {
+    (UserId,LocalDate,DimensionCode) [unique]
+  }
+}
+
+Table current_tracking.TrackingOutbox {
+  EventId uniqueidentifier [pk]
+  UserId uniqueidentifier
+  EventType nvarchar(100)
+  PayloadJson nvarchar(4096)
+  CreatedAtUtc datetime2
+  PublishedAtUtc datetime2
+  PublishAttempts int
+}
+
+Table current_worker.ReminderSchedules {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  Category nvarchar(32)
+  TimeZone nvarchar(100)
+  LocalTime time
+  QuietStart time
+  QuietEnd time
+  Enabled bit
+  PreferenceVersion int
+  NextDueUtc datetime2
+  UpdatedAtUtc datetime2
+  indexes {
+    (UserId,Category) [unique]
+  }
+}
+
+Table current_worker.ReminderDispatchRecords {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  Category nvarchar(32)
+  DueAtUtc datetime2
+  DeduplicationKey nvarchar(160) [unique]
+  CreatedAtUtc datetime2
+}
+
+Table current_worker.WorkerProcessedEvents {
+  EventId uniqueidentifier [pk]
+  ProcessedAtUtc datetime2
+}
+
+Table current_worker.WorkerOutbox {
+  EventId uniqueidentifier [pk]
+  EventType nvarchar(100)
+  PayloadJson nvarchar(4096)
+  CreatedAtUtc datetime2
+  PublishedAtUtc datetime2
+  PublishAttempts int
+}
+
+// Only enforce intra-database FKs actually configured / owned.
+Ref: current_identity.UserProfiles.UserId - current_identity.Users.Id
+Ref: current_identity.RefreshTokens.UserId > current_identity.Users.Id
+Ref: current_identity.ReminderPreferences.UserId - current_identity.Users.Id
+Ref: current_identity.UserNotifications.UserId > current_identity.Users.Id
+Ref: current_tracking.ScoreDimensions.AdherenceScoreId > current_tracking.AdherenceScores.Id

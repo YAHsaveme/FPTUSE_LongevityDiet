@@ -64,7 +64,9 @@ The official C4 model calls these views **System Context** and **Container**. Th
 
 ### 6.1 C0 - System Context
 
-![C0 System Context](previews/01-c0-system-context.png)
+![C0 System Context — one-page Draw.io](one-page/01-c0-system-context.png)
+
+[Editable Draw.io](one-page/01-c0-system-context.drawio) | [Single-page vector PDF](one-page/01-c0-system-context.pdf)
 
 **Purpose:** show LDC as one software system, the people directly interacting with it, and direct external software dependencies.
 
@@ -78,7 +80,9 @@ The official C4 model calls these views **System Context** and **Container**. Th
 **Intentionally hidden at C0:** React, REST API, SQL Server, Redis, gRPC, Worker, Controllers, Services and Repositories. The optional local AI runtime is shown because it is a direct external software dependency of the whole system.
 ### 6.2 C1 - Container Architecture
 
-![C1 Container Architecture](previews/02-c1-container-architecture.png)
+![C1 Target Container Architecture — one-page Draw.io](one-page/02-c1-container-architecture.png)
+
+[Editable Draw.io](one-page/02-c1-container-architecture.drawio) | [Single-page vector PDF](one-page/02-c1-container-architecture.pdf)
 
 **Status:** approved **Target Architecture** from ADR-005. It is intentionally not presented as the Current Runtime until code and Docker Compose are migrated.
 
@@ -168,7 +172,7 @@ For the Cloud Docker Target, only **HTTPS :443** is public. Containers resolve e
 | Testing | xUnit, WebApplicationFactory, Playwright |
 ## 8. ERD - Conceptual
 
-![Conceptual ERD](previews/03-conceptual-erd.png)
+**Conceptual overview is summarized below.** The consolidated database diagram is maintained as one editable [target DBML model](one-page/06-database-target.dbml) and [one-page ERD](one-page/06-database-target-one-page.pdf), rather than a second independent Draw.io ERD.
 
 The conceptual ERD contains business concepts only. SQL types, refresh tokens, Outbox, ProcessedEvent and other technical infrastructure are intentionally excluded.
 
@@ -186,11 +190,13 @@ The conceptual ERD contains business concepts only. SQL types, refresh tokens, O
 
 ## 9. Physical Database
 
-![Physical Database](previews/04-physical-database.png)
+![Target database ERD generated from DBML — one landscape page](one-page/06-database-target-one-page.svg)
+
+[Editable DBML](one-page/06-database-target.dbml) | [Vector PDF, one page](one-page/06-database-target-one-page.pdf) | [Current EF Core mapped DBML](one-page/06-database-current.dbml)
 
 The physical view shows the **full 33-table Target Assignment MVP** defined by the project database design. To keep the page readable, every table shows its primary/foreign keys plus the important implementation fields; cross-domain foreign keys are written inside table cards instead of drawing long spaghetti lines.
 
-For deep zoom and printing, use `vector/04-physical-database.svg`. Five domain-specific PNG crops are also generated under `previews/physical-db-sections/` so each table remains easy to read without making the master diagram visually crowded.
+For deep zoom and printing, use the DBML-generated vector SVG/PDF above. The canonical target has 33 logical entity types across six separate database ownership boundaries; all fit on one large landscape page. The current implementation is separately documented in DBML with 18 mapped tables across three EF Core DbContexts.
 
 ### Full Table Groups
 

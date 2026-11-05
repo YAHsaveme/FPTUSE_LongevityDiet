@@ -1,5 +1,7 @@
 # Assignment Diagram QA Report
 
+> **2026-11-05 update:** The canonical submission is now the [one-page Draw.io + DBML collection](one-page/README.md). For current validation, run scripts/Validate-OnePageDiagrams.ps1. Older checks below document the previous diagram workflow; they should not be interpreted as checks of the retired multipage files.
+
 ## Scope
 Teacher-facing Assignment views:
 - `01-c0-system-context.drawio`

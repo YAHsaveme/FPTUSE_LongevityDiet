@@ -38,32 +38,17 @@ It is intentionally smaller than the internal engineering documentation under `d
    - Queue/topic modelling rule for Redis Streams
    - Automated quality-gate summary
 
-## Diagrams
+## Canonical one-page diagram set (Draw.io and DBML)
 
-Editable draw.io:
-- `diagrams/01-c0-system-context.drawio`
-- `diagrams/02-c1-container-architecture.drawio`
-- `diagrams/03-conceptual-erd.drawio`
-- `diagrams/04-physical-database.drawio`
+All submission diagrams now live together in **[one-page/README.md](one-page/README.md)**. Open the linked PDF for vector zoom; edit the Draw.io XML or DBML source, not the exported preview.
 
-Canonical PNG:
-- `previews/01-c0-system-context.png`
-- `previews/02-c1-container-architecture.png`
-- `previews/03-conceptual-erd.png`
-- `previews/04-physical-database.png`
+- **C0:** [Draw.io](one-page/01-c0-system-context.drawio) | [1-page PDF](one-page/01-c0-system-context.pdf)
+- **C1 Target:** [Draw.io](one-page/02-c1-container-architecture.drawio) | [1-page PDF](one-page/02-c1-container-architecture.pdf)
+- **C2 Target, six bounded services:** [Draw.io](one-page/05-c2-component-architecture.drawio) | [1-page PDF](one-page/05-c2-component-architecture.pdf)
+- **Target Database:** [DBML](one-page/06-database-target.dbml) | [1-page ERD PDF](one-page/06-database-target-one-page.pdf) | [SVG](one-page/06-database-target-one-page.svg)
+- **Current EF Core database mapping (reference):** [DBML](one-page/06-database-current.dbml) | [1-page PDF](one-page/06-database-current-one-page.pdf)
 
-Vector SVG (recommended for zooming/printing):
-- `vector/01-c0-system-context.svg`
-- `vector/02-c1-container-architecture.svg`
-- `vector/03-conceptual-erd.svg`
-- `vector/04-physical-database.svg`
-
-Physical DB readable section previews:
-- `previews/physical-db-sections/01-identity-profile.png`
-- `previews/physical-db-sections/02-catalog-rules.png`
-- `previews/physical-db-sections/03-planning-tracking.png`
-- `previews/physical-db-sections/04-progress-engagement-safety.png`
-- `previews/physical-db-sections/05-messaging-reliability-operations.png`
+The historical multipage diagrams and old Draw.io ERDs have been retired from the main assignment tree; backup and Git history remain available. Distinct engineering Dynamic/Deployment views in `docs/architecture/` are retained. Official C4 recommends one container per component view; C2 is a clearly marked consolidated **atlas**, not a claim that all components are deployed in one process.
 
 C4 semantic source:
 - `c4/workspace.dsl`

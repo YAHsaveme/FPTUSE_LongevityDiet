@@ -1,0 +1,353 @@
+// LongevityDiet  |  TARGET logical database map  |  2026-11-05
+// DBML source of truth for the ONE-PAGE conceptual/physical target ERD.
+// Six namespaces below represent SIX SEPARATE LOGICAL SQL SERVER DATABASES for visualization.
+// No cross-database SQL FK. UserId / RecipeId references across ownership boundaries are scalar IDs only.
+// Proposed schema, NOT an EF Core migration. Compare to CURRENT .dbml before implementation.
+Project LongevityDiet_Target {
+  database_type: 'SQLServer'
+  Note: 'Target logical model - six service-owned SQL databases. Not yet deployed. No cross DB foreign keys.'
+}
+
+Table target_identity.Users {
+  Id uniqueidentifier [pk]
+  Email nvarchar(320)
+  NormalizedEmail nvarchar(320) [unique]
+  PasswordHash nvarchar(512)
+  DisplayName nvarchar(120)
+  Role nvarchar(24)
+  Status nvarchar(24)
+  CreatedAt datetimeoffset
+  UpdatedAt datetimeoffset
+}
+
+Table target_identity.UserProfiles {
+  UserId uniqueidentifier [pk]
+  BirthYear int
+  TimeZone nvarchar(100)
+  WakeTime time
+  SleepTime time
+  PreferredMealFrequency int
+  FoodPreference nvarchar(500)
+  ProfileCompleted bit
+  UpdatedAt datetimeoffset
+}
+
+Table target_identity.RefreshTokens {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  TokenHash nvarchar(64) [unique]
+  ExpiresAt datetimeoffset
+  RevokedAt datetimeoffset
+  ReplacedByTokenId uniqueidentifier
+  CreatedAt datetimeoffset
+}
+
+Table target_identity.Allergies {
+  Id uniqueidentifier [pk]
+  Code nvarchar(64) [unique]
+  Name nvarchar(200)
+  Severity nvarchar(24)
+}
+
+Table target_identity.UserAllergies {
+  UserId uniqueidentifier
+  AllergyId uniqueidentifier
+  RecordedAtUtc datetime2
+  indexes {
+    (UserId,AllergyId) [pk]
+  }
+}
+
+Table target_identity.UserExcludedFoods {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  FoodId uniqueidentifier [note: 'Catalog ID external, no FK']
+  FreeText nvarchar(300)
+  Note: 'Constraint: FoodId or FreeText must be provided'
+}
+
+Table target_identity.Reminders {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier
+  Category nvarchar(40)
+  Enabled bit
+  PreferredTime time
+  QuietStart time
+  QuietEnd time
+  UpdatedAtUtc datetime2
+}
+
+Table target_catalog.Foods {
+  Id uniqueidentifier [pk]
+  Name nvarchar(200)
+  NormalizedName nvarchar(200)
+  Category nvarchar(80)
+  Calories decimal(10,2)
+  ProteinG decimal(9,2)
+  CarbohydrateG decimal(9,2)
+  FatG decimal(9,2)
+  IsPlantBased bit
+  IsWholeGrain bit
+  IsLegume bit
+  IsFish bit
+  IsActive bit
+}
+
+Table target_catalog.Recipes {
+  Id uniqueidentifier [pk]
+  Name nvarchar(200)
+  MealType nvarchar(40)
+  Description nvarchar(1000)
+  PrepMinutes int
+  IsPlantForward bit
+  IsActive bit
+}
+
+Table target_catalog.RecipeIngredients {
+  RecipeId uniqueidentifier
+  FoodId uniqueidentifier
+  Amount decimal(10,2)
+  Unit nvarchar(40)
+  IsOptional bit
+  indexes {
+    (RecipeId,FoodId) [pk]
+  }
+}
+
+Table target_catalog.RecipeAllergens {
+  RecipeId uniqueidentifier
+  AllergenCode nvarchar(64)
+  Evidence nvarchar(200)
+  indexes {
+    (RecipeId,AllergenCode) [pk]
+  }
+}
+
+Table target_catalog.DietRules {
+  Id uniqueidentifier [pk]
+  Code nvarchar(80) [unique]
+  Name nvarchar(200)
+  Category nvarchar(80)
+  IsMedicalSensitive bit
+  IsActive bit
+}
+
+Table target_catalog.RuleVersions {
+  Id uniqueidentifier [pk]
+  DietRuleId uniqueidentifier
+  VersionNumber int
+  ParametersJson nvarchar(max)
+  SourceUrl nvarchar(1000)
+  EvidenceLevel nvarchar(40)
+  PublishedAtUtc datetime2
+  IsCurrent bit
+  indexes {
+    (DietRuleId,VersionNumber) [unique]
+  }
+}
+
+Table target_catalog.RuleSetVersions {
+  Id uniqueidentifier [pk]
+  SetName nvarchar(160)
+  Version int
+  PublishedAtUtc datetime2
+  IsCurrent bit
+}
+
+Table target_catalog.RuleSetVersionItems {
+  RuleSetVersionId uniqueidentifier
+  RuleVersionId uniqueidentifier
+  Position int
+  indexes {
+    (RuleSetVersionId,RuleVersionId) [pk]
+  }
+}
+
+Table target_planning.MealPlans {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  StartDate date
+  EndDate date
+  Revision int
+  Status nvarchar(40)
+  GeneratedAtUtc datetime2
+}
+
+Table target_planning.MealPlanDays {
+  Id uniqueidentifier [pk]
+  MealPlanId uniqueidentifier
+  Date date
+  indexes {
+    (MealPlanId,Date) [unique]
+  }
+}
+
+Table target_planning.PlannedMeals {
+  Id uniqueidentifier [pk]
+  MealPlanDayId uniqueidentifier
+  RecipeId uniqueidentifier [note: 'Catalog reference, no cross-DB FK']
+  MealType nvarchar(40)
+  ScheduledTime time
+  Position int
+  ReasonJson nvarchar(max)
+}
+
+Table target_planning.Challenges {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  Title nvarchar(200)
+  StartDate date
+  EndDate date
+  Status nvarchar(40)
+}
+
+Table target_planning.ChallengeDays {
+  Id uniqueidentifier [pk]
+  ChallengeId uniqueidentifier
+  Date date
+  Completed bit
+}
+
+Table target_planning.FmdSafetyAssessments {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  AssessedAtUtc datetime2
+  RiskCode nvarchar(64)
+  IsEligible bit
+  ConsentConfirmed bit
+}
+
+Table target_planning.FmdCycles {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  SafetyAssessmentId uniqueidentifier
+  StartDate date
+  EndDate date
+  Status nvarchar(40)
+}
+
+Table target_tracking.MealLogs {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  ConsumedAtUtc datetime2
+  MealType nvarchar(40)
+  Note nvarchar(1000)
+  IsDeleted bit
+}
+
+Table target_tracking.MealLogItems {
+  Id uniqueidentifier [pk]
+  MealLogId uniqueidentifier
+  FoodId uniqueidentifier [note: 'Catalog stable ID, no FK']
+  RecipeId uniqueidentifier [note: 'Catalog stable ID, no FK']
+  Quantity decimal(9,3)
+  Unit nvarchar(40)
+  Note: 'FoodId XOR RecipeId business constraint'
+}
+
+Table target_tracking.ActivityLogs {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  ActivityType nvarchar(40)
+  StartedAtUtc datetime2
+  DurationMinutes int
+  Intensity nvarchar(40)
+  IsDeleted bit
+}
+
+Table target_tracking.EatingWindowSnapshots {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  LocalDate date
+  WindowStart time
+  WindowEnd time
+  DurationHours decimal(5,2)
+}
+
+Table target_tracking.AdherenceScores {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  LocalDate date
+  Version nvarchar(40)
+  Score decimal(5,2) [note: 'nullable when coverage incomplete']
+  CoveragePercent decimal(5,2)
+  IsPartial bit
+  CalculatedAtUtc datetime2
+}
+
+Table target_tracking.ScoreDimensions {
+  Id uniqueidentifier [pk]
+  AdherenceScoreId uniqueidentifier
+  Code nvarchar(40)
+  Weight decimal(5,4)
+  RawScore decimal(5,2)
+  WeightedScore decimal(5,2)
+  ReasonCode nvarchar(100)
+}
+
+Table target_tracking.WeeklyReports {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  WeekStart date
+  WeekEnd date
+  SummaryJson nvarchar(max)
+  GeneratedAtUtc datetime2
+}
+
+Table target_recommendation.RecommendationFeedback {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  RequestId uniqueidentifier
+  ItemId uniqueidentifier
+  Rating int
+  ReasonCode nvarchar(80)
+  CreatedAtUtc datetime2
+  Note: 'Proposed service-owned feedback storage; ranker not deployed'
+}
+
+Table target_worker.ProcessedEvents {
+  EventId uniqueidentifier
+  ConsumerName nvarchar(120)
+  ProcessedAtUtc datetime2
+  indexes {
+    (EventId,ConsumerName) [pk]
+  }
+}
+
+Table target_worker.OutboxMessages {
+  Id uniqueidentifier [pk]
+  EventType nvarchar(120)
+  PayloadJson nvarchar(max)
+  CreatedAtUtc datetime2
+  PublishedAtUtc datetime2
+  PublishAttempts int
+}
+
+Table target_worker.AuditLogs {
+  Id uniqueidentifier [pk]
+  UserId uniqueidentifier [note: 'Cross-service identity reference; NOT a database FK']
+  Action nvarchar(120)
+  OccurredAtUtc datetime2
+  CorrelationId nvarchar(120)
+  Result nvarchar(50)
+  Note: 'Logical operational example; domain audits live with owners'
+}
+
+Ref: target_identity.UserProfiles.UserId - target_identity.Users.Id
+Ref: target_identity.RefreshTokens.UserId > target_identity.Users.Id
+Ref: target_identity.UserAllergies.UserId > target_identity.Users.Id
+Ref: target_identity.UserAllergies.AllergyId > target_identity.Allergies.Id
+Ref: target_identity.UserExcludedFoods.UserId > target_identity.Users.Id
+Ref: target_identity.Reminders.UserId > target_identity.Users.Id
+Ref: target_catalog.RecipeIngredients.RecipeId > target_catalog.Recipes.Id
+Ref: target_catalog.RecipeIngredients.FoodId > target_catalog.Foods.Id
+Ref: target_catalog.RecipeAllergens.RecipeId > target_catalog.Recipes.Id
+Ref: target_catalog.RuleVersions.DietRuleId > target_catalog.DietRules.Id
+Ref: target_catalog.RuleSetVersionItems.RuleSetVersionId > target_catalog.RuleSetVersions.Id
+Ref: target_catalog.RuleSetVersionItems.RuleVersionId > target_catalog.RuleVersions.Id
+Ref: target_planning.MealPlanDays.MealPlanId > target_planning.MealPlans.Id
+Ref: target_planning.PlannedMeals.MealPlanDayId > target_planning.MealPlanDays.Id
+Ref: target_planning.ChallengeDays.ChallengeId > target_planning.Challenges.Id
+Ref: target_planning.FmdCycles.SafetyAssessmentId > target_planning.FmdSafetyAssessments.Id
+Ref: target_tracking.MealLogItems.MealLogId > target_tracking.MealLogs.Id
+Ref: target_tracking.ScoreDimensions.AdherenceScoreId > target_tracking.AdherenceScores.Id

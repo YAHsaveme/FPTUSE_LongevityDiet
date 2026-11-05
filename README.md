@@ -274,18 +274,21 @@ The project distinguishes:
 See `docs/01-BOOK-RESEARCH.md` and `docs/11-BOOK-TO-SOFTWARE-TRACEABILITY.md`.
 
 
-## Extended C2 architecture, complete SQL diagrams and Cloudflare session prototype (November 2026)
+## Architecture diagrams — ONE PAGE each (Draw.io + DBML, November 2026)
 
-Editable deliverables under [`docs/assignment/extended-diagrams`](docs/assignment/extended-diagrams):
+**Canonical submission diagrams:** [all one-page files and instructions](docs/assignment/one-page/README.md).
 
-- [C2 Component Architecture, 8 pages](docs/assignment/extended-diagrams/05-c2-component-architecture.drawio) — one Current API page + seven explicitly Target pages.
-- [All Database Diagrams, 9 pages](docs/assignment/extended-diagrams/06-all-database-erd.drawio) — physical Current SQL, six logical target SQL DBs, plus optional future Cloudflare D1 session store.
-- [C2 PDF](docs/assignment/extended-diagrams/05-c2-component-architecture.pdf) and [Database PDF](docs/assignment/extended-diagrams/06-all-database-erd.pdf); 17 PNG pages in `extended-diagrams/previews/`.
-- [Data model rationale and 33/33 table mapping](docs/assignment/06-C2-AND-DATABASE-MAPPING.md).
-- [Cloudflare D1 security/migration guide](docs/security/CLOUDFLARE-REFRESH-TOKENS.md) and [proposed Worker source](cloudflare/refresh-sessions/README.md).
+- [C0 Context, editable Draw.io](docs/assignment/one-page/01-c0-system-context.drawio) · [PDF, one page](docs/assignment/one-page/01-c0-system-context.pdf)
+- [C1 Container TARGET, editable Draw.io](docs/assignment/one-page/02-c1-container-architecture.drawio) · [PDF, one page](docs/assignment/one-page/02-c1-container-architecture.pdf)
+- [C2 consolidated Component TARGET, editable Draw.io](docs/assignment/one-page/05-c2-component-architecture.drawio) · [PDF, one page](docs/assignment/one-page/05-c2-component-architecture.pdf)
+- [Target Database Diagram, editable DBML](docs/assignment/one-page/06-database-target.dbml) · [one-page vector ERD PDF](docs/assignment/one-page/06-database-target-one-page.pdf) · [SVG](docs/assignment/one-page/06-database-target-one-page.svg)
+- [Current EF Core schema, editable DBML](docs/assignment/one-page/06-database-current.dbml) · [one-page PDF](docs/assignment/one-page/06-database-current-one-page.pdf) (supporting diagnostic, not an extra main submission page)
+- [Architecture rationale and 33/33 target table mapping](docs/assignment/06-C2-AND-DATABASE-MAPPING.md); [Cloudflare D1 security/migration guide](docs/security/CLOUDFLARE-REFRESH-TOKENS.md).
 
-**Current runtime remains ONE SQL database, containing three EF Core entity tables.** The six SQL databases, split services and most of the 33 target entity types are design-only, not deployed. The Cloudflare refresh-session store is implemented as a **feature-flagged, OFF-by-default prototype**, never deployed without a configured Cloudflare account and complete E2E validation. The existing SQL refresh-token behavior remains the default.
+The CURRENT code currently maps **18 entity tables across three EF Core DbContexts** (Identity, Tracking and Worker). Redis + SQLite E2E smoke passed, but live SQL Server E2E is still an acceptance gap. **C1 and C2 depict the approved six-service TARGET**, not a claim those separate processes/databases are deployed. The Cloudflare D1 refresh-session store remains a feature-flagged **OFF-by-default** prototype.
 
-Validation: `powershell -File scripts/Validate-C2DbDiagrams.ps1`, `node --test cloudflare/refresh-sessions/tests/worker.test.mjs`, `dotnet test tests/LongevityDiet.IntegrationTests -c Release`.
+All four principal diagrams are single-page; vector PDF/SVG supports detailed zoom. Superseded 8-page C2 and 9-page Draw.io ERD are retired to an out-of-repo backup; supplemental engineering diagrams under `docs/architecture` remain.
+
+Diagram validation: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Validate-OnePageDiagrams.ps1`. API, Redis and Cloudflare tests remain separate from diagram validation.
 
 To opt in *after provisioning and verifying* a Cloudflare Worker + D1, set secret environment variables `CloudflareSessions__Enabled=true`, `CloudflareSessions__BaseUrl=https://YOUR_PRIVATE_WORKER_HOST/` and `CloudflareSessions__ServiceBearer=<FROM_SECURE_SECRET_MANAGER>`; do **not** put credentials into Git or `appsettings.json`. See the migration guide before switching live sessions.

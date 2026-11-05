@@ -1,5 +1,7 @@
 # C2, Complete Database Diagrams, and Cloudflare Refresh Sessions — Delivery Report
 
+> **ARCHIVED SNAPSHOT (pre-consolidation).** The 8-page C2 and 9-page Draw.io ERD listed below are no longer canonical. Their old files have been backed up outside the repo; use the [new one-page Draw.io + DBML source and PDFs](one-page/README.md). The active codebase now maps 18 EF Core tables / 3 DbContexts, not the 3-table baseline in this historical report. Cloudflare D1 remains opt-in and disabled.
+
 **Local delivery date:** 2026-11-05 (Vietnam time)
 **Repository:** `YAHsaveme/FPTUSE_LongevityDiet`
 **Source baseline:** `main` at `1962735c02b61b69a0697741fab4173362cade33`.
@@ -10,11 +12,11 @@
 
 | Artifact | Path | Status |
 | --- | --- | --- |
-| C2 component diagrams (8 pages) | `docs/assignment/extended-diagrams/05-c2-component-architecture.drawio` | Native editable draw.io XML, generated and render-inspected |
-| Database diagrams (9 pages) | `docs/assignment/extended-diagrams/06-all-database-erd.drawio` | Current DB + 6 Target SQL + proposed Cloudflare D1 |
-| C2 handout | `docs/assignment/extended-diagrams/05-c2-component-architecture.pdf` | All 8 pages, exported with verified draw.io desktop |
-| Database handout | `docs/assignment/extended-diagrams/06-all-database-erd.pdf` | All 9 pages, exported with verified draw.io desktop |
-| PNG evidence | `docs/assignment/extended-diagrams/previews/` | 17 page images |
+| **C2 target components (one page)** | `docs/assignment/one-page/05-c2-component-architecture.drawio` | Native editable Draw.io XML; one canvas, 6 service boundaries |
+| **Target database (one page)** | `docs/assignment/one-page/06-database-target.dbml` | Editable DBML; 33 logical target entities, 6 separate SQL owners |
+| **C2 vector handout** | `docs/assignment/one-page/05-c2-component-architecture.pdf` | Exactly one PDF page; zoomable vector text and connectors |
+| **Target ERD PDF** | `docs/assignment/one-page/06-database-target-one-page.pdf` | Exactly one PDF page; generated from DBML |
+| **Current schema reference** | `docs/assignment/one-page/06-database-current.dbml` | 18 current entity tables from 3 EF Core DbContexts; separate reference PDF |
 | Data ownership rationale | `docs/assignment/06-C2-AND-DATABASE-MAPPING.md` | Current vs Target; 33 logical entity definitions |
 
 Architecture **C2 = C4 Level 3 Component**. Current implemented REST API is shown separately from seven Target views; the Gateway/6-service target split is not falsely described as deployed.
@@ -68,4 +70,4 @@ Only set these after provisioning and running production-like integration and co
 
 21 unique source repositories from the request were shallow-cloned under `D:\PRN232\_diagram_toolkit_sources`, with commit records in `sync-report.tsv`. Four relevant skill directories were copied into the project's `.agents/skills/`. The portable draw.io Desktop v32.6.1 and uv v0.13.7 were downloaded from official releases and SHA-256 verified.
 
-Open any `.drawio` file using diagrams.net or draw.io Desktop (File > Open From > Device). Original canonical C0/C1 and assignment documents remain in `docs/assignment/diagrams/`; extended C2/ERD files intentionally live separately.
+Open the canonical `.drawio` sources in Draw.io Desktop and `.dbml` sources in dbdiagram.io. All new files are in `docs/assignment/one-page/`; old 8/9-page sources were preserved in an external backup and Git history before removing duplicated files from the project.
