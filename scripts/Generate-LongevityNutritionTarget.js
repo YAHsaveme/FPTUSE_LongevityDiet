@@ -77,11 +77,16 @@ const patchFields=(group,name,extraFields)=>{
  const row=groups[group].find(x=>x[0]===name);if(!row)throw Error('Missing target table '+name);
  row[1]+='|'+extraFields;
 };
+patchFields('PLANS','DietPrograms','ContinuationMode:text|RollingHorizonDays:int|LastGeneratedLocalDate:date');
 patchFields('PLANS','ProgramVersions','EffectiveFromLocalDate:date|ApprovedAtUtc:datetime');
 patchFields('PLANS','ProgramDays','PublicationState:text|SafetyStatus:text|GeneratedAtUtc:datetime');
 patchFields('PLANS','ScheduledMeals','Status:text|TargetEnergyKcal:decimal');
 patchFields('PLANS','ScheduledMealItems','PortionUnit:text|IngredientSnapshotVersion:text|AllergenGate:text');
-patchFields('FEEDBACK','CheckinSubmissions','SubmittedAtUtc:datetime|ResponseStatus:text');
+patchFields('FEEDBACK','CheckinSchedules','ConsentId:uuid|TriggerKind:text|RecurrenceRule:text|PausedUntilUtc:datetime');
+patchFields('FEEDBACK','CheckinSubmissions','SubmittedAtUtc:datetime|ResponseStatus:text|ProgramDayId:uuid|MealIntakeId:uuid|ContextCode:text');
+// Optional links: baseline submissions have no program day; non-meal check-ins have no meal ID.
+groups.FEEDBACK.find(x=>x[0]==='CheckinSchedules')[2].push('ConsentId>HealthConsents');
+groups.FEEDBACK.find(x=>x[0]==='CheckinSubmissions')[2].push('ProgramDayId>ProgramDays','MealIntakeId>MealIntakes');
 patchFields('FEEDBACK','CheckinAnswers','AnswerState:text|RecordedAtUtc:datetime');
 patchFields('FEEDBACK','HealthObservations','SourceType:text|QualityFlag:text');
 patchFields('FEEDBACK','SafetyIncidents','ActionState:text|ResolvedAtUtc:datetime');
@@ -97,7 +102,7 @@ const uniqueIndexes={
  Foods:['LocalName, Region'],Nutrients:['Code'],FoodNutrients:['FoodId, NutrientId'],
  FoodAllergens:['FoodId, AllergenId'],RecipeIngredients:['RecipeId, FoodId'],
  RecipeAllergens:['RecipeId, AllergenId'],RecipeCrossContactRisks:['RecipeId, AllergenId'],
- ProgramVersions:['ProgramId, VersionNumber'],ProgramDays:['ProgramVersionId, LocalDate'],
+ ProgramVersions:['ProgramId, VersionNumber','ProgramId, EffectiveFromLocalDate'],ProgramDays:['ProgramVersionId, LocalDate'],
  ScheduledMeals:['ProgramDayId, MealType, LocalTime'],
  DayNutrientEstimates:['ProgramDayId, NutrientId'],
  CheckinAnswerSelections:['AnswerId, OptionId'],QuestionnaireQuestions:['TemplateId, SortOrder'],
@@ -111,8 +116,8 @@ const requiredColumns={
  FoodAllergens:['FoodId','AllergenId','Presence'],
  Recipes:['LocalName'],RecipeIngredients:['RecipeId','FoodId','AmountGrams'],
  RecipeCrossContactRisks:['RecipeId','AllergenId','RiskState'],
- DietPrograms:['ProfileId','StartLocalDate','EndLocalDate','Status'],
- ProgramVersions:['ProgramId','VersionNumber','ApprovalState'],
+ DietPrograms:['ProfileId','StartLocalDate','Status','ContinuationMode','RollingHorizonDays'],
+ ProgramVersions:['ProgramId','VersionNumber','ApprovalState','EffectiveFromLocalDate'],
  ProgramDays:['ProgramVersionId','LocalDate','TimeZoneId','PublicationState','SafetyStatus'],
  ScheduledMeals:['ProgramDayId','MealType','LocalTime'],
  ScheduledMealItems:['ScheduledMealId','RecipeId','ServingQuantity','PortionUnit','AllergenGate'],
@@ -123,6 +128,7 @@ const requiredColumns={
  CheckinAnswers:['SubmissionId','QuestionId','AnswerState'],
  CheckinAnswerSelections:['AnswerId','OptionId'],
  NutritionReviews:['ProfileId','ProgramVersionId','ReviewStatus'],
+ CheckinSchedules:['ProfileId','TemplateId','ConsentId','TriggerKind','RecurrenceRule','Enabled'],
  PromptDeliveries:['ScheduleId','IdempotencyKey']
 };
 const sqlChecks={
@@ -134,7 +140,7 @@ const sqlChecks={
  NutritionTargetRanges:['LowerPerDay >= 0','UpperPerDay >= LowerPerDay'],
  CheckinSchedules:['MaxPerDay >= 0','MaxPerDay <= 12'],
  SymptomReports:['Severity >= 0','Severity <= 5'],
- DietPrograms:['StartLocalDate <= EndLocalDate']
+ DietPrograms:["(ContinuationMode = 'rolling' AND EndLocalDate IS NULL) OR (ContinuationMode = 'fixed' AND EndLocalDate IS NOT NULL AND StartLocalDate <= EndLocalDate)",'RollingHorizonDays >= 1','RollingHorizonDays <= 90']
 };
 const dbml=['// TARGET DESIGN, NOT IMPLEMENTED SQL TABLES / MIGRATIONS.','// SQL Server LongevityTrackingDb, proposed schema nutrition.','// UserId refers logically to Users in LongevityDietDb (NO cross-database SQL FK).',
 'Project LongevityDiet_Nutrition_Target { database_type: "SQLServer" }'];
@@ -247,21 +253,22 @@ for(const [group,filename,heading] of [
  ['FEEDBACK','10-erd-checkins-trends-target.drawio','DAILY LOGS, CHECK-INS AND PROGRESS']
 ]){
  const tables=groups[group],cols=group==='PROFILE'?2:3;
- const ww=cols===2?4250:6250,rw=630,rows=Math.ceil(tables.length/cols),hh=rows*rw+580;
+ const ww=cols===2?4250:6250,rw=group==='FEEDBACK'?750:630,rows=Math.ceil(tables.length/cols),hh=rows*rw+580;
  const d=drawing('TARGET TABLE CATALOG - '+heading,
   'NOT MIGRATED | nutrition.* in LongevityTrackingDb | full uncluttered column details here; all FK arrows are in diagrams 12-15',ww,hh);
  const map=new Map(),xs=cols===2?[240,2260]:[160,2250,4340];
  tables.forEach((t,i)=>{
   const x=xs[i%cols],y=400+Math.floor(i/cols)*rw;
   const props=t[1].split('|').map(f=>f.replace(':',' : ')).join('\n');
-  const cross=t[2].filter(ref=>!tables.some(z=>z[0]===ref.split('>')[1])).map(ref=>'FK '+ref.replace('>',' -> '));
-  d.add(t[0],x,y,cols===2?1730:1680,520,t[0]+'\n'+props+(cross.length?'\n'+cross.join(', '):''),'box',{font:37,boldFirst:true,color:'#FFFFFF'});
+  // Catalogs show every table field; each FK is already drawn explicitly in 12-15.
+  // Avoid duplicating long FK labels inside narrow table boxes.
+  d.add(t[0],x,y,cols===2?1730:1680,group==='FEEDBACK'?640:520,t[0]+'\n'+props,'box',{font:37,boldFirst:true,color:'#FFFFFF'});
   map.set(t[0],{x,y});
  });
  // Use a dedicated full FK audit to avoid connector crossings in a 39-table overview.
  // FK counts remain computable from DBML, and every FK is actually drawn in diagrams 12-15.
  const links=tables.reduce((n,t)=>n+t[2].filter(ref=>tables.some(v=>v[0]===ref.split('>')[1])).length,0);
- d.add(null,160,hh-145,ww-320,96,'Complete native FK arrows: diagrams 12-15 (50 total). This sheet shows all table fields without wires crossing the boxes. No actual migrations changed.','pill',{font:22});
+ d.add(null,160,hh-145,ww-320,96,'Complete native FK arrows: diagrams 12-15 ('+fkCount+' total). This sheet shows fields without crossing arrows; no migrations applied.','pill',{font:22});
  d.save(filename);
  console.log('SHEET '+group+' tables='+tables.length+' auditedLocalFKs='+links);
 }

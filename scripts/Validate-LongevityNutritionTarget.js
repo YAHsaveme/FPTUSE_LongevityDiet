@@ -18,11 +18,11 @@ const tableNames=tableRows.map(m=>m[1]);
 const fieldMap=new Map(tableRows.map(m=>[m[1],new Set([...m[2].matchAll(/^\s+(\w+)\s+[\w()\,]+/gm)].map(x=>x[1]))]));
 const refs=[...dbml.matchAll(/^Ref: nutrition\.(\w+)\.(\w+) > nutrition\.(\w+)\.(\w+)$/gm)]
   .map(m=>({child:m[1],column:m[2],parent:m[3],pk:m[4]}));
-const core={PROFILE:14,PLANS:20,FEEDBACK:18},expectedFK=71;
+const core={PROFILE:14,PLANS:20,FEEDBACK:18},expectedFK=74;
 insist(manifest.status==='TARGET_DESIGN_ONLY_NOT_IMPLEMENTED','False implementation status');
 insist(manifest.tableCount===52&&tableRows.length===52&&new Set(tableNames).size===52,'52-table coverage/drift');
 insist(JSON.stringify(manifest.groupCounts)===JSON.stringify(core),'14+20+18 owner groups changed');
-insist(refs.length===expectedFK&&manifest.fkCount===expectedFK,'71-FK count/drift');
+insist(refs.length===expectedFK&&manifest.fkCount===expectedFK,'74-FK count/drift');
 for(const ref of refs){
  insist(fieldMap.get(ref.child)?.has(ref.column), 'Missing FK field '+ref.child+'.'+ref.column);
  insist(ref.pk==='Id'&&fieldMap.get(ref.parent)?.has(ref.pk), 'Missing PK '+ref.parent+'.'+ref.pk);
@@ -39,6 +39,8 @@ for(const [table,columns] of Object.entries({
  FoodSourceLinks:['SourceId','VerifiedAtUtc'],RecipeCrossContactRisks:['RecipeId','AllergenId','RiskState'],
  NutritionTargetRanges:['ProgramVersionId','NutrientId','LowerPerDay','UpperPerDay'],
  DayNutrientEstimates:['ProgramDayId','NutrientId','Completeness'],
+ DietPrograms:['ContinuationMode','RollingHorizonDays','LastGeneratedLocalDate'],
+ ProgramVersions:['EffectiveFromLocalDate'],
  ProgramDays:['ProgramVersionId','LocalDate','PublicationState','SafetyStatus','GeneratedAtUtc'],
  ScheduledMealItems:['PortionUnit','AllergenGate','RecipeId'],
  PlanSelectionDecisions:['ScheduledMealItemId','AssessmentId','Allowed'],
@@ -46,14 +48,15 @@ for(const [table,columns] of Object.entries({
  CheckinAnswers:['AnswerState','NumericValue','BooleanValue','FreeText'],
  CheckinAnswerSelections:['AnswerId','OptionId'],
  HealthObservations:['MetricValue','Unit','SourceType','MeasuredAtUtc'],
- CheckinSchedules:['QuietStart','QuietEnd','MaxPerDay'],
- CheckinSubmissions:['ResponseStatus','LocalDate'],
+ CheckinSchedules:['ConsentId','TriggerKind','RecurrenceRule','QuietStart','QuietEnd','MaxPerDay'],
+ CheckinSubmissions:['ProgramDayId','MealIntakeId','ResponseStatus','LocalDate'],
  SafetyIncidents:['ActionState'],PlanChangeHistory:['ToVersionId']
 })){
  for(const column of columns)insist(fieldMap.get(table)?.has(column),'Required column absent '+table+'.'+column);
 }
 for(const [table,uniqueCols] of [
  ['NutritionProfiles','UserId'],['ProgramVersions','ProgramId, VersionNumber'],
+ ['ProgramVersions','ProgramId, EffectiveFromLocalDate'],
  ['ProgramDays','ProgramVersionId, LocalDate'],['ScheduledMeals','ProgramDayId, MealType, LocalTime'],
  ['UserAllergies','ProfileId, AllergenId'],['CheckinAnswerSelections','AnswerId, OptionId'],
  ['DayNutrientEstimates','ProgramDayId, NutrientId'],['PromptDeliveries','IdempotencyKey']]){
@@ -92,7 +95,7 @@ for(const [ledger,wanted] of expectedLedgers){
  insist(g.size===wanted.length,ledger+': duplicates or missing endpoints');
  auditMap.set(ledger,edges.length);
 }
-insist([...auditMap.values()].reduce((a,b)=>a+b,0)===71,'All FK native arrow coverage is incomplete');
+insist([...auditMap.values()].reduce((a,b)=>a+b,0)===expectedFK,'All FK native arrow coverage is incomplete');
 const catalogueExpected=[...bounds];
 for(const b of catalogueExpected){
  const {vertices,edges}=diagram(b.catalog);insist(edges.length===0,b.catalog+': catalog arrows overlap, use 12-15 audit');
@@ -144,4 +147,4 @@ for(const filename of expectedFiles){
  console.log('DIAGRAM_QA '+name+' nodes='+vertices.size+' edges='+edges.length);
 }
 if(issues.length){issues.forEach(s=>console.error('NUTRITION_DESIGN_FAIL '+s));process.exitCode=1;}
-else console.log('LONGITUDINAL_TARGET_QA=PASS: 52 proposed tables, 71 verified FK arrows, 13 C2 contracts, complete care-loop, PDF coverage');
+else console.log('LONGITUDINAL_TARGET_QA=PASS: 52 proposed tables, 74 verified FK arrows, 13 C2 contracts, complete care-loop, PDF coverage');

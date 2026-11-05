@@ -3,7 +3,7 @@
   "database": "LongevityTrackingDb",
   "schema": "nutrition",
   "tableCount": 52,
-  "fkCount": 71,
+  "fkCount": 74,
   "groupCounts": {
     "PROFILE": 14,
     "PLANS": 20,

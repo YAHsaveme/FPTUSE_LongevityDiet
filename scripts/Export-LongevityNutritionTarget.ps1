@@ -37,4 +37,6 @@ foreach($n in $names){
 }
 & node (Join-Path $Root 'scripts\Validate-LongevityNutritionTarget.js')
 if($LASTEXITCODE -ne 0){throw 'Target structural QA failed'}
+& node (Join-Path $Root 'scripts\Validate-NutritionPlanContract.js')
+if($LASTEXITCODE -ne 0){throw 'Target scenario contract QA failed'}
 Write-Host 'NUTRITION_TARGET_EXPORT_QA=PASS'

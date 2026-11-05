@@ -39,6 +39,7 @@ jobs:
           node ./scripts/Validate-EndToEndFlow.js
           node ./scripts/Validate-CourseLinks.js
           node ./scripts/Validate-LongevityNutritionTarget.js
+          node ./scripts/Validate-NutritionPlanContract.js
 
       - name: Validate frozen project structure
         shell: pwsh

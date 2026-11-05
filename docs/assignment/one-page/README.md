@@ -100,7 +100,7 @@ D:\PRN232\_LongevityDiet_C1C2_ERD_Audit_2026-11-05.
 
 **Do not confuse these files with the implemented 01–06 views.** The actual EF Core
 model remains 18 mapped EF Core table types; the following **52 proposed nutrition tables**,
-**71 proposed FKs** and seven REST feature areas are design targets requiring code, migrations,
+**74 proposed FKs** and seven REST feature areas are design targets requiring code, migrations,
 food-source verification, user testing and professional review before use.
 
 | Proposed artifact | Editable Draw.io | Printable PDF |
@@ -110,20 +110,20 @@ food-source verification, user testing and professional review before use.
 | Foods, recipes & every-day plan (20 table models) | [09 Table Catalog](09-erd-food-daily-plans-target.drawio) | [PDF](09-erd-food-daily-plans-target.pdf) |
 | Meal logs, questionnaires & trends (18 table models) | [10 Table Catalog](10-erd-checkins-trends-target.drawio) | [PDF](10-erd-checkins-trends-target.pdf) |
 | Baseline → every day → feedback → future plan loop | [11 Daily Care Loop](11-daily-care-loop-target.drawio) | [PDF](11-daily-care-loop-target.pdf) |
-| Cross-sheet FK audit, 19 arrows | [12 Cross-sheet FKs](12-erd-cross-domain-foreign-keys-target.drawio) | [PDF](12-erd-cross-domain-foreign-keys-target.pdf) |
+| Cross-sheet FK audit, 21 arrows | [12 Cross-sheet FKs](12-erd-cross-domain-foreign-keys-target.drawio) | [PDF](12-erd-cross-domain-foreign-keys-target.pdf) |
 | Profile/safety local FK audit, 14 arrows | [13 Profile FKs](13-fk-profile-safety-target.drawio) | [PDF](13-fk-profile-safety-target.pdf) |
 | Food/plan local FK audit, 22 arrows | [14 Food FKs](14-fk-food-daily-plans-target.drawio) | [PDF](14-fk-food-daily-plans-target.pdf) |
-| Check-in/trend local FK audit, 16 arrows | [15 Tracking FKs](15-fk-checkins-trends-target.drawio) | [PDF](15-fk-checkins-trends-target.pdf) |
+| Check-in/trend local FK audit, 17 arrows | [15 Tracking FKs](15-fk-checkins-trends-target.drawio) | [PDF](15-fk-checkins-trends-target.pdf) |
 | C2 service-to-service call contracts (13 arrows) | [16 Dependencies](16-c2-service-dependencies-target.drawio) | [PDF](16-c2-service-dependencies-target.pdf) |
 
 The **[52-table target DBML](08-nutrition-target-52-tables.dbml)** is the single
-complete FK reference (71 proposed FKs). Detailed table catalogs deliberately
-have no crossing connector spaghetti. Instead, 12–15 enumerate **all 71 FK arrows**
-with explicit, attached child and parent endpoints, one relationship per row.
+complete FK reference (74 proposed FKs). Detailed table catalogs deliberately
+have no crossing connector spaghetti. Instead, 12–15 enumerate **all 74 FK arrows**
+with explicit, attached child and parent endpoints, one relationship per row. The official DBML CLI successfully exported a **52-table / 74-FK** SQL Server preview (20 UNIQUE, 14 CHECK) without executing SQL.
 `UserId` pointing to Identity is a logical reference, not a cross-database FK.
 
 The full research, clinical-safety safeguards, patient-reported check-in schedule,
 data dictionary, daily coverage rules and acceptance tests are in
 [Longitudinal Nutrition Target](../05-LONGITUDINAL-NUTRITION-TARGET.md).
 Run `powershell -ExecutionPolicy Bypass -File .\scripts\Export-LongevityNutritionTarget.ps1`
-from the repository root to regenerate/validate all editable designs.
+from the repository root to regenerate/validate all editable designs. Run `node scripts/Validate-NutritionPlanContract.js` for **20 synthetic contract scenarios**; these verify the target design, **not** the currently deployed meal planning feature.

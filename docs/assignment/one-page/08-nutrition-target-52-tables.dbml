@@ -193,10 +193,15 @@ Table nutrition.DietPrograms {
   Id uniqueidentifier [pk]
   ProfileId uniqueidentifier [not null]
   StartLocalDate date [not null]
-  EndLocalDate date [not null]
+  EndLocalDate date
   Status nvarchar(300) [not null]
+  ContinuationMode nvarchar(300) [not null]
+  RollingHorizonDays int [not null]
+  LastGeneratedLocalDate date
   checks {
-    `StartLocalDate <= EndLocalDate`
+    `(ContinuationMode = 'rolling' AND EndLocalDate IS NULL) OR (ContinuationMode = 'fixed' AND EndLocalDate IS NOT NULL AND StartLocalDate <= EndLocalDate)`
+    `RollingHorizonDays >= 1`
+    `RollingHorizonDays <= 90`
   }
 }
 Table nutrition.ProgramVersions {
@@ -205,10 +210,11 @@ Table nutrition.ProgramVersions {
   VersionNumber int [not null]
   RulesVersion nvarchar(300)
   ApprovalState nvarchar(300) [not null]
-  EffectiveFromLocalDate date
+  EffectiveFromLocalDate date [not null]
   ApprovedAtUtc datetime2
   indexes {
     (ProgramId, VersionNumber) [unique]
+    (ProgramId, EffectiveFromLocalDate) [unique]
   }
 }
 Table nutrition.ProgramDays {
@@ -361,13 +367,17 @@ Table nutrition.QuestionOptions {
 }
 Table nutrition.CheckinSchedules {
   Id uniqueidentifier [pk]
-  ProfileId uniqueidentifier
-  TemplateId uniqueidentifier
+  ProfileId uniqueidentifier [not null]
+  TemplateId uniqueidentifier [not null]
   LocalTime time
-  Enabled bit
+  Enabled bit [not null]
   QuietStart time
   QuietEnd time
   MaxPerDay int
+  ConsentId uniqueidentifier [not null]
+  TriggerKind nvarchar(300) [not null]
+  RecurrenceRule nvarchar(300) [not null]
+  PausedUntilUtc datetime2
   checks {
     `MaxPerDay >= 0`
     `MaxPerDay <= 12`
@@ -381,6 +391,9 @@ Table nutrition.CheckinSubmissions {
   Phase nvarchar(300) [not null]
   SubmittedAtUtc datetime2
   ResponseStatus nvarchar(300) [not null]
+  ProgramDayId uniqueidentifier
+  MealIntakeId uniqueidentifier
+  ContextCode nvarchar(300)
 }
 Table nutrition.CheckinAnswers {
   Id uniqueidentifier [pk]
@@ -535,8 +548,11 @@ Ref: nutrition.QuestionnaireQuestions.TemplateId > nutrition.QuestionnaireTempla
 Ref: nutrition.QuestionOptions.QuestionId > nutrition.QuestionnaireQuestions.Id
 Ref: nutrition.CheckinSchedules.ProfileId > nutrition.NutritionProfiles.Id
 Ref: nutrition.CheckinSchedules.TemplateId > nutrition.QuestionnaireTemplates.Id
+Ref: nutrition.CheckinSchedules.ConsentId > nutrition.HealthConsents.Id
 Ref: nutrition.CheckinSubmissions.ProfileId > nutrition.NutritionProfiles.Id
 Ref: nutrition.CheckinSubmissions.TemplateId > nutrition.QuestionnaireTemplates.Id
+Ref: nutrition.CheckinSubmissions.ProgramDayId > nutrition.ProgramDays.Id
+Ref: nutrition.CheckinSubmissions.MealIntakeId > nutrition.MealIntakes.Id
 Ref: nutrition.CheckinAnswers.SubmissionId > nutrition.CheckinSubmissions.Id
 Ref: nutrition.CheckinAnswers.QuestionId > nutrition.QuestionnaireQuestions.Id
 Ref: nutrition.CheckinAnswers.OptionId > nutrition.QuestionOptions.Id
