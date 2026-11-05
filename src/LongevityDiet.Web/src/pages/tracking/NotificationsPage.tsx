@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Bell, CheckCheck, Clock3 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
@@ -43,13 +43,14 @@ const toApi = (value: string) => value.length === 5 ? `${value}:00` : value
 export function NotificationsPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
-  const [draft, setDraft] = useState<Preference | null>(null)
+  // React Query supplies server defaults; local state exists only after an edit.
+  const [draftOverride, setDraftOverride] = useState<Preference | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
   const preferences = useQuery({
     queryKey: ['reminder-preferences'],
     queryFn: async () => (await api.get<Preference>('/reminders/preferences')).data,
   })
-  useEffect(() => { if (preferences.data) setDraft(preferences.data) }, [preferences.data])
+  const draft = draftOverride ?? preferences.data ?? null
 
   const schedule = useQuery({
     queryKey: ['reminder-preview'],
@@ -85,6 +86,7 @@ export function NotificationsPage() {
     onSuccess: async () => {
       setFeedback('Đã lưu cài đặt. Lịch mới sẽ được Worker xử lý khi Redis hoạt động.')
       await queryClient.invalidateQueries({ queryKey: ['reminder-preferences'] })
+      setDraftOverride(null)
       await queryClient.invalidateQueries({ queryKey: ['reminder-preview'] })
     },
     onError: (error) => setFeedback(getApiErrorMessage(error)),
@@ -101,10 +103,16 @@ export function NotificationsPage() {
   })
 
   function setBoolean(key: keyof Preference, checked: boolean) {
-    setDraft((s) => s ? { ...s, [key]: checked } : s)
+    setDraftOverride((s) => {
+      const base = s ?? preferences.data
+      return base ? { ...base, [key]: checked } : null
+    })
   }
   function setTime(key: keyof Preference, value: string) {
-    setDraft((s) => s ? { ...s, [key]: toApi(value) } : s)
+    setDraftOverride((s) => {
+      const base = s ?? preferences.data
+      return base ? { ...base, [key]: toApi(value) } : null
+    })
   }
 
   return (

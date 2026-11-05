@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Activity, ArrowLeft, CalendarDays, Save, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
@@ -51,8 +51,8 @@ export function ActivityTrackingPage() {
   const [duration, setDuration] = useState(30)
   const [note, setNote] = useState('')
   const [startedAt, setStartedAt] = useState(localDateTime)
-  const [goalMinutes, setGoalMinutes] = useState(150)
-  const [goalStrength, setGoalStrength] = useState(2)
+  // Server values are the defaults. Only user edits create a draft; no effect-driven state copy.
+  const [goalDraft, setGoalDraft] = useState<Goal | null>(null)
   const [page, setPage] = useState(1)
   const [feedback, setFeedback] = useState<string | null>(null)
 
@@ -76,12 +76,8 @@ export function ActivityTrackingPage() {
     queryKey: ['activity-goal'],
     queryFn: async () => (await api.get<Goal>('/activities/goal')).data,
   })
-  useEffect(() => {
-    if (goal.data) {
-      setGoalMinutes(goal.data.weeklyMinutesTarget)
-      setGoalStrength(goal.data.weeklyStrengthSessionsTarget)
-    }
-  }, [goal.data])
+  const goalMinutes = goalDraft?.weeklyMinutesTarget ?? goal.data?.weeklyMinutesTarget ?? 150
+  const goalStrength = goalDraft?.weeklyStrengthSessionsTarget ?? goal.data?.weeklyStrengthSessionsTarget ?? 2
   const score = useQuery({
     queryKey: ['ldas', localToday],
     enabled: profile.isSuccess,
@@ -122,6 +118,7 @@ export function ActivityTrackingPage() {
     onSuccess: async () => {
       setFeedback('Đã lưu mục tiêu tuần.')
       await qc.invalidateQueries({ queryKey: ['activity-goal'] })
+      setGoalDraft(null)
       await refresh()
     },
     onError: (error) => setFeedback(getApiErrorMessage(error)),
@@ -175,9 +172,15 @@ export function ActivityTrackingPage() {
             <p>Đang áp dụng: {goal.data?.weeklyMinutesTarget ?? 150} phút / {goal.data?.weeklyStrengthSessionsTarget ?? 2} buổi sức mạnh</p>
             <form onSubmit={(event) => { event.preventDefault(); saveGoal.mutate() }}>
               <label>Phút mỗi tuần <input type="number" min={1} max={1000} value={goalMinutes}
-                onChange={(event) => setGoalMinutes(Number(event.target.value))} /></label>
+                onChange={(event) => setGoalDraft({
+                  weeklyMinutesTarget: Number(event.target.value),
+                  weeklyStrengthSessionsTarget: goalStrength,
+                })} /></label>
               <label>Buổi sức mạnh <input type="number" min={0} max={7} value={goalStrength}
-                onChange={(event) => setGoalStrength(Number(event.target.value))} /></label>
+                onChange={(event) => setGoalDraft({
+                  weeklyMinutesTarget: goalMinutes,
+                  weeklyStrengthSessionsTarget: Number(event.target.value),
+                })} /></label>
               <button type="submit" disabled={saveGoal.isPending}>Lưu mục tiêu</button>
             </form>
           </div>
