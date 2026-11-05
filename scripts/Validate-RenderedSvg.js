@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('fs'),path=require('path');
 const dir=path.resolve(process.argv[2]||path.resolve(__dirname,'../docs/assignment/one-page'));
-const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core'];
+const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database'];
 const attr=s=>Object.fromEntries([...s.matchAll(/([\w-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
 function part(a,b,x,eps=8){return x>Math.min(a,b)+eps&&x<Math.max(a,b)-eps;}
 const globalIssues=[];
@@ -21,7 +21,7 @@ for(const name of names){
   }else if(a.edge==='1')edges.set(a.id,{a,body});
  }
  const raw=[];
- for(const m of svg.matchAll(/<g data-cell-id="([^"]+)"><g transform="translate\(0\.5,0\.5\)"><path d="([^"]+)" fill="none"/g)){
+ for(const m of svg.matchAll(/<g data-cell-id="([^"]+)"><g(?: transform="translate\(0\.5,0\.5\)")?><path d="([^"]+)" fill="none"/g)){
   if(!edges.has(m[1]))continue;
   const points=[...m[2].matchAll(/[ML]\s*(-?\d+(?:\.\d+)?)\s*(-?\d+(?:\.\d+)?)/g)].map(x=>({x:+x[1],y:+x[2]}));
   if(points.length>=2)raw.push({id:m[1],points});

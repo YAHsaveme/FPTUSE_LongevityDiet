@@ -35,6 +35,7 @@ jobs:
         run: |
           node ./scripts/Validate-CourseDiagrams.js
           node ./scripts/Validate-CourseRouting.js
+          node ./scripts/Validate-ArchitectureTopology.js
           node ./scripts/Validate-EndToEndFlow.js
           node ./scripts/Validate-CourseLinks.js
 

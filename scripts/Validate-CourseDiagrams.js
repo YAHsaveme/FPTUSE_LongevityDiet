@@ -1,7 +1,7 @@
 // Structural and readability checks for the four course-sized one-page diagrams.
 const fs=require('fs'),path=require('path');
 const dir=path.resolve(__dirname,'../docs/assignment/one-page');
-const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core'];
+const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database'];
 let fail=[];
 const attrs=s=>Object.fromEntries([...s.matchAll(/([\w-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
 function overlap(a,b,epsilon=4){return Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>epsilon&&Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)>epsilon;}

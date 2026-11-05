@@ -64,18 +64,18 @@ function Diagram(name,subtitle,W,H){
  g.actor('member',275,500,'Member','Người dùng');
  g.actor('admin',275,1110,'Administrator','Quản trị');
  // Application containers: visual reading order, left -> right.
- g.box('web',1240,725,710,310,'Web Application','React / Vite','Giao diện và API client',{font:36});
- g.box('api',2390,725,830,310,'REST API','ASP.NET Core / JWT','Auth, Tracking, Notifications, gRPC client',{font:35});
- g.box('grpc',3790,725,850,310,'Recommendation Service','gRPC HTTP/2','ActivityCoach.Recommend',{font:35});
+ g.box('web',1240,725,710,310,'Web Application','Nginx :80 / host :5173','React UI | /api proxy to API :8080',{font:36});
+ g.box('api',2390,725,830,310,'REST API','ASP.NET Core :8080','Auth / Tracking / Notifications / gRPC client',{font:35});
+ g.box('grpc',3790,725,850,310,'Recommendation Service','HTTP/2 :8081','Stateless ActivityCoach | No database',{font:35});
  // Async processing, beneath the backend.
- g.box('redis',2390,1650,830,315,'Redis Streams','Message Broker','Identity events | Worker results',{font:35});
- g.box('worker',3790,1650,850,315,'Background Worker','.NET hosted service','Lịch nhắc, xử lý sự kiện, trả kết quả',{font:34});
+ g.box('redis',2390,1650,830,315,'Redis Streams','Redis :6379','Identity-events | Worker-events',{font:35});
+ g.box('worker',3790,1650,850,315,'Background Worker','.NET Hosted / no HTTP port','Schedules | event consumer | event producer',{font:34});
  // One SQL Server host. Split logical ownership explicitly so Worker does
  // not need an unreadable long U-shaped cross-page SQL arrow.
- g.boundary(1130,2310,3600,840,'SQL Server instance [one host / three logical databases]');
- g.box('identity',1250,2550,900,330,'Identity Database','SQL Server + EF Core','Users, Profiles, Preferences, Outbox, Notifications',{font:33});
- g.box('trackingdb',2390,2550,830,330,'Tracking Database','SQL Server + EF Core','Activity logs, goals and scores',{font:33});
- g.box('workerdb',3790,2550,850,330,'Worker Database','SQL Server + EF Core','Reminder schedules, worker outbox / inbox',{font:32});
+ g.boundary(1130,2310,3600,840,'SQL Server :1433 (host :14330) [three physical catalogs]');
+ g.box('identity',1250,2550,900,330,'Identity Database','LongevityDietDb','Users / Profiles / Prefs / Outbox / Inbox',{font:33});
+ g.box('trackingdb',2390,2550,830,330,'Tracking Database','LongevityTrackingDb','Activities / Goals / Scores / Outbox',{font:33});
+ g.box('workerdb',3790,2550,850,330,'Worker Database','LongevityWorkerDb','Schedules / Dispatch / Outbox / Processed',{font:32});
  g.arrow('member','web',[1,.50],[0,.29],[[850,620],[850,815]]);
  g.arrow('admin','web',[1,.50],[0,.78],[[930,1230],[930,967]]);
  g.arrow('web','api',[1,.50],[0,.50]);
@@ -98,7 +98,7 @@ function Diagram(name,subtitle,W,H){
  g.text(3310,1655,390,64,'Consume events',26,true,'center');
  g.text(3310,1920,390,64,'Publish results',26,true,'center');
  g.text(4270,2200,410,68,'Worker persists schedules',25,true,'center');
- g.text(1050,3300,3910,96,'Solid arrows: synchronous API/gRPC/EF Core calls; dashed arrows: Redis publish/consume. SQL boxes share one physical SQL Server instance.',26);
+ g.text(1050,3300,3910,96,'Host ports: Web 5173->80 | REST 8080 | gRPC 8081 | Redis 6379 | SQL 14330->1433 | Worker none. Solid=request+response; dashed=events.',26);
  g.save('02-c1-container-architecture.drawio');
 }
 
@@ -121,13 +121,13 @@ function Diagram(name,subtitle,W,H){
   g.arrow('router',key+'ctl',[(x+370-1170)/4780,1],[.5,0]);
   g.arrow(key+'ctl',key+'svc',[.5,1],[.5,0]);
  });
- g.box('identity',1390,2090,1250,260,'Identity Persistence','EF Core DbContext','Users | Tokens | Preferences | Notifications | Outbox',{font:29});
- g.box('bridge',2830,2090,740,260,'Identity Redis Bridge','Hosted Service','Poll Outbox / Write Inbox',{font:29});
- g.box('trackingdb',3700,2090,810,260,'Tracking Persistence','EF Core DbContext','ActivityLogs | Goals | AdherenceScores',{font:29});
- g.box('grpc',6370,1450,780,275,'Recommendation gRPC','External Container','ActivityCoach.Recommend',{font:31});
- g.box('sqlIdentity',1390,2850,1250,220,'Identity SQL Database','External Data Store','Owned data and local FKs',{font:31});
- g.box('redis',2830,2850,740,220,'Redis Streams','External Broker','Identity events / Worker results',{font:30});
- g.box('sqlTracking',3700,2850,810,220,'Tracking SQL Database','External Data Store','Activity / scores',{font:31});
+ g.box('identity',1390,2090,1250,260,'Identity Persistence','EF Core DbContext','Users | Profiles | Tokens | Prefs | Outbox | Inbox',{font:29});
+ g.box('bridge',2830,2090,740,260,'Identity Redis Bridge','BackgroundService','Poll Outbox | Consume Worker result',{font:29});
+ g.box('trackingdb',3700,2090,810,260,'Tracking Persistence','TrackingDbContext','Activities | Goals | Score / Signals / Outbox',{font:29});
+ g.box('grpc',6370,1450,780,275,'Recommendation gRPC','External :8081 / HTTP2','Stateless | no SQL database',{font:31});
+ g.box('sqlIdentity',1390,2850,1250,220,'Identity SQL Database','External :1433','LongevityDietDb',{font:31});
+ g.box('redis',2830,2850,740,220,'Redis Streams','External :6379','Identity events / Worker results',{font:30});
+ g.box('sqlTracking',3700,2850,810,220,'Tracking SQL Database','External :1433','LongevityTrackingDb',{font:31});
  g.arrow('web','router',[1,.5],[0,.5]);
  g.arrow('recommendctl','trackingsvc',[0,.68],[1,.55],[[4610,1096],[4610,1647]]);
  g.text(4370,1285,220,110,'Read own weekly summary',24,true,'center');
@@ -139,7 +139,8 @@ function Diagram(name,subtitle,W,H){
  g.arrow('bridge','identity',[0,.55],[1,.55]);
  g.arrow('trackingsvc','trackingdb',[.52,1],[.52,0]);
  g.arrow('identity','sqlIdentity',[.5,1],[.5,0]);
- g.arrow('bridge','redis',[.5,1],[.5,0],[],{dashed:true});
+ g.arrow('bridge','redis',[.32,1],[.32,0],[],{dashed:true}); // publish identity-events
+ g.arrow('redis','bridge',[.68,0],[.68,1],[],{dashed:true}); // consume worker-events
  g.arrow('trackingdb','sqlTracking',[.5,1],[.5,0]);
  g.text(1020,3130,5520,60,'A. RecommendationController -> TrackingService (own summary) -> gRPC Client -> Recommendation Service -> JSON response.',26);
  g.text(1020,3210,5520,60,'B. ReminderService -> Identity DB (preferences + outbox) -> Bridge -> Redis -> Worker -> Redis -> Bridge -> notification inbox.',26);

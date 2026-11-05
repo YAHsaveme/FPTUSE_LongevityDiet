@@ -10,6 +10,8 @@ It does not demand 33 business tables or six separately deployed databases.
 [one-page PDF](one-page/04-database-core.pdf) |
 [vector SVG](one-page/04-database-core.svg).
 
+For an exhaustive source-verified view, open the [18-table physical Draw.io appendix](one-page/06-full-physical-database.drawio) or [PDF](one-page/06-full-physical-database.pdf). It includes 7 Identity, 7 Tracking and 4 Worker tables, with the same five enforced SQL FKs. Tables without FK arrows are intentionally independent at the SQL level, not missing from the drawing.
+
 Ten representative **existing** entity tables are included:
 - Identity: Users, UserProfiles, RefreshTokens, ReminderPreferences,
   UserNotifications.

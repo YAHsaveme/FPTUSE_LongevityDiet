@@ -18,7 +18,7 @@ This is a companion sequence diagram, not a replacement for C0/C1/C2.
 2. [C4 structure and scope](02-SYSTEM-ARCHITECTURE-C4.md)
 3. [Core database model](03-DATA-MODEL.md)
 4. [Actual connections, test evidence and remaining limits](04-RUNTIME-CONNECTIVITY.md)
-5. [Five editable Draw.io diagrams and one-page PDFs](one-page/README.md)
+5. [Six editable Draw.io diagrams and one-page PDFs](one-page/README.md)
 6. [Deployment and supplementary runtime views](../architecture/README.md)
 
 The PDF rubric does not require six REST microservices, six databases or a

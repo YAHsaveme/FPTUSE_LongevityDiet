@@ -13,7 +13,9 @@ if($LASTEXITCODE -ne 0){throw 'Draw.io diagram generator failed'}
 if($LASTEXITCODE -ne 0){throw 'DBML SVG renderer failed'}
 & node (Join-Path $Root 'scripts\Generate-EndToEndFlow.js')
 if($LASTEXITCODE -ne 0){throw 'End-to-end Draw.io sequence generation failed'}
-foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','05-runtime-end-to-end')){
+& node (Join-Path $Root 'scripts\Generate-FullPhysicalDatabase.js')
+if($LASTEXITCODE -ne 0){throw 'Full EF Core physical ERD generation failed'}
+foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','05-runtime-end-to-end','06-full-physical-database')){
   $source=Join-Path $dir ($name+'.drawio')
   $pdf=Join-Path $dir ($name+'.pdf')
   $png=Join-Path $previews ($name+'.png')
@@ -23,7 +25,7 @@ foreach($name in @('01-c0-system-context','02-c1-container-architecture','03-c2-
   if(!(Test-Path -LiteralPath $pdf) -or (Get-Item $pdf).Length -lt 1000){throw "Draw.io PDF export failed: $name"}
   # Runtime sequence is much larger than C4. Keep only its *preview* small;
   # the editable Draw.io and vector PDF preserve full one-page resolution.
-  $previewScale=if($name -eq '05-runtime-end-to-end'){'0.30'}else{'0.85'}
+  $previewScale=if($name -eq '05-runtime-end-to-end'){'0.30'}elseif($name -eq '06-full-physical-database'){'0.40'}else{'0.85'}
   if(Test-Path -LiteralPath $png){Remove-Item -LiteralPath $png -Force}
   $prior=$ErrorActionPreference;$ErrorActionPreference='Continue'
   & $Drawio --export --format png --scale $previewScale --output $png $source 2>$null | Out-Null
@@ -52,6 +54,8 @@ if($LASTEXITCODE -ne 0){throw 'Course diagram quality gate failed'}
 if($LASTEXITCODE -ne 0){throw 'Orthogonal connector and label clearance QA failed'}
 & node (Join-Path $Root 'scripts\Validate-EndToEndFlow.js')
 if($LASTEXITCODE -ne 0){throw 'Complete runtime sequence validation failed'}
+& node (Join-Path $Root 'scripts\Validate-ArchitectureTopology.js')
+if($LASTEXITCODE -ne 0){throw 'C1/C2 ports, graph connectivity or 18-table source mapping failed'}
 & node (Join-Path $Root 'scripts\Validate-RenderedSvg.js') $previews
 if($LASTEXITCODE -ne 0){throw 'Actual Draw.io SVG connector crossing or label collision detected'}
 Write-Host 'ALL_DRAWIO_ARTIFACTS=PASS'
