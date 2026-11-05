@@ -31,6 +31,13 @@ jobs:
             src/LongevityDiet.Web/package-lock.json
             tests/LongevityDiet.E2ETests/package-lock.json
 
+      - name: Validate native Draw.io architecture, ERD and end-to-end flows
+        run: |
+          node ./scripts/Validate-CourseDiagrams.js
+          node ./scripts/Validate-CourseRouting.js
+          node ./scripts/Validate-EndToEndFlow.js
+          node ./scripts/Validate-CourseLinks.js
+
       - name: Validate frozen project structure
         shell: pwsh
         run: ./scripts/Validate-ProjectStructure.ps1
