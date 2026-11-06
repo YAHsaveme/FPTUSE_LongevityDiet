@@ -92,12 +92,16 @@ check(unified.tableCount===32 && unified.actualSqlFKs===9 && unified.logicalLink
  '32 table / 9 SQL FK / 16 logical / 6 event count mismatch');
 check(unified.totalRelationships===31 && db.edges.length===31,
  'Unexpected number of actual relationship connectors');
-const sqlEdges=db.edges.filter(e=>(e.a.style||'').includes('strokeColor=#164B78'));
-const logicalEdges=db.edges.filter(e=>(e.a.style||'').includes('strokeColor=#B2862E'));
-const eventEdges=db.edges.filter(e=>(e.a.style||'').includes('strokeColor=#805AB1'));
+const sqlEdges=db.edges.filter(e=>(e.a.style||'').includes('startArrow=ERmandOne')&&!(e.a.style||'').includes('dashed=1'));
+const logicalEdges=db.edges.filter(e=>(e.a.style||'').includes('endArrow=open')&&(e.a.style||'').includes('dashPattern=17 11'));
+const eventEdges=db.edges.filter(e=>(e.a.style||'').includes('endArrow=block')&&(e.a.style||'').includes('dashPattern=2 10'));
 check(sqlEdges.length===9 && logicalEdges.length===16 && eventEdges.length===6,
  'ERD edge color/type missing or an invented link was added');
 const expectedNames=new Set(manifest.databaseCardNames);
+const nativeERD=fs.readFileSync(path.join(base,'Database Diagram.drawio'),'utf8');
+const colors=[...nativeERD.matchAll(/#[0-9a-fA-F]{6}\b/g)].map(m=>m[0].toUpperCase());
+check(colors.every(c=>c==='#000000'||c==='#FFFFFF'),'ERD contains unwanted non-monochrome colors');
+check(nativeERD.includes('fillColor=#FFFFFF'),'ERD must use white shapes');
 const tableNodes=db.vertices.filter(v=>[...expectedNames].some(t=>(v.a.value||'').startsWith('&lt;b&gt;'+t+'&lt;/b&gt;')));
 const cardMap=new Map(tableNodes.map(v=>[(v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v]));
 check(tableNodes.length===32 && cardMap.size===32,'Every actual mapped table must appear exactly once');
@@ -114,8 +118,11 @@ for(const rel of unified.relationships){
  check(match.length===1,'No directly attached relationship: '+pair);
  if(match.length!==1)continue;
  const style=match[0].a.style||'';
- const color=rel.kind==='sql'?'#164B78':rel.kind==='event'?'#805AB1':'#B2862E';
- check(style.includes('strokeColor='+color),'Relationship kind not visibly distinguished: '+pair);
+ check(style.includes('strokeColor=#000000'),'All connector strokes must be black: '+pair);
+ const semantic=rel.kind==='sql'?'startArrow=ERmandOne':rel.kind==='event'?'dashPattern=2 10':'dashPattern=17 11';
+ check(style.includes(semantic),'Monochrome connector pattern does not distinguish its meaning: '+pair);
+ if(rel.kind==='logical')check((match[0].a.value||'').startsWith('APP: '),'Logical link missing its field label: '+pair);
+ if(rel.kind==='event')check((match[0].a.value||'').startsWith('EVENT'),'Event lineage missing its readable label: '+pair);
  if(rel.kind==='sql'){
   check(manifest.realRelationships.some(f=>f.parent===rel.from&&f.child===rel.to&&f.cardinality===rel.cardinality),
    'Physical Crow Foot relation is not in EF Core: '+pair);
