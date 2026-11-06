@@ -8,74 +8,84 @@
   ],
   "controllers": [
     {
-      "domain": "Auth",
+      "domain": "AUTH",
       "controller": "AuthController",
       "service": "AuthenticationService",
-      "persistence": "User + Token repositories",
-      "owner": "LongevityDietDb"
+      "persistence": "UserRepository + RefreshTokenRepository",
+      "database": "LongevityDietDb",
+      "owner": "identity"
     },
     {
-      "domain": "Profile",
+      "domain": "PROFILE",
       "controller": "ProfileController",
       "service": "ProfileService",
-      "persistence": "UserProfile repository",
-      "owner": "LongevityDietDb"
+      "persistence": "UserRepository / Profile persistence",
+      "database": "LongevityDietDb",
+      "owner": "identity"
     },
     {
-      "domain": "Reminders",
+      "domain": "REMINDERS",
       "controller": "ReminderNotificationsController",
-      "service": "ReminderService + IdentityRedisBridge",
-      "persistence": "Identity outbox / inbox",
-      "owner": "LongevityDietDb + Redis"
+      "service": "ReminderService / IdentityRedisBridge",
+      "persistence": "Identity outbox + inbox persistence",
+      "database": "LongevityDietDb",
+      "owner": "identity"
     },
     {
-      "domain": "Activity",
-      "controller": "TrackingController",
-      "service": "TrackingService",
-      "persistence": "TrackingDbContext",
-      "owner": "LongevityTrackingDb"
-    },
-    {
-      "domain": "Activity advice",
-      "controller": "RecommendationController",
-      "service": "ActivityCoach gRPC client",
-      "persistence": "gRPC adapter (stateless)",
-      "owner": "Recommendation gRPC"
-    },
-    {
-      "domain": "Meal plans",
+      "domain": "MEAL PLAN",
       "controller": "MealPlansController",
       "service": "MealPlanningService",
       "persistence": "MealPlanRepository",
-      "owner": "LongevityDietDb"
+      "database": "LongevityDietDb",
+      "owner": "identity"
     },
     {
-      "domain": "Meal logs",
+      "domain": "MEAL LOG",
       "controller": "MealLogsController",
       "service": "MealTrackingService",
       "persistence": "MealLogRepository",
-      "owner": "LongevityDietDb"
+      "database": "LongevityDietDb",
+      "owner": "identity"
     },
     {
-      "domain": "Eating window",
+      "domain": "EATING WINDOW",
       "controller": "EatingWindowController",
       "service": "MealTrackingService",
       "persistence": "EatingWindowRepository",
-      "owner": "LongevityDietDb"
+      "database": "LongevityDietDb",
+      "owner": "identity"
     },
     {
-      "domain": "Recommendations",
+      "domain": "MEAL ADVICE",
       "controller": "RecommendationsController",
       "service": "RecommendationService + gRPC client",
-      "persistence": "RecommendationRepository",
-      "owner": "LongevityDietDb + gRPC"
+      "persistence": "RecommendationRepository / gRPC adapter",
+      "database": "LongevityDietDb",
+      "owner": "identity"
     },
     {
       "domain": "FMD",
       "controller": "FmdController",
       "service": "FmdService",
       "persistence": "FmdRepository",
-      "owner": "LongevityDietDb"
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "ACTIVITY",
+      "controller": "TrackingController",
+      "service": "TrackingService",
+      "persistence": "TrackingDbContext",
+      "database": "LongevityTrackingDb",
+      "owner": "tracking"
+    },
+    {
+      "domain": "ACTIVITY ADVICE",
+      "controller": "RecommendationController",
+      "service": "TrackingService + ActivityCoachClient",
+      "persistence": "TrackingDbContext + gRPC adapter",
+      "database": "LongevityTrackingDb",
+      "owner": "tracking"
     }
   ],
   "mappedTableCount": 32,
