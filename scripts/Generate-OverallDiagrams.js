@@ -137,73 +137,7 @@ function title(g,s,description){g.n(null,110,45,g.w-220,115,s,'title');g.n(null,
  g.n(null,150,6730,11450,530,'SHARED DEPENDENCIES (not extra API instances): ActivityCoach / Recommendation gRPC :8081 (stateless); Redis Streams :6379 <-> Reminder Worker; SQL: LongevityDietDb, LongevityTrackingDb, LongevityWorkerDb. Future clinical nutrition/check-in target is NOT deployed.','amber','fontSize=34;');
  g.save();
 }
-{
- const g=new Diagram('Database Diagram',11000,5700);
- title(g,'Database Diagram','FULL PHYSICAL ERD | 32 current EF Core tables and 9 direct SQL FK links; no fictitious cross-database references');
- const cols=5,boxW=1930,boxH=380,colStep=2150,rowStep=475,x0=180;
- // Keep actual FK parents and children in adjacent cells so all nine
- // connectors are short, straight, native-attached, and non-crossing.
- const byGroup={
-  identity:[
-   'IdentityOutbox','IdentityInbox','UserProfiles','UserDietaryPreferences','RecommendationFeedbacks',
-   'FmdEducationAcknowledgements','RefreshTokens','Users','ReminderPreferences','UserFoodPreferences',
-   'FmdSafetyAssessments','EatingWindowSnapshots','UserNotifications','MealReplacementHistories',null,
-   'MealPlans','MealPlanDays','PlannedMeals','MealLogs','MealLogItems',
-   'FmdCycles','FmdCycleDays',null,null,null
-  ],
-  tracking:[
-   'AdherenceScores','ScoreDimensions','ActivityLogs','ActivityGoals','ScoreConfigurationVersions',
-   'TrackingScoreSignals','TrackingOutbox',null,null,null
-  ],
-  worker:['ReminderSchedules','ReminderDispatchRecords','WorkerProcessedEvents','WorkerOutbox',null]
- };
- const sections=[
-  {key:'identity',heading:'LongevityDietDb  |  21 tables  |  Identity + Planning + Recommendation + FMD',top:340,h:2670},
-  {key:'tracking',heading:'LongevityTrackingDb  |  7 tables  |  Activity + Adherence',top:3120,h:1100},
-  {key:'worker',heading:'LongevityWorkerDb  |  4 tables  |  Reminder and event processing',top:4320,h:670}
- ];
- for(const s of sections){
-  g.n(null,120,s.top,10740,s.h,s.heading,'frame','fontSize=44;');
-  const order=byGroup[s.key].filter(Boolean),actual=Object.keys(groups[s.key].columns);
-  if(order.length!==actual.length||order.some(t=>!actual.includes(t))||
-     actual.some(t=>!order.includes(t)))throw Error('Physical DB layout coverage mismatch '+s.key);
-  byGroup[s.key].forEach((table,i)=>{
-   if(!table)return;
-   const c=i%cols,r=Math.floor(i/cols);
-   const x=x0+c*colStep,y=s.top+190+r*rowStep;
-   const fields=groups[s.key].columns[table];
-   const label='<b>'+table+'</b><br/>'+fields.map(esc).join('<br/>');
-   g.n('table:'+table,x,y,boxW,boxH,label,'table','fontSize=44;');
-  });
- }
- const relationDirections=[
-  ['Users','UserProfiles','up'],
-  ['Users','RefreshTokens','left'],
-  ['Users','ReminderPreferences','right'],
-  ['Users','UserNotifications','down'],
-  ['MealPlans','MealPlanDays','right'],
-  ['MealPlanDays','PlannedMeals','right'],
-  ['MealLogs','MealLogItems','right'],
-  ['FmdCycles','FmdCycleDays','right'],
-  ['AdherenceScores','ScoreDimensions','right']
- ];
- if(relationDirections.length!==refs.length)throw Error('SQL relation count drift');
- for(const [parent,child,direction] of relationDirections){
-  if(!refs.some(r=>r[1]===parent&&r[3]===child))throw Error('Invented physical FK '+parent+' -> '+child);
-  const directionOptions={
-   up:{fromPoint:[.5,0],toPoint:[.5,1]},
-   down:{fromPoint:[.5,1],toPoint:[.5,0]},
-   left:{fromPoint:[0,.5],toPoint:[1,.5]},
-   right:{fromPoint:[1,.5],toPoint:[0,.5]}
-  };
-  g.edge('table:'+parent,'table:'+child,{...directionOptions[direction],color:'#287857',size:4});
- }
- g.n(null,180,5100,10610,385,
- 'DIRECT SQL RELATIONSHIPS | Each green arrow joins the real parent table PK to its FK child; PK/FK columns are written inside each card.\n' +
- 'Nine enforced FKs, no crossing wires. Logical UserId/cross-database IDs are not SQL foreign keys. The 52-table clinical nutrition extension is future work, not migrated.',
- 'amber','fontSize=39;');
- g.save();
-}
+require('./Generate-ProfessionalERD.js');
 const manifest={
  status:'CURRENT_IMPLEMENTED_SOURCE',names:['C0','C1','C2','Database Diagram'],
  controllers:controllers.map(x=>({domain:x[0],controller:x[1],service:x[2],persistence:x[3],owner:x[4]})),

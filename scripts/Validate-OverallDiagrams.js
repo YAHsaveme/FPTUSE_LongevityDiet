@@ -85,27 +85,41 @@ for(let i=0;i<10;i++){
  check(expectedId.length>=1,'C2 module controller missing: '+keys[0]);
 }
 const db=diagrams['Database Diagram'];
-check(db.edges.length===9,'Database Diagram must show 9 actual FK arrows on the SAME page');
-for(const t of manifest.databaseCardNames){
- const label='&lt;b&gt;'+t+'&lt;/b&gt;';
- const cards=db.vertices.filter(c=>(c.a.value||'').startsWith(label));
- check(cards.length===1,'Missing/duplicate table card '+t+' ('+cards.length+')');
-}
-const cards=db.vertices.filter(v=>(v.a.value||'').startsWith('&lt;b&gt;'));
-check(cards.length===32,'Database must contain 32 actual table cards');
-const byTable=new Map(cards.map(v=>[
-  (v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v
-]));
+const relationManifest=JSON.parse(fs.readFileSync(path.join(root,'scripts/professional-erd-relations.json'),'utf8'));
+const physical=db.edges.filter(e=>!e.a.style.includes('dashed=1'));
+const logical=db.edges.filter(e=>e.a.style.includes('dashed=1'));
+check(physical.length===9,'Exactly nine SQL-enforced Crow Foot edges required');
+check(logical.length===relationManifest.logicalCount,'Logical connector count drift');
+check(relationManifest.currentTables===32 && relationManifest.physicalCount===9,'ERD manifest mismatches source database');
+const tableNames=new Set(manifest.databaseCardNames);
+const cards=db.vertices.filter(v=>[...tableNames].some(n=>(v.a.value||'').startsWith('&lt;b&gt;'+n+'&lt;/b&gt;')));
+check(cards.length===32,'Exactly 32 source-backed table cards required');
+const byTable=new Map(cards.map(v=>[(v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v]));
+check(byTable.size===32,'Repeated/missing SQL table cards');
+for(const name of tableNames)check(byTable.has(name),'Missing source table '+name);
 for(const r of manifest.realRelationships){
  const a=byTable.get(r.parent),b=byTable.get(r.child);
- check(Boolean(a&&b),'Missing real linked tables '+r.parent+' -> '+r.child);
- if(a&&b)check(db.edges.some(e=>e.a.source===a.a.id&&e.a.target===b.a.id),
-  'Real SQL FK is not directly attached: '+r.parent+' -> '+r.child);
+ check(Boolean(a&&b),'Missing direct SQL tables '+r.parent+' to '+r.child);
+ if(a&&b)check(physical.some(e=>e.a.source===a.a.id&&e.a.target===b.a.id),
+  'Crow Foot FK is not attached to actual tables: '+r.parent+' to '+r.child);
 }
-for(const edge of db.edges){
- check(cards.some(v=>v.a.id===edge.a.source)&&cards.some(v=>v.a.id===edge.a.target),
-  'SQL FK must connect actual table cards, not separate ledger boxes');
+for(const e of physical){
+ check(e.a.style.includes('startArrow=ERmandOne'),'Crow Foot missing source cardinality '+e.a.id);
+ check(e.a.style.includes('endArrow=ERmany')||e.a.style.includes('endArrow=ERmandOne'),
+  'Crow Foot missing target cardinality '+e.a.id);
 }
+for(const relation of relationManifest.links){
+ const a=byTable.get(relation.from),b=byTable.get(relation.to);
+ const arr=relation.mode==='physical'?physical:logical;
+ check(Boolean(a&&b),'Relationship with missing table '+relation.from+' to '+relation.to);
+ if(a&&b)check(arr.some(e=>e.a.source===a.a.id&&e.a.target===b.a.id),
+  'Missing grounded '+relation.mode+' connection '+relation.from+' to '+relation.to);
+}
+for(const e of db.edges){
+ check(cards.some(v=>v.a.id===e.a.source)&&cards.some(v=>v.a.id===e.a.target),
+  'ERD relation endpoint not attached directly to a real table: '+e.a.id);
+}
+console.log('PROFESSIONAL_ERD_QA: tables='+cards.length+' actualFK='+physical.length+' logical='+logical.length);
 const contexts=[
  ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',21,8],
  ['src/LongevityDiet.Tracking/TrackingDbContext.cs',7,1],
