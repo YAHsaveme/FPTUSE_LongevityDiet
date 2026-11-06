@@ -85,41 +85,58 @@ for(let i=0;i<10;i++){
  check(expectedId.length>=1,'C2 module controller missing: '+keys[0]);
 }
 const db=diagrams['Database Diagram'];
-const relationManifest=JSON.parse(fs.readFileSync(path.join(root,'scripts/professional-erd-relations.json'),'utf8'));
-const physical=db.edges.filter(e=>!e.a.style.includes('dashed=1'));
-const logical=db.edges.filter(e=>e.a.style.includes('dashed=1'));
-check(physical.length===9,'Exactly nine SQL-enforced Crow Foot edges required');
-check(logical.length===relationManifest.logicalCount,'Logical connector count drift');
-check(relationManifest.currentTables===32 && relationManifest.physicalCount===9,'ERD manifest mismatches source database');
+const full=JSON.parse(fs.readFileSync(path.join(root,'scripts/connected-erd-manifest.json'),'utf8'));
+check(full.status==='CURRENT_MODEL_PLUS_DOCUMENTED_CONTEXT_NOT_SQL_FK','ERD must not misstate navigation buses as SQL FKs');
+check(full.tables===32&&full.physicalSqlFkCount===9,'32-table/9-FK source summary changed');
+const physical=db.edges.filter(e=>e.a.style.includes('strokeColor=#164B78'));
+const logical=db.edges.filter(e=>e.a.style.includes('strokeColor=#BA822A'));
+const event=db.edges.filter(e=>e.a.style.includes('strokeColor=#7753A8'));
+const context=db.edges.filter(e=>e.a.style.includes('strokeColor=#477E96'));
+check(physical.length===9,'SQL FK Crow Foot connector count must equal 9');
+check(db.edges.length===full.relationships.length,'Native relationship edges missing or duplicated');
+check(logical.length===4&&event.length===4&&context.length===20,'Incorrect count/types of documented non-FK connections');
+check(full.allTablesHaveLinks&&full.allNodesOneConnectedGraph,'Generator connectivity audit failed');
 const tableNames=new Set(manifest.databaseCardNames);
-const cards=db.vertices.filter(v=>[...tableNames].some(n=>(v.a.value||'').startsWith('&lt;b&gt;'+n+'&lt;/b&gt;')));
-check(cards.length===32,'Exactly 32 source-backed table cards required');
-const byTable=new Map(cards.map(v=>[(v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v]));
-check(byTable.size===32,'Repeated/missing SQL table cards');
-for(const name of tableNames)check(byTable.has(name),'Missing source table '+name);
-for(const r of manifest.realRelationships){
- const a=byTable.get(r.parent),b=byTable.get(r.child);
- check(Boolean(a&&b),'Missing direct SQL tables '+r.parent+' to '+r.child);
- if(a&&b)check(physical.some(e=>e.a.source===a.a.id&&e.a.target===b.a.id),
-  'Crow Foot FK is not attached to actual tables: '+r.parent+' to '+r.child);
+const cardNodes=db.vertices.filter(v=>[...tableNames].some(n=>(v.a.value||'').startsWith('&lt;b&gt;'+n+'&lt;/b&gt;')));
+check(cardNodes.length===32,'Exactly 32 real table cards required');
+const cards=new Map(cardNodes.map(v=>[(v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v]));
+check(cards.size===32,'Duplicate or missing table cards');
+for(const name of tableNames)check(cards.has(name),'Missing source table '+name);
+for(const rel of manifest.realRelationships){
+ const a=cards.get(rel.parent),b=cards.get(rel.child);
+ if(!a||!b){check(false,'Missing FK parent/child '+rel.parent+' -> '+rel.child);continue;}
+ const edges=physical.filter(e=>e.a.source===a.a.id&&e.a.target===b.a.id);
+ check(edges.length===1,'Expected one real SQL FK edge '+rel.parent+' -> '+rel.child);
+ if(edges.length){
+  const style=edges[0].a.style;
+  check(style.includes('startArrow=ERmandOne'),'Missing parent Crow Foot endpoint '+rel.parent);
+  check(style.includes('endArrow='+(rel.cardinality==='1:1'?'ERmandOne':'ERmany')),'Incorrect Crow Foot child cardinality '+rel.child);
+ }
 }
 for(const e of physical){
- check(e.a.style.includes('startArrow=ERmandOne'),'Crow Foot missing source cardinality '+e.a.id);
- check(e.a.style.includes('endArrow=ERmany')||e.a.style.includes('endArrow=ERmandOne'),
-  'Crow Foot missing target cardinality '+e.a.id);
+ check(cardNodes.some(v=>v.a.id===e.a.source)&&cardNodes.some(v=>v.a.id===e.a.target),
+  'A physical FK may only join real SQL table cards');
 }
-for(const relation of relationManifest.links){
- const a=byTable.get(relation.from),b=byTable.get(relation.to);
- const arr=relation.mode==='physical'?physical:logical;
- check(Boolean(a&&b),'Relationship with missing table '+relation.from+' to '+relation.to);
- if(a&&b)check(arr.some(e=>e.a.source===a.a.id&&e.a.target===b.a.id),
-  'Missing grounded '+relation.mode+' connection '+relation.from+' to '+relation.to);
-}
+// Validate the entire native connection graph, not merely a list of arrows.
+const adjacency=new Map();
 for(const e of db.edges){
- check(cards.some(v=>v.a.id===e.a.source)&&cards.some(v=>v.a.id===e.a.target),
-  'ERD relation endpoint not attached directly to a real table: '+e.a.id);
+ if(!adjacency.has(e.a.source))adjacency.set(e.a.source,new Set());
+ if(!adjacency.has(e.a.target))adjacency.set(e.a.target,new Set());
+ adjacency.get(e.a.source).add(e.a.target);
+ adjacency.get(e.a.target).add(e.a.source);
 }
-console.log('PROFESSIONAL_ERD_QA: tables='+cards.length+' actualFK='+physical.length+' logical='+logical.length);
+for(const [table,node] of cards)check(adjacency.has(node.a.id),'Disconnected table card '+table);
+const start=cardNodes[0]?.a.id;
+const seen=new Set(start?[start]:[]),queue=start?[start]:[];
+while(queue.length){for(const next of adjacency.get(queue.shift())||[]){
+ if(!seen.has(next)){seen.add(next);queue.push(next);}
+}}
+for(const [table,node] of cards)check(seen.has(node.a.id),'No path to entire ERD for table '+table);
+const realNative=full.relationships.filter(r=>r.type==='physical');
+check(realNative.length===9&&full.relationships.length===db.edges.length,'Source-vs-diagram edge mismatch');
+console.log('DATABASE_CONNECTIVITY_QA: tables='+cards.size+' SQL_FKs='+physical.length+
+ ' logical='+logical.length+' events='+event.length+' navigation='+context.length+
+ ' native_edges='+db.edges.length+' reachable_table_count='+[...cards.values()].filter(c=>seen.has(c.a.id)).length);
 const contexts=[
  ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',21,8],
  ['src/LongevityDiet.Tracking/TrackingDbContext.cs',7,1],
