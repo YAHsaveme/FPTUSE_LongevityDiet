@@ -14,6 +14,14 @@ Database Diagram được thiết kế trên **một trang, chỉ có nét đen 
 
 **Mọi nhãn APP chỉ biểu thị liên hệ theo khóa hoặc ngữ cảnh nghiệp vụ.** Hai bảng cùng `UserId` không đồng nghĩa một bản ghi ở bảng A có một bản ghi cha ở bảng B. Các liên hệ EVENT thể hiện định danh sự kiện hoặc luồng xử lý, không phải kết nối vật lý trong SQL Server.
 
+## Cách đọc bản bố cục tối ưu
+
+Thay vì lặp lại tên database dài trong mỗi ô, tiêu đề bảng sử dụng mã ngắn **[I] = LongevityDietDb**, **[T] = LongevityTrackingDb**, và **[W] = LongevityWorkerDb**. Cả ba tên database, số bảng và ý nghĩa đường nối được ghi trong hàng chú giải ở đầu trang.
+
+Font các trường PK/FK và tên bảng được tăng tỷ lệ hiển thị so với chiều rộng trang; bố cục được thu gọn đồng bộ, không để đường nối hoặc kích thước ô lệch nhau. Nhãn đường **APP: UserId**, **APP: PlannedMealId**, **APP: Version**, **EVENT: EventId**, **EVENT: Notification** v.v. cho biết chính xác khóa hoặc ngữ cảnh sự kiện, thay vì ghi chung chung "business key" hoặc "EVENT".
+
+File PDF vẫn chỉ có **một trang chứa toàn bộ 32 bảng**. Khi cần đọc tất cả thuộc tính, hãy phóng to ở mức 150–200% hoặc dùng Draw.io; đây là giới hạn thực tế của một ERD 32 bảng trên màn hình nhỏ.
+
 ## Dữ liệu đã triển khai
 
 | Database | Số bảng | FK SQL thật |
