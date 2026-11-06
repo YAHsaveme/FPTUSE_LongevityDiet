@@ -32,10 +32,10 @@ documentation and presentation **10%**.
 
 ## Four canonical one-page diagrams
 
-- [C0 Context (Draw.io)](one-page/01-c0-system-context.drawio)
-- [C1 Containers (Draw.io)](one-page/02-c1-container-architecture.drawio)
-- [C2 REST API Components (Draw.io)](one-page/03-c2-api-components.drawio)
-- [Database core ERD (DBML)](one-page/04-database-core.dbml)
+- [C0 Context (Draw.io)](one-page/C0.drawio)
+- [C1 Containers (Draw.io)](one-page/C1.drawio)
+- [C2 REST API Components (Draw.io)](one-page/C2.drawio)
+- [Database Diagram (Draw.io)](one-page/Database%20Diagram.drawio)
 
 [One-page PDFs, editing/QA instructions](one-page/README.md).
 

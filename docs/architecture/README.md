@@ -1,15 +1,10 @@
-# Supporting architecture diagrams — PRN232
+# Architecture documentation
 
-Only these three editable Draw.io diagrams are kept here:
+All canonical diagrams are in the **single four-diagram handover**:
 
-- 03-docker-deployment.drawio — Docker Compose deployment.
-- 06-outbox-redis-dynamic.drawio — producer / Redis Streams / consumer flow.
-- 09-end-to-end-demo-flow.drawio — student final presentation flow.
+- [C0](../assignment/one-page/C0.drawio)
+- [C1](../assignment/one-page/C1.drawio)
+- [C2](../assignment/one-page/C2.drawio)
+- [Database Diagram](../assignment/one-page/Database%20Diagram.drawio)
 
-The four main C0/C1/C2/ERD submission diagrams are under
-[assignment/one-page](../assignment/one-page/README.md).
-
-Redundant PNG copies and older target architecture models (six microservices
-and 33-table database) were archived outside the Git repository. Open these
-Draw.io files directly for zooming and editing. The current source code and
-Docker Compose, not archived proposals, define what the system actually runs.
+See [four diagram PDFs and regeneration guide](../assignment/one-page/README.md). The three earlier redundant deployment / Redis / demonstration Draw.io variants were removed from this directory; those concerns are integrated into C1 and C2. Research text / guidelines remain available without adding misleading extra diagrams.

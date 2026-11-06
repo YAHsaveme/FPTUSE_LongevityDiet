@@ -25,7 +25,7 @@ dotnet test tests/LongevityDiet.UnitTests/LongevityDiet.UnitTests.csproj -c Rele
 dotnet test tests/LongevityDiet.IntegrationTests/LongevityDiet.IntegrationTests.csproj -c Release
 npm --prefix src/LongevityDiet.Web run lint
 npm --prefix src/LongevityDiet.Web run build
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-CourseDiagrams.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
 node scripts/Validate-CourseLinks.js
 ```
 
@@ -39,11 +39,7 @@ Chỉ chạy nếu Docker đã sẵn sàng và ổ hệ thống đủ dung lư�
 
 ## Complete request/response and asynchronous sequence
 
-The native Draw.io [end-to-end runtime view](one-page/05-runtime-end-to-end.drawio)
-uses 10 ordered synchronous arrows and 19 ordered asynchronous arrows to
-document each request, response, broker event and notification query. Its
-sequence is verified against the real REST controller, TrackingService,
-gRPC contract, Identity outbox/bridge, Worker and ReminderService.
+The canonical [C2 component diagram](one-page/C2.drawio) is an overall controller/service/persistence view, NOT a sequence chart. The written runtime paths and tests above remain the authoritative evidence of request-response and asynchronous Redis/Worker processing.
 
 Key implementation distinction: IdentityRedisBridge consumes Worker results
 and calls ReminderService.PersistNotificationResultAsync. ReminderService

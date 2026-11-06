@@ -1,42 +1,17 @@
-# C4 Architecture — PRN232 student scope
+# C4 — Complete Current System Architecture
 
-Based on https://c4model.com/diagrams and current source/Docker Compose.
+The canonical, source-verified Draw.io/PDF set has exactly four overall diagrams. See [all four diagrams](one-page/README.md). These reflect the latest merged develop code, not a speculative six-microservice architecture.
 
-## C0: System Context
+## C0
+Member and Administrator access one complete LongevityDiet platform. C0 excludes Docker internals; actors are real roles present in the code.
 
-Two actors (Member and Administrator) use the LongevityDiet software system.
-No framework, database or Redis box belongs at this zoom level.
+## C1
+Actual deployable containers: Web (Nginx/React), REST API (.NET 9), independent stateless Recommendation gRPC, Redis Streams, Reminder Worker, and three distinct SQL catalogs (Identity/Planning/FMD, Tracking, Worker). Host ports: Web 5173 -> 80, API 8080, gRPC 8081 HTTP/2, Redis 6379, SQL 14330 -> 1433. Worker has no inbound HTTP port.
 
-## C1: Container Architecture
+## C2
+Full current REST API components, not just one teaching slice: AuthController, ProfileController, ReminderNotificationsController, TrackingController, RecommendationController (activity advice), MealPlansController, MealLogsController, EatingWindowController, RecommendationsController (V2), and FmdController. Each module has a real service, persistence / gRPC adapter, and destination identified in the diagram. JWT/routing, rate limits, OpenAPI and Redis bridge are shared infrastructure; Worker and independent gRPC host remain separate containers in C1.
 
-Within the software system:
-- Web UI: React/TypeScript/Vite
-- REST API: ASP.NET Core (.NET 9), JWT and CRUD
-- Recommendation gRPC: independent ASP.NET Core ActivityCoach.Recommend endpoint (real HTTP/2)
-- Background Worker: .NET job host and Redis consumer
-- SQL Server: EF Core Identity / Tracking / Worker databases
-- Redis Streams: broker carrying async events
+## Database Diagram
+All 32 mapped EF Core tables across LongevityDietDb (21), LongevityTrackingDb (7), LongevityWorkerDb (4); all nine real local SQL FK arrows attached in the SAME overall drawing. Logical cross-database UserId and Redis event correlations are not fake SQL FKs.
 
-Solid links correspond to current implemented calls/dependencies.
-REST API → gRPC is a **solid synchronous HTTP/2 call**. A real gRPC Kestrel
-listener plus JWT-authenticated REST API and SQLite test databases passed
-the end-to-end integration test. Docker + live SQL Server remain unverified.
-
-Docker Compose is a separate deployment concern, not a justification for
-inventing six REST microservices.
-
-## C2: REST API Components only
-
-Scope is the single LongevityDiet.API container.
-Controllers → Authentication/Profile/Tracking/Reminder services → EF Core
-repositories/DbContexts. Identity Redis Bridge is a hosted event-integration
-component. JWT, rate limiting, error handling and health checks are
-cross-cutting. RecommendationController calls TrackingService for the
-member's weekly summary, then a generated ActivityCoach gRPC client
-for deterministic educational feedback. C2 depicts these real components.
-
-Each arrow has a direction and relationship label. The diagrams use
-plain monochrome, standard editable Draw.io shapes and a clean one-page
-layout.
-
-Editable source and PDFs: [one-page/README.md](one-page/README.md).
+Future 52-table personalized wellness/check-in work is a [separate research specification](05-LONGITUDINAL-NUTRITION-TARGET.md), not an implemented database. A green diagram/test result does not assert live Docker SQL Server acceptance or clinical validity.

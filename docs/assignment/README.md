@@ -1,28 +1,9 @@
-# PRN232 Final Assignment — LongevityDiet
+# LongevityDiet — Overall Architecture (C0, C1, C2, Database Diagram)
 
-Start with the [course requirements and evidence](00-ASSIGNMENT-DOCUMENT.md).
+The whole implemented system is represented by exactly **four editable overall drawings**: [C0](one-page/C0.drawio), [C1](one-page/C1.drawio), [C2](one-page/C2.drawio), and [Database Diagram](one-page/Database%20Diagram.drawio). Each has a one-page PDF beside the Draw.io source.
 
-## Deliverables (small student-project scope)
+These four views cover all real REST modules and dependencies, Docker Compose ports, three real SQL databases, 32 EF Core tables and nine genuine SQL foreign keys. See the [diagram index](one-page/README.md) for sources, PDFs and verification.
 
-[One-page Draw.io diagrams and editable DBML](one-page/README.md):
-C0 context, C1 containers, C2 REST API components and the core ten-table ERD.
+The detailed [data model](03-DATA-MODEL.md), [runtime test evidence](04-RUNTIME-CONNECTIVITY.md) and [assignment requirements](00-ASSIGNMENT-DOCUMENT.md) are supplementary text, not extra diagrams.
 
-To follow **every request, return and asynchronous result**, open the
-[single-page runtime sequence](one-page/05-runtime-end-to-end.drawio).
-It has 10 ordered REST/gRPC steps and 19 ordered Redis/Worker/notification steps.
-This is a companion sequence diagram, not a replacement for C0/C1/C2.
-
-## Reading order
-
-1. [Assignment summary](00-ASSIGNMENT-DOCUMENT.md)
-2. [C4 structure and scope](02-SYSTEM-ARCHITECTURE-C4.md)
-3. [Core database model](03-DATA-MODEL.md)
-4. [Actual connections, test evidence and remaining limits](04-RUNTIME-CONNECTIVITY.md)
-5. [Six editable Draw.io diagrams and one-page PDFs](one-page/README.md)
-6. [Deployment and supplementary runtime views](../architecture/README.md)
-7. [Research-backed LONGITUDINAL NUTRITION TARGET (not yet implemented)](05-LONGITUDINAL-NUTRITION-TARGET.md): daily meals, allergies, health questionnaires, safety and proposed 39-table model
-
-The PDF rubric does not require six REST microservices, six databases or a
-separate gateway. The existing EF migrations and source code remain
-authoritative for the actual schema. Old target-architecture atlases have
-verified backups and are not included in the student handout.
+The [52-table longitudinal nutrition target](05-LONGITUDINAL-NUTRITION-TARGET.md) is future research and must not be mistaken for code already deployed.
