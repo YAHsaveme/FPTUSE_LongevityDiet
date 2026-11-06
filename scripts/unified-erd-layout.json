@@ -1,0 +1,1038 @@
+{
+  "width": 19036,
+  "height": 11779,
+  "nodes": {
+    "Users": {
+      "x": 270,
+      "y": 3228,
+      "w": 2096,
+      "h": 786
+    },
+    "UserProfiles": {
+      "x": 3003,
+      "y": 1201,
+      "w": 2096,
+      "h": 786
+    },
+    "RefreshTokens": {
+      "x": 3003,
+      "y": 2214,
+      "w": 2096,
+      "h": 786
+    },
+    "ReminderPreferences": {
+      "x": 3003,
+      "y": 3228,
+      "w": 2096,
+      "h": 786
+    },
+    "UserNotifications": {
+      "x": 3003,
+      "y": 4242,
+      "w": 2096,
+      "h": 786
+    },
+    "IdentityOutbox": {
+      "x": 3003,
+      "y": 9310,
+      "w": 2096,
+      "h": 786
+    },
+    "IdentityInbox": {
+      "x": 13936,
+      "y": 9310,
+      "w": 2096,
+      "h": 786
+    },
+    "UserDietaryPreferences": {
+      "x": 5737,
+      "y": 1713,
+      "w": 2096,
+      "h": 786
+    },
+    "MealPlans": {
+      "x": 8470,
+      "y": 1713,
+      "w": 2096,
+      "h": 786
+    },
+    "MealPlanDays": {
+      "x": 11203,
+      "y": 1713,
+      "w": 2096,
+      "h": 786
+    },
+    "PlannedMeals": {
+      "x": 13936,
+      "y": 1713,
+      "w": 2096,
+      "h": 786
+    },
+    "MealLogs": {
+      "x": 3003,
+      "y": 5255,
+      "w": 2096,
+      "h": 786
+    },
+    "MealLogItems": {
+      "x": 5737,
+      "y": 4242,
+      "w": 2096,
+      "h": 786
+    },
+    "EatingWindowSnapshots": {
+      "x": 5737,
+      "y": 5255,
+      "w": 2096,
+      "h": 786
+    },
+    "RecommendationFeedbacks": {
+      "x": 16670,
+      "y": 2214,
+      "w": 2096,
+      "h": 786
+    },
+    "MealReplacementHistories": {
+      "x": 16670,
+      "y": 1201,
+      "w": 2096,
+      "h": 786
+    },
+    "UserFoodPreferences": {
+      "x": 5737,
+      "y": 700,
+      "w": 2096,
+      "h": 786
+    },
+    "FmdEducationAcknowledgements": {
+      "x": 5737,
+      "y": 7282,
+      "w": 2096,
+      "h": 786
+    },
+    "FmdSafetyAssessments": {
+      "x": 3003,
+      "y": 6269,
+      "w": 2096,
+      "h": 786
+    },
+    "FmdCycles": {
+      "x": 5737,
+      "y": 6269,
+      "w": 2096,
+      "h": 786
+    },
+    "FmdCycleDays": {
+      "x": 8470,
+      "y": 6269,
+      "w": 2096,
+      "h": 786
+    },
+    "ActivityLogs": {
+      "x": 5737,
+      "y": 8296,
+      "w": 2096,
+      "h": 786
+    },
+    "ActivityGoals": {
+      "x": 3003,
+      "y": 7784,
+      "w": 2096,
+      "h": 786
+    },
+    "AdherenceScores": {
+      "x": 13936,
+      "y": 8296,
+      "w": 2096,
+      "h": 786
+    },
+    "ScoreDimensions": {
+      "x": 16670,
+      "y": 8296,
+      "w": 2096,
+      "h": 786
+    },
+    "ScoreConfigurationVersions": {
+      "x": 16670,
+      "y": 9310,
+      "w": 2096,
+      "h": 786
+    },
+    "TrackingScoreSignals": {
+      "x": 11203,
+      "y": 8296,
+      "w": 2096,
+      "h": 786
+    },
+    "TrackingOutbox": {
+      "x": 8470,
+      "y": 8296,
+      "w": 2096,
+      "h": 786
+    },
+    "ReminderSchedules": {
+      "x": 5737,
+      "y": 9310,
+      "w": 2096,
+      "h": 786
+    },
+    "ReminderDispatchRecords": {
+      "x": 8470,
+      "y": 9310,
+      "w": 2096,
+      "h": 786
+    },
+    "WorkerProcessedEvents": {
+      "x": 5737,
+      "y": 10323,
+      "w": 2096,
+      "h": 786
+    },
+    "WorkerOutbox": {
+      "x": 11203,
+      "y": 9310,
+      "w": 2096,
+      "h": 786
+    }
+  },
+  "edges": [
+    {
+      "source": "Users",
+      "target": "UserProfiles",
+      "points": [
+        [
+          976,
+          3225
+        ],
+        [
+          976,
+          2635
+        ],
+        [
+          976,
+          1594
+        ],
+        [
+          976,
+          1594
+        ],
+        [
+          976,
+          1594
+        ],
+        [
+          2916,
+          1594
+        ],
+        [
+          2916,
+          1594
+        ]
+      ]
+    },
+    {
+      "source": "Users",
+      "target": "RefreshTokens",
+      "points": [
+        [
+          1671,
+          3226
+        ],
+        [
+          1671,
+          2941
+        ],
+        [
+          1671,
+          2607
+        ],
+        [
+          1671,
+          2607
+        ],
+        [
+          1671,
+          2607
+        ],
+        [
+          2915,
+          2607
+        ],
+        [
+          2915,
+          2607
+        ]
+      ]
+    },
+    {
+      "source": "Users",
+      "target": "ReminderPreferences",
+      "points": [
+        [
+          2367,
+          3621
+        ],
+        [
+          2367,
+          3621
+        ],
+        [
+          2915,
+          3621
+        ],
+        [
+          2915,
+          3621
+        ]
+      ]
+    },
+    {
+      "source": "Users",
+      "target": "UserNotifications",
+      "points": [
+        [
+          2024,
+          4016
+        ],
+        [
+          2024,
+          4300
+        ],
+        [
+          2024,
+          4635
+        ],
+        [
+          2024,
+          4635
+        ],
+        [
+          2024,
+          4635
+        ],
+        [
+          2916,
+          4635
+        ],
+        [
+          2916,
+          4635
+        ]
+      ]
+    },
+    {
+      "source": "Users",
+      "target": "IdentityOutbox",
+      "points": [
+        [
+          623,
+          4015
+        ],
+        [
+          623,
+          5363
+        ],
+        [
+          623,
+          9703
+        ],
+        [
+          623,
+          9703
+        ],
+        [
+          623,
+          9703
+        ],
+        [
+          2914,
+          9703
+        ],
+        [
+          2914,
+          9703
+        ]
+      ]
+    },
+    {
+      "source": "Users",
+      "target": "MealLogs",
+      "points": [
+        [
+          1671,
+          4017
+        ],
+        [
+          1671,
+          4607
+        ],
+        [
+          1671,
+          5648
+        ],
+        [
+          1671,
+          5648
+        ],
+        [
+          1671,
+          5648
+        ],
+        [
+          2915,
+          5648
+        ],
+        [
+          2915,
+          5648
+        ]
+      ]
+    },
+    {
+      "source": "Users",
+      "target": "FmdSafetyAssessments",
+      "points": [
+        [
+          1318,
+          4015
+        ],
+        [
+          1318,
+          4838
+        ],
+        [
+          1318,
+          6662
+        ],
+        [
+          1318,
+          6662
+        ],
+        [
+          1318,
+          6662
+        ],
+        [
+          2917,
+          6662
+        ],
+        [
+          2917,
+          6662
+        ]
+      ]
+    },
+    {
+      "source": "Users",
+      "target": "ActivityGoals",
+      "points": [
+        [
+          976,
+          4017
+        ],
+        [
+          976,
+          5126
+        ],
+        [
+          976,
+          8176
+        ],
+        [
+          976,
+          8176
+        ],
+        [
+          976,
+          8176
+        ],
+        [
+          2916,
+          8176
+        ],
+        [
+          2916,
+          8176
+        ]
+      ]
+    },
+    {
+      "source": "UserProfiles",
+      "target": "UserDietaryPreferences",
+      "points": [
+        [
+          5100,
+          1850
+        ],
+        [
+          5100,
+          1850
+        ],
+        [
+          5648,
+          1850
+        ],
+        [
+          5648,
+          1850
+        ]
+      ]
+    },
+    {
+      "source": "UserProfiles",
+      "target": "UserFoodPreferences",
+      "points": [
+        [
+          5100,
+          1343
+        ],
+        [
+          5100,
+          1343
+        ],
+        [
+          5648,
+          1343
+        ],
+        [
+          5648,
+          1343
+        ]
+      ]
+    },
+    {
+      "source": "IdentityOutbox",
+      "target": "ReminderSchedules",
+      "points": [
+        [
+          5100,
+          9703
+        ],
+        [
+          5100,
+          9703
+        ],
+        [
+          5648,
+          9703
+        ],
+        [
+          5648,
+          9703
+        ]
+      ]
+    },
+    {
+      "source": "IdentityOutbox",
+      "target": "WorkerProcessedEvents",
+      "points": [
+        [
+          4051,
+          10097
+        ],
+        [
+          4051,
+          10382
+        ],
+        [
+          4051,
+          10716
+        ],
+        [
+          4051,
+          10716
+        ],
+        [
+          4051,
+          10716
+        ],
+        [
+          5650,
+          10716
+        ],
+        [
+          5650,
+          10716
+        ]
+      ]
+    },
+    {
+      "source": "UserDietaryPreferences",
+      "target": "MealPlans",
+      "points": [
+        [
+          7833,
+          2106
+        ],
+        [
+          7833,
+          2106
+        ],
+        [
+          8382,
+          2106
+        ],
+        [
+          8382,
+          2106
+        ]
+      ]
+    },
+    {
+      "source": "MealPlans",
+      "target": "MealPlanDays",
+      "points": [
+        [
+          10567,
+          2106
+        ],
+        [
+          10567,
+          2106
+        ],
+        [
+          11115,
+          2106
+        ],
+        [
+          11115,
+          2106
+        ]
+      ]
+    },
+    {
+      "source": "MealPlanDays",
+      "target": "PlannedMeals",
+      "points": [
+        [
+          13300,
+          2106
+        ],
+        [
+          13300,
+          2106
+        ],
+        [
+          13848,
+          2106
+        ],
+        [
+          13848,
+          2106
+        ]
+      ]
+    },
+    {
+      "source": "PlannedMeals",
+      "target": "RecommendationFeedbacks",
+      "points": [
+        [
+          16034,
+          2356
+        ],
+        [
+          16034,
+          2356
+        ],
+        [
+          16581,
+          2356
+        ],
+        [
+          16581,
+          2356
+        ]
+      ]
+    },
+    {
+      "source": "PlannedMeals",
+      "target": "MealReplacementHistories",
+      "points": [
+        [
+          16034,
+          1850
+        ],
+        [
+          16034,
+          1850
+        ],
+        [
+          16581,
+          1850
+        ],
+        [
+          16581,
+          1850
+        ]
+      ]
+    },
+    {
+      "source": "MealLogs",
+      "target": "MealLogItems",
+      "points": [
+        [
+          5101,
+          5517
+        ],
+        [
+          5284,
+          5517
+        ],
+        [
+          5418,
+          5517
+        ],
+        [
+          5418,
+          5517
+        ],
+        [
+          5418,
+          5517
+        ],
+        [
+          5418,
+          4635
+        ],
+        [
+          5418,
+          4635
+        ],
+        [
+          5418,
+          4635
+        ],
+        [
+          5649,
+          4635
+        ],
+        [
+          5649,
+          4635
+        ]
+      ]
+    },
+    {
+      "source": "MealLogs",
+      "target": "EatingWindowSnapshots",
+      "points": [
+        [
+          5100,
+          5779
+        ],
+        [
+          5100,
+          5779
+        ],
+        [
+          5648,
+          5779
+        ],
+        [
+          5648,
+          5779
+        ]
+      ]
+    },
+    {
+      "source": "FmdSafetyAssessments",
+      "target": "FmdEducationAcknowledgements",
+      "points": [
+        [
+          4051,
+          7057
+        ],
+        [
+          4051,
+          7287
+        ],
+        [
+          4051,
+          7533
+        ],
+        [
+          4051,
+          7533
+        ],
+        [
+          4051,
+          7533
+        ],
+        [
+          5650,
+          7533
+        ],
+        [
+          5650,
+          7533
+        ]
+      ]
+    },
+    {
+      "source": "FmdSafetyAssessments",
+      "target": "FmdCycles",
+      "points": [
+        [
+          5100,
+          6662
+        ],
+        [
+          5100,
+          6662
+        ],
+        [
+          5648,
+          6662
+        ],
+        [
+          5648,
+          6662
+        ]
+      ]
+    },
+    {
+      "source": "FmdCycles",
+      "target": "FmdCycleDays",
+      "points": [
+        [
+          7833,
+          6662
+        ],
+        [
+          7833,
+          6662
+        ],
+        [
+          8382,
+          6662
+        ],
+        [
+          8382,
+          6662
+        ]
+      ]
+    },
+    {
+      "source": "ActivityLogs",
+      "target": "TrackingOutbox",
+      "points": [
+        [
+          7833,
+          8689
+        ],
+        [
+          7833,
+          8689
+        ],
+        [
+          8382,
+          8689
+        ],
+        [
+          8382,
+          8689
+        ]
+      ]
+    },
+    {
+      "source": "ActivityGoals",
+      "target": "ActivityLogs",
+      "points": [
+        [
+          5100,
+          8433
+        ],
+        [
+          5100,
+          8433
+        ],
+        [
+          5648,
+          8433
+        ],
+        [
+          5648,
+          8433
+        ]
+      ]
+    },
+    {
+      "source": "AdherenceScores",
+      "target": "ScoreDimensions",
+      "points": [
+        [
+          16034,
+          8558
+        ],
+        [
+          16034,
+          8558
+        ],
+        [
+          16581,
+          8558
+        ],
+        [
+          16581,
+          8558
+        ]
+      ]
+    },
+    {
+      "source": "AdherenceScores",
+      "target": "ScoreConfigurationVersions",
+      "points": [
+        [
+          16035,
+          8820
+        ],
+        [
+          16217,
+          8820
+        ],
+        [
+          16351,
+          8820
+        ],
+        [
+          16351,
+          8820
+        ],
+        [
+          16351,
+          8820
+        ],
+        [
+          16351,
+          9703
+        ],
+        [
+          16351,
+          9703
+        ],
+        [
+          16351,
+          9703
+        ],
+        [
+          16583,
+          9703
+        ],
+        [
+          16583,
+          9703
+        ]
+      ]
+    },
+    {
+      "source": "TrackingScoreSignals",
+      "target": "AdherenceScores",
+      "points": [
+        [
+          13300,
+          8689
+        ],
+        [
+          13300,
+          8689
+        ],
+        [
+          13848,
+          8689
+        ],
+        [
+          13848,
+          8689
+        ]
+      ]
+    },
+    {
+      "source": "TrackingOutbox",
+      "target": "TrackingScoreSignals",
+      "points": [
+        [
+          10567,
+          8689
+        ],
+        [
+          10567,
+          8689
+        ],
+        [
+          11115,
+          8689
+        ],
+        [
+          11115,
+          8689
+        ]
+      ]
+    },
+    {
+      "source": "ReminderSchedules",
+      "target": "ReminderDispatchRecords",
+      "points": [
+        [
+          7833,
+          9703
+        ],
+        [
+          7833,
+          9703
+        ],
+        [
+          8382,
+          9703
+        ],
+        [
+          8382,
+          9703
+        ]
+      ]
+    },
+    {
+      "source": "ReminderDispatchRecords",
+      "target": "WorkerOutbox",
+      "points": [
+        [
+          10567,
+          9703
+        ],
+        [
+          10567,
+          9703
+        ],
+        [
+          11115,
+          9703
+        ],
+        [
+          11115,
+          9703
+        ]
+      ]
+    },
+    {
+      "source": "WorkerOutbox",
+      "target": "IdentityInbox",
+      "points": [
+        [
+          13300,
+          9703
+        ],
+        [
+          13300,
+          9703
+        ],
+        [
+          13848,
+          9703
+        ],
+        [
+          13848,
+          9703
+        ]
+      ]
+    }
+  ]
+}

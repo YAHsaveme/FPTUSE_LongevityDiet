@@ -85,58 +85,58 @@ for(let i=0;i<10;i++){
  check(expectedId.length>=1,'C2 module controller missing: '+keys[0]);
 }
 const db=diagrams['Database Diagram'];
-const full=JSON.parse(fs.readFileSync(path.join(root,'scripts/connected-erd-manifest.json'),'utf8'));
-check(full.status==='CURRENT_MODEL_PLUS_DOCUMENTED_CONTEXT_NOT_SQL_FK','ERD must not misstate navigation buses as SQL FKs');
-check(full.tables===32&&full.physicalSqlFkCount===9,'32-table/9-FK source summary changed');
-const physical=db.edges.filter(e=>e.a.style.includes('strokeColor=#164B78'));
-const logical=db.edges.filter(e=>e.a.style.includes('strokeColor=#BA822A'));
-const event=db.edges.filter(e=>e.a.style.includes('strokeColor=#7753A8'));
-const context=db.edges.filter(e=>e.a.style.includes('strokeColor=#477E96'));
-check(physical.length===9,'SQL FK Crow Foot connector count must equal 9');
-check(db.edges.length===full.relationships.length,'Native relationship edges missing or duplicated');
-check(logical.length===4&&event.length===4&&context.length===20,'Incorrect count/types of documented non-FK connections');
-check(full.allTablesHaveLinks&&full.allNodesOneConnectedGraph,'Generator connectivity audit failed');
-const tableNames=new Set(manifest.databaseCardNames);
-const cardNodes=db.vertices.filter(v=>[...tableNames].some(n=>(v.a.value||'').startsWith('&lt;b&gt;'+n+'&lt;/b&gt;')));
-check(cardNodes.length===32,'Exactly 32 real table cards required');
-const cards=new Map(cardNodes.map(v=>[(v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v]));
-check(cards.size===32,'Duplicate or missing table cards');
-for(const name of tableNames)check(cards.has(name),'Missing source table '+name);
-for(const rel of manifest.realRelationships){
- const a=cards.get(rel.parent),b=cards.get(rel.child);
- if(!a||!b){check(false,'Missing FK parent/child '+rel.parent+' -> '+rel.child);continue;}
- const edges=physical.filter(e=>e.a.source===a.a.id&&e.a.target===b.a.id);
- check(edges.length===1,'Expected one real SQL FK edge '+rel.parent+' -> '+rel.child);
- if(edges.length){
-  const style=edges[0].a.style;
-  check(style.includes('startArrow=ERmandOne'),'Missing parent Crow Foot endpoint '+rel.parent);
-  check(style.includes('endArrow='+(rel.cardinality==='1:1'?'ERmandOne':'ERmany')),'Incorrect Crow Foot child cardinality '+rel.child);
- }
+const unified=JSON.parse(fs.readFileSync(path.join(root,'scripts/unified-erd-manifest.json'),'utf8'));
+check(unified.scope==='CURRENT_EF_MAPPED' && unified.noDividers && unified.noPseudoHubs,
+ 'Unified ERD should contain no artificial column separators or pseudo-relational hubs');
+check(unified.tableCount===32 && unified.actualSqlFKs===9 && unified.logicalLinks===16 && unified.eventLinks===6,
+ '32 table / 9 SQL FK / 16 logical / 6 event count mismatch');
+check(unified.totalRelationships===31 && db.edges.length===31,
+ 'Unexpected number of actual relationship connectors');
+const sqlEdges=db.edges.filter(e=>(e.a.style||'').includes('strokeColor=#164B78'));
+const logicalEdges=db.edges.filter(e=>(e.a.style||'').includes('strokeColor=#B2862E'));
+const eventEdges=db.edges.filter(e=>(e.a.style||'').includes('strokeColor=#805AB1'));
+check(sqlEdges.length===9 && logicalEdges.length===16 && eventEdges.length===6,
+ 'ERD edge color/type missing or an invented link was added');
+const expectedNames=new Set(manifest.databaseCardNames);
+const tableNodes=db.vertices.filter(v=>[...expectedNames].some(t=>(v.a.value||'').startsWith('&lt;b&gt;'+t+'&lt;/b&gt;')));
+const cardMap=new Map(tableNodes.map(v=>[(v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v]));
+check(tableNodes.length===32 && cardMap.size===32,'Every actual mapped table must appear exactly once');
+for(const table of expectedNames)check(cardMap.has(table),'Missing source table '+table);
+const planned=new Set();
+for(const rel of unified.relationships){
+ const pair=rel.from+'|'+rel.to;
+ check(!planned.has(pair),'Duplicate relation in source manifest: '+pair);
+ planned.add(pair);
+ const A=cardMap.get(rel.from),B=cardMap.get(rel.to);
+ check(Boolean(A&&B),'Relation uses a missing table '+pair);
+ if(!A||!B)continue;
+ const match=db.edges.filter(e=>e.a.source===A.a.id&&e.a.target===B.a.id);
+ check(match.length===1,'No directly attached relationship: '+pair);
+ if(match.length!==1)continue;
+ const style=match[0].a.style||'';
+ const color=rel.kind==='sql'?'#164B78':rel.kind==='event'?'#805AB1':'#B2862E';
+ check(style.includes('strokeColor='+color),'Relationship kind not visibly distinguished: '+pair);
+ if(rel.kind==='sql'){
+  check(manifest.realRelationships.some(f=>f.parent===rel.from&&f.child===rel.to&&f.cardinality===rel.cardinality),
+   'Physical Crow Foot relation is not in EF Core: '+pair);
+  check(style.includes('startArrow=ERmandOne'),'Parent cardinality missing: '+pair);
+  const tip=rel.cardinality==='1:1'?'ERmandOne':'ERmany';
+  check(style.includes('endArrow='+tip),'Child cardinality wrong: '+pair);
+ } else check(style.includes('dashed=1'),'App/event link drawn deceptively like a SQL FK: '+pair);
 }
-for(const e of physical){
- check(cardNodes.some(v=>v.a.id===e.a.source)&&cardNodes.some(v=>v.a.id===e.a.target),
-  'A physical FK may only join real SQL table cards');
+for(const edge of db.edges){
+ check(tableNodes.some(v=>v.a.id===edge.a.source)&&tableNodes.some(v=>v.a.id===edge.a.target),
+  'All links must attach to real table cards, not a box, rail or decorative hub');
 }
-// Validate the entire native connection graph, not merely a list of arrows.
-const adjacency=new Map();
-for(const e of db.edges){
- if(!adjacency.has(e.a.source))adjacency.set(e.a.source,new Set());
- if(!adjacency.has(e.a.target))adjacency.set(e.a.target,new Set());
- adjacency.get(e.a.source).add(e.a.target);
- adjacency.get(e.a.target).add(e.a.source);
-}
-for(const [table,node] of cards)check(adjacency.has(node.a.id),'Disconnected table card '+table);
-const start=cardNodes[0]?.a.id;
-const seen=new Set(start?[start]:[]),queue=start?[start]:[];
-while(queue.length){for(const next of adjacency.get(queue.shift())||[]){
- if(!seen.has(next)){seen.add(next);queue.push(next);}
+const adj=new Map([...cardMap.values()].map(v=>[v.a.id,new Set()]));
+for(const edge of db.edges){adj.get(edge.a.source)?.add(edge.a.target);adj.get(edge.a.target)?.add(edge.a.source);}
+const start=cardMap.get('Users')?.a.id;
+const reached=new Set(start?[start]:[]),pending=start?[start]:[];
+while(pending.length){const current=pending.shift();for(const next of adj.get(current)||[]){
+ if(!reached.has(next)){reached.add(next);pending.push(next);}
 }}
-for(const [table,node] of cards)check(seen.has(node.a.id),'No path to entire ERD for table '+table);
-const realNative=full.relationships.filter(r=>r.type==='physical');
-check(realNative.length===9&&full.relationships.length===db.edges.length,'Source-vs-diagram edge mismatch');
-console.log('DATABASE_CONNECTIVITY_QA: tables='+cards.size+' SQL_FKs='+physical.length+
- ' logical='+logical.length+' events='+event.length+' navigation='+context.length+
- ' native_edges='+db.edges.length+' reachable_table_count='+[...cards.values()].filter(c=>seen.has(c.a.id)).length);
+check(reached.size===32,'Disconnected database tables: '+(32-reached.size));
+console.log('UNIFIED_DB_ERD_QA: 32 mapped tables, 9 real SQL FKs, 16 logical, 6 event links, '+reached.size+'/32 reachable, no artificial hubs');
 const contexts=[
  ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',21,8],
  ['src/LongevityDiet.Tracking/TrackingDbContext.cs',7,1],
