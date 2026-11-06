@@ -53,37 +53,54 @@ function directed(view,a,b){
  const A=view.vertices.find(v=>(v.a.value||'').includes(a)),B=view.vertices.find(v=>(v.a.value||'').includes(b));
  return A&&B&&view.edges.some(e=>e.a.source===A.a.id&&e.a.target===B.a.id);
 }
-const C0=diagrams.C0;
-check(C0.edges.length===2,'C0 must show member/admin access to system boundary');
-for(const p of ['MEMBER','ADMINISTRATOR','LONGEVITYDIET'])check(contains(C0,p),'C0 missing '+p);
-const C1=diagrams.C1;
-check(C1.edges.length===11,'C1 missing or excess directed container links');
-for(const name of ['WEB / NGINX','REST API (.NET)','RECOMMENDATION gRPC',
-'REDIS STREAMS','REMINDER WORKER','LongevityDietDb','LongevityTrackingDb','LongevityWorkerDb',
-'5173','8080','8081','6379','14330','1433','no inbound HTTP port'])
- check(contains(C1,name),'C1 missing actual component/port: '+name);
-for(const [a,b] of [['WEB / NGINX','REST API (.NET)'],['REST API (.NET)','RECOMMENDATION gRPC'],
-['REST API (.NET)','LongevityDietDb'],['REST API (.NET)','LongevityTrackingDb'],
-['REDIS STREAMS','REMINDER WORKER'],['REMINDER WORKER','REDIS STREAMS'],
-['REMINDER WORKER','LongevityWorkerDb']])
- check(directed(C1,a,b),'C1 missing actual directed connection '+a+' -> '+b);
-for(const port of manifest.ports)check(fs.readFileSync(path.join(root,'docker-compose.yml'),'utf8').includes(port.replace(/^([0-9]+):([0-9]+)$/,'$1}:$2')),'Port declaration not in Compose: '+port);
-const C2=diagrams.C2;
-check(C2.edges.length===42,'C2 incomplete: expected 40 domain arrows + web/gateway + gateway continuation');
-for(const info of manifest.controllers){
- const domain=info.domain.toUpperCase();
- for(const label of [domain,info.controller,info.service,info.persistence,info.owner])
-  check(contains(C2,label),'C2 missing implemented module/route '+label);
- check(fs.existsSync(path.join(root,'src/LongevityDiet.API/Controllers',info.controller+'.cs')),
-  'C2 controller is not implemented: '+info.controller);
+const c4=JSON.parse(fs.readFileSync(path.join(root,'scripts/c4-architecture-manifest.json'),'utf8'));
+check(c4.status==='CURRENT_C4_BLACK_WHITE','Unexpected C4 version');
+const C0=diagrams.C0,C1=diagrams.C1,C2=diagrams.C2;
+const expected={C0:2,C1:11,C2:41};
+for(const [name,need] of Object.entries(expected)){
+ const view=diagrams[name],native=fs.readFileSync(path.join(base,name+'.drawio'),'utf8');
+ check(view.edges.length===need,name+': expected '+need+' visible native arrows');
+ const colors=[...native.matchAll(/#[0-9a-fA-F]{6}\b/g)].map(m=>m[0].toUpperCase());
+ check(colors.every(c=>c==='#000000'||c==='#FFFFFF'),name+': colors forbidden');
+ for(const edge of view.edges){
+  check((edge.a.value||'').trim().length>3,name+': unlabeled arrow '+edge.a.id);
+  check((edge.a.style||'').includes('endArrow=block'),name+': arrowhead missing '+edge.a.id);
+  check((edge.a.style||'').includes('strokeColor=#000000'),name+': colored connector '+edge.a.id);
+ }
 }
-for(let i=0;i<10;i++){
- // The generator produces 4 named states per lane; test edges by their parsed geometry.
- const vertices=C2.vertices;const keys=[manifest.controllers[i].controller,manifest.controllers[i].service,
- manifest.controllers[i].persistence,manifest.controllers[i].owner];
- const expectedId=((idx)=>vertices.filter(v=>(v.a.value||'').includes(keys[idx])))(0);
- check(expectedId.length>=1,'C2 module controller missing: '+keys[0]);
+check(contains(C0,'PERSON')&&contains(C0,'LONGEVITYDIET'),'C0 missing actors/product boundary');
+check(!contains(C0,':1433')&&!contains(C0,':8080'),'C0 must remain at context level; ports belong in C1');
+const c1Nodes=['WEB / NGINX','REST API','RECOMMENDATION gRPC','REDIS STREAMS','REMINDER WORKER','LongevityDietDb','LongevityTrackingDb','LongevityWorkerDb','NO OWN DB'];
+for(const n of c1Nodes)check(contains(C1,n),'C1 missing actual container/DB '+n);
+for(const p of ['5173','8080','8081','6379','14330','1433'])check(contains(C1,p),'C1 missing documented port '+p);
+for(const [a,b] of [['WEB / NGINX','REST API'],['REST API','RECOMMENDATION gRPC'],['REST API','LongevityDietDb'],['REST API','LongevityTrackingDb'],['REDIS STREAMS','REMINDER WORKER'],['REMINDER WORKER','REDIS STREAMS'],['REMINDER WORKER','LongevityWorkerDb'],['REST API','REDIS STREAMS'],['REDIS STREAMS','REST API']])
+ check(directed(C1,a,b),'C1 missing directional connection '+a+' -> '+b);
+const compose=fs.readFileSync(path.join(root,'docker-compose.yml'),'utf8');
+for(const p of c4.ports){const [host,inside]=p.split(':');check(compose.includes(host+'}:'+inside),'C1 port inconsistent with Docker Compose '+p);}
+check(c4.controllers.length===10,'C2 must include 10 real API controllers');
+check(C2.edges.length===1+4*c4.controllers.length,'C2 one router+4 arrows per endpoint required');
+const cards=C2.vertices;
+const card=(part)=>cards.find(v=>(v.a.value||'').includes(part));
+function edgeBetween(view,source,dest){if(!source||!dest)return false;return view.edges.some(e=>e.a.source===source.a.id&&e.a.target===dest.a.id)}
+const httpRouter=card('API ROUTING');
+for(const info of c4.controllers){
+ const ctrl=card(info.controller);
+ const svc=cards.find(v=>(v.a.value||'').includes(info.service)&&edgeBetween(C2,ctrl,v));
+ const repo=cards.find(v=>(v.a.value||'').includes(info.persistence)&&edgeBetween(C2,svc,v));
+ check(Boolean(ctrl&&svc&&repo),'C2 missing true Controller/Service/Persistence '+info.controller);
+ check(fs.existsSync(path.join(root,'src/LongevityDiet.API/Controllers',info.controller+'.cs')),'C2 controller not in source: '+info.controller);
+ check(edgeBetween(C2,httpRouter,ctrl),'C2 router not attached to '+info.controller);
+ check(edgeBetween(C2,ctrl,svc),'C2 Controller -> Service not connected '+info.controller);
+ check(edgeBetween(C2,svc,repo),'C2 Service -> Persistence not connected '+info.controller);
+ if(repo){
+  const destinations=cards.filter(x=>(x.a.value||'').includes('DATABASE REFERENCE')&&(x.a.value||'').includes(info.database));
+  check(destinations.some(x=>edgeBetween(C2,repo,x)),'C2 service missing DB endpoint '+info.controller);
+ }
 }
+check(contains(C2,'HTTP/2 :8081'),'C2 missing explicit gRPC HTTP/2 dependency');
+check(contains(C2,'NO OWN DB')||contains(C2,'no separate DB'),'C2 must not invent gRPC storage');
+check(contains(C2,'LongevityWorkerDb'),'C2 must identify Worker-owned database as external dependency');
+console.log('C4_ARCHITECTURE_QA: C0 2 labeled arrows; C1 11 protocol/DB arrows; C2 10 complete controller-service-persistence-DB lanes, all monochrome');
 const db=diagrams['Database Diagram'];
 const unified=JSON.parse(fs.readFileSync(path.join(root,'scripts/unified-erd-manifest.json'),'utf8'));
 check(unified.scope==='CURRENT_EF_MAPPED' && unified.noDividers && unified.noPseudoHubs,

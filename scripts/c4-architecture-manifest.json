@@ -1,0 +1,451 @@
+{
+  "status": "CURRENT_C4_BLACK_WHITE",
+  "ports": [
+    "5173:80",
+    "8080:8080",
+    "8081:8081",
+    "6379:6379",
+    "14330:1433"
+  ],
+  "dbCounts": {
+    "identity": 21,
+    "tracking": 7,
+    "worker": 4
+  },
+  "controllers": [
+    {
+      "domain": "AUTH",
+      "controller": "AuthController",
+      "service": "AuthenticationService",
+      "persistence": "UserRepository + RefreshTokenRepository",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "PROFILE",
+      "controller": "ProfileController",
+      "service": "ProfileService",
+      "persistence": "UserRepository / Profile persistence",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "REMINDERS",
+      "controller": "ReminderNotificationsController",
+      "service": "ReminderService / IdentityRedisBridge",
+      "persistence": "Identity outbox + inbox persistence",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "MEAL PLAN",
+      "controller": "MealPlansController",
+      "service": "MealPlanningService",
+      "persistence": "MealPlanRepository",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "MEAL LOG",
+      "controller": "MealLogsController",
+      "service": "MealTrackingService",
+      "persistence": "MealLogRepository",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "EATING WINDOW",
+      "controller": "EatingWindowController",
+      "service": "MealTrackingService",
+      "persistence": "EatingWindowRepository",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "MEAL ADVICE",
+      "controller": "RecommendationsController",
+      "service": "RecommendationService + gRPC client",
+      "persistence": "RecommendationRepository / gRPC adapter",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "FMD",
+      "controller": "FmdController",
+      "service": "FmdService",
+      "persistence": "FmdRepository",
+      "database": "LongevityDietDb",
+      "owner": "identity"
+    },
+    {
+      "domain": "ACTIVITY",
+      "controller": "TrackingController",
+      "service": "TrackingService",
+      "persistence": "TrackingDbContext",
+      "database": "LongevityTrackingDb",
+      "owner": "tracking"
+    },
+    {
+      "domain": "ACTIVITY ADVICE",
+      "controller": "RecommendationController",
+      "service": "TrackingService + ActivityCoachClient",
+      "persistence": "TrackingDbContext + gRPC adapter",
+      "database": "LongevityTrackingDb",
+      "owner": "tracking"
+    }
+  ],
+  "diagrams": [
+    {
+      "name": "C0",
+      "relations": [
+        {
+          "from": "member",
+          "to": "system",
+          "label": "Uses meal plans, tracking and reminders"
+        },
+        {
+          "from": "admin",
+          "to": "system",
+          "label": "Role-authorized use"
+        }
+      ],
+      "nodes": [
+        "member",
+        "admin",
+        "system"
+      ]
+    },
+    {
+      "name": "C1",
+      "relations": [
+        {
+          "from": "member",
+          "to": "web",
+          "label": "Web access :5173"
+        },
+        {
+          "from": "admin",
+          "to": "web",
+          "label": "Role-based access"
+        },
+        {
+          "from": "web",
+          "to": "api",
+          "label": "/api reverse proxy HTTP :8080"
+        },
+        {
+          "from": "api",
+          "to": "grpc",
+          "label": "gRPC HTTP/2 :8081"
+        },
+        {
+          "from": "api",
+          "to": "redis",
+          "label": "XADD events TCP :6379"
+        },
+        {
+          "from": "redis",
+          "to": "api",
+          "label": "XREAD results TCP :6379"
+        },
+        {
+          "from": "redis",
+          "to": "worker",
+          "label": "XREAD stream :6379"
+        },
+        {
+          "from": "worker",
+          "to": "redis",
+          "label": "XADD result :6379"
+        },
+        {
+          "from": "api",
+          "to": "identity",
+          "label": "EF Core SQL TCP :1433"
+        },
+        {
+          "from": "api",
+          "to": "tracking",
+          "label": "EF Core SQL TCP :1433"
+        },
+        {
+          "from": "worker",
+          "to": "workerdb",
+          "label": "Worker SQL TCP :1433"
+        }
+      ],
+      "nodes": [
+        "member",
+        "admin",
+        "web",
+        "api",
+        "grpc",
+        "redis",
+        "worker",
+        "identity",
+        "tracking",
+        "workerdb"
+      ]
+    },
+    {
+      "name": "C2",
+      "relations": [
+        {
+          "from": "web",
+          "to": "router",
+          "label": "/api HTTP :8080"
+        },
+        {
+          "from": "router",
+          "to": "ctrl0",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl0",
+          "to": "svc0",
+          "label": "Calls"
+        },
+        {
+          "from": "svc0",
+          "to": "repo0",
+          "label": "Uses"
+        },
+        {
+          "from": "repo0",
+          "to": "db0",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl1",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl1",
+          "to": "svc1",
+          "label": "Calls"
+        },
+        {
+          "from": "svc1",
+          "to": "repo1",
+          "label": "Uses"
+        },
+        {
+          "from": "repo1",
+          "to": "db1",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl2",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl2",
+          "to": "svc2",
+          "label": "Calls"
+        },
+        {
+          "from": "svc2",
+          "to": "repo2",
+          "label": "Uses"
+        },
+        {
+          "from": "repo2",
+          "to": "db2",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl3",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl3",
+          "to": "svc3",
+          "label": "Calls"
+        },
+        {
+          "from": "svc3",
+          "to": "repo3",
+          "label": "Uses"
+        },
+        {
+          "from": "repo3",
+          "to": "db3",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl4",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl4",
+          "to": "svc4",
+          "label": "Calls"
+        },
+        {
+          "from": "svc4",
+          "to": "repo4",
+          "label": "Uses"
+        },
+        {
+          "from": "repo4",
+          "to": "db4",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl5",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl5",
+          "to": "svc5",
+          "label": "Calls"
+        },
+        {
+          "from": "svc5",
+          "to": "repo5",
+          "label": "Uses"
+        },
+        {
+          "from": "repo5",
+          "to": "db5",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl6",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl6",
+          "to": "svc6",
+          "label": "Calls"
+        },
+        {
+          "from": "svc6",
+          "to": "repo6",
+          "label": "Uses"
+        },
+        {
+          "from": "repo6",
+          "to": "db6",
+          "label": "SQL :1433 + gRPC :8081"
+        },
+        {
+          "from": "router",
+          "to": "ctrl7",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl7",
+          "to": "svc7",
+          "label": "Calls"
+        },
+        {
+          "from": "svc7",
+          "to": "repo7",
+          "label": "Uses"
+        },
+        {
+          "from": "repo7",
+          "to": "db7",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl8",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl8",
+          "to": "svc8",
+          "label": "Calls"
+        },
+        {
+          "from": "svc8",
+          "to": "repo8",
+          "label": "Uses"
+        },
+        {
+          "from": "repo8",
+          "to": "db8",
+          "label": "SQL TCP :1433"
+        },
+        {
+          "from": "router",
+          "to": "ctrl9",
+          "label": "HTTP route"
+        },
+        {
+          "from": "ctrl9",
+          "to": "svc9",
+          "label": "Calls"
+        },
+        {
+          "from": "svc9",
+          "to": "repo9",
+          "label": "Uses"
+        },
+        {
+          "from": "repo9",
+          "to": "db9",
+          "label": "SQL :1433 + gRPC :8081"
+        }
+      ],
+      "nodes": [
+        "web",
+        "router",
+        "ctrl0",
+        "svc0",
+        "repo0",
+        "db0",
+        "ctrl1",
+        "svc1",
+        "repo1",
+        "db1",
+        "ctrl2",
+        "svc2",
+        "repo2",
+        "db2",
+        "ctrl3",
+        "svc3",
+        "repo3",
+        "db3",
+        "ctrl4",
+        "svc4",
+        "repo4",
+        "db4",
+        "ctrl5",
+        "svc5",
+        "repo5",
+        "db5",
+        "ctrl6",
+        "svc6",
+        "repo6",
+        "db6",
+        "ctrl7",
+        "svc7",
+        "repo7",
+        "db7",
+        "ctrl8",
+        "svc8",
+        "repo8",
+        "db8",
+        "ctrl9",
+        "svc9",
+        "repo9",
+        "db9"
+      ]
+    }
+  ],
+  "facts": [
+    "Web Nginx proxy /api -> api:8080",
+    "API identity + tracking catalogs; Worker uses its own catalog",
+    "Recommendation gRPC stateless, no invented DB",
+    "C0 intentionally omits ports per official C4 level"
+  ]
+}

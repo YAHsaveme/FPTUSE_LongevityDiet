@@ -1,4 +1,5 @@
 # LongevityDiet — Four overall diagrams
+`n**C4 C0/C1/C2 refreshed:** all drawings are monochrome, all directed arrows are labeled and attached, and C1 lists actual HTTP/2, Redis, SQL and published host ports. C2 shows each of the ten controller/service/persistence paths with explicit SQL catalog references. Stateless gRPC has no invented database. See [complete C4 connectivity and source evidence](../02-SYSTEM-ARCHITECTURE-C4.md).`n
 
 These are the only **four canonical architecture/database diagrams** for the merged develop implementation. No numeric prefixes. Each has an editable Draw.io source and a single-page PDF.
 
