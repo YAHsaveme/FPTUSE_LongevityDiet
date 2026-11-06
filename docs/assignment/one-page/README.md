@@ -9,7 +9,7 @@ These are the only **four canonical architecture/database diagrams** for the mer
 | **C2** | [C2.drawio](C2.drawio) | [C2.pdf](C2.pdf) | All 10 current API controllers, services, repositories, owner databases and dependencies |
 | **Database Diagram** | [Database Diagram.drawio](Database%20Diagram.drawio) | [Database Diagram.pdf](Database%20Diagram.pdf) | All 32 mapped EF Core tables and all 9 genuine same-database FK arrows |
 
-**Current data:** LongevityDietDb 21 tables; LongevityTrackingDb 7; LongevityWorkerDb 4. All 32 are on the same database diagram, with nine native FK arrows in its lower relation band. An independent table is not assigned a fake FK. Cross-database UserId references and Redis events are logical, not physical FKs.
+**Current data:** LongevityDietDb 21 tables; LongevityTrackingDb 7; LongevityWorkerDb 4. All 32 are on the same database diagram, with all nine actual SQL FK arrows connected directly between the relevant table cards. An independent table is not assigned a fake FK. Cross-database UserId references and Redis events are logical, not physical FKs.
 
 **Docker Compose ports:** Web host 5173 -> Nginx container 80; API 8080; gRPC 8081 (HTTP/2); Redis 6379; SQL Server host 14330 -> container 1433. Worker has no inbound HTTP port.
 

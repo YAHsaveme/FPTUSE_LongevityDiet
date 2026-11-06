@@ -11,6 +11,26 @@ function get(name){
  const cells=[...xml.matchAll(/<mxCell\b([^>]*?)(?:\/>|>([\s\S]*?)<\/mxCell>)/g)].map(m=>({a:attr(m[1]),body:m[2]||''}));
  const vertices=cells.filter(c=>c.a.vertex==='1'),edges=cells.filter(c=>c.a.edge==='1');
  const nodeMap=new Map(vertices.map(x=>[x.a.id,x]));
+ const rectangles=vertices.map(v=>{
+  const m=v.body.match(/<mxGeometry\b([^>]+)\/>/);
+  if(!m)return null;
+  const p=attr(m[1]);
+  return {id:v.a.id,x:+p.x,y:+p.y,w:+p.width,h:+p.height};
+ }).filter(Boolean);
+ const contains=(a,b)=>a.x<=b.x+2&&a.y<=b.y+2&&
+   a.x+a.w>=b.x+b.w-2&&a.y+a.h>=b.y+b.h-2;
+ let unexpectedOverlaps=0;
+ for(let i=0;i<rectangles.length;i++)for(let j=i+1;j<rectangles.length;j++){
+  const a=rectangles[i],b=rectangles[j];
+  const iw=Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x);
+  const ih=Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y);
+  if(iw>8&&ih>8&&!contains(a,b)&&!contains(b,a)){
+   unexpectedOverlaps++;
+   check(false,name+': overlapping shapes '+a.id+' and '+b.id);
+  }
+ }
+ console.log('OVERALL_LAYOUT',name,'rectangles',rectangles.length,'unexpectedOverlaps',unexpectedOverlaps);
+
  for(const e of edges)check(nodeMap.has(e.a.source)&&nodeMap.has(e.a.target),name+': unattached native connector '+e.a.id);
  const pdfPath=path.join(base,name+'.pdf');
  check(fs.existsSync(pdfPath),name+': missing PDF');
@@ -71,14 +91,20 @@ for(const t of manifest.databaseCardNames){
  const cards=db.vertices.filter(c=>(c.a.value||'').startsWith(label));
  check(cards.length===1,'Missing/duplicate table card '+t+' ('+cards.length+')');
 }
+const cards=db.vertices.filter(v=>(v.a.value||'').startsWith('&lt;b&gt;'));
+check(cards.length===32,'Database must contain 32 actual table cards');
+const byTable=new Map(cards.map(v=>[
+  (v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v
+]));
 for(const r of manifest.realRelationships){
- const parent=manifest.tableGroups[r.owner]===undefined?null:
-   r.owner==='identity'?'LongevityDietDb':r.owner==='tracking'?'LongevityTrackingDb':'LongevityWorkerDb';
- const sources=db.vertices.filter(v=>(v.a.value||'').includes(parent+'  |  '+r.parent+'.'+r.parentColumn));
- const targets=db.vertices.filter(v=>(v.a.value||'').includes(r.child+'.'+r.childColumn+'  |  '+r.cardinality));
- check(Boolean(sources.length&&targets.length),'Missing PK/FK endpoint '+r.parent+' -> '+r.child);
- if(sources.length&&targets.length)check(db.edges.some(e=>sources.some(v=>v.a.id===e.a.source)&&targets.some(v=>v.a.id===e.a.target)),
-  'FK arrow not attached '+r.parent+'.'+r.parentColumn+' -> '+r.child+'.'+r.childColumn);
+ const a=byTable.get(r.parent),b=byTable.get(r.child);
+ check(Boolean(a&&b),'Missing real linked tables '+r.parent+' -> '+r.child);
+ if(a&&b)check(db.edges.some(e=>e.a.source===a.a.id&&e.a.target===b.a.id),
+  'Real SQL FK is not directly attached: '+r.parent+' -> '+r.child);
+}
+for(const edge of db.edges){
+ check(cards.some(v=>v.a.id===edge.a.source)&&cards.some(v=>v.a.id===edge.a.target),
+  'SQL FK must connect actual table cards, not separate ledger boxes');
 }
 const contexts=[
  ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',21,8],
