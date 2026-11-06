@@ -89,7 +89,7 @@ const legend=[
 ];
 const lw=Math.floor((w-460)/3);
 legend.forEach((v,i)=>vertex(null,180+i*(lw+40),340,lw,175,v.text,
- 'rounded=1;arcSize=9;html=1;whiteSpace=wrap;strokeColor='+v.border+';strokeWidth=4;fillColor='+v.fill+';fontFamily=Arial;fontColor=#243952;fontSize=41;align=left;verticalAlign=middle;spacingLeft=36;'));
+ 'rounded=1;arcSize=9;html=1;whiteSpace=wrap;strokeColor='+v.border+';strokeWidth=4;fillColor='+v.fill+';fontFamily=Arial;fontColor=#243952;fontSize=49;align=left;verticalAlign=middle;spacingLeft=36;'));
 const dbColors={
  identity:{fill:'#E9F5EC',border:'#61947C',text:'LongevityDietDb  /  Identity, Planning, FMD'},
  tracking:{fill:'#E9F2FB',border:'#678BBA',text:'LongevityTrackingDb  /  Activity & Adherence'},
@@ -129,7 +129,7 @@ for(const [name,box] of Object.entries(layout.nodes)){
     : linked?'<font color="#A26D24">'+label+'</font>':label;
  });
  const html='<b>'+name+'</b><br/><font color="#52718A">'+color.text+'</font><br/><font color="#ABB7C5">___________________________________</font><br/>'+lines.join('<br/>');
- const style='rounded=1;arcSize=10;html=1;whiteSpace=wrap;strokeColor='+color.border+';strokeWidth=3.5;fillColor='+color.fill+';fontFamily=Arial;fontColor=#1D3349;fontSize=41;align=left;verticalAlign=top;spacingLeft=30;spacingTop=28;spacingRight=20;';
+ const style='rounded=1;arcSize=10;html=1;whiteSpace=wrap;strokeColor='+color.border+';strokeWidth=3.5;fillColor='+color.fill+';fontFamily=Arial;fontColor=#1D3349;fontSize=56;align=left;verticalAlign=top;spacingLeft=30;spacingTop=28;spacingRight=20;';
  vertex(name,box.x,box.y,box.w,box.h,html,style);
 }
 function clamp(v){return Math.max(0,Math.min(1,v));}
@@ -145,20 +145,24 @@ for(const route of layout.edges){
  const marker=physical?'startArrow=ERmandOne;endArrow='+(r.cardinality==='1:1'?'ERmandOne':'ERmany')+';startFill=0;endFill=0;startSize=39;endSize=45;'
   :event?'startArrow=none;endArrow=block;endFill=0;endSize=27;'
   :'startArrow=none;endArrow=open;endFill=0;endSize=25;';
- const style='edgeStyle=segmentEdgeStyle;rounded=0;orthogonal=1;html=1;strokeColor='+color+';strokeWidth='+(physical?9:6)+';'+(physical?'':'dashed=1;dashPattern=14 9;')+marker+
- 'exitX='+ex.toFixed(4)+';exitY='+ey.toFixed(4)+';exitPerimeter=0;entryX='+tx.toFixed(4)+';entryY='+ty.toFixed(4)+';entryPerimeter=0;';
+ const shortKey=()=>{const r0=r.reason;if(r0.includes('UserId')&&r0.includes('Category'))return 'UserId + Category';if(r0.includes('UserId')&&r0.includes('LocalDate'))return 'UserId + date';if(r0.includes('PlannedMealId'))return 'PlannedMealId';if(r0.includes('UserId'))return 'UserId';if(r0.includes('Version'))return 'Version';if(r0.includes('LocalDate'))return 'LocalDate';if(r0.includes('Due'))return 'due-time';return 'business key';};
+ const edgeLabel=physical?'':event?(r.reason.includes('EventId')?'EVENT: EventId':'EVENT'):'APP: '+shortKey();
+ const style='edgeStyle=segmentEdgeStyle;rounded=0;orthogonal=1;html=1;strokeColor='+color+';strokeWidth='+(physical?9:event?7:6)+';'+(physical?'':event?'dashed=1;dashPattern=2 10;':'dashed=1;dashPattern=17 11;')+marker+
+ 'fontColor=#000000;fontSize=39;fontStyle=1;labelBackgroundColor=#FFFFFF;align=center;verticalAlign=middle;spacing=5;exitX='+ex.toFixed(4)+';exitY='+ey.toFixed(4)+';exitPerimeter=0;entryX='+tx.toFixed(4)+';entryY='+ty.toFixed(4)+';entryPerimeter=0;';
  const points=[];
  for(const xy of route.points.slice(1,-1))if(!points.length||points.at(-1)[0]!==xy[0]||points.at(-1)[1]!==xy[1])points.push(xy);
  const way=points.length?'<Array as="points">'+points.map(xy=>'<mxPoint x="'+xy[0]+'" y="'+xy[1]+'"/>').join('')+'</Array>':'';
  const id='rel'+(++counter);
- edges.push('<mxCell id="'+id+'" edge="1" source="'+keyToId.get(route.source)+'" target="'+keyToId.get(route.target)+'" style="'+esc(style)+'" parent="1"><mxGeometry relative="1" as="geometry">'+way+'</mxGeometry></mxCell>');
+ edges.push('<mxCell id="'+id+'" value="'+esc(edgeLabel)+'" edge="1" source="'+keyToId.get(route.source)+'" target="'+keyToId.get(route.target)+'" style="'+esc(style)+'" parent="1"><mxGeometry relative="1" as="geometry">'+way+'</mxGeometry></mxCell>');
 }
 vertex(null,180,h-490,w-360,330,
  '<b>HOW TO READ:</b> Follow relationships from Users into profile, meal planning, meal logs, FMD, activity and reminder events. PK = primary key, FK = SQL-enforced foreign key, APP REF = key present in the app but not SQL-enforced.<br/>'+
  '<b>ACCURACY:</b> All 32 mapped tables are shown with selected key fields; full column definitions are in the EF Core models. No decorative domain dividers, invented SQL links or pseudo-hubs.',
- 'rounded=1;html=1;whiteSpace=wrap;strokeColor=#A9BCCE;strokeWidth=3;fillColor=#F4F8FC;fontFamily=Arial;fontColor=#3C5065;fontSize=35;align=left;verticalAlign=middle;spacing=34;');
+ 'rounded=1;html=1;whiteSpace=wrap;strokeColor=#A9BCCE;strokeWidth=3;fillColor=#F4F8FC;fontFamily=Arial;fontColor=#3C5065;fontSize=43;align=left;verticalAlign=middle;spacing=34;');
 const xml='<mxfile host="app.diagrams.net" version="32.6.10"><diagram name="Database Diagram" id="unified-current-erd"><mxGraphModel page="1" grid="1" gridSize="10" pageWidth="'+w+'" pageHeight="'+h+'" pageScale="1" connect="1" arrows="1"><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+edges.join('')+vertices.join('')+'</root></mxGraphModel></diagram></mxfile>';
-fs.writeFileSync(path.join(root,'docs/assignment/one-page/Database Diagram.drawio'),xml,'utf8');
+const blackWhite=xml.replace(/fillColor=#[0-9a-fA-F]{6}/g,'fillColor=#FFFFFF').replace(/#[0-9a-fA-F]{6}/g,c=>c.toUpperCase()==='#FFFFFF'?'#FFFFFF':'#000000');
+if(/#(?!000000\b|FFFFFF\b)[0-9a-fA-F]{6}/.test(blackWhite))throw Error('Color remained in ERD');
+fs.writeFileSync(path.join(root,'docs/assignment/one-page/Database Diagram.drawio'),blackWhite,'utf8');
 const summary={scope:'CURRENT_EF_MAPPED',tableCount:32,databaseCounts:{identity:21,tracking:7,worker:4},actualSqlFKs:9,logicalLinks:16,eventLinks:6,totalRelationships:31,noDividers:true,noPseudoHubs:true,relationships:relationshipDefs.map(([from,to,kind,cardinality,reason])=>({from,to,kind,cardinality,reason}))};
 fs.writeFileSync(path.join(root,'scripts/unified-erd-manifest.json'),JSON.stringify(summary,null,2)+'\n','utf8');
 console.log('UNIFIED_ERD_GENERATED',Object.keys(layout.nodes).length,'tables',edges.length,'native relationships');
