@@ -90,7 +90,7 @@ for(const t of ['5173}:80','8080}:8080','8081}:8081','6379}:6379','14330}:1433']
  if(!source.includes(t))errors.push('docker-compose port mapping missing '+t);
 }
 const realContexts=[
- ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',7],
+ ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',21],
  ['src/LongevityDiet.Tracking/TrackingDbContext.cs',7],
  ['src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs',4]
 ];
@@ -104,10 +104,26 @@ for(const [file,count] of realContexts){
 }
 for(const name of tableNames)if(!physical.some(c=>c.a.vertex==='1'&&c.a.value===name))
  errors.push('Missing real EF Core physical table '+name);
-if(tableNames.length!==18||new Set(tableNames).size!==18)errors.push('Expected exactly 18 unique mapped EF tables');
-const physicalEdges=physical.filter(c=>c.a.edge==='1');
-if(physicalEdges.length!==5)errors.push('Physical ERD should show 5 and only 5 local FKs; got '+physicalEdges.length);
-for(const e of physicalEdges)if(!e.a.source||!e.a.target)errors.push('Missing native attached SQL FK endpoints '+e.a.id);
-console.log('PHYSICAL_DB_COVERAGE: 7 Identity + 7 Tracking + 4 Worker = '+tableNames.length+' tables, '+physicalEdges.length+' local SQL FKs');
+if(tableNames.length!==32||new Set(tableNames).size!==32)errors.push('Expected exactly 32 unique mapped EF tables');
+const catalogEdges=physical.filter(c=>c.a.edge==='1');
+if(catalogEdges.length)errors.push('Physical catalog must show clean table details; use separate 17 FK ledger');
+const fkManifest=JSON.parse(fs.readFileSync(path.join(docs,'physical-model-manifest.json'),'utf8'));
+if(fkManifest.scope!=='CURRENT_EF_MAPPED'||fkManifest.tableCount!==32||fkManifest.localFkCount!==9)errors.push('Physical schema manifest drift');
+const auditCells=diagram('17-physical-sql-fk-audit');
+const auditNodes=new Map(auditCells.filter(c=>c.a.vertex==='1').map(c=>[c.a.id,c]));
+const sqlEdges=auditCells.filter(c=>c.a.edge==='1');
+if(sqlEdges.length!==9)errors.push('Expected exactly nine real local SQL FK arrows');
+const found=[];
+for(const e of sqlEdges){
+ const parent=auditNodes.get(e.a.source)?.a.value||'',child=auditNodes.get(e.a.target)?.a.value||'';
+ if(!parent||!child)errors.push('SQL FK audit has unattached endpoint '+e.a.id);
+ found.push(parent+' -> '+child);
+}
+for(const r of fkManifest.relationships){
+ const needle=r.parent+'.'+r.parentKey,child=r.child+'.'+r.childKey;
+ if(!found.some(pair=>pair.includes(needle)&&pair.includes(' -> '+child)))errors.push('SQL FK arrow missing '+needle+' -> '+child);
+}
+if(new Set(found).size!==9)errors.push('Duplicate FK arrows in physical ledger');
+console.log('PHYSICAL_DB_COVERAGE: 21 Identity/Planning + 7 Tracking + 4 Worker = '+tableNames.length+' mapped tables, '+sqlEdges.length+' local SQL FK arrows');
 if(errors.length){errors.forEach(e=>console.error('TOPOLOGY_FAIL '+e));process.exit(1);}
 console.log('TOPOLOGY_AND_SCHEMA_QA=PASS');

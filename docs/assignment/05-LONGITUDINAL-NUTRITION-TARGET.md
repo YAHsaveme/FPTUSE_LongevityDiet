@@ -1,6 +1,6 @@
 # LongevityDiet – Daily Nutrition & Longitudinal Health (TARGET SPEC)
 **Status:** Proposed architecture / research-backed target, NOT currently implemented. Updated: 2026-11-06.
-**Baseline:** The real running code contains 18 mapped EF Core tables across Identity (7), Tracking (7), and Worker (4), plus an activity-focused gRPC recommendation. It does **not** implement a verified multi-day menu, structured allergy catalog, daily symptom questionnaires, or clinician-reviewed nutrition pathway.
+**Current merged-code baseline:** The EF Core models contain 32 mapped tables: 21 Identity/Planning/Recommendation/FMD, 7 Tracking and 4 Worker. Basic multi-day meal planning, CSV-based allergy/exclusion screening, meal logging, recommendation feedback, FMD risk screening and an activity-focused gRPC service are implemented and tested using synthetic data. The **52-table normalized nutrition model**, independently sourced per-ingredient allergen/cross-contact validation, continuous structured wellness questionnaires and clinician-reviewed personalized nutrition pathway remain **proposed**, not migrated or clinically validated.
 **Intended scope:** Adults; special populations and clinical dietary therapy require clinician or licensed dietitian review. Do not promise life extension or diagnose diseases from check-ins.
 
 ## A. Daily longitudinal user journey

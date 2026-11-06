@@ -40,7 +40,7 @@ documentation and presentation **10%**.
 [One-page PDFs, editing/QA instructions](one-page/README.md).
 
 Only implemented business tables are represented. The ERD is a 10-table
-**teaching subset** of the 18 EF Core mapped tables; the actual migration
+**teaching subset** of the 32 EF Core mapped tables after team integration; the actual migration
 history is authoritative. Omitted outbox and bookkeeping tables still exist.
 
 ## Presentation notes

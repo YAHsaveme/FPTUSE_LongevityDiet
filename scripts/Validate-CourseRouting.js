@@ -3,7 +3,7 @@
 'use strict';
 const fs=require('fs'),path=require('path');
 const root=path.resolve(__dirname,'../docs/assignment/one-page');
-const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database'];
+const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database','17-physical-sql-fk-audit'];
 const attrs=s=>Object.fromEntries([...s.matchAll(/([\w-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
 const failures=[];
 function intercept(p,q,r){

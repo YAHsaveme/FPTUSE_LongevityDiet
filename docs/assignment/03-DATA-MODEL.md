@@ -1,41 +1,51 @@
-# Database Model — Core ERD for PRN232
+# Database Model — Verified Current Source and Future Nutrition Target
 
-The course requires EF Core with a relational database and migrations.
-It does not demand 33 business tables or six separately deployed databases.
+The course uses EF Core, SQL Server and migrations. This file distinguishes the implemented model from the separately proposed longitudinal nutrition schema. Passing source-model checks is not proof of live SQL deployment or clinical safety.
 
-## Core ERD
+## 1. Teaching ERD (10 representative tables)
 
-[Editable Draw.io](one-page/04-database-core.drawio) |
-[Editable DBML](one-page/04-database-core.dbml) |
-[one-page PDF](one-page/04-database-core.pdf) |
-[vector SVG](one-page/04-database-core.svg).
+- [Editable Draw.io](one-page/04-database-core.drawio)
+- [Editable DBML](one-page/04-database-core.dbml)
+- [One-page PDF](one-page/04-database-core.pdf)
+- [Vector SVG](one-page/04-database-core.svg)
 
-For an exhaustive source-verified view, open the [18-table physical Draw.io appendix](one-page/06-full-physical-database.drawio) or [PDF](one-page/06-full-physical-database.pdf). It includes 7 Identity, 7 Tracking and 4 Worker tables, with the same five enforced SQL FKs. Tables without FK arrows are intentionally independent at the SQL level, not missing from the drawing.
+The teaching diagram includes 10 of the **32 real EF Core mapped entity tables** and **five** of the **nine** locally enforced SQL foreign keys. It is intentionally a simplified view, not an exhaustive physical SQL schema.
 
-Ten representative **existing** entity tables are included:
-- Identity: Users, UserProfiles, RefreshTokens, ReminderPreferences,
-  UserNotifications.
-- Tracking: ActivityLogs, ActivityGoals, AdherenceScores, ScoreDimensions.
-- Worker: ReminderSchedules.
+## 2. Complete merged physical model (current code)
 
-These represent three existing EF Core database ownership areas, but do
-not imply actual foreign keys between databases. Only five relationships
-are drawn, each implemented within an owner.
+- [All 32 mapped EF Core tables — editable catalog](one-page/06-full-physical-database.drawio) | [PDF](one-page/06-full-physical-database.pdf)
+- [All 9 locally enforced SQL foreign keys — individual connected arrows](one-page/17-physical-sql-fk-audit.drawio) | [PDF](one-page/17-physical-sql-fk-audit.pdf)
+- [Machine-checkable model manifest](one-page/physical-model-manifest.json)
 
-## Honest physical scope
+The three logical SQL database catalogs are:
 
-The current source contains **18 EF Core mapped entity tables**. Outbox,
-inbox, dispatch, signal and configuration tables omitted from the teaching
-view remain in the code and migrations. This ERD intentionally includes
-representative columns rather than pretending to be a full SQL DDL export.
+| Database | Real EF Core mapped tables | Physical foreign keys |
+| --- | ---: | ---: |
+| LongevityDietDb (Identity, Planning, Recommendation, FMD) | 21 | 8 |
+| LongevityTrackingDb (activity, goals, LDAS) | 7 | 1 |
+| LongevityWorkerDb (reminder processing) | 4 | 0 |
+| **Total** | **32** | **9** |
 
-Authoritative physical source:
-- src/LongevityDiet.Repositories/LongevityDietDbContext.cs
-- src/LongevityDiet.Tracking/TrackingDbContext.cs
-- src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs
+The merged source now includes MealPlans, MealPlanDays, PlannedMeals, MealLogs, MealLogItems, eating-window snapshots, recommendation feedback and FMD cycle tracking. Tables intentionally lacking SQL foreign keys remain represented in the complete catalog; cross-database user references and Redis event correlations are **logical**, not enforced SQL FKs.
 
-Only use EF Core migrations to apply actual database changes, not the
-ten-table teaching diagram. The score is educational; missing upstream
-meal/eating-window inputs do not prove a complete LDAS result.
+Use these EF Core DbContexts and their migrations as the source of truth:
 
-DBML documentation: https://dbml.dbdiagram.io/docs/
+- `src/LongevityDiet.Repositories/LongevityDietDbContext.cs`
+- `src/LongevityDiet.Tracking/TrackingDbContext.cs`
+- `src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs`
+
+The **TeamIntegrationModelSnapshot** bridge migration contains intentionally empty Up/Down methods because both teams' earlier migrations already define the tables. Its regenerated model snapshot includes all merged entities, without repeated CREATE TABLE operations.
+
+## 3. Future nutrition target — not migrated
+
+The separate [longitudinal nutrition target](05-LONGITUDINAL-NUTRITION-TARGET.md) proposes **52 additional logical table models and 74 relationships** for long-horizon daily meal plans, sourced allergen checks, check-ins and longitudinal health signals. These are architecture/specification artifacts, **not the current physical SQL schema** and not clinician-validated dietary recommendations. No live database was migrated when generating the diagrams.
+
+Generate/verify the actual physical views from current mapped source:
+
+```powershell
+node scripts/Generate-FullPhysicalDatabase.js
+node scripts/Validate-ArchitectureTopology.js
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-CourseDiagrams.ps1
+```
+
+DBML reference: https://dbml.dbdiagram.io/docs/

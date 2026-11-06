@@ -1,7 +1,7 @@
-# LongevityDiet PRN232 — Six editable Draw.io diagrams
+# LongevityDiet PRN232 - Seven current Draw.io views and future nutrition target
 
 The primary coursework views are C0, C1, C2 and a 10-table core ERD.
-Two appendices cover the complete runtime sequence and all 18 physical tables.
+Current-code appendices cover the runtime sequence, all **32 mapped EF Core tables**, and a separate audit of the **9 actual SQL foreign keys**. Future nutrition schemas are documented separately and have not been migrated.
 
 | Diagram | Editable file | PDF | Content |
 | --- | --- | --- | --- |
@@ -10,7 +10,8 @@ Two appendices cover the complete runtime sequence and all 18 physical tables.
 | C2 Components | [Draw.io](03-c2-api-components.drawio) | [PDF](03-c2-api-components.pdf) | 19 API components, no orphan module, two-way Redis |
 | Core ERD | [Draw.io](04-database-core.drawio) | [PDF](04-database-core.pdf) | 10 essential tables and five local SQL FKs |
 | Runtime sequence | [Draw.io](05-runtime-end-to-end.drawio) | [PDF](05-runtime-end-to-end.pdf) | Ten REST/gRPC steps, nineteen reminder steps |
-| Full physical ERD | [Draw.io](06-full-physical-database.drawio) | [PDF](06-full-physical-database.pdf) | All 18 mapped EF Core tables, five real SQL FKs |
+| Complete physical table catalog | [Draw.io](06-full-physical-database.drawio) | [PDF](06-full-physical-database.pdf) | All 32 mapped EF Core tables; no crossing arrows |
+| Actual SQL FK audit | [Draw.io](17-physical-sql-fk-audit.drawio) | [PDF](17-physical-sql-fk-audit.pdf) | All 9 real local SQL FKs, each with explicit endpoints |
 
 The core ERD also has [editable DBML](04-database-core.dbml). The full ERD
 is a source-verified appendix, not a change to the actual database migrations.
@@ -38,10 +39,7 @@ the synchronous response; the runtime sequence shows explicit returns.
 
 ## C2: modules, not database tables
 
-C2 correctly expands only LongevityDiet.API: five controllers and their
-services, Identity Persistence, Tracking Persistence, a hosted Redis
-Bridge, and the typed gRPC client. Auth endpoints are anonymous; member
-endpoints require JWT.
+The foundational C2 view focuses on the **identity, activity and reminder slice** of LongevityDiet.API: five controllers, their services, Identity Persistence, Tracking Persistence, a Redis Bridge and the typed ActivityCoach gRPC client. The merged API **also implements** MealPlansController, MealLogsController, EatingWindowController, RecommendationsController (V2) and FmdController, with planning/tracking/recommendation/FMD services. The C2 diagram remains a scoped educational view, **not a full inventory of all merged controllers**. Auth endpoints are anonymous; member endpoints require JWT.
 
 The Recommendation Controller reads the user's weekly activity summary
 through Tracking Service before invoking ActivityCoach gRPC. The gRPC
@@ -55,15 +53,14 @@ C2 is not supposed to enumerate physical SQL tables; use the ERDs.
 
 ## ERD: not every table should have a foreign key
 
-Exactly five SQL-enforced relationships exist in the current EF models:
+The **10-table teaching ERD** highlights five real SQL-enforced relationships:
 - UserProfiles.UserId → Users.Id (1:1).
 - RefreshTokens.UserId → Users.Id (1:N).
 - ReminderPreferences.UserId → Users.Id (1:1).
 - UserNotifications.UserId → Users.Id (1:N).
 - ScoreDimensions.AdherenceScoreId → AdherenceScores.Id (1:N).
 
-The full physical ERD contains **7 Identity + 7 Tracking + 4 Worker**
-tables, checked against actual DbContext table mappings.
+The **current physical model** contains **21 Identity/Planning/Recommendation/FMD + 7 Tracking + 4 Worker = 32 mapped EF Core tables** across three SQL databases, with **9 enforced local SQL FKs**. The four additional FKs are MealPlanDays.MealPlanId -> MealPlans.Id, PlannedMeals.MealPlanDayId -> MealPlanDays.Id, MealLogItems.MealLogId -> MealLogs.Id and FmdCycleDays.FmdCycleId -> FmdCycles.Id. All nine appear in [the physical FK audit](17-physical-sql-fk-audit.drawio).
 
 Some tables intentionally have **zero physical FKs**. For example,
 Tracking and Worker hold UserId as a logical identity reference;
@@ -81,12 +78,12 @@ Run from the project root in PowerShell:
     node .\scripts\Validate-ArchitectureTopology.js
     node .\scripts\Validate-CourseLinks.js
 
-Draw.io Desktop exports six one-page editable source/PDF pairs. PNG/SVG
+Draw.io Desktop exports seven current-code one-page editable source/PDF pairs (01-06 and 17). PNG/SVG
 inspection previews stay outside Git under
 D:\PRN232\_diagram_toolkit_sources\course-c4-previews.
 
 Checks cover every C1/C2 module and directed dependency, port labels,
-actual Compose mappings, all 18 DbContext tables, the five local SQL FKs,
+actual Compose mappings, all 32 DbContext tables, the nine current local SQL FKs,
 text clearance, rendered SVG paths and the 29-step execution sequence.
 
 The local gRPC HTTP/2 and Redis smoke tests used test databases.
@@ -99,7 +96,7 @@ D:\PRN232\_LongevityDiet_C1C2_ERD_Audit_2026-11-05.
 ## Research-backed daily nutrition design — PROPOSAL, NOT RUNNING CODE
 
 **Do not confuse these files with the implemented 01–06 views.** The actual EF Core
-model remains 18 mapped EF Core table types; the following **52 proposed nutrition tables**,
+model now contains **32 mapped EF Core tables** including existing basic multi-day meal planning, logging, Recommendation V2 and FMD features; the following **52 proposed normalized nutrition tables**,
 **74 proposed FKs** and seven REST feature areas are design targets requiring code, migrations,
 food-source verification, user testing and professional review before use.
 

@@ -1,7 +1,7 @@
 // Structural and readability checks for the four course-sized one-page diagrams.
 const fs=require('fs'),path=require('path');
 const dir=path.resolve(__dirname,'../docs/assignment/one-page');
-const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database'];
+const names=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database','17-physical-sql-fk-audit'];
 let fail=[];
 const attrs=s=>Object.fromEntries([...s.matchAll(/([\w-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
 function overlap(a,b,epsilon=4){return Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>epsilon&&Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)>epsilon;}
@@ -36,6 +36,8 @@ for(const name of names){
     const x=m[1].toLowerCase();if(x.slice(0,2)!==x.slice(2,4)||x.slice(2,4)!==x.slice(4,6))fail.push(name+' is not black/grey');
   }
  }
+ if(name==='06-full-physical-database'&&ed.length!==0)fail.push(name+' table catalog should have no FK spaghetti');
+ if(name==='17-physical-sql-fk-audit'&&ed.length!==9)fail.push(name+' should show all 9 physical SQL FKs');
  const pdf=fs.readFileSync(path.join(dir,name+'.pdf'),'latin1');
  if((pdf.match(/\/Type\s*\/Page\b/g)||[]).length!==1)fail.push(name+' PDF not 1 page');
  console.log('PASS FILE',name,'objects',vert.length,'relations',ed.length,'pages',1);

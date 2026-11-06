@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('fs'),path=require('path');
 const dir=path.resolve(process.argv[2]||path.resolve(__dirname,'../docs/assignment/one-page'));
-const defaultNames=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database'];
+const defaultNames=['01-c0-system-context','02-c1-container-architecture','03-c2-api-components','04-database-core','06-full-physical-database','17-physical-sql-fk-audit'];
 const names=process.argv.length>3?process.argv.slice(3):defaultNames;
 const attr=s=>Object.fromEntries([...s.matchAll(/([\w-]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
 function part(a,b,x,eps=8){return x>Math.min(a,b)+eps&&x<Math.max(a,b)-eps;}
@@ -28,6 +28,7 @@ for(const name of names){
   if(points.length>=2)raw.push({id:m[1],points});
  }
  if(raw.length!==edges.size)globalIssues.push(name+' svg edge count '+raw.length+' != native '+edges.size);
+ if(!edges.size){console.log(name+': 0 SQL connector paths (table catalog; all SQL FKs audited separately)');continue;}
  const edge1=edges.get(raw[0]?.id),start=vertices.get(edge1?.a.source);
  const st=edge1?.a.style||'';
  const xc=+(st.match(/exitX=([\d.]+)/)||[])[1],yc=+(st.match(/exitY=([\d.]+)/)||[])[1];
