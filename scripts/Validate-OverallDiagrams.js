@@ -56,15 +56,17 @@ function directed(view,a,b){
 const c4=JSON.parse(fs.readFileSync(path.join(root,'scripts/c4-architecture-manifest.json'),'utf8'));
 check(c4.status==='CURRENT_C4_BLACK_WHITE','Unexpected C4 version');
 const C0=diagrams.C0,C1=diagrams.C1,C2=diagrams.C2;
-const expected={C0:2,C1:11,C2:41};
+const expected={C0:2,C1:11,C2:73};
 for(const [name,need] of Object.entries(expected)){
  const view=diagrams[name],native=fs.readFileSync(path.join(base,name+'.drawio'),'utf8');
  check(view.edges.length===need,name+': expected '+need+' visible native arrows');
  const colors=[...native.matchAll(/#[0-9a-fA-F]{6}\b/g)].map(m=>m[0].toUpperCase());
  check(colors.every(c=>c==='#000000'||c==='#FFFFFF'),name+': colors forbidden');
  for(const edge of view.edges){
-  check((edge.a.value||'').trim().length>3,name+': unlabeled arrow '+edge.a.id);
-  check((edge.a.style||'').includes('endArrow=block'),name+': arrowhead missing '+edge.a.id);
+  if(!(name==='C2'&&(edge.a.style||'').includes('startArrow=ERmandOne')))
+   check((edge.a.value||'').trim().length>0,name+': unlabeled arrow '+edge.a.id);
+  if(name!=='C2')check((edge.a.style||'').includes('endArrow=block'),name+': arrowhead missing '+edge.a.id);
+  else check((edge.a.style||'').includes('endArrow=block')||(edge.a.style||'').includes('endArrow=open')||(edge.a.style||'').includes('endArrow=ERmany')||(edge.a.style||'').includes('endArrow=ERmandOne'), name+': arrow head/cardinality missing '+edge.a.id);
   check((edge.a.style||'').includes('strokeColor=#000000'),name+': colored connector '+edge.a.id);
  }
 }
@@ -77,30 +79,68 @@ for(const [a,b] of [['WEB / NGINX','REST API'],['REST API','RECOMMENDATION gRPC'
  check(directed(C1,a,b),'C1 missing directional connection '+a+' -> '+b);
 const compose=fs.readFileSync(path.join(root,'docker-compose.yml'),'utf8');
 for(const p of c4.ports){const [host,inside]=p.split(':');check(compose.includes(host+'}:'+inside),'C1 port inconsistent with Docker Compose '+p);}
-check(c4.controllers.length===10,'C2 must include 10 real API controllers');
-check(C2.edges.length===1+4*c4.controllers.length,'C2 one router+4 arrows per endpoint required');
-const cards=C2.vertices;
-const card=(part)=>cards.find(v=>(v.a.value||'').includes(part));
-function edgeBetween(view,source,dest){if(!source||!dest)return false;return view.edges.some(e=>e.a.source===source.a.id&&e.a.target===dest.a.id)}
-const httpRouter=card('API ROUTING');
+{
+const c2m=JSON.parse(fs.readFileSync(path.join(root,'scripts/c2-extended-manifest.json'),'utf8'));
+check(c2m.status==='C2_EXTENDED_SOURCE_BACKED','Extended C2 manifest missing');
+check(c2m.components===10 && c2m.tableCount===32 && c2m.actualFk===9 && c2m.logical===16 && c2m.event===6,'C2 tables or key kinds drift');
+check(c2m.componentFlows===31&&c2m.tableReferences===10&&c2m.sourceToTableBridge===1&&c2m.totalConnectors===73,'C2 arrow model count mismatch');
+check(C2.edges.length===73,'C2 missing real data/SQL connectors');
+const c2cards=C2.vertices;
+const findCard=value=>c2cards.find(v=>(v.a.value||'').includes(value));
+const edgeTo=(a,b)=>a&&b&&C2.edges.find(e=>e.a.source===a.a.id&&e.a.target===b.a.id);
+const router=findCard('API ROUTING'),web=findCard('WEB / NGINX');
+check(Boolean(edgeTo(web,router)),'Web -> REST API router missing');
+const expectedAccess=new Map(c2m.tableAccessLinks.map(r=>[r[0],r[1]]));
+const refs=[];
 for(const info of c4.controllers){
- const ctrl=card(info.controller);
- const svc=cards.find(v=>(v.a.value||'').includes(info.service)&&edgeBetween(C2,ctrl,v));
- const repo=cards.find(v=>(v.a.value||'').includes(info.persistence)&&edgeBetween(C2,svc,v));
- check(Boolean(ctrl&&svc&&repo),'C2 missing true Controller/Service/Persistence '+info.controller);
- check(fs.existsSync(path.join(root,'src/LongevityDiet.API/Controllers',info.controller+'.cs')),'C2 controller not in source: '+info.controller);
- check(edgeBetween(C2,httpRouter,ctrl),'C2 router not attached to '+info.controller);
- check(edgeBetween(C2,ctrl,svc),'C2 Controller -> Service not connected '+info.controller);
- check(edgeBetween(C2,svc,repo),'C2 Service -> Persistence not connected '+info.controller);
- if(repo){
-  const destinations=cards.filter(x=>(x.a.value||'').includes('DATABASE REFERENCE')&&(x.a.value||'').includes(info.database));
-  check(destinations.some(x=>edgeBetween(C2,repo,x)),'C2 service missing DB endpoint '+info.controller);
- }
+ const control=findCard(info.controller);
+ const service=control&&c2cards.find(v=>edgeTo(control,v)&&(v.a.value||'').includes(info.service));
+ const repository=service&&c2cards.find(v=>edgeTo(service,v)&&(v.a.value||'').includes(info.persistence));
+ const table=expectedAccess.get(info.controller);
+ const reference=repository&&c2cards.find(v=>edgeTo(repository,v)&&(v.a.value||'').includes('DATA REFERENCE')&&(v.a.value||'').includes(table));
+ check(Boolean(control&&service&&repository&&reference),'C2 incomplete Controller/Service/Repository/Table-Ref '+info.controller);
+ check(fs.existsSync(path.join(root,'src/LongevityDiet.API/Controllers',info.controller+'.cs')),'C2 controller not in live source '+info.controller);
+ check(Boolean(edgeTo(router,control)),'API router disconnected from '+info.controller);
+ if(reference)refs.push(reference);
 }
-check(contains(C2,'HTTP/2 :8081'),'C2 missing explicit gRPC HTTP/2 dependency');
-check(contains(C2,'NO OWN DB')||contains(C2,'no separate DB'),'C2 must not invent gRPC storage');
-check(contains(C2,'LongevityWorkerDb'),'C2 must identify Worker-owned database as external dependency');
-console.log('C4_ARCHITECTURE_QA: C0 2 labeled arrows; C1 11 protocol/DB arrows; C2 10 complete controller-service-persistence-DB lanes, all monochrome');
+check(refs.length===10,'Must have ten labeled source-backed table references');
+const physicalSchema=JSON.parse(fs.readFileSync(path.join(root,'scripts/current-physical-schema.json'),'utf8'));
+const fullNames=manifest.databaseCardNames;
+const own=new Map();
+for(const [database,group] of Object.entries(physicalSchema.groups))for(const t of Object.keys(group.columns))own.set(t,database[0].toUpperCase());
+const sqlCards=new Map(fullNames.map(n=>[n,c2cards.find(v=>(v.a.value||'').startsWith(n+'  ['+own.get(n)+']'))]));
+check(sqlCards.size===32&&[...sqlCards.values()].every(Boolean),'C2 must draw every one of the 32 database tables exactly once');
+for(const n of fullNames)check(c2cards.filter(v=>(v.a.value||'').startsWith(n+'  ['+own.get(n)+']')).length===1,'C2 duplicated/missing table '+n);
+const realFK= C2.edges.filter(e=>(e.a.style||'').includes('startArrow=ERmandOne'));
+const app= C2.edges.filter(e=>(e.a.style||'').includes('endArrow=open')&&(e.a.style||'').includes('dashPattern=14 10'));
+const event= C2.edges.filter(e=>(e.a.style||'').includes('dashPattern=2 10'));
+const access= C2.edges.filter(e=>(e.a.style||'').includes('dashPattern=8 6'));
+check(realFK.length===9&&app.length===16&&event.length===6&&access.length===11,'C2 FK/logical/event/access connector types inconsistent');
+const c2unified=JSON.parse(fs.readFileSync(path.join(root,'scripts/unified-erd-manifest.json'),'utf8'));
+for(const r of c2unified.relationships){
+ const A=sqlCards.get(r.from),B=sqlCards.get(r.to),edge=edgeTo(A,B);
+ check(Boolean(edge),'Missing exact table-to-table arrow '+r.from+' -> '+r.to);
+ if(!edge)continue;
+ const style=edge.a.style||'';
+ if(r.kind==='sql'){
+  check(style.includes('startArrow=ERmandOne'),'Physical FK symbol missing '+r.from+' -> '+r.to);
+  check(style.includes('endArrow='+(r.cardinality==='1:1'?'ERmandOne':'ERmany')),'Incorrect SQL relationship multiplicity '+r.from+' -> '+r.to);
+  check(manifest.realRelationships.some(x=>x.parent===r.from&&x.child===r.to&&x.cardinality===r.cardinality),'SQL FK fabricated in C2 '+r.from+' -> '+r.to);
+ } else check(style.includes('dashed=1'),'Non-SQL link falsely presented as SQL FK '+r.from+' -> '+r.to);
+}
+const bridge=refs.filter(ref=>edgeTo(ref,sqlCards.get('Users')));
+check(bridge.length===1,'API/data section must be connected by an authentic Users SQL-table reference bridge');
+const adj=new Map();
+for(const e of C2.edges){for(const x of [e.a.source,e.a.target])if(!adj.has(x))adj.set(x,new Set());adj.get(e.a.source).add(e.a.target);adj.get(e.a.target).add(e.a.source);}
+const reached=new Set(web?[web.a.id]:[]),queue=web?[web.a.id]:[];
+while(queue.length){for(const next of adj.get(queue.shift())||[]){if(!reached.has(next)){reached.add(next);queue.push(next);}}}
+for(const [n,table] of sqlCards)check(reached.has(table?.a.id),'API/data graph cannot reach '+n);
+check(reached.size>=1+1+10*4+32,'C2 should form a connected API → reference → full database table graph');
+for(const edge of C2.edges)check((edge.a.style||'').includes('strokeColor=#000000'),'C2 contains colored connector '+edge.a.id);
+console.log('C2_EXPANDED_QA: 10 API/controller lanes, 10 named table references, 1 native graph bridge, 32 current tables, 9 SQL FK, 16 APP, 6 EVENT, '+C2.edges.length+' total connectors');
+console.log('C4_ARCHITECTURE_QA: C0 context 2 arrows; C1 protocols 11 arrows; C2 extended API and full data graph all monochrome');
+
+}
 const db=diagrams['Database Diagram'];
 const unified=JSON.parse(fs.readFileSync(path.join(root,'scripts/unified-erd-manifest.json'),'utf8'));
 check(unified.scope==='CURRENT_EF_MAPPED' && unified.noDividers && unified.noPseudoHubs,

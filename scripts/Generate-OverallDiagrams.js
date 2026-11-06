@@ -6,6 +6,7 @@ const fs=require('fs'),path=require('path'),root=path.resolve(__dirname,'..');
 const c4File=path.join(root,'scripts/c4-architecture-manifest.json');
 require('./Generate-C4Architecture.js');
 require('./Generate-UnifiedERD.js');
+require('./Generate-ExtendedC2.js');
 const c4=JSON.parse(fs.readFileSync(c4File,'utf8'));
 const schema=JSON.parse(fs.readFileSync(path.join(root,'scripts/current-physical-schema.json'),'utf8'));
 const counts=Object.fromEntries(Object.entries(schema.groups).map(([key,g])=>[key,Object.keys(g.columns).length]));
