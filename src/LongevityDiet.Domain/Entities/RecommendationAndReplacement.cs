@@ -63,4 +63,3 @@ public enum FoodPreferenceKind
     Disliked = 2,
     ExplicitExclusion = 3
 }
-

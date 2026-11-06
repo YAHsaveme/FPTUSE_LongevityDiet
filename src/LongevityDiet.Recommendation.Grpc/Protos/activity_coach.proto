@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package longevity.recommendation.v1;
+option csharp_namespace = "LongevityDiet.Recommendation.Contracts";
+
+// Deterministic course-project recommendation. No PII is transmitted.
+service ActivityCoach {
+  rpc Recommend (ActivityProgressRequest) returns (ActivityAdviceReply);
+}
+
+message ActivityProgressRequest {
+  int32 completed_minutes = 1;
+  int32 weekly_minutes_goal = 2;
+  int32 completed_strength_sessions = 3;
+  int32 weekly_strength_goal = 4;
+}
+
+message ActivityAdviceReply {
+  string status = 1;
+  int32 remaining_minutes = 2;
+  int32 remaining_strength_sessions = 3;
+  string guidance = 4;
+  string disclaimer = 5;
+}

@@ -1,4 +1,4 @@
-# AGENTS.md - Longevity Diet Companion
+﻿# AGENTS.md - Longevity Diet Companion
 
 ## Read first
 
@@ -71,23 +71,17 @@ Do not remove or bypass:
 
 ## Draw.io rules
 
-Follow:
-- `.agents/ARCHITECTURE-DIAGRAM-SKILLS.md`
-- `.agents/skills/c4-drawio-assignment-production/SKILL.md`
-- `.agents/skills/c4-architecture/SKILL.md`
-- `.agents/skills/c4-model/SKILL.md`
-- `.agents/skills/drawio-studio/SKILL.md`
-- `.agents/skills/drawio-architecture-diagrams/SKILL.md`
-- `.agents/skills/architecture-diagrams-as-code/SKILL.md`
-- `.agents/skills/drawio-advanced-qa/SKILL.md`
-- `.agents/skills/bmad-assignment-foundation/SKILL.md`
-- `.agents/skills/drawio-system-architecture/SKILL.md`
-- `.agents/skills/architecture-diagram-qa/SKILL.md`
-- `.agents/skills/assignment-diagram-polish/SKILL.md`
-- `docs/architecture/DRAWIO-GUIDELINES.md`
+Use only task-relevant local references:
+- .agents/skills/prn232-project-guardrails/SKILL.md
+- .agents/skills/c4-model/SKILL.md
+- .agents/skills/drawio-studio/SKILL.md
+- .agents/skills/drawio-advanced-qa/SKILL.md
+- docs/architecture/DRAWIO-GUIDELINES.md
+- docs/assignment/one-page/README.md
 
-Precedence: current code/Docker for Current Runtime and the approved target architecture spec/ADR for Target Architecture always beat generic skill examples.
-
+The original three-page PRN232 Final Assignment PDF and actual source code
+are the authority. Do not treat old six-microservice Target diagrams as the
+implemented system. Preserve Git backups and never delete applied migrations.
 ## Task workflow
 
 - Work from the active file under `docs/task/Week N/`.

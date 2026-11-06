@@ -1,4 +1,4 @@
-# Longevity Diet Companion
+﻿# Longevity Diet Companion
 
 ## Project description
 
@@ -73,25 +73,18 @@ PRN232_LongevityDiet/
 
 ## System architecture
 
-- `docs/assignment/README.md` - Assignment-facing documentation pack.
-- `docs/assignment/00-ASSIGNMENT-DOCUMENT.md` - submission entry point: Context -> Problems -> Solutions -> Actors/Features -> C0/C1 -> Technology -> Conceptual ERD -> Physical DB -> PRN232 coverage.
-- `docs/05-SYSTEM-ARCHITECTURE.md` - detailed engineering architecture.
-- `docs/architecture/README.md` - extended internal architecture diagram set.
-- `docs/architecture/02-container-architecture.drawio`
-- `docs/10-PRN232-TRACEABILITY.md`
+For the PRN232 final assignment, use [four course-sized diagrams](docs/assignment/one-page/README.md).
+They comprise C0 Context, C1 Containers, C2 REST API Components, and a ten-table core ERD in DBML.
 
-The canonical diagram set covers:
-- System Context;
-- Container Architecture;
-- Docker Deployment;
-- API Component view;
-- Recommendation dynamic flow;
-- Transactional Outbox + Redis flow;
-- PRN232 requirement coverage;
-- deliverables/demo assessment;
-- end-to-end demo flow;
-- Production Secure Deployment.
+Three optional supporting technical diagrams are available:
+[Docker deployment](docs/architecture/03-docker-deployment.drawio),
+[Redis event flow](docs/architecture/06-outbox-redis-dynamic.drawio), and
+[end-to-end demonstration](docs/architecture/09-end-to-end-demo-flow.drawio).
 
+See the [assignment summary](docs/assignment/00-ASSIGNMENT-DOCUMENT.md)
+and [PRN232 traceability](docs/10-PRN232-TRACEABILITY.md) for the grading evidence.
+The old six-service and 33-table design proposals have been archived externally
+and must not be confused with implemented runtime functionality.
 ## Current implementation status
 
 ### Completed engineering baseline
@@ -195,8 +188,10 @@ It creates a local ignored `.env` with generated development secrets when needed
 
 ## Build and test
 
+Build/cache folders (`bin`, `obj`, `node_modules`, and `dist`) are **generated files**, not source code. They may be safely removed to save disk space for this school project. Restore them with the commands below when building or running again. Never delete `src` code, EF migrations, `*.csproj`, `package-lock.json`, or any diagrams to achieve a similar cleanup.
+
 ```powershell
-cd D:\PRN232\PRN232_LongevityDiet
+cd D:\PRN232\FPTUSE_LongevityDiet
 dotnet restore
 dotnet build .\LongevityDiet.sln
 dotnet test .\LongevityDiet.sln --no-build
@@ -272,3 +267,16 @@ The project distinguishes:
 4. project-defined software heuristics such as LDAS.
 
 See `docs/01-BOOK-RESEARCH.md` and `docs/11-BOOK-TO-SOFTWARE-TRACEABILITY.md`.
+
+
+## Architecture diagrams — PRN232 course-size views (2026-11-05)
+
+**Canonical assignment**: [four editable one-page diagrams and validation](docs/assignment/one-page/README.md).
+
+- [C0 System Context (Draw.io)](docs/assignment/one-page/01-c0-system-context.drawio) and [PDF](docs/assignment/one-page/01-c0-system-context.pdf)
+- [C1 Container (Draw.io)](docs/assignment/one-page/02-c1-container-architecture.drawio) and [PDF](docs/assignment/one-page/02-c1-container-architecture.pdf)
+- [C2 REST API Components (Draw.io)](docs/assignment/one-page/03-c2-api-components.drawio) and [PDF](docs/assignment/one-page/03-c2-api-components.pdf)
+- [Core ERD (DBML)](docs/assignment/one-page/04-database-core.dbml) and [one-page PDF](docs/assignment/one-page/04-database-core.pdf)
+
+The DBML shows **10 core teaching tables chosen from 32 mapped EF Core tables**. It is an assignment reading view, not a complete database migration. C2 covers **one existing REST API container** rather than six proposed microservices. RecommendationController now invokes the independent ActivityCoach gRPC service with a real HTTP/2 integration test (SQLite); live Docker/SQL Server E2E remains to be verified. Supporting deployment and event flow diagrams live in [docs/architecture](docs/architecture/README.md).
+To opt in *after provisioning and verifying* a Cloudflare Worker + D1, set secret environment variables `CloudflareSessions__Enabled=true`, `CloudflareSessions__BaseUrl=https://YOUR_PRIVATE_WORKER_HOST/` and `CloudflareSessions__ServiceBearer=<FROM_SECURE_SECRET_MANAGER>`; do **not** put credentials into Git or `appsettings.json`. See the migration guide before switching live sessions.

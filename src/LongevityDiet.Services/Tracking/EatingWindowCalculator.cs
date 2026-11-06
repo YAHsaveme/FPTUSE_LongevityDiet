@@ -215,4 +215,3 @@ public static class EatingWindowCalculator
             : $"{windowText}, {bedtimeText} — Nên hoàn tất bữa cuối ít nhất 3 giờ trước khi ngủ.";
     }
 }
-

@@ -79,4 +79,3 @@ public sealed class MealLogRepository(LongevityDietDbContext dbContext) : IMealL
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
-

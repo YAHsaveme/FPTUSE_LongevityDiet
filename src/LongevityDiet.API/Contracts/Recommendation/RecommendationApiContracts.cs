@@ -26,4 +26,3 @@ public sealed record ReplacePlanMealByRouteRequest(
     string? ReplacementReasonCode = null,
     string? ReasonNotes = null,
     IReadOnlyList<string>? AdditionalExcludedCodes = null);
-

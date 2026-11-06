@@ -140,4 +140,3 @@ public sealed record MealPlanSummary(
     DateTimeOffset GeneratedAt,
     DateTimeOffset UpdatedAt,
     IReadOnlyList<MealPlanDaySummary> Days);
-

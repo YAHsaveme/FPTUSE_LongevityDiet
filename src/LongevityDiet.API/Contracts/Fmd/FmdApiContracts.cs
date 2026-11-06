@@ -20,4 +20,3 @@ public sealed record LogFmdCycleDayRequest(
 
 public sealed record StopFmdCycleRequest(
     [Required, MaxLength(500)] string StopReason);
-

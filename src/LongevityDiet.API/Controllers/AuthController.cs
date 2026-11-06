@@ -2,11 +2,13 @@ using LongevityDiet.API.Contracts.Auth;
 using LongevityDiet.API.Errors;
 using LongevityDiet.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LongevityDiet.API.Controllers;
 
 [ApiController]
+[EnableRateLimiting("auth")]
 [AllowAnonymous]
 [Route("api/v1/auth")]
 public sealed class AuthController(AuthenticationService authenticationService) : ControllerBase
@@ -106,7 +108,10 @@ public sealed class AuthController(AuthenticationService authenticationService) 
         new()
         {
             HttpOnly = true,
-            Secure = Request.IsHttps,
+            // Fail closed for production deployments even behind a TLS proxy that
+            // has not yet populated forwarded scheme headers.
+            Secure = Request.IsHttps || !HttpContext.RequestServices
+                .GetRequiredService<IHostEnvironment>().IsDevelopment(),
             SameSite = SameSiteMode.Strict,
             Path = "/api/v1/auth",
             Expires = expires,

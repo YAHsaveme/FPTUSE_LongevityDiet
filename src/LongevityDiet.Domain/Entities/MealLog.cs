@@ -41,4 +41,3 @@ public sealed class MealLogItem
 
     public MealLog MealLog { get; set; } = null!;
 }
-

@@ -197,4 +197,3 @@ public sealed class RecommendationEnvelopeMethodProvider : IServiceMethodProvide
             (service, request, callContext) => service.RankMealsEnvelope(request, callContext));
     }
 }
-

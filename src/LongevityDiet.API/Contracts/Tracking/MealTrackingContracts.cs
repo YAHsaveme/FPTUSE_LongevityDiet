@@ -83,4 +83,3 @@ public sealed record EatingWindowSummaryResponse(
     string StatusCode,
     string SummaryMessage,
     DateTimeOffset CalculatedAt);
-

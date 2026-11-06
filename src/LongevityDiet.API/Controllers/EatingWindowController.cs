@@ -89,4 +89,3 @@ public sealed class EatingWindowController(
             summary.SummaryMessage,
             summary.CalculatedAt);
 }
-

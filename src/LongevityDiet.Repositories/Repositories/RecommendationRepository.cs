@@ -121,4 +121,3 @@ public sealed class RecommendationRepository(LongevityDietDbContext dbContext) :
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
-

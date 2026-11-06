@@ -226,4 +226,3 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
 
     private sealed record AuthSessionDto(string AccessToken);
 }
-

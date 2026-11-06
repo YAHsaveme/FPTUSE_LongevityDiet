@@ -16,7 +16,9 @@ app.MapGet("/", () => Results.Ok(new
     service = "LongevityDiet.Recommendation.Grpc",
     status = "ready",
     version = "2026-04-v2",
-    contract = "longevitydiet.recommendation.v2.RecommendationProtoService"
+    contract = "longevitydiet.recommendation.v2.RecommendationProtoService",
+    legacyContract = "longevity.recommendation.v1.ActivityCoach/Recommend",
+    transport = "gRPC over HTTP/2"
 }));
 
 app.Run();

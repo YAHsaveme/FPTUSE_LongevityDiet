@@ -124,4 +124,3 @@ public sealed class GrpcRecommendationEngineClient : IRecommendationEngineClient
         _channel?.Dispose();
     }
 }
-

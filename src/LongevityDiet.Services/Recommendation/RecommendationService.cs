@@ -790,4 +790,3 @@ public sealed class RecommendationService(
             days);
     }
 }
-

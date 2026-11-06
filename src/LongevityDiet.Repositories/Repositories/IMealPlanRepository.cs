@@ -12,4 +12,3 @@ public interface IMealPlanRepository
     Task AddAsync(MealPlan mealPlan, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
-

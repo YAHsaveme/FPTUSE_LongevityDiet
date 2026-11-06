@@ -113,4 +113,3 @@ Giảng viên rất đánh giá cao khi sinh viên chứng minh được tính s
    docker compose start redis
    ```
    Worker tự động quét các bản ghi Outbox chưa xử lý và tiếp tục đẩy vào Redis Streams, hoàn tất toàn bộ chu trình bất đồng bộ mà không cần can thiệp thủ công.
-

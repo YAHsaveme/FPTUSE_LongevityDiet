@@ -6,4 +6,3 @@ public interface ITrackingUserScheduleProvider
         Guid userId,
         CancellationToken cancellationToken = default);
 }
-

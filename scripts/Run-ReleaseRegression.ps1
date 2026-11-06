@@ -2,7 +2,7 @@
 .SYNOPSIS
     Runs the complete PRN232 Release Regression Suite across all projects.
 .DESCRIPTION
-    Validates project structure, builds all projects, runs all 52 unit and integration tests,
+    Validates project structure, builds all projects, runs every currently discovered unit and integration test,
     executes frontend lint and build, and outputs a formatted 100% Rubric evidence summary.
 #>
 
@@ -68,5 +68,5 @@ else {
 $sw.Stop()
 Write-Host "`n=================================================================" -ForegroundColor Green
 Write-Host " ALL REGRESSION CHECKS PASSED (Total Elapsed: $($sw.Elapsed.ToString('mm\:ss')))" -ForegroundColor Green
-Write-Host " 100% PRN232 Rubric Compliance Verified Successfully!" -ForegroundColor Green
+Write-Host " Automated regression checks completed; rubric and live deployment need separate review." -ForegroundColor Green
 Write-Host "=================================================================" -ForegroundColor Green

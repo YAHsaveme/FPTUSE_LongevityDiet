@@ -28,4 +28,3 @@ public sealed class TrackingUserScheduleProvider(IUserRepository userRepository)
             TargetWindowMinutes: 720);
     }
 }
-

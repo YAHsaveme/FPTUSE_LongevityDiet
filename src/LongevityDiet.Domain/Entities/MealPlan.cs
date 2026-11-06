@@ -86,4 +86,3 @@ public enum MealSlotType
     Dinner = 3,
     Snack = 4
 }
-

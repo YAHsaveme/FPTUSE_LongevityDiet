@@ -9,4 +9,3 @@ public sealed class UserDietaryPreference
     public string? PreferredCuisine { get; set; }
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
-

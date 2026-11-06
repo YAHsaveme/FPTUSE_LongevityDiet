@@ -13,4 +13,3 @@ public interface IRecommendationRepository
     Task AddReplacementHistoryAsync(MealReplacementHistory history, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
-

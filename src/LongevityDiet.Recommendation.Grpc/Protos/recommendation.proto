@@ -111,4 +111,3 @@ message RankMealsProtoResponse {
   repeated RankedCandidateProto accepted_candidates = 8;
   repeated RejectedCandidateProto rejected_candidates = 9;
 }
-

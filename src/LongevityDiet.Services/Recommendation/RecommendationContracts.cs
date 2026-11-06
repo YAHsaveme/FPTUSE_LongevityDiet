@@ -107,4 +107,3 @@ public sealed record ReplacePlannedMealResultSummary(
     MealPlanSummary UpdatedPlan,
     PlannedMealSummary ReplacedMeal,
     MealReplacementHistorySummary ReplacementAudit);
-

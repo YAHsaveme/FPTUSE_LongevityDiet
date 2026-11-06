@@ -428,4 +428,3 @@ public sealed class MealTrackingService(
             snapshot.SummaryMessage,
             snapshot.CalculatedAt);
 }
-

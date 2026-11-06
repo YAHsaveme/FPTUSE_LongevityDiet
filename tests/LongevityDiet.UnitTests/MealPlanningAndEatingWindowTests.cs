@@ -534,4 +534,3 @@ public sealed class MealPlanningAndEatingWindowTests
         public Task SaveChangesAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }
-

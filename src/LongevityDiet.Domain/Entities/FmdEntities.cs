@@ -76,4 +76,3 @@ public sealed class FmdCycleDay
 
     public FmdCycle FmdCycle { get; set; } = null!;
 }
-

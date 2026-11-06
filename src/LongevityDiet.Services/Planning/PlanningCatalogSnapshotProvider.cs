@@ -654,4 +654,3 @@ public sealed class PlanningCatalogSnapshotProvider(
         return null;
     }
 }
-

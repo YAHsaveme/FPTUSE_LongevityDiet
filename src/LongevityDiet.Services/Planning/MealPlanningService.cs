@@ -1078,4 +1078,3 @@ public sealed class MealPlanningService(
         decimal Score,
         IReadOnlyList<string> ReasonCodes);
 }
-

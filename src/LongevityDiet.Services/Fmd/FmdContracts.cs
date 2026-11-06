@@ -81,4 +81,3 @@ public sealed record FmdCycleSummary(
     DateTimeOffset? StoppedAt,
     string? StopReason,
     IReadOnlyList<FmdCycleDaySummary> Days);
-

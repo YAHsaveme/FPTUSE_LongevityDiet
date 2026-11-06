@@ -12,4 +12,3 @@ public interface IPlanningInputProvider
     Task<IReadOnlyList<PlanningCandidateMealSnapshot>> GetCandidateMealsAsync(
         CancellationToken cancellationToken = default);
 }
-

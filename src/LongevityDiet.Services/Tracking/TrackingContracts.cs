@@ -91,4 +91,3 @@ public sealed record EatingWindowSummary(
     string StatusCode,
     string SummaryMessage,
     DateTimeOffset CalculatedAt);
-

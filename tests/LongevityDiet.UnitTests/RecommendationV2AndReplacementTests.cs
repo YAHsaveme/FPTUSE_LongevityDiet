@@ -300,4 +300,3 @@ public sealed class RecommendationV2AndReplacementTests
             handler(candidate, dietaryPattern, cancellationToken);
     }
 }
-

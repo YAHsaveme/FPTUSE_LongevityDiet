@@ -768,4 +768,3 @@ public static class RecommendationRankingPipeline
         return raw.Trim().ToLowerInvariant();
     }
 }
-

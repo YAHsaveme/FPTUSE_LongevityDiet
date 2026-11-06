@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Protobuf Include="Protos\activity_coach.proto" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LongevityDiet.Domain\LongevityDiet.Domain.csproj" />
   </ItemGroup>
 

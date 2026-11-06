@@ -190,4 +190,3 @@ public sealed class MealLogsController(
                     x.IsPlantBased))
                 .ToList());
 }
-

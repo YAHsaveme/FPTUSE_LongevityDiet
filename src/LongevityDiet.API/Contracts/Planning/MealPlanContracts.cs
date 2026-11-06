@@ -108,4 +108,3 @@ public sealed record MealPlanResponse(
     DateTimeOffset GeneratedAt,
     DateTimeOffset UpdatedAt,
     IReadOnlyList<MealPlanDayResponse> Days);
-

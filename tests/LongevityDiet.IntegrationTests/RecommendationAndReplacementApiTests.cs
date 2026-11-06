@@ -198,4 +198,3 @@ public sealed class RecommendationAndReplacementApiTests : IClassFixture<Integra
         return client;
     }
 }
-

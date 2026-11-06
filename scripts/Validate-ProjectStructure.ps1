@@ -29,6 +29,8 @@ $requiredProjects = @(
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj',
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj',
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj',
+    # W2-T1 implementation owns an isolated TrackingDbContext in its own project.
+    'src\LongevityDiet.Tracking\LongevityDiet.Tracking.csproj',
     'src\LongevityDiet.API\LongevityDiet.API.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
@@ -103,7 +105,8 @@ $dependencyRules = @{
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
-    'src\LongevityDiet.API\LongevityDiet.API.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
+    'src\LongevityDiet.Tracking\LongevityDiet.Tracking.csproj' = @()
+    'src\LongevityDiet.API\LongevityDiet.API.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services', 'LongevityDiet.Tracking')
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj' = @('LongevityDiet.Domain')
 }

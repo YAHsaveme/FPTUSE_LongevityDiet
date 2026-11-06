@@ -14,4 +14,3 @@ public interface IFmdRepository
     Task AddCycleAsync(FmdCycle cycle, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
-

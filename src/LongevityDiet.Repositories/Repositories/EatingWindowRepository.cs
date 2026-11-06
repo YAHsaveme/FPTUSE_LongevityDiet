@@ -68,4 +68,3 @@ public sealed class EatingWindowRepository(LongevityDietDbContext dbContext) : I
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
-

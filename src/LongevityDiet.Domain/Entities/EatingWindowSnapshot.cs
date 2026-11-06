@@ -23,4 +23,3 @@ public sealed class EatingWindowSnapshot
     public string SummaryMessage { get; set; } = string.Empty;
     public DateTimeOffset CalculatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
-

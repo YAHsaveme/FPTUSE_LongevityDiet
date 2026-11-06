@@ -179,4 +179,3 @@ public sealed class FmdController(
         return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
     }
 }
-

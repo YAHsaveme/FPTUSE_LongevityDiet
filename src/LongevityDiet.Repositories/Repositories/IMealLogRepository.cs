@@ -18,4 +18,3 @@ public interface IMealLogRepository
     void ReplaceItems(MealLog mealLog, IReadOnlyList<MealLogItem> newItems);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
-

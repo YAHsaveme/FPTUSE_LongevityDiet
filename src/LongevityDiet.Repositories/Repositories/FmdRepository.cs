@@ -106,4 +106,3 @@ public sealed class FmdRepository(LongevityDietDbContext dbContext) : IFmdReposi
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
-
