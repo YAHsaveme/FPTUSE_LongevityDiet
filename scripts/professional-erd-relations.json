@@ -1,0 +1,133 @@
+{
+  "currentTables": 32,
+  "physicalCount": 9,
+  "logicalCount": 9,
+  "links": [
+    {
+      "from": "Users",
+      "to": "RefreshTokens",
+      "mode": "physical",
+      "cardinality": "1:N",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "Users",
+      "to": "UserProfiles",
+      "mode": "physical",
+      "cardinality": "1:1",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "Users",
+      "to": "ReminderPreferences",
+      "mode": "physical",
+      "cardinality": "1:1",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "Users",
+      "to": "UserNotifications",
+      "mode": "physical",
+      "cardinality": "1:N",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "MealPlans",
+      "to": "MealPlanDays",
+      "mode": "physical",
+      "cardinality": "1:N",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "MealPlanDays",
+      "to": "PlannedMeals",
+      "mode": "physical",
+      "cardinality": "1:N",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "MealLogs",
+      "to": "MealLogItems",
+      "mode": "physical",
+      "cardinality": "1:N",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "FmdCycles",
+      "to": "FmdCycleDays",
+      "mode": "physical",
+      "cardinality": "1:N",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "AdherenceScores",
+      "to": "ScoreDimensions",
+      "mode": "physical",
+      "cardinality": "1:N",
+      "reason": "SQL FK"
+    },
+    {
+      "from": "Users",
+      "to": "MealPlans",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "same UserId"
+    },
+    {
+      "from": "Users",
+      "to": "UserDietaryPreferences",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "same UserId"
+    },
+    {
+      "from": "UserProfiles",
+      "to": "UserFoodPreferences",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "same UserId"
+    },
+    {
+      "from": "MealPlans",
+      "to": "MealReplacementHistories",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "MealPlanId"
+    },
+    {
+      "from": "PlannedMeals",
+      "to": "MealReplacementHistories",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "PlannedMealId"
+    },
+    {
+      "from": "FmdSafetyAssessments",
+      "to": "FmdCycles",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "same UserId"
+    },
+    {
+      "from": "FmdEducationAcknowledgements",
+      "to": "FmdCycles",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "same UserId"
+    },
+    {
+      "from": "ScoreConfigurationVersions",
+      "to": "AdherenceScores",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "Version"
+    },
+    {
+      "from": "ReminderSchedules",
+      "to": "ReminderDispatchRecords",
+      "mode": "logical",
+      "cardinality": "",
+      "reason": "UserId and Category"
+    }
+  ]
+}
