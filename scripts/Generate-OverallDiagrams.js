@@ -137,7 +137,7 @@ function title(g,s,description){g.n(null,110,45,g.w-220,115,s,'title');g.n(null,
  g.n(null,150,6730,11450,530,'SHARED DEPENDENCIES (not extra API instances): ActivityCoach / Recommendation gRPC :8081 (stateless); Redis Streams :6379 <-> Reminder Worker; SQL: LongevityDietDb, LongevityTrackingDb, LongevityWorkerDb. Future clinical nutrition/check-in target is NOT deployed.','amber','fontSize=34;');
  g.save();
 }
-require('./Generate-ConnectedERD.js');
+require('./Generate-UnifiedERD.js');
 const manifest={
  status:'CURRENT_IMPLEMENTED_SOURCE',names:['C0','C1','C2','Database Diagram'],
  controllers:controllers.map(x=>({domain:x[0],controller:x[1],service:x[2],persistence:x[3],owner:x[4]})),

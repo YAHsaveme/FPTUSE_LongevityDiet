@@ -1,43 +1,48 @@
-# Database Diagram — mô hình dữ liệu tổng thể, có kết nối
+# Database Diagram — ERD tổng thể LongevityDiet
 
-[**Mở bản vẽ Draw.io để xem và chỉnh sửa**](one-page/Database%20Diagram.drawio) | [**Xem PDF một trang**](one-page/Database%20Diagram.pdf)
+**[Database Diagram — Draw.io chỉnh sửa được](one-page/Database%20Diagram.drawio)** · **[Xem PDF một trang](one-page/Database%20Diagram.pdf)**
 
-Sơ đồ chứa **đúng 32 bảng EF Core của hệ thống hiện tại** trong **3 database**. Tất cả 32 bảng đều có đường nối đi vào hoặc đi ra và đều có đường đi liên tục trong cùng một mạng tổng thể; không còn bảng nào xuất hiện rời rạc khi xem ở mức tổng thể.
+Đây là **một ERD thống nhất**, không còn vách ngăn cột, khung miền dữ liệu lớn, trục giả hoặc một sơ đồ FK tách riêng. Bố cục được tính theo luồng quan hệ: bắt đầu từ `Users`, phân nhánh sang hồ sơ, thực đơn, nhật ký ăn, FMD, hoạt động và hệ thống nhắc lịch. Mỗi bảng xuất hiện **đúng một lần** và có ít nhất một liên kết tới một bảng khác.
 
-## Cách đọc các loại đường
+## Cấu trúc dữ liệu đã triển khai
 
-| Kiểu đường | Số đường | Ý nghĩa chính xác |
-| --- | ---: | --- |
-| **Xanh đậm, Crow's Foot** | **9** | FK thực sự được EF Core khai báo, SQL Server có thể ràng buộc khi migration được áp dụng. Đường nối trực tiếp bảng cha với bảng con. |
-| **Vàng, nét đứt** | **4** | Liên hệ trực tiếp bằng khóa/mã nghiệp vụ trong code như `PlannedMealId`, `Version`, `UserId` và lịch nhắc, **không phải FK SQL**. |
-| **Tím, nét đứt** | **4** | Quan hệ phát sinh/tiêu thụ sự kiện, như Activity → TrackingOutbox, Schedule → Dispatch → WorkerOutbox. **Không phải FK SQL**. |
-| **Xanh lam, trục nhóm/nhánh** | **20** | Đường **định hướng nhóm nghiệp vụ và phạm vi sở hữu dữ liệu**. Các trục này **không phải bảng, không đại diện cho một phép JOIN và không phải FK**. |
+| Database vật lý | Bảng EF Core | FK SQL |
+| --- | ---: | ---: |
+| `LongevityDietDb` — Identity, Planning, Meal Logging, Recommendation, FMD | 21 | 8 |
+| `LongevityTrackingDb` — Activity, LDAS, Tracking | 7 | 1 |
+| `LongevityWorkerDb` — Reminder Worker, events | 4 | 0 |
+| **Tổng** | **32** | **9** |
 
-Tổng cộng **37 đường nối gắn native vào các thành phần**, nhưng chỉ **9 đường** là quan hệ FK SQL thật. Các đường trục làm người đọc thấy rõ mỗi bảng nằm trong miền nào mà không phải vẽ hàng chục đường UserId chéo nhau qua ba database.
+**31 đường nối trên cùng một ERD** được phân biệt như sau: **9 FK thật** dùng đường xanh đậm và ký hiệu Crow's Foot, **16 liên kết logic** dùng đường vàng nét đứt, **6 luồng sự kiện** dùng đường tím nét đứt. Hai loại nét đứt **không phải** khóa ngoại SQL hoặc cam kết tồn tại một phép JOIN ràng buộc trong database. Những liên kết chỉ dựa trên `UserId` hoặc cùng ngày mang ý nghĩa cùng phạm vi người dùng/nghiệp vụ, không khẳng định hai bản ghi tham chiếu duy nhất tới nhau.
 
-**Các chuỗi FK thực:** `Users → UserProfiles`, `Users → RefreshTokens`, `Users → ReminderPreferences`, `Users → UserNotifications`, `MealPlans → MealPlanDays → PlannedMeals`, `MealLogs → MealLogItems`, `FmdCycles → FmdCycleDays`, `AdherenceScores → ScoreDimensions`.
+### Toàn bộ chín quan hệ SQL thật
 
-**Database thực tế:** `LongevityDietDb` có 21 bảng (Identity/Planning/Meal Tracking/Recommendation/FMD), `LongevityTrackingDb` có 7 bảng, `LongevityWorkerDb` có 4 bảng. Không tự thêm FK chéo database.
+| Bảng cha (PK) | Bảng con (FK) | Bội số |
+| --- | --- | --- |
+| `Users.Id` | `UserProfiles.UserId` | 1–1 |
+| `Users.Id` | `RefreshTokens.UserId` | 1–N |
+| `Users.Id` | `ReminderPreferences.UserId` | 1–1 |
+| `Users.Id` | `UserNotifications.UserId` | 1–N |
+| `MealPlans.Id` | `MealPlanDays.MealPlanId` | 1–N |
+| `MealPlanDays.Id` | `PlannedMeals.MealPlanDayId` | 1–N |
+| `MealLogs.Id` | `MealLogItems.MealLogId` | 1–N |
+| `FmdCycles.Id` | `FmdCycleDays.FmdCycleId` | 1–N |
+| `AdherenceScores.Id` | `ScoreDimensions.AdherenceScoreId` | 1–N |
 
-Các bảng Outbox, Inbox và lịch nhắc tham gia **dòng sự kiện qua Redis Streams** theo code, không có FK xuyên database. Vì vậy, việc trình bày chúng trong một **mạng dữ liệu tổng thể** là hợp lý, nhưng việc tự nối chúng bằng khóa ngoại vật lý là sai kỹ thuật.
+### Tại sao các bảng còn lại vẫn có kết nối?
 
-## Nguồn chứng cứ nội bộ
+Các bảng như `UserFoodPreferences`, `MealPlans`, `ActivityGoals` và `FmdSafetyAssessments` lưu `UserId` nhưng chưa khai báo FK tương ứng; sơ đồ thể hiện bằng nét đứt và ghi rõ **APP REF**, không tạo ra ràng buộc SQL giả.
 
-- `src/LongevityDiet.Repositories/LongevityDietDbContext.cs`
-- `src/LongevityDiet.Tracking/TrackingDbContext.cs`
-- `src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs`
-- `src/LongevityDiet.Services/Reminders/ReminderService.cs`
-- `src/LongevityDiet.Worker/Reminders/ReminderWorkerEngine.cs`
-- `src/LongevityDiet.Tracking/TrackingService.cs`
-- `scripts/connected-erd-manifest.json` — mọi đường nối và mục đích của chúng.
+Các bảng `IdentityOutbox`, `TrackingOutbox`, `WorkerOutbox`, `IdentityInbox`, `WorkerProcessedEvents` tham gia luồng event/định danh event, nên dùng **mũi tên sự kiện** thay vì Crow's Foot. Tất cả 31 cặp bảng, loại liên kết và lý do được lưu trong **[manifest máy kiểm tra được](../../scripts/unified-erd-manifest.json)**.
 
-## Nguyên tắc ERD từ tài liệu chuyên môn
+Sơ đồ ưu tiên hiển thị PK, FK và cột liên hệ quan trọng để tránh quá tải chữ. **Các cột không hiện trong ô vẫn tồn tại trong EF Core source**; đây là ERD tổng thể về bảng và quan hệ, không thay thế toàn bộ bảng kê metadata cột. Không có migration hay thay đổi cơ sở dữ liệu nào được thực hiện khi vẽ lại.
 
-- [Microsoft — Crow's Foot, bội số quan hệ và bảng không có liên kết](https://support.microsoft.com/en-us/visio/create-a-diagram-with-crow-s-foot-database-notation)
-- [Microsoft — thiết kế database diagram và quan hệ vật lý](https://learn.microsoft.com/en-us/ssms/visual-db-tools/design-database-diagrams-visual-database-tools)
-- [draw.io — Crow's Foot notation và tránh quan hệ dư thừa](https://www.drawio.com/docs/tutorials/crows-foot-notation/)
-- [draw.io — nối bảng hoặc cột trong mô hình ER](https://www.drawio.com/docs/diagram-types/entity-relationship-tables/)
-- [dbdiagram — phân biệt `Ref` (FK) và `Dep` (data lineage)](https://docs.dbdiagram.io/data-lineage/)
-- [Edinburgh Napier — sử dụng đường nối vuông góc, hạn chế giao cắt](https://bdavison.napier.ac.uk/db/Practicals/Drawio/erd/)
+## Nguồn đối chiếu
 
-Tài liệu nghiên cứu [52 bảng dinh dưỡng tương lai](05-LONGITUDINAL-NUTRITION-TARGET.md) và [DBML mục tiêu](nutrition-target-52-tables.dbml) **không được trộn với schema đã triển khai**. Các kết quả kiểm tra hình học và model không thay thế kiểm thử SQL Server chạy thực tế.
+- Source hiện tại: `src/LongevityDiet.Repositories/LongevityDietDbContext.cs`, `src/LongevityDiet.Tracking/TrackingDbContext.cs`, `src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs`.
+- [Microsoft — Crow's Foot và bội số quan hệ](https://support.microsoft.com/en-us/visio/create-a-diagram-with-crow-s-foot-database-notation).
+- [Microsoft — sơ đồ vật lý, đường liền và đường chấm](https://learn.microsoft.com/en-us/ssms/visual-db-tools/design-database-diagrams-visual-database-tools).
+- [draw.io — ER table shapes](https://www.drawio.com/docs/diagram-types/entity-relationship-tables/).
+- [dbdiagram — Relationship semantics](https://docs.dbdiagram.io/relationships/).
+
+Mô hình **52 bảng dinh dưỡng đề xuất** là một thiết kế tương lai riêng: [đặc tả nghiên cứu](05-LONGITUDINAL-NUTRITION-TARGET.md) và [DBML mục tiêu](nutrition-target-52-tables.dbml). Những bảng dự kiến này chưa nằm trong database hiện tại.

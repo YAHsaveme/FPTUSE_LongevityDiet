@@ -1,0 +1,234 @@
+{
+  "scope": "CURRENT_EF_MAPPED",
+  "tableCount": 32,
+  "databaseCounts": {
+    "identity": 21,
+    "tracking": 7,
+    "worker": 4
+  },
+  "actualSqlFKs": 9,
+  "logicalLinks": 16,
+  "eventLinks": 6,
+  "totalRelationships": 31,
+  "noDividers": true,
+  "noPseudoHubs": true,
+  "relationships": [
+    {
+      "from": "Users",
+      "to": "UserProfiles",
+      "kind": "sql",
+      "cardinality": "1:1",
+      "reason": "Users.Id = UserProfiles.UserId"
+    },
+    {
+      "from": "Users",
+      "to": "RefreshTokens",
+      "kind": "sql",
+      "cardinality": "1:N",
+      "reason": "Users.Id = RefreshTokens.UserId"
+    },
+    {
+      "from": "Users",
+      "to": "ReminderPreferences",
+      "kind": "sql",
+      "cardinality": "1:1",
+      "reason": "Users.Id = ReminderPreferences.UserId"
+    },
+    {
+      "from": "Users",
+      "to": "UserNotifications",
+      "kind": "sql",
+      "cardinality": "1:N",
+      "reason": "Users.Id = UserNotifications.UserId"
+    },
+    {
+      "from": "UserProfiles",
+      "to": "UserFoodPreferences",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId; no SQL FK"
+    },
+    {
+      "from": "UserProfiles",
+      "to": "UserDietaryPreferences",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId; no SQL FK"
+    },
+    {
+      "from": "UserDietaryPreferences",
+      "to": "MealPlans",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId; no SQL FK"
+    },
+    {
+      "from": "MealPlans",
+      "to": "MealPlanDays",
+      "kind": "sql",
+      "cardinality": "1:N",
+      "reason": "MealPlans.Id = MealPlanDays.MealPlanId"
+    },
+    {
+      "from": "MealPlanDays",
+      "to": "PlannedMeals",
+      "kind": "sql",
+      "cardinality": "1:N",
+      "reason": "MealPlanDays.Id = PlannedMeals.MealPlanDayId"
+    },
+    {
+      "from": "PlannedMeals",
+      "to": "MealReplacementHistories",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "MealReplacementHistory.PlannedMealId; not SQL FK"
+    },
+    {
+      "from": "PlannedMeals",
+      "to": "RecommendationFeedbacks",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "optional RecommendationFeedback.PlannedMealId"
+    },
+    {
+      "from": "Users",
+      "to": "MealLogs",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "Users.Id = MealLogs.UserId; not SQL FK"
+    },
+    {
+      "from": "MealLogs",
+      "to": "MealLogItems",
+      "kind": "sql",
+      "cardinality": "1:N",
+      "reason": "MealLogs.Id = MealLogItems.MealLogId"
+    },
+    {
+      "from": "MealLogs",
+      "to": "EatingWindowSnapshots",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId and LocalDate; not SQL FK"
+    },
+    {
+      "from": "Users",
+      "to": "FmdSafetyAssessments",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId; not SQL FK"
+    },
+    {
+      "from": "FmdSafetyAssessments",
+      "to": "FmdCycles",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId; safety eligibility context"
+    },
+    {
+      "from": "FmdCycles",
+      "to": "FmdCycleDays",
+      "kind": "sql",
+      "cardinality": "1:N",
+      "reason": "FmdCycles.Id = FmdCycleDays.FmdCycleId"
+    },
+    {
+      "from": "FmdSafetyAssessments",
+      "to": "FmdEducationAcknowledgements",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId; not SQL FK"
+    },
+    {
+      "from": "Users",
+      "to": "ActivityGoals",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "Users.Id = ActivityGoals.UserId across databases"
+    },
+    {
+      "from": "ActivityGoals",
+      "to": "ActivityLogs",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId; not SQL FK"
+    },
+    {
+      "from": "ActivityLogs",
+      "to": "TrackingOutbox",
+      "kind": "event",
+      "cardinality": "",
+      "reason": "activity change event produced by TrackingService"
+    },
+    {
+      "from": "TrackingOutbox",
+      "to": "TrackingScoreSignals",
+      "kind": "event",
+      "cardinality": "",
+      "reason": "TrackingOutbox.EventId = TrackingScoreSignal.SourceEventId"
+    },
+    {
+      "from": "TrackingScoreSignals",
+      "to": "AdherenceScores",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId and LocalDate; score input context"
+    },
+    {
+      "from": "AdherenceScores",
+      "to": "ScoreDimensions",
+      "kind": "sql",
+      "cardinality": "1:N",
+      "reason": "AdherenceScores.Id = ScoreDimensions.AdherenceScoreId"
+    },
+    {
+      "from": "AdherenceScores",
+      "to": "ScoreConfigurationVersions",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "AdherenceScores.Version uses ScoreConfigurationVersions.Version"
+    },
+    {
+      "from": "Users",
+      "to": "IdentityOutbox",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "Users.Id = IdentityOutbox.UserId; not SQL FK"
+    },
+    {
+      "from": "IdentityOutbox",
+      "to": "ReminderSchedules",
+      "kind": "event",
+      "cardinality": "",
+      "reason": "identity reminder change event -> Worker schedule"
+    },
+    {
+      "from": "ReminderSchedules",
+      "to": "ReminderDispatchRecords",
+      "kind": "logical",
+      "cardinality": "",
+      "reason": "same UserId, Category and due-time context"
+    },
+    {
+      "from": "ReminderDispatchRecords",
+      "to": "WorkerOutbox",
+      "kind": "event",
+      "cardinality": "",
+      "reason": "Worker emits notification-ready event"
+    },
+    {
+      "from": "WorkerOutbox",
+      "to": "IdentityInbox",
+      "kind": "event",
+      "cardinality": "",
+      "reason": "event idempotency correlation through EventId"
+    },
+    {
+      "from": "IdentityOutbox",
+      "to": "WorkerProcessedEvents",
+      "kind": "event",
+      "cardinality": "",
+      "reason": "Worker processed identity event by EventId"
+    }
+  ]
+}
