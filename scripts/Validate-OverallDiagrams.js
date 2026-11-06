@@ -106,6 +106,45 @@ const tableNodes=db.vertices.filter(v=>[...expectedNames].some(t=>(v.a.value||''
 const cardMap=new Map(tableNodes.map(v=>[(v.a.value||'').split('&lt;b&gt;')[1].split('&lt;/b&gt;')[0],v]));
 check(tableNodes.length===32 && cardMap.size===32,'Every actual mapped table must appear exactly once');
 for(const table of expectedNames)check(cardMap.has(table),'Missing source table '+table);
+// Readability gate: geometry and typography checked together, not only edge counts.
+const dbCodes={identity:'I',tracking:'T',worker:'W'};
+const ownerByTable=new Map();
+const physicalSchema=JSON.parse(fs.readFileSync(path.join(root,'scripts/current-physical-schema.json'),'utf8'));
+for(const [owner,model] of Object.entries(physicalSchema.groups))
+ for(const n of Object.keys(model.columns))ownerByTable.set(n,owner);
+const dbPage=+(nativeERD.match(/pageWidth="([\d.]+)"/)||[])[1];
+let minFontRatio=Infinity,maxCapacity=0;
+for(const [name,card] of cardMap){
+ const geometry=card.body.match(/<mxGeometry\b([^>]*?)\/>/);
+ check(Boolean(geometry),'Missing real table bounds '+name);
+ if(!geometry)continue;
+ const bounds=attr(geometry[1]);
+ const width=+bounds.width,height=+bounds.height;
+ const font=+(card.a.style.match(/fontSize=([\d.]+)/)||[])[1];
+ const owner=ownerByTable.get(name);
+ check(owner&&card.a.value.includes('['+dbCodes[owner]+']'),'Short database ID absent from '+name);
+ check(card.a.value.startsWith('&lt;b&gt;'+name+'&lt;/b&gt;'),'Table header clipped or renamed '+name);
+ const lineText=card.a.value.replace(/&lt;br\s*\/&gt;/g,'\n').replace(/&lt;.*?&gt;/g,'').replace(/&amp;/g,'&');
+ const lines=lineText.split('\n');
+ const maxChars=Math.max(...lines.map(x=>x.length));
+ const estimatedWidth=maxChars*font*0.70;
+ const estimatedHeight=lines.length*font*1.35+24;
+ check(estimatedWidth<width-10,'Likely text horizontal overflow '+name+' chars='+maxChars);
+ check(estimatedHeight<height-10,'Likely text vertical overflow '+name+' lines='+lines.length);
+ minFontRatio=Math.min(minFontRatio,font/dbPage);
+ maxCapacity=Math.max(maxCapacity,estimatedHeight/height);
+}
+check(minFontRatio>=0.004,'ERD card font too small relative to page width: '+minFontRatio.toFixed(5));
+for(const rel of unified.relationships){
+ const A=cardMap.get(rel.from),B=cardMap.get(rel.to);if(!A||!B)continue;
+ const edge=db.edges.find(e=>e.a.source===A.a.id&&e.a.target===B.a.id);
+ if(rel.kind!=='sql')check(Boolean(edge&&edge.a.value.includes(': '))&&
+  !/business key|^EVENT$|^APP:\s*$/.test(edge.a.value),
+  'Vague APP/EVENT relationship label: '+rel.from+' -> '+rel.to);
+}
+console.log('READABILITY_QA: minTableFontToPageWidth='+minFontRatio.toFixed(5)+
+ ' maxEstimatedTextHeightUse='+maxCapacity.toFixed(3)+' databaseCodeKeys='+cardMap.size);
+
 const planned=new Set();
 for(const rel of unified.relationships){
  const pair=rel.from+'|'+rel.to;
