@@ -31,14 +31,10 @@ jobs:
             src/LongevityDiet.Web/package-lock.json
             tests/LongevityDiet.E2ETests/package-lock.json
 
-      - name: Validate native Draw.io architecture, ERD and end-to-end flows
+      - name: Validate four overall C0 C1 C2 Database diagrams
         run: |
-          node ./scripts/Validate-CourseDiagrams.js
-          node ./scripts/Validate-CourseRouting.js
-          node ./scripts/Validate-ArchitectureTopology.js
-          node ./scripts/Validate-EndToEndFlow.js
+          node ./scripts/Validate-OverallDiagrams.js
           node ./scripts/Validate-CourseLinks.js
-          node ./scripts/Validate-LongevityNutritionTarget.js
           node ./scripts/Validate-NutritionPlanContract.js
 
       - name: Validate frozen project structure

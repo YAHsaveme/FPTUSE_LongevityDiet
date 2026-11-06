@@ -73,18 +73,10 @@ PRN232_LongevityDiet/
 
 ## System architecture
 
-For the PRN232 final assignment, use [four course-sized diagrams](docs/assignment/one-page/README.md).
-They comprise C0 Context, C1 Containers, C2 REST API Components, and a ten-table core ERD in DBML.
+**Only four overall diagrams are canonical:** [C0](docs/assignment/one-page/C0.drawio), [C1](docs/assignment/one-page/C1.drawio), [C2](docs/assignment/one-page/C2.drawio), and [Database Diagram](docs/assignment/one-page/Database%20Diagram.drawio). All include one-page PDFs; see the [four-diagram index](docs/assignment/one-page/README.md). The full physical diagram shows 32 mapped EF Core tables and nine local SQL FKs. No separate teaching subset or redundant supplement is needed.
 
-Three optional supporting technical diagrams are available:
-[Docker deployment](docs/architecture/03-docker-deployment.drawio),
-[Redis event flow](docs/architecture/06-outbox-redis-dynamic.drawio), and
-[end-to-end demonstration](docs/architecture/09-end-to-end-demo-flow.drawio).
+See the [assignment evidence](docs/assignment/00-ASSIGNMENT-DOCUMENT.md) and [traceability](docs/10-PRN232-TRACEABILITY.md).
 
-See the [assignment summary](docs/assignment/00-ASSIGNMENT-DOCUMENT.md)
-and [PRN232 traceability](docs/10-PRN232-TRACEABILITY.md) for the grading evidence.
-The old six-service and 33-table design proposals have been archived externally
-and must not be confused with implemented runtime functionality.
 ## Current implementation status
 
 ### Completed engineering baseline
@@ -273,10 +265,10 @@ See `docs/01-BOOK-RESEARCH.md` and `docs/11-BOOK-TO-SOFTWARE-TRACEABILITY.md`.
 
 **Canonical assignment**: [four editable one-page diagrams and validation](docs/assignment/one-page/README.md).
 
-- [C0 System Context (Draw.io)](docs/assignment/one-page/01-c0-system-context.drawio) and [PDF](docs/assignment/one-page/01-c0-system-context.pdf)
-- [C1 Container (Draw.io)](docs/assignment/one-page/02-c1-container-architecture.drawio) and [PDF](docs/assignment/one-page/02-c1-container-architecture.pdf)
-- [C2 REST API Components (Draw.io)](docs/assignment/one-page/03-c2-api-components.drawio) and [PDF](docs/assignment/one-page/03-c2-api-components.pdf)
-- [Core ERD (DBML)](docs/assignment/one-page/04-database-core.dbml) and [one-page PDF](docs/assignment/one-page/04-database-core.pdf)
+- [C0 System Context (Draw.io)](docs/assignment/one-page/C0.drawio) and [PDF](docs/assignment/one-page/C0.pdf)
+- [C1 Container (Draw.io)](docs/assignment/one-page/C1.drawio) and [PDF](docs/assignment/one-page/C1.pdf)
+- [C2 REST API Components (Draw.io)](docs/assignment/one-page/C2.drawio) and [PDF](docs/assignment/one-page/C2.pdf)
+- [Database Diagram (Draw.io)](docs/assignment/one-page/Database%20Diagram.drawio) and [one-page PDF](docs/assignment/one-page/Database%20Diagram.pdf)
 
-The DBML shows **10 core teaching tables chosen from 32 mapped EF Core tables**. It is an assignment reading view, not a complete database migration. C2 covers **one existing REST API container** rather than six proposed microservices. RecommendationController now invokes the independent ActivityCoach gRPC service with a real HTTP/2 integration test (SQLite); live Docker/SQL Server E2E remains to be verified. Supporting deployment and event flow diagrams live in [docs/architecture](docs/architecture/README.md).
+The complete Database Diagram shows all **32 mapped EF Core tables and 9 real foreign keys**, while C2 shows all **10 current API controller modules**. The independent ActivityCoach gRPC connection has an HTTP/2 integration test; full live Docker/SQL Server E2E is still unverified.
 To opt in *after provisioning and verifying* a Cloudflare Worker + D1, set secret environment variables `CloudflareSessions__Enabled=true`, `CloudflareSessions__BaseUrl=https://YOUR_PRIVATE_WORKER_HOST/` and `CloudflareSessions__ServiceBearer=<FROM_SECURE_SECRET_MANAGER>`; do **not** put credentials into Git or `appsettings.json`. See the migration guide before switching live sessions.

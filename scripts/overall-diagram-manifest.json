@@ -1,0 +1,209 @@
+{
+  "status": "CURRENT_IMPLEMENTED_SOURCE",
+  "names": [
+    "C0",
+    "C1",
+    "C2",
+    "Database Diagram"
+  ],
+  "controllers": [
+    {
+      "domain": "Auth",
+      "controller": "AuthController",
+      "service": "AuthenticationService",
+      "persistence": "User + Token repositories",
+      "owner": "LongevityDietDb"
+    },
+    {
+      "domain": "Profile",
+      "controller": "ProfileController",
+      "service": "ProfileService",
+      "persistence": "UserProfile repository",
+      "owner": "LongevityDietDb"
+    },
+    {
+      "domain": "Reminders",
+      "controller": "ReminderNotificationsController",
+      "service": "ReminderService + IdentityRedisBridge",
+      "persistence": "Identity outbox / inbox",
+      "owner": "LongevityDietDb + Redis"
+    },
+    {
+      "domain": "Activity",
+      "controller": "TrackingController",
+      "service": "TrackingService",
+      "persistence": "TrackingDbContext",
+      "owner": "LongevityTrackingDb"
+    },
+    {
+      "domain": "Activity advice",
+      "controller": "RecommendationController",
+      "service": "ActivityCoach gRPC client",
+      "persistence": "gRPC adapter (stateless)",
+      "owner": "Recommendation gRPC"
+    },
+    {
+      "domain": "Meal plans",
+      "controller": "MealPlansController",
+      "service": "MealPlanningService",
+      "persistence": "MealPlanRepository",
+      "owner": "LongevityDietDb"
+    },
+    {
+      "domain": "Meal logs",
+      "controller": "MealLogsController",
+      "service": "MealTrackingService",
+      "persistence": "MealLogRepository",
+      "owner": "LongevityDietDb"
+    },
+    {
+      "domain": "Eating window",
+      "controller": "EatingWindowController",
+      "service": "MealTrackingService",
+      "persistence": "EatingWindowRepository",
+      "owner": "LongevityDietDb"
+    },
+    {
+      "domain": "Recommendations",
+      "controller": "RecommendationsController",
+      "service": "RecommendationService + gRPC client",
+      "persistence": "RecommendationRepository",
+      "owner": "LongevityDietDb + gRPC"
+    },
+    {
+      "domain": "FMD",
+      "controller": "FmdController",
+      "service": "FmdService",
+      "persistence": "FmdRepository",
+      "owner": "LongevityDietDb"
+    }
+  ],
+  "mappedTableCount": 32,
+  "tableGroups": {
+    "identity": 21,
+    "tracking": 7,
+    "worker": 4
+  },
+  "sqlForeignKeys": 9,
+  "realRelationships": [
+    {
+      "owner": "identity",
+      "parent": "Users",
+      "parentColumn": "Id",
+      "child": "UserProfiles",
+      "childColumn": "UserId",
+      "cardinality": "1:1"
+    },
+    {
+      "owner": "identity",
+      "parent": "Users",
+      "parentColumn": "Id",
+      "child": "RefreshTokens",
+      "childColumn": "UserId",
+      "cardinality": "1:N"
+    },
+    {
+      "owner": "identity",
+      "parent": "Users",
+      "parentColumn": "Id",
+      "child": "ReminderPreferences",
+      "childColumn": "UserId",
+      "cardinality": "1:1"
+    },
+    {
+      "owner": "identity",
+      "parent": "Users",
+      "parentColumn": "Id",
+      "child": "UserNotifications",
+      "childColumn": "UserId",
+      "cardinality": "1:N"
+    },
+    {
+      "owner": "identity",
+      "parent": "MealPlans",
+      "parentColumn": "Id",
+      "child": "MealPlanDays",
+      "childColumn": "MealPlanId",
+      "cardinality": "1:N"
+    },
+    {
+      "owner": "identity",
+      "parent": "MealPlanDays",
+      "parentColumn": "Id",
+      "child": "PlannedMeals",
+      "childColumn": "MealPlanDayId",
+      "cardinality": "1:N"
+    },
+    {
+      "owner": "identity",
+      "parent": "MealLogs",
+      "parentColumn": "Id",
+      "child": "MealLogItems",
+      "childColumn": "MealLogId",
+      "cardinality": "1:N"
+    },
+    {
+      "owner": "identity",
+      "parent": "FmdCycles",
+      "parentColumn": "Id",
+      "child": "FmdCycleDays",
+      "childColumn": "FmdCycleId",
+      "cardinality": "1:N"
+    },
+    {
+      "owner": "tracking",
+      "parent": "AdherenceScores",
+      "parentColumn": "Id",
+      "child": "ScoreDimensions",
+      "childColumn": "AdherenceScoreId",
+      "cardinality": "1:N"
+    }
+  ],
+  "labels": {
+    "C0": "C0",
+    "C1": "C1",
+    "C2": "C2",
+    "database": "Database Diagram"
+  },
+  "databaseCardNames": [
+    "Users",
+    "UserProfiles",
+    "RefreshTokens",
+    "ReminderPreferences",
+    "UserNotifications",
+    "IdentityOutbox",
+    "IdentityInbox",
+    "UserDietaryPreferences",
+    "MealPlans",
+    "MealPlanDays",
+    "PlannedMeals",
+    "MealLogs",
+    "MealLogItems",
+    "EatingWindowSnapshots",
+    "RecommendationFeedbacks",
+    "MealReplacementHistories",
+    "UserFoodPreferences",
+    "FmdEducationAcknowledgements",
+    "FmdSafetyAssessments",
+    "FmdCycles",
+    "FmdCycleDays",
+    "ActivityLogs",
+    "ActivityGoals",
+    "AdherenceScores",
+    "ScoreDimensions",
+    "ScoreConfigurationVersions",
+    "TrackingScoreSignals",
+    "TrackingOutbox",
+    "ReminderSchedules",
+    "ReminderDispatchRecords",
+    "WorkerProcessedEvents",
+    "WorkerOutbox"
+  ],
+  "ports": [
+    "5173:80",
+    "8080:8080",
+    "8081:8081",
+    "6379:6379",
+    "14330:1433"
+  ]
+}

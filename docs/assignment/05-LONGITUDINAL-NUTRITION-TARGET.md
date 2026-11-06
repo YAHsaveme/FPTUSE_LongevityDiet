@@ -71,19 +71,11 @@ The C2 target reuses the existing ASP.NET Core REST container at :8080, Nginx UI
 - NCI NIH ASA24 dietary records and multiple day recall methodology: https://epi.grants.cancer.gov/asa24/respondent/methodology.html
 - WHO digital health intervention taxonomy (self-monitoring, targeted prompts, consent): https://smart.who.int/base/CodeSystem-CDHIv2.html
 
-## H. Deliverables and implementation status
-- `one-page/07-c2-daily-nutrition-target.drawio` – PROPOSED C2 components and data ownership.
-- `one-page/08-nutrition-target-52-tables.dbml` – source-of-truth candidate FK graph with uniqueness constraints for calendar coverage, idempotency and multi-choice answers.
-- `one-page/08-erd-nutrition-profile-safety-target.drawio` – onboarding, restrictions, consent.
-- `one-page/09-erd-food-daily-plans-target.drawio` – food, allergens, recipe, calendar days, multiple meals.
-- `one-page/10-erd-checkins-trends-target.drawio` – intake, questionnaires, symptoms, assessments and reminders.
-- `one-page/11-daily-care-loop-target.drawio` – explicit baseline → schedule → meal → feedback → next day.
-- `one-page/12-erd-cross-domain-foreign-keys-target.drawio` – 21 explicit cross-sheet SQL FK arrows (not cross-database).
-- `one-page/13-fk-profile-safety-target.drawio`, `14-fk-food-daily-plans-target.drawio`, `15-fk-checkins-trends-target.drawio` – 14 + 22 + 17 clear local FK rows. Together with 12, these show **all 74 FKs, one arrow per relationship**, without a tangled connector network.
-- `one-page/16-c2-service-dependencies-target.drawio` – 13 explicit inter-component calls showing the safety gate, clinician-review escalation, meal/check-in feedback, future plan revision and Redis/Worker delivery.
-- Existing 01–06 as-is current-code architectural diagrams are intentionally **not overwritten**.
-- **No source API endpoints, EF migrations, food database, clinical rule engine, recommendation model or UI implementation are implied by these new diagrams.** The 52 tables and 74 FKs are a **design proposal**, not existing SQL schema or medical validation.
-- Explicit system acceptance is still required: zero missing local dates across 7/14/30-day calendar boundaries, mandatory allergy/cross-contact gate before publishing any meal, high-risk hold with human review, correct check-in consent/quiet hours, no mistaken inference from missing answers, preservation of all original historical days, and user-level privacy isolation.
+## H. Research sources, not additional current diagrams
+
+The canonical architecture handover now consists only of [C0](one-page/C0.drawio), [C1](one-page/C1.drawio), [C2](one-page/C2.drawio) and [Database Diagram](one-page/Database%20Diagram.drawio).
+
+The normalized **52-table proposed nutrition database** remains available as a single [candidate DBML](nutrition-target-52-tables.dbml), together with the research and acceptance rules in this document. Earlier exploratory target Draw.io/PDF variants were removed to avoid confusing planned medical features with implemented code. No new nutrition target tables have been migrated.
 
 ## I. Rolling every-day plan and timeline invariants (design contract, not runtime)
 

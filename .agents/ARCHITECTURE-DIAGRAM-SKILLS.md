@@ -14,8 +14,8 @@ when the coursework asks only for one REST API, one independent gRPC service,
 one background job and one producer/consumer broker.
 
 Canonical diagrams: docs/assignment/one-page/README.md.
-Regeneration: scripts/Export-CourseDiagrams.ps1.
-Validation: scripts/Validate-CourseDiagrams.js.
+Regeneration: scripts/Export-OverallDiagrams.ps1.
+Validation: scripts/Validate-OverallDiagrams.js.
 
 References:
 - https://c4model.com/diagrams
