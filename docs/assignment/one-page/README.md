@@ -11,6 +11,8 @@ Chỉ giữ **4 sơ đồ chính**, không thêm tiền tố số hoặc các b�
 
 **Đối chiếu chi tiết:** [Bảng kiểm tra liên thông C1, C2 và đầy đủ 32 bảng](../04-ARCHITECTURE-CONNECTIVITY-REGISTER.md). Trên C2, tìm mã **A01–A10** ở ô `DATA REFERENCE` bên trái và đúng mã bên cạnh bảng thật ở phần ERD để lần đường nhanh, không cần đoán bằng mắt.
 
+**Bản C1/C2 tối ưu chữ (07/11/2026):** Đã tăng kích thước chữ trong các service, controller, database và bảng; rút ngắn nhãn đường nối thành `HTTP`, `Call`, `Data`, `Ref`, đặt thông tin cổng trong ô liên quan. C2 tự tính font theo độ dài tên trường và kích thước bảng, bảo toàn đủ 32/32 bảng và các kết nối. Mỗi lần xuất sẽ kiểm tra thêm nguy cơ chữ tràn/chồng trong từng ô, bên cạnh kiểm tra mũi tên, SVG và layout.
+
 **C2 mới không chỉ dừng ở tên database.** Mỗi repository có điểm tham chiếu tới **tên bảng cụ thể**, sau đó đọc mạng 32 bảng ở cùng bản vẽ. Có **một mũi tên nối trực tiếp** từ một tham chiếu tới bảng thật để liên thông hai phần; 9 quan hệ FK thật dùng Crow's Foot, 16 liên hệ logic dùng nét đứt và 6 luồng sự kiện dùng nét chấm. Tham chiếu bảng **không tạo ra bảng SQL mới**.
 
 Trong code hiện tại, `LongevityDietDb` có **21 bảng**, `LongevityTrackingDb` có **7**, `LongevityWorkerDb` có **4**. Recommendation gRPC là dịch vụ **stateless**, không có database riêng. Các đề xuất dinh dưỡng 52 bảng thuộc thiết kế tương lai, không nằm trong sơ đồ hiện tại.

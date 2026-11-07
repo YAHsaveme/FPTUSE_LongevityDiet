@@ -121,57 +121,57 @@
         {
           "from": "member",
           "to": "web",
-          "label": "Web access :5173"
+          "label": "HTTP :5173"
         },
         {
           "from": "admin",
           "to": "web",
-          "label": "Role-based access"
+          "label": "Role access"
         },
         {
           "from": "web",
           "to": "api",
-          "label": "/api reverse proxy HTTP :8080"
+          "label": "/api :8080"
         },
         {
           "from": "api",
           "to": "grpc",
-          "label": "gRPC HTTP/2 :8081"
+          "label": "HTTP/2 :8081"
         },
         {
           "from": "api",
           "to": "redis",
-          "label": "XADD events TCP :6379"
+          "label": "XADD :6379"
         },
         {
           "from": "redis",
           "to": "api",
-          "label": "XREAD results TCP :6379"
+          "label": "XREAD :6379"
         },
         {
           "from": "redis",
           "to": "worker",
-          "label": "XREAD stream :6379"
+          "label": "XREAD :6379"
         },
         {
           "from": "worker",
           "to": "redis",
-          "label": "XADD result :6379"
+          "label": "XADD :6379"
         },
         {
           "from": "api",
           "to": "identity",
-          "label": "EF Core SQL TCP :1433"
+          "label": "SQL :1433"
         },
         {
           "from": "api",
           "to": "tracking",
-          "label": "EF Core SQL TCP :1433"
+          "label": "SQL :1433"
         },
         {
           "from": "worker",
           "to": "workerdb",
-          "label": "Worker SQL TCP :1433"
+          "label": "SQL :1433"
         }
       ],
       "nodes": [
@@ -276,7 +276,7 @@
           "from": "router",
           "to": "ctrl0",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl0",
@@ -288,19 +288,19 @@
           "from": "service0",
           "to": "repo0",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo0",
           "to": "ref0",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl1",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl1",
@@ -312,19 +312,19 @@
           "from": "service1",
           "to": "repo1",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo1",
           "to": "ref1",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl2",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl2",
@@ -336,19 +336,19 @@
           "from": "service2",
           "to": "repo2",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo2",
           "to": "ref2",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl3",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl3",
@@ -360,19 +360,19 @@
           "from": "service3",
           "to": "repo3",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo3",
           "to": "ref3",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl4",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl4",
@@ -384,19 +384,19 @@
           "from": "service4",
           "to": "repo4",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo4",
           "to": "ref4",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl5",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl5",
@@ -408,19 +408,19 @@
           "from": "service5",
           "to": "repo5",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo5",
           "to": "ref5",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl6",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl6",
@@ -432,19 +432,19 @@
           "from": "service6",
           "to": "repo6",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo6",
           "to": "ref6",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl7",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl7",
@@ -456,19 +456,19 @@
           "from": "service7",
           "to": "repo7",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo7",
           "to": "ref7",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl8",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl8",
@@ -480,19 +480,19 @@
           "from": "service8",
           "to": "repo8",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo8",
           "to": "ref8",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "router",
           "to": "ctrl9",
           "type": "component",
-          "label": "HTTP endpoint"
+          "label": "HTTP"
         },
         {
           "from": "ctrl9",
@@ -504,13 +504,13 @@
           "from": "service9",
           "to": "repo9",
           "type": "component",
-          "label": "Data access"
+          "label": "Data"
         },
         {
           "from": "repo9",
           "to": "ref9",
           "type": "access",
-          "label": "TABLE REF"
+          "label": "Ref"
         },
         {
           "from": "table:Users",

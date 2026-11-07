@@ -52,7 +52,7 @@ class Diagram{
   const exit=opts.exit||[1,.5],entry=opts.entry||[0,.5],via=opts.via||[];
   const s='edgeStyle=segmentEdgeStyle;rounded=0;orthogonal=1;html=1;strokeColor=#000000;strokeWidth='+(opts.width||5)+';'+
    (opts.dashed?'dashed=1;dashPattern=12 8;':'')+
-   'startArrow=none;endArrow=block;endFill=1;endSize=22;fontFamily=Arial;fontColor=#000000;fontSize=35;labelBackgroundColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;'+
+   'startArrow=none;endArrow=block;endFill=1;endSize=22;fontFamily=Arial;fontColor=#000000;fontSize='+(this.name==='C1'?68:35)+';labelBackgroundColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;'+
    'exitX='+exit[0]+';exitY='+exit[1]+';exitPerimeter=0;entryX='+entry[0]+';entryY='+entry[1]+';entryPerimeter=0;';
   const way=via.length?'<Array as="points">'+via.map(p=>'<mxPoint x="'+p[0]+'" y="'+p[1]+'"/>').join('')+'</Array>':'';
   this.arrows.push('<mxCell id="a'+(++this.seq)+'" value="'+esc(label)+'" style="'+esc(s)+'" edge="1" source="'+A.id+'" target="'+B.id+'" parent="1"><mxGeometry relative="1" as="geometry">'+way+'</mxGeometry></mxCell>');
@@ -81,31 +81,31 @@ c0.edge('admin','system','Role-authorized use',{exit:[1,.5],entry:[0,.78],via:[[
 c0.node(null,375,2920,6780,260,'C0 shows the WHO and WHAT. Protocols, ports, databases and services are shown at C1/C2, as required by the C4 abstraction levels.',{kind:'note',font:36});
 const C0=c0.save();
 const c1=new Diagram('C1',17450,6050);
-header(c1,'C1  |  CONTAINER ARCHITECTURE','Ports, protocol direction, data ownership, SQL catalogs and stateless services  /  Docker Compose');
+header(c1,'C1  |  CONTAINER ARCHITECTURE','Actual ports, protocol directions, service owners and three SQL catalogs');
 c1.node(null,5130,3900,11960,1610,'',{kind:'frame',background:true});
 c1.node(null,5300,5215,11550,115,'ONE SQL SERVER  /  sqlserver:1433 TCP  /  host published :14330  /  3 distinct catalogs',{kind:'text',font:45});
-c1.node('member',205,790,1670,395,'MEMBER',{font:51});
-c1.node('admin',205,1550,1670,395,'ADMIN  /  role',{font:49});
-c1.node('web',2350,1140,2430,670,'WEB / NGINX\nReact SPA  HTTP :80\nhost published :5173',{font:48});
-c1.node('api',5510,1120,2660,690,'REST API  (.NET)\nhttp://api:8080\nAuth, meals, tracking, FMD',{font:46});
-c1.node('grpc',10200,540,2720,670,'RECOMMENDATION gRPC\nHTTP/2 :8081\nSTATELESS  |  NO OWN DB',{font:45});
-c1.node('redis',10100,2230,2780,640,'REDIS STREAMS\nredis:6379 TCP / host :6379\nAsync preference and result events',{font:43});
-c1.node('worker',14000,2240,2740,620,'REMINDER WORKER\nRedis consumer / schedule\nNO inbound HTTP port',{font:44});
-c1.node('identity',5390,4410,3270,630,'LongevityDietDb  |  21 tables\nIdentity, Planning and FMD\nSQL catalog TCP :1433',{kind:'db',font:46});
-c1.node('tracking',9560,4410,3210,630,'LongevityTrackingDb  |  7 tables\nActivity and Adherence\nSQL catalog TCP :1433',{kind:'db',font:46});
-c1.node('workerdb',13720,4410,3130,630,'LongevityWorkerDb  |  4 tables\nWorker schedules / outbox\nSQL catalog TCP :1433',{kind:'db',font:45});
-c1.edge('member','web','Web access :5173',{exit:[1,.5],entry:[0,.29]});
-c1.edge('admin','web','Role-based access',{exit:[1,.5],entry:[0,.78]});
-c1.edge('web','api','/api reverse proxy HTTP :8080');
-c1.edge('api','grpc','gRPC HTTP/2 :8081',{exit:[1,.22],entry:[0,.5],via:[[9120,1272],[9120,875]]});
-c1.edge('api','redis','XADD events TCP :6379',{exit:[1,.73],entry:[0,.27],via:[[8870,1624],[8870,2403]],dashed:true});
-c1.edge('redis','api','XREAD results TCP :6379',{exit:[0,.73],entry:[1,.94],via:[[8730,2697],[8730,1769]],dashed:true});
-c1.edge('redis','worker','XREAD stream :6379',{exit:[1,.27],entry:[0,.27],dashed:true});
-c1.edge('worker','redis','XADD result :6379',{exit:[0,.75],entry:[1,.75],dashed:true});
-c1.edge('api','identity','EF Core SQL TCP :1433',{exit:[.18,1],entry:[.5,0],via:[[5989,3050],[7025,3050]]});
-c1.edge('api','tracking','EF Core SQL TCP :1433',{exit:[.82,1],entry:[.5,0],via:[[7691,3450],[11165,3450]]});
-c1.edge('worker','workerdb','Worker SQL TCP :1433',{exit:[.57,1],entry:[.57,0]});
-c1.node(null,270,5550,16600,230,'PUBLISHED HOST PORTS  Web 5173→80   |   API 8080→8080   |   gRPC 8081→8081   |   Redis 6379→6379   |   SQL 14330→1433   |   Worker: no listener. Dashed = Redis events.',{kind:'note',font:34});
+c1.node('member',205,790,1670,395,'MEMBER',{font:108});
+c1.node('admin',205,1550,1670,395,'ADMIN  /  role',{font:102});
+c1.node('web',2350,1140,2430,670,'WEB / NGINX\nReact SPA | HTTP :80\nHost :5173',{font:102});
+c1.node('api',5510,1120,2660,690,'REST API  (.NET)\nHTTP :8080\nAuth, meals, FMD, tracking',{font:98});
+c1.node('grpc',10200,540,2720,670,'RECOMMENDATION gRPC\nHTTP/2 :8081\nSTATELESS | NO OWN DB',{font:90});
+c1.node('redis',10100,2230,2780,640,'REDIS STREAMS\nTCP :6379\nAPI and Worker events',{font:100});
+c1.node('worker',14000,2240,2740,620,'REMINDER WORKER\nEvents + schedules\nNo inbound HTTP port',{font:98});
+c1.node('identity',5390,4410,3270,630,'LongevityDietDb | 21 tables\nIdentity, meals, FMD\nSQL :1433',{kind:'db',font:96});
+c1.node('tracking',9560,4410,3210,630,'LongevityTrackingDb | 7 tables\nActivity + adherence\nSQL :1433',{kind:'db',font:94});
+c1.node('workerdb',13720,4410,3130,630,'LongevityWorkerDb | 4 tables\nSchedules + outbox\nSQL :1433',{kind:'db',font:94});
+c1.edge('member','web','HTTP :5173',{exit:[1,.5],entry:[0,.29]});
+c1.edge('admin','web','Role access',{exit:[1,.5],entry:[0,.78]});
+c1.edge('web','api','/api :8080');
+c1.edge('api','grpc','HTTP/2 :8081',{exit:[1,.22],entry:[0,.5],via:[[9120,1272],[9120,875]]});
+c1.edge('api','redis','XADD :6379',{exit:[1,.73],entry:[0,.27],via:[[8870,1624],[8870,2403]],dashed:true});
+c1.edge('redis','api','XREAD :6379',{exit:[0,.73],entry:[1,.94],via:[[8730,2697],[8730,1769]],dashed:true});
+c1.edge('redis','worker','XREAD :6379',{exit:[1,.27],entry:[0,.27],dashed:true});
+c1.edge('worker','redis','XADD :6379',{exit:[0,.75],entry:[1,.75],dashed:true});
+c1.edge('api','identity','SQL :1433',{exit:[.18,1],entry:[.5,0],via:[[5989,3050],[7025,3050]]});
+c1.edge('api','tracking','SQL :1433',{exit:[.82,1],entry:[.5,0],via:[[7691,3450],[11165,3450]]});
+c1.edge('worker','workerdb','SQL :1433',{exit:[.57,1],entry:[.57,0]});
+c1.node(null,270,5540,16600,270,'HOST: Web 5173 → 80  |  API 8080  |  gRPC 8081  |  Redis 6379  |  SQL 14330 → 1433\nSOLID = synchronous call / SQL   |   DASHED = Redis event streams   |   Worker: no HTTP listener',{kind:'note',font:76});
 const C1=c1.save();
 const c2=new Diagram('C2',16300,8010);
 header(c2,'C2  |  API COMPONENTS','Scope: one REST API :8080  /  endpoint → controller → service → persistence → DB reference');
