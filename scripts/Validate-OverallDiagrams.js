@@ -257,3 +257,4 @@ if(fail.length){fail.forEach(e=>console.error('OVERALL_QA_FAIL '+e));process.exi
 else console.log('OVERALL_FOUR_QA=PASS: C0 C1 C2 Database Diagram; 10 controllers; 32 mapped tables; 9 FK edges; 4 PDFs');
 if(!process.exitCode)require('./Validate-DiagramConnectivity.js');
 if(!process.exitCode)require('./Validate-Text-Layout.js');
+if(!process.exitCode)require('./Validate-ActorLabelRouting.js');

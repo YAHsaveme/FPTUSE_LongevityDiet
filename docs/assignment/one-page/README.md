@@ -2,6 +2,8 @@
 
 **Bộ bàn giao chính thức chỉ có bốn sơ đồ:** `C0`, `C1`, `C2` và `Database Diagram`. Đây là bản thiết kế lại với cùng một ngôn ngữ hình học: **nền trắng, đường đen, chữ đen, căn hàng theo lưới, nhãn ngắn và khoảng cách nhất quán**. Mỗi sơ đồ là một trang PDF có thể phóng to, kèm file Draw.io chứa các shape và connector native để chỉnh sửa.
 
+**Actor và routing (07/11/2026):** C0/C1 dùng **UML Actor hình người** cho `MEMBER` và `ADMIN`, với tên đặt **phía dưới hình**. Các nhãn mũi tên được đặt lệch khỏi nét đường trên nền trắng; riêng hai chiều API↔Redis có vị trí nhãn riêng để tránh dính nhau. Mũi tên là các đoạn ngang/dọc gấp góc 90°, ưu tiên cùng trục qua tâm service/database. Bộ kiểm tra tự động xác minh 4 Actor, khoảng lệch của nhãn có chữ, các đầu nối có thật và bố cục 10 tuyến component ở C2; SVG render được kiểm tra thêm giao cắt và đường chạm chữ.
+
 | Sơ đồ | PDF | Draw.io | Cách đọc |
 | --- | --- | --- | --- |
 | **C0** | [C0.pdf](C0.pdf) | [C0.drawio](C0.drawio) | Member và Admin tương tác với hệ thống LongevityDiet; mức System Context nên không nhồi cổng hoặc database |

@@ -18,7 +18,7 @@ function parse(name){
  return {nodes,edges,graph,find,unique,reach};
 }
 const c1=parse('C1'),c2=parse('C2'),erd=parse('Database Diagram');
-const c1Names=['MEMBER','ADMIN  /  role','WEB / NGINX','REST API  (.NET)','RECOMMENDATION gRPC','REDIS STREAMS','REMINDER WORKER','LongevityDietDb','LongevityTrackingDb','LongevityWorkerDb'];
+const c1Names=['MEMBER','ADMIN','WEB / NGINX','REST API  (.NET)','RECOMMENDATION gRPC','REDIS STREAMS','REMINDER WORKER','LongevityDietDb','LongevityTrackingDb','LongevityWorkerDb'];
 const connectedC1=c1.reach(c1.unique('MEMBER').id);
 for(const name of c1Names){
  const n=c1.unique(name);
