@@ -30,4 +30,5 @@ const manifest={
  ports:c4.ports
 };
 fs.writeFileSync(path.join(root,'scripts/overall-diagram-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+require('./Generate-Connectivity-Register.js');
 console.log('FOUR_CANONICAL_DIAGRAMS_COMPLETE',manifest.names.join(','),'32 mapped tables, 9 SQL foreign keys');

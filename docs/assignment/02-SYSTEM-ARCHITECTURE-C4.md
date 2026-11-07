@@ -9,6 +9,8 @@ Bộ sơ đồ chỉ dùng **đen–trắng**, được tạo từ source của 
 | **C2 mở rộng** | [C2.drawio](one-page/C2.drawio) | [C2.pdf](one-page/C2.pdf) | **10 luồng API + 32 bảng + 31 quan hệ giữa bảng** |
 | Database Diagram | [Database Diagram.drawio](one-page/Database%20Diagram.drawio) | [Database Diagram.pdf](one-page/Database%20Diagram.pdf) | ERD độc lập, chỉ tập trung vào cấu trúc database |
 
+**Bảng đối chiếu không bỏ sót:** [Kiểm tra liên thông C1/C2/Database Diagram, 10 cặp mã A01–A10 và 32 bảng](04-ARCHITECTURE-CONNECTIVITY-REGISTER.md).
+
 ## C2 — đọc từ trái sang phải
 
 Ở phía trái, **Nginx / Web → REST API router → Controller → Service → Persistence → TABLE REFERENCE**. Mỗi hàng ghi **tên bảng được đối chiếu theo source**, không dừng lại ở một nhãn chung chung như “Database”. Mỗi tham chiếu ghi rõ database và cổng SQL **1433**.

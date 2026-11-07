@@ -255,3 +255,4 @@ const expectedAssets=names.flatMap(n=>[n+'.drawio',n+'.pdf']).sort();
 check(JSON.stringify(assets)===JSON.stringify(expectedAssets),'More/less than the requested FOUR Draw.io + FOUR PDF outputs: '+assets.join(', '));
 if(fail.length){fail.forEach(e=>console.error('OVERALL_QA_FAIL '+e));process.exitCode=1;}
 else console.log('OVERALL_FOUR_QA=PASS: C0 C1 C2 Database Diagram; 10 controllers; 32 mapped tables; 9 FK edges; 4 PDFs');
+if(!process.exitCode)require('./Validate-DiagramConnectivity.js');

@@ -29,6 +29,8 @@ const ext=[
  ['RecommendationController','ActivityGoals','Weekly activity goals']
 ];
 const ordered=ext.slice().sort((a,b)=>layout.nodes[a[1]].y-layout.nodes[b[1]].y||layout.nodes[a[1]].x-layout.nodes[b[1]].x);
+const referenceTagByTable=new Map(ordered.map(([,table],i)=>[table,'A'+String(i+1).padStart(2,'0')]));
+if(referenceTagByTable.size!==10)throw Error('Each API reference must identify one distinct real table');
 const ctrlLookup=new Map(ordered.map(([name],i)=>[name,{...c4.controllers.find(c=>c.controller===name),index:i}]));
 for(const [name,table] of ext){
  const c=ctrlLookup.get(name);
@@ -88,7 +90,7 @@ for(const [i,[controllerName]] of ordered.entries()){
  node(service,3890,y,2380,cardH,c.service,'box',36);
  node(repo,6530,y,2570,cardH,c.persistence,'box',35);
  const data=ordered[i],entity=data[1],owner=tables[entity].db;
- node('ref'+i,9430,y,1630,cardH,'DATA REFERENCE\n'+entity+' ['+owner[0].toUpperCase()+']\nSQL :1433','db',32);
+ node('ref'+i,9430,y,1630,cardH,'DATA REFERENCE '+referenceTagByTable.get(entity)+'\n'+entity+' ['+owner[0].toUpperCase()+']\nSQL :1433','db',32);
  const frac=Math.min(.97,Math.max(.03,(y+cardH/2-920)/7420));
  edge('router',cont,{entry:[0,.5],exit:[1,frac],label:'HTTP endpoint'});
  edge(cont,service,{label:'Call'});
@@ -101,7 +103,8 @@ for(const [table,geo] of Object.entries(layout.nodes)){
  const x=ox+geo.x*scale,y=oy+geo.y*scale,w=geo.w*scale,h=geo.h*scale;
  const s=tables[table];
  const cols=s.fields.slice(0,5).map(c=>c.replace(/\s*\[logical[^\]]*\]/g,' (APP REF)'));
- const name=table+'  ['+s.db[0].toUpperCase()+']\n'+cols.join('\n');
+ const tag=referenceTagByTable.get(table);
+ const name=table+'  ['+s.db[0].toUpperCase()+']'+(tag?'  |  '+tag:'')+'\n'+cols.join('\n');
  node('table:'+table,x,y,w,h,name,'table',51);
 }
 const relMap=new Map(erd.relationships.map(r=>[r.from+'|'+r.to,r]));
@@ -138,7 +141,7 @@ const all=[...vertices,...edges];
 const xml='<mxfile host="app.diagrams.net" version="32.6.10"><diagram name="C2" id="c2-extended-tables"><mxGraphModel page="1" grid="1" gridSize="10" pageWidth="'+W+'" pageHeight="'+H+'" pageScale="1" connect="1" arrows="1"><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+edges.join('')+vertices.join('')+'</root></mxGraphModel></diagram></mxfile>';
 if([...xml.matchAll(/#[0-9a-fA-F]{6}\b/g)].some(m=>!['#000000','#FFFFFF'].includes(m[0].toUpperCase())))throw Error('Color in C2');
 fs.writeFileSync(path.join(out,'C2.drawio'),xml,'utf8');
-const m={status:'C2_EXTENDED_SOURCE_BACKED',components:c4.controllers.length,tableCount:32,actualFk:9,logical:16,event:6,componentFlows:31,tableReferences:10,sourceToTableBridge:1,totalConnectors:73,ports:{api:8080,grpc:8081,redis:6379,sql:1433,web:5173},tableAccessLinks:ext,relations};
+const m={status:'C2_EXTENDED_SOURCE_BACKED',components:c4.controllers.length,tableCount:32,actualFk:9,logical:16,event:6,componentFlows:31,tableReferences:10,sourceToTableBridge:1,totalConnectors:73,ports:{api:8080,grpc:8081,redis:6379,sql:1433,web:5173},tableAccessLinks:ext,referenceTags:Object.fromEntries(referenceTagByTable),relations};
 fs.writeFileSync(path.join(root,'scripts/c2-extended-manifest.json'),JSON.stringify(m,null,2)+'\n','utf8');
 const c4path=path.join(root,'scripts/c4-architecture-manifest.json');
 c4.diagrams=c4.diagrams.map(d=>d.name==='C2'?{name:'C2',nodes:[...named.keys()],relations}:d);

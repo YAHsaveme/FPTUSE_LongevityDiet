@@ -68,6 +68,18 @@
       "Weekly activity goals"
     ]
   ],
+  "referenceTags": {
+    "UserFoodPreferences": "A01",
+    "UserProfiles": "A02",
+    "MealPlans": "A03",
+    "Users": "A04",
+    "ReminderPreferences": "A05",
+    "MealLogs": "A06",
+    "EatingWindowSnapshots": "A07",
+    "FmdSafetyAssessments": "A08",
+    "ActivityGoals": "A09",
+    "ActivityLogs": "A10"
+  },
   "relations": [
     {
       "from": "web",
