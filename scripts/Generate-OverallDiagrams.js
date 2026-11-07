@@ -1,34 +1,41 @@
 'use strict';
-// Four canonical current-source diagrams, no extra numbered/partial diagrams.
-// C0/C1/C2 monochrome C4: actual ports, components, SQL ownership.
-// Database Diagram: source-verified EF entities and relationship types.
+// Source-audited, four-canonical-diagram pipeline.
+// C0 / C1 / extended C2 / full Database Diagram are rendered in one
+// coherent monochrome editorial system from the same current repository facts.
 const fs=require('fs'),path=require('path'),root=path.resolve(__dirname,'..');
-const c4File=path.join(root,'scripts/c4-architecture-manifest.json');
-require('./Generate-C4Architecture.js');
-require('./Generate-UnifiedERD.js');
-require('./Generate-ExtendedC2.js');
-const c4=JSON.parse(fs.readFileSync(c4File,'utf8'));
-const schema=JSON.parse(fs.readFileSync(path.join(root,'scripts/current-physical-schema.json'),'utf8'));
-const counts=Object.fromEntries(Object.entries(schema.groups).map(([key,g])=>[key,Object.keys(g.columns).length]));
-if(JSON.stringify(counts)!==JSON.stringify({identity:21,tracking:7,worker:4})||schema.refs.length!==9)throw Error('Physical schema source drift');
-for(const [key,meta] of Object.entries(schema.groups)){
- const text=fs.readFileSync(path.join(root,meta.context),'utf8');
- const mapped=[...text.matchAll(/\.ToTable\("([^"]+)"\)/g)].map(m=>m[1]).sort();
- if(JSON.stringify(mapped)!==JSON.stringify(Object.keys(meta.columns).sort()))throw Error('Mapped table drift in '+key);
- if((text.match(/\.HasForeignKey(?:<[^>]+>)?\s*\(/g)||[]).length!==schema.refs.filter(r=>r[0]===key).length)throw Error('SQL FK drift in '+key);
+const c4=require('./c4-architecture-manifest.json');
+const c2=require('./c2-extended-manifest.json');
+const rel=require('./unified-erd-manifest.json');
+const model=require('./current-physical-schema.json');
+const counts={};
+for(const [key,g] of Object.entries(model.groups)){
+ const content=fs.readFileSync(path.join(root,g.context),'utf8');
+ const physical=[...content.matchAll(/\.ToTable\("([^"]+)"\)/g)].map(m=>m[1]).sort();
+ const listed=Object.keys(g.columns).sort();
+ if(JSON.stringify(physical)!==JSON.stringify(listed))throw Error('EF table mappings changed in '+key);
+ if((content.match(/\.HasForeignKey(?:<[^>]+>)?\s*\(/g)||[]).length!==model.refs.filter(r=>r[0]===key).length)
+  throw Error('EF foreign keys changed in '+key);
+ counts[key]=listed.length;
 }
+if(JSON.stringify(counts)!==JSON.stringify({identity:21,tracking:7,worker:4})||
+ model.refs.length!==9||rel.relationships.length!==31||c4.controllers.length!==10||c2.tableAccessLinks.length!==10)
+ throw Error('Current physical/operational source counts require review before redrawing');
+for(const x of c4.controllers){
+ const location=path.join(root,'src/LongevityDiet.API/Controllers',x.controller+'.cs');
+ if(!fs.existsSync(location))throw Error('Missing API component '+location);
+}
+const names=['C0','C1','C2','Database Diagram'];
 const manifest={
  status:'CURRENT_IMPLEMENTED_SOURCE',
- names:['C0','C1','C2','Database Diagram'],
+ names,
  controllers:c4.controllers,
- mappedTableCount:Object.values(counts).reduce((a,b)=>a+b,0),
- tableGroups:counts,
- sqlForeignKeys:schema.refs.length,
- realRelationships:schema.refs.map(([owner,parent,parentColumn,child,childColumn,cardinality])=>({owner,parent,parentColumn,child,childColumn,cardinality})),
+ mappedTableCount:32,tableGroups:counts,sqlForeignKeys:model.refs.length,
+ realRelationships:model.refs.map(([owner,parent,parentColumn,child,childColumn,cardinality])=>({owner,parent,parentColumn,child,childColumn,cardinality})),
  labels:{C0:'C0',C1:'C1',C2:'C2',database:'Database Diagram'},
- databaseCardNames:Object.values(schema.groups).flatMap(g=>Object.keys(g.columns)),
+ databaseCardNames:Object.values(model.groups).flatMap(g=>Object.keys(g.columns)),
  ports:c4.ports
 };
 fs.writeFileSync(path.join(root,'scripts/overall-diagram-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+require('./Generate-EditorialDiagrams.js');
 require('./Generate-Connectivity-Register.js');
-console.log('FOUR_CANONICAL_DIAGRAMS_COMPLETE',manifest.names.join(','),'32 mapped tables, 9 SQL foreign keys');
+console.log('FOUR_EDITORIAL_DIAGRAMS=PASS '+names.join(' | ')+' / 32 mapped tables / 9 EF-declared SQL FK relationships');
