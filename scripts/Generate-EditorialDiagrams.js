@@ -47,6 +47,7 @@ class Board{
   const style=(type==='title'?'text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;':
                type==='text'?'text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;':
                type==='db'?'shape=cylinder3;html=1;whiteSpace=wrap;boundedLbl=1;size=17;strokeColor=#000000;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=8;':
+               type==='actor'?'shape=umlActor;html=1;whiteSpace=wrap;strokeColor=#000000;strokeWidth=2.5;fillColor=#FFFFFF;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;spacingTop=8;spacingBottom=0;':
                type==='bar'?'rounded=0;html=1;whiteSpace=wrap;strokeColor=#000000;strokeWidth=0.5;fillColor=#000000;':
                type==='outline'?'rounded=0;html=1;whiteSpace=wrap;strokeColor=#000000;strokeWidth=1.6;fillColor=#FFFFFF;align=left;verticalAlign=middle;spacingLeft=12;':
                type==='table'?'rounded=1;arcSize=5;html=1;whiteSpace=wrap;strokeColor=#000000;strokeWidth=1.6;fillColor=#FFFFFF;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=7;spacingTop=7;':
@@ -54,7 +55,7 @@ class Board{
               'fontFamily=Arial;fontColor=#000000;fontSize='+size+';'+(opt.extra||'');
   const val=opt.html?esc(value):esc(value).replace(/\n/g,'&lt;br/&gt;');
   this.nodes.push('<mxCell id="'+id+'" value="'+val+'" style="'+esc(style)+'" vertex="1" parent="1"><mxGeometry x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" width="'+w.toFixed(2)+'" height="'+h.toFixed(2)+'" as="geometry"/></mxCell>');
-  if(key)this.ref.set(key,{id,x,y,w,h,label:value});
+  if(key)this.ref.set(key,{id,x,y,w,h,label:value,type});
   return id;
  }
  edge(from,to,label,type='call',fromPt=[1,.5],toPt=[0,.5],way=[],card='1:N'){
@@ -67,9 +68,19 @@ class Board{
   else if(type==='access')style+='dashed=1;dashPattern=8 6;startArrow=none;endArrow=block;endFill=0;endSize=13;';
   else style+='startArrow=none;endArrow=block;endFill=1;endSize=12;';
   style+='fontFamily=Arial;fontColor=#000000;fontSize='+(this.name==='C1'?18:this.name==='C0'?19:17)+';labelBackgroundColor=#FFFFFF;align=center;verticalAlign=middle;spacing=3;';
+  // Keep connector captions distinct from their strokes; y is a pixel
+  // perpendicular offset from the rendered edge (mxGeometry relative=1).
+  // Horizontal links move above the segment. Vertical links move aside.
+  const labelYOffset=label?-(this.name==='C0'?26:this.name==='C1'?24:20):0;
+  // Place the two reverse-direction Redis labels on separate parts of
+  // their source-side corridors to avoid label-to-label collisions.
+  const labelAlong=this.name==='C1'&&from==='api'&&to==='redis'?0.12:
+    this.name==='C1'&&from==='redis'&&to==='api'?-0.52:0;
+  const labelAdjustment=this.name==='C1'&&from==='api'&&to==='redis'?'<mxPoint x="0" y="-32" as="offset"/>':'';
+  style+='verticalLabelPosition=top;';
   style+='exitX='+fromPt[0].toFixed(5)+';exitY='+fromPt[1].toFixed(5)+';exitPerimeter=0;entryX='+toPt[0].toFixed(5)+';entryY='+toPt[1].toFixed(5)+';entryPerimeter=0;';
   const points=way.length?'<Array as="points">'+way.map(p=>'<mxPoint x="'+p[0].toFixed(2)+'" y="'+p[1].toFixed(2)+'"/>').join('')+'</Array>':'';
-  this.edges.push('<mxCell id="e'+this.seq+++'" value="'+esc(label)+'" style="'+esc(style)+'" edge="1" source="'+a.id+'" target="'+b.id+'" parent="1"><mxGeometry relative="1" as="geometry">'+points+'</mxGeometry></mxCell>');
+  this.edges.push('<mxCell id="e'+this.seq+++'" value="'+esc(label)+'" style="'+esc(style)+'" edge="1" source="'+a.id+'" target="'+b.id+'" parent="1"><mxGeometry x="'+labelAlong+'" y="'+labelYOffset+'" relative="1" as="geometry">'+labelAdjustment+points+'</mxGeometry></mxCell>');
   this.rels.push({from,to,label,type});
  }
  header(title,subtitle,tag){
@@ -88,13 +99,13 @@ class Board{
 function c0(){
  const b=new Board('C0',1600,880);
  b.header('SYSTEM CONTEXT','WHO INTERACTS WITH LONGEVITYDIET  /  CURRENT IMPLEMENTED SCOPE','C0');
- b.put(null,88,237,560,31,'PEOPLE  /  SYSTEM USERS','text',20);
+ b.put(null,88,237,560,31,'PERSON / SYSTEM USERS','text',20);
  b.put(null,892,237,560,31,'SOFTWARE SYSTEM','text',20);
- b.put('member',100,306,465,158,'PERSON  |  MEMBER\nMeal planning, logs and reminders','card',27);
- b.put('admin',100,558,465,150,'PERSON  |  ADMIN\nRole-authorized functions','card',27);
+ b.put('member',225,313,170,140,'MEMBER','actor',26);
+ b.put('admin',225,570,170,140,'ADMIN','actor',26);
  b.put('system',880,367,610,257,'LONGEVITYDIET\nMeal planning  ·  Food logging\nActivity tracking  ·  FMD\nRecommendations  ·  Reminders','card',33);
- b.edge('member','system','Meal plans / tracking','call',[1,.49],[0,.28],[[706,383],[706,438]]);
- b.edge('admin','system','Role-authorized use','call',[1,.46],[0,.77],[[739,627],[739,565]]);
+ b.edge('member','system','Meal plans / tracking','call',[1,.5],[0,.28],[[706,383],[706,439]]);
+ b.edge('admin','system','Role-authorized use','call',[1,.5],[0,.77],[[739,640],[739,565]]);
  b.put(null,90,792,1400,45,'C0 shows people and the system boundary; internal ports, containers and storage belong to C1/C2.','text',20);
  b.save();
 }
@@ -103,8 +114,8 @@ function c1(){
  b.header('CONTAINER ARCHITECTURE','DEPLOYED SERVICES, COMMUNICATION PROTOCOLS AND PHYSICAL DATA STORES','C1');
  b.put(null,88,245,650,36,'CLIENT ACCESS','text',19);
  b.put(null,1555,245,750,36,'ASYNC & COMPUTATION','text',19);
- b.put('member',92,337,302,125,'MEMBER','card',30);
- b.put('admin',92,568,302,125,'ADMIN  /  role','card',28);
+ b.put('member',145,325,210,135,'MEMBER','actor',25);
+ b.put('admin',145,558,210,135,'ADMIN','actor',25);
  b.put('web',525,465,345,190,'WEB / NGINX\nReact SPA\nHTTP :80\nHost :5173','card',27);
  b.put('api',1020,465,400,190,'REST API  (.NET)\nHTTP :8080\nAuth · Meals\nFMD · Activity','card',27);
  b.put('grpc',1570,299,425,160,'RECOMMENDATION gRPC\nHTTP/2 :8081\nSTATELESS  ·  NO OWN DB','card',26);
@@ -112,20 +123,20 @@ function c1(){
  b.put('worker',2100,555,320,170,'REMINDER WORKER\nEvent consumer\nEvent producer\nNo HTTP listener','card',25);
  b.put(null,91,995,785,49,'PERSISTENCE  /  ONE SQL SERVER','title',27);
  b.put(null,92,1048,775,43,'TCP :1433  ·  Published host :14330','text',22);
- b.put('identity',1003,1083,415,172,'LongevityDietDb\n21 tables\nIdentity · Meals · FMD\nSQL :1433','db',25);
+ b.put('identity',1012,1083,415,172,'LongevityDietDb\n21 tables\nIdentity · Meals · FMD\nSQL :1433','db',25);
  b.put('tracking',1505,1083,417,172,'LongevityTrackingDb\n7 tables\nActivity · Adherence\nSQL :1433','db',24);
- b.put('workerdb',2050,1083,370,172,'LongevityWorkerDb\n4 tables\nSchedules · Outbox\nSQL :1433','db',24);
- b.edge('member','web','HTTP :5173','call',[1,.5],[0,.30],[[461,399],[461,522]]);
- b.edge('admin','web','Role access','call',[1,.5],[0,.78],[[480,630],[480,613]]);
+ b.put('workerdb',2075,1083,370,172,'LongevityWorkerDb\n4 tables\nSchedules · Outbox\nSQL :1433','db',24);
+ b.edge('member','web','HTTP :5173','call',[1,.5],[0,.30],[[459,392.5],[459,522]]);
+ b.edge('admin','web','Role access','call',[1,.5],[0,.78],[[481,625.5],[481,613.2]]);
  b.edge('web','api','/api :8080');
  b.edge('api','grpc','gRPC :8081','call',[1,.22],[0,.54],[[1480,507],[1480,385]]);
- b.edge('api','redis','XADD :6379','event',[1,.62],[0,.33],[[1460,583],[1460,611]]);
- b.edge('redis','api','XREAD :6379','event',[0,.77],[1,.87],[[1510,686],[1510,630]]);
+ b.edge('api','redis','XADD','event',[1,.62],[0,.33],[[1460,583],[1460,611]]);
+ b.edge('redis','api','XREAD','event',[0,.77],[1,.87],[[1510,686],[1510,630]]);
  b.edge('redis','worker','XREAD','event',[1,.31],[0,.31],[]);
  b.edge('worker','redis','XADD','event',[0,.73],[1,.73],[]);
- b.edge('api','identity','SQL :1433','call',[.23,1],[.5,0],[[1112,925],[1211,925]]);
+ b.edge('api','identity','SQL :1433','call',[.5,1],[.5,0],[]);
  b.edge('api','tracking','SQL :1433','call',[.84,1],[.5,0],[[1356,968],[1714,968]]);
- b.edge('worker','workerdb','SQL :1433','call',[.58,1],[.58,0],[]);
+ b.edge('worker','workerdb','SQL :1433','call',[.5,1],[.5,0],[]);
  b.put(null,92,1385,2320,2,'','bar',1);
  b.put(null,92,1410,920,42,'SOLID  /  HTTP · gRPC · SQL','text',21);
  b.put(null,1120,1410,1270,42,'DOTTED  /  Redis event streams    ·    Worker has no inbound HTTP port','text',21);
