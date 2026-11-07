@@ -65,7 +65,7 @@ function edge(a,b,opts={}){
  const stroke=solid?7:event?5:access?5:4;
  const dash=event?'dashed=1;dashPattern=2 10;':assoc?'dashed=1;dashPattern=14 10;':access?'dashed=1;dashPattern=8 6;':'';
  const css='edgeStyle=segmentEdgeStyle;rounded=0;orthogonal=1;html=1;strokeColor=#000000;strokeWidth='+stroke+';'+dash+arrow+
-  'fontFamily=Arial;fontColor=#000000;fontSize=30;labelBackgroundColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;'+
+  'fontFamily=Arial;fontColor=#000000;fontSize='+(type==='component'||type==='access'?60:34)+';labelBackgroundColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;'+
   'exitX='+from[0].toFixed(4)+';exitY='+from[1].toFixed(4)+';exitPerimeter=0;entryX='+to[0].toFixed(4)+';entryY='+to[1].toFixed(4)+';entryPerimeter=0;';
  const points=opts.via||[];
  const way=points.length?'<Array as="points">'+points.map(([x,y])=>'<mxPoint x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'"/>').join('')+'</Array>':'';
@@ -74,28 +74,28 @@ function edge(a,b,opts={}){
  edges.push('<mxCell id="'+id+'" value="'+ESC(label)+'" style="'+ESC(css)+'" edge="1" source="'+named.get(a).id+'" target="'+named.get(b).id+'" parent="1"><mxGeometry relative="1" as="geometry">'+way+'</mxGeometry></mxCell>');
  relations.push({from:a,to:b,type,label});
 }
-node(null,130,50,25900,125,'C2  |  COMPONENTS + ALL 32 CONNECTED DATABASE TABLES','text',85);
-node(null,130,175,25900,105,'EXTENDED C2 / API components on left | actual SQL entities + Crow Foot/APP/EVENT relationships on right | source: current EF Core','text',37);
-node(null,150,340,10450,210,'REST API :8080   |   gRPC :8081 (HTTP/2)   |   Redis :6379 (TCP)   |   SQL :1433 (TCP)','db',35);
-node(null,11500,340,13740,210,'DATABASE KEY: I = LongevityDietDb (21)  |  T = LongevityTrackingDb (7)  |  W = LongevityWorkerDb (4)','db',34);
-node('web',85,620,1140,215,'WEB / NGINX :80\nhost :5173','box',33);
-node('router',130,920,1030,7420,'API ROUTING\nJWT / Role\nRate limit\n\nHTTP :8080','box',38);
+node(null,130,25,25900,185,'C2  |  COMPONENTS + ALL 32 DATABASE TABLES','text',128);
+node(null,130,215,25900,100,'EXTENDED C2: API and real database relations (not a pure C4 Component diagram)','text',56);
+node(null,150,345,10450,205,'API :8080  |  gRPC :8081 HTTP/2  |  Redis :6379  |  SQL :1433','db',62);
+node(null,11500,345,13740,205,'DATABASES: I = Identity (21)  |  T = Tracking (7)  |  W = Worker (4)','db',61);
+node('web',85,620,1140,215,'WEB / NGINX :80\nHost :5173','box',63);
+node('router',130,920,1030,7420,'API ROUTING\nJWT / Role\nHTTP :8080','box',95);
 edge('web','router',{type:'component',exit:[.5,1],entry:[.5,0],label:'/api :8080'});
 const y0=1000,step=705,cardH=345;
 for(const [i,[controllerName]] of ordered.entries()){
  const c=ctrlLookup.get(controllerName);
  const y=y0+i*step;
  const cont='ctrl'+i,service='service'+i,repo='repo'+i;
- node(cont,1360,y,2260,cardH,c.domain+'\n'+c.controller,'box',37);
- node(service,3890,y,2380,cardH,c.service,'box',36);
- node(repo,6530,y,2570,cardH,c.persistence,'box',35);
+ node(cont,1360,y,2260,cardH,c.domain+'\n'+c.controller,'box',77);
+ node(service,3890,y,2380,cardH,c.service,'box',74);
+ node(repo,6530,y,2570,cardH,c.persistence,'box',72);
  const data=ordered[i],entity=data[1],owner=tables[entity].db;
- node('ref'+i,9430,y,1630,cardH,'DATA REFERENCE '+referenceTagByTable.get(entity)+'\n'+entity+' ['+owner[0].toUpperCase()+']\nSQL :1433','db',32);
+ node('ref'+i,9430,y,1630,cardH,'DATA REFERENCE '+referenceTagByTable.get(entity)+'\n'+entity+' ['+owner[0].toUpperCase()+']\nSQL :1433','db',69);
  const frac=Math.min(.97,Math.max(.03,(y+cardH/2-920)/7420));
- edge('router',cont,{entry:[0,.5],exit:[1,frac],label:'HTTP endpoint'});
+ edge('router',cont,{entry:[0,.5],exit:[1,frac],label:'HTTP'});
  edge(cont,service,{label:'Call'});
- edge(service,repo,{label:'Data access'});
- edge(repo,'ref'+i,{type:'access',label:'TABLE REF'});
+ edge(service,repo,{label:'Data'});
+ edge(repo,'ref'+i,{type:'access',label:'Ref'});
 }
 const normalized=n=>Math.max(0,Math.min(1,n));
 for(const [table,geo] of Object.entries(layout.nodes)){
@@ -105,7 +105,9 @@ for(const [table,geo] of Object.entries(layout.nodes)){
  const cols=s.fields.slice(0,5).map(c=>c.replace(/\s*\[logical[^\]]*\]/g,' (APP REF)'));
  const tag=referenceTagByTable.get(table);
  const name=table+'  ['+s.db[0].toUpperCase()+']'+(tag?'  |  '+tag:'')+'\n'+cols.join('\n');
- node('table:'+table,x,y,w,h,name,'table',51);
+ const maxLength=Math.max(...name.split('\n').map(line=>line.length));
+ const autoFont=Math.max(43,Math.min(71,Math.floor((h-50)/((cols.length+1)*1.38)),Math.floor((w-60)/(maxLength*.67))));
+ node('table:'+table,x,y,w,h,name,'table',autoFont);
 }
 const relMap=new Map(erd.relationships.map(r=>[r.from+'|'+r.to,r]));
 for(const route of layout.edges){
@@ -134,9 +136,9 @@ for(const [ref,table] of [['ref3','Users']]){
  edge(ref,'table:'+table,{type:'access',label:'REAL TABLE'});
 }
 node(null,180,8610,10440,680,
- 'C2 EXTENDED: 10 Controller → Service → Persistence paths connect to real tables. Table-to-table lines: SOLID CROW FOOT = 9 genuine SQL FKs; LONG DASH APP = 16 application associations; DOTTED EVENT = 6 event paths. Dashed links are NOT SQL FKs. TABLE REF names map to the real 32-table graph on the right. The Worker owns its own DB. gRPC is stateless and does not have a separate DB.','db',36);
+ 'C2: HTTP → Controller → Service → Repository → REF A01–A10. Find the same code on its real table.\nFK: 9 solid Crow Foot  |  APP: 16 dashed  |  EVENT: 6 dotted. Worker DB is separate; gRPC has no own DB.','db',76);
 node(null,11500,9310,14300,490,
- 'These are the 32 CURRENT EF Core mapped tables (I=21, T=7, W=4). Every table is connected to another table. Table cards show selected important columns; exact source definitions remain in EF Core. API/database access links are component usage, NOT extra SQL FKs.','db',34);
+ '32 CURRENT EF TABLES: Identity 21 + Tracking 7 + Worker 4. TABLE REF labels navigate to real tables, NOT SQL foreign keys.\nOnly solid Crow Foot links are enforced in SQL; all other links are documented APP/EVENT relations.','db',75);
 const all=[...vertices,...edges];
 const xml='<mxfile host="app.diagrams.net" version="32.6.10"><diagram name="C2" id="c2-extended-tables"><mxGraphModel page="1" grid="1" gridSize="10" pageWidth="'+W+'" pageHeight="'+H+'" pageScale="1" connect="1" arrows="1"><root><mxCell id="0"/><mxCell id="1" parent="0"/>'+edges.join('')+vertices.join('')+'</root></mxGraphModel></diagram></mxfile>';
 if([...xml.matchAll(/#[0-9a-fA-F]{6}\b/g)].some(m=>!['#000000','#FFFFFF'].includes(m[0].toUpperCase())))throw Error('Color in C2');
