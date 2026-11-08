@@ -75,7 +75,14 @@ public sealed partial class ReminderWorkerHostedService(
             catch (Exception error)
             {
                 WarnDisconnected(logger, error);
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
             }
         }
     }
@@ -106,6 +113,8 @@ public sealed partial class ReminderWorkerHostedService(
                     var kind = entry.Values.FirstOrDefault(p => p.Name == "eventType").Value.ToString();
                     if (!string.Equals(kind, "ReminderPreferenceUpdated.v1", StringComparison.Ordinal))
                     {
+                        // Do not silently ACK a message the Worker cannot understand.
+                        await WriteDeadLetterAsync(redis, entry.Id, kind, "UnsupportedEventType");
                         await redis.StreamAcknowledgeAsync(PreferenceStream, GroupName, entry.Id);
                         continue;
                     }
@@ -120,15 +129,21 @@ public sealed partial class ReminderWorkerHostedService(
                 catch (JsonException error)
                 {
                     WarnInvalidEvent(logger, error);
-                    await redis.StreamAddAsync("ldc:dead-letter",
-                        new[] { new NameValueEntry("source", PreferenceStream),
-                            new NameValueEntry("entryId", entry.Id) });
+                    await WriteDeadLetterAsync(redis, entry.Id, "ReminderPreferenceUpdated.v1", "MalformedEvent");
                     await redis.StreamAcknowledgeAsync(PreferenceStream, GroupName, entry.Id);
                 }
             }
             // Always advance from pending replay to fresh '>' events.
             // A short/empty pending batch must not starve new messages.
         }
+    }
+
+    private static async Task WriteDeadLetterAsync(
+        IDatabase redis, RedisValue entryId, string eventType, string reason)
+    {
+        // Exclude the raw payload: it may contain sensitive reminder preferences.
+        await redis.StreamAddAsync("ldc:dead-letter",
+            ReminderDeadLetterEntry.Create(PreferenceStream, entryId, eventType, reason));
     }
 
     private async Task PublishOutboxAsync(IDatabase redis, CancellationToken ct)

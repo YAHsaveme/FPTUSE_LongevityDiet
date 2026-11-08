@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 
 const HomePage = lazy(() =>
@@ -22,6 +22,10 @@ const NotificationsPage = lazy(() =>
 const ActivityTrackingPage = lazy(() =>
   import('./pages/tracking/ActivityTrackingPage')
     .then((module) => ({ default: module.ActivityTrackingPage })),
+)
+
+const NotFoundPage = lazy(() =>
+  import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })),
 )
 
 const profilePages = () => import('./pages/auth/ProfileEditorPage')
@@ -51,8 +55,11 @@ function RouteLoading() {
 
 function App() {
   return (
-    <Suspense fallback={<RouteLoading />}>
-      <Routes>
+    <>
+      <a className="skip-link" href="#main-content">Bá» qua Ä‘iá»u hÆ°á»›ng</a>
+      <div id="main-content" tabIndex={-1}>
+        <Suspense fallback={<RouteLoading />}>
+          <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -109,9 +116,11 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </div>
+    </>
   )
 }
 

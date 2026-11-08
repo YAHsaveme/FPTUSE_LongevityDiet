@@ -1709,3 +1709,64 @@ select.plain-input {
     align-items: flex-start;
   }
 }
+
+/* Keyboard-first navigation; existing brand colours remain unchanged. */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 10000;
+  transform: translateY(-160%);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+}
+.skip-link:focus-visible { transform: translateY(0); }
+:where(a, button, input, select, textarea, [role="button"]):focus-visible {
+  outline: 3px solid var(--champagne);
+  outline-offset: 3px;
+}
+.not-found-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+  background: var(--ivory);
+}
+.not-found-card {
+  width: min(100%, 620px);
+  padding: clamp(28px, 6vw, 64px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.not-found-code {
+  margin: 0;
+  color: var(--green);
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(64px, 12vw, 112px);
+  line-height: 1;
+}
+.not-found-card h1 { margin: 18px 0; color: var(--ink); font-size: clamp(25px, 5vw, 36px); }
+.not-found-card p:not(.not-found-code) { line-height: 1.7; }
+.not-found-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+.not-found-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 22px;
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  font-weight: 700;
+}
+.not-found-primary { background: var(--green); color: white; }
+.not-found-secondary { background: transparent; color: var(--green); }
+@media (prefers-reduced-motion: reduce) {
+  .skip-link { transition: none; }
+}

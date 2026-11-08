@@ -59,6 +59,10 @@ jobs:
         working-directory: src/LongevityDiet.Web
         run: npm ci
 
+      - name: Test frontend error handling
+        working-directory: src/LongevityDiet.Web
+        run: npm test
+
       - name: Lint frontend
         working-directory: src/LongevityDiet.Web
         run: npm run lint
