@@ -20,6 +20,10 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
     {
         await _factory.ResetDatabaseAsync();
         using var client = await CreateOnboardedUserClientAsync("planner-user");
+        var allergyReview = await client.PutAsJsonAsync("/api/v1/wellness/screening",
+            new { RiskFlags = Array.Empty<string>(), AllergiesReviewed = true,
+                Allergies = new List<string> { "peanut", "shellfish" } });
+        Assert.Equal(HttpStatusCode.OK, allergyReview.StatusCode);
 
         var generateResponse = await client.PostAsJsonAsync(
             "/api/v1/meal-plans/generate",
@@ -220,6 +224,10 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
                 FoodPreference = "Plant-forward Vietnamese",
             });
         Assert.Equal(HttpStatusCode.OK, profileUpdate.StatusCode);
+        var reviewed = await client.PutAsJsonAsync("/api/v1/wellness/screening",
+            new { RiskFlags = Array.Empty<string>(), AllergiesReviewed = true,
+                Allergies = Array.Empty<string>() });
+        Assert.Equal(HttpStatusCode.OK, reviewed.StatusCode);
 
         return client;
     }

@@ -1893,6 +1893,90 @@ namespace LongevityDiet.Repositories.Migrations
                     b.ToTable("WeeklyReportMetrics", (string)null);
                 });
 
+            modelBuilder.Entity("LongevityDiet.Domain.Entities.WellnessCheckIn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BodyChangesCsv")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Digestion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Energy")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("LocalDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Mood")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Phase")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("SleepQuality")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SymptomsCsv")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("WeightKg")
+                        .HasPrecision(6, 2)
+                        .HasColumnType("decimal(6,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "LocalDate", "Phase")
+                        .IsUnique();
+
+                    b.ToTable("WellnessCheckIns", (string)null);
+                });
+
+            modelBuilder.Entity("LongevityDiet.Domain.Entities.WellnessScreening", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AllergiesReviewed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReviewedAllergiesCsv")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("RiskFlagsCsv")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("WellnessScreenings", (string)null);
+                });
+
             modelBuilder.Entity("LongevityDiet.Domain.Entities.WorkerDeadLetter", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2236,6 +2320,24 @@ namespace LongevityDiet.Repositories.Migrations
                         .IsRequired();
 
                     b.Navigation("WeeklyReport");
+                });
+
+            modelBuilder.Entity("LongevityDiet.Domain.Entities.WellnessCheckIn", b =>
+                {
+                    b.HasOne("LongevityDiet.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LongevityDiet.Domain.Entities.WellnessScreening", b =>
+                {
+                    b.HasOne("LongevityDiet.Domain.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("LongevityDiet.Domain.Entities.WellnessScreening", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RuleSetVersionItem", b =>

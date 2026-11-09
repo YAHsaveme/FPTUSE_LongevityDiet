@@ -197,7 +197,9 @@ public sealed class ReminderWorkerEngine(
         category switch
         {
             ReminderCategory.MealLogging =>
-                ("Ghi nhận bữa ăn", "Bạn có thể ghi lại các bữa ăn hôm nay khi thuận tiện.", "/app"),
+                ("Nhật ký bữa ăn và sức khỏe",
+                 "Hôm nay bạn cảm thấy thế nào? Hãy ghi bữa ăn và đánh giá năng lượng, ngủ, tiêu hóa, triệu chứng trong bảng hỏi sức khỏe hàng ngày.",
+                 "/app"),
             ReminderCategory.Activity =>
                 ("Ghi nhận vận động", "Hãy ghi lại hoạt động bạn đã thực hiện hôm nay.", "/activity"),
             ReminderCategory.Challenge =>

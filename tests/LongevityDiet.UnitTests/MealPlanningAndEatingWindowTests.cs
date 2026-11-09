@@ -22,12 +22,12 @@ public sealed class MealPlanningAndEatingWindowTests
         var service1 = new MealPlanningService(
             planRepo1,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo1),
-            timeProvider);
+            new EmptyWellnessRepository("peanut"), timeProvider);
 
         var service2 = new MealPlanningService(
             planRepo2,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo2),
-            timeProvider);
+            new EmptyWellnessRepository("peanut"), timeProvider);
 
         var command = new GenerateMealPlanCommand(
             StartDate: new DateOnly(2026, 11, 2),
@@ -70,7 +70,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository("peanut,shellfish,soy,tree-nut"), new FixedTimeProvider(FixedNow));
 
         var command = new GenerateMealPlanCommand(
             StartDate: new DateOnly(2026, 11, 2),
@@ -103,7 +103,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var command = new GenerateMealPlanCommand(
             StartDate: new DateOnly(2026, 11, 2),
@@ -135,7 +135,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository("peanut,shellfish"), new FixedTimeProvider(FixedNow));
 
         var generated = await service.GeneratePlanAsync(
             userId,
@@ -174,7 +174,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var startDate = new DateOnly(2026, 11, 2);
         var first = await service.GeneratePlanAsync(

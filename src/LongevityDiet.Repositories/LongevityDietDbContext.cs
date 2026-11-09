@@ -8,6 +8,8 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<WellnessScreening> WellnessScreenings => Set<WellnessScreening>();
+    public DbSet<WellnessCheckIn> WellnessCheckIns => Set<WellnessCheckIn>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<ReminderPreference> ReminderPreferences => Set<ReminderPreference>();
     public DbSet<UserNotification> Notifications => Set<UserNotification>();
@@ -154,6 +156,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
 
         // Preserve Identity/Reminder and team Meal Planning/Tracking/Recommendation/FMD models.
         ConfigurePlanningModel(modelBuilder);
+        ConfigureWellnessModel(modelBuilder);
         ConfigureTrackingModel(modelBuilder);
         ConfigureRecommendationModel(modelBuilder);
         ConfigureFmdModel(modelBuilder);
@@ -221,6 +224,30 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         plannedMeal.Property(x => x.ExplanationSummary).HasMaxLength(1000).IsRequired();
         plannedMeal.HasIndex(x => new { x.MealPlanDayId, x.SlotOrder }).IsUnique();
         plannedMeal.HasIndex(x => new { x.UserId, x.MealPlanId });
+    }
+
+    private static void ConfigureWellnessModel(ModelBuilder modelBuilder)
+    {
+        var screening = modelBuilder.Entity<WellnessScreening>();
+        screening.ToTable("WellnessScreenings");
+        screening.HasKey(x => x.UserId);
+        screening.Property(x => x.RiskFlagsCsv).HasMaxLength(500).IsRequired();
+        screening.Property(x => x.ReviewedAllergiesCsv).HasMaxLength(1000).IsRequired();
+        screening.HasOne<User>().WithOne()
+            .HasForeignKey<WellnessScreening>(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var checkIn = modelBuilder.Entity<WellnessCheckIn>();
+        checkIn.ToTable("WellnessCheckIns");
+        checkIn.HasKey(x => x.Id);
+        checkIn.Property(x => x.Phase).HasMaxLength(16).IsRequired();
+        checkIn.Property(x => x.SymptomsCsv).HasMaxLength(500).IsRequired();
+        checkIn.Property(x => x.BodyChangesCsv).HasMaxLength(500).IsRequired();
+        checkIn.Property(x => x.WeightKg).HasPrecision(6, 2);
+        checkIn.Property(x => x.Notes).HasMaxLength(500);
+        checkIn.HasIndex(x => new { x.UserId, x.LocalDate, x.Phase }).IsUnique();
+        checkIn.HasOne<User>().WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 
     private static void ConfigureTrackingModel(ModelBuilder modelBuilder)

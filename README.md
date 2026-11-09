@@ -1,5 +1,7 @@
 ﻿# Longevity Diet Companion
 
+> **2026-11-10 — Current scope and acceptance status.** The member 1/4 branch now contains reviewed-allergy screening, conservative audience grouping, 14-day rolling meal coverage, Baseline/During/FollowUp self-reported health check-ins, and conditional daily reminders. See [the current implementation and Final Assignment audit](docs/assignment/WELLNESS-JOURNEY-FINAL-AUDIT-20261110.md). **Automated tests passing does not establish medical safety or 100% final acceptance.** The current EF migration snapshots include **56 tables** (45 main + 7 tracking + 4 worker). The original four architecture diagrams still represent a **32-table historical subset**. A supplemental [full 56-table ERD](docs/assignment/one-page/Database%20Diagram%20FULL.pdf) and [editable Draw.io version](docs/assignment/one-page/Database%20Diagram%20FULL.drawio) have been generated. A full current C2 and production-equivalent Docker/SQL/Redis/gRPC test remain open.
+
 ## Project description
 
 PRN232 Final Assignment: distributed .NET application hỗ trợ người dùng xây dựng và theo dõi thói quen longevity diet/lifestyle theo hướng giải thích được, truy vết được rule/source và có distributed architecture rõ ràng.

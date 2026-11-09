@@ -1,4 +1,6 @@
-# LongevityDiet — bộ sơ đồ kiến trúc hiện tại
+# LongevityDiet — sơ đồ kiến trúc và mô hình dữ liệu hiện hành
+
+> **Cập nhật 10/11/2026:** Bộ sơ đồ C0/C1/C2/Database Diagram bốn tệp ban đầu chỉ bao phủ **32 bảng** và **9 khóa ngoại**, không phản ánh toàn bộ mô hình EF Core mới. Đặc biệt, C2 hiện vẫn là sơ đồ nền cũ. Bổ sung [Database Diagram FULL.pdf](Database%20Diagram%20FULL.pdf), [Database Diagram FULL.drawio](Database%20Diagram%20FULL.drawio) và manifest để tra cứu **56 bảng, 23 khóa ngoại SQL và 50 quan hệ nghiệp vụ không ép FK**. Vui lòng **không nộp riêng sơ đồ 32 bảng để khẳng định đầy đủ 100%**; cần cập nhật C2 và kiểm tra trực quan cuối cùng. Xem [báo cáo nghiệm thu tính năng](../WELLNESS-JOURNEY-FINAL-AUDIT-20261110.md).
 
 **Bộ bàn giao chính thức chỉ có bốn sơ đồ:** `C0`, `C1`, `C2` và `Database Diagram`. Đây là bản thiết kế lại với cùng một ngôn ngữ hình học: **nền trắng, đường đen, chữ đen, căn hàng theo lưới, nhãn ngắn và khoảng cách nhất quán**. Mỗi sơ đồ là một trang PDF có thể phóng to, kèm file Draw.io chứa các shape và connector native để chỉnh sửa.
 

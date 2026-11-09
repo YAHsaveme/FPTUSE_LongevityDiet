@@ -133,6 +133,7 @@ public sealed class MealPlansController(
 
     [HttpGet("current")]
     [ProducesResponseType<MealPlanResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<MealPlanResponse>> GetCurrentPlan(
@@ -146,10 +147,25 @@ public sealed class MealPlansController(
         var result = await mealPlanningService.GetCurrentPlanAsync(userId, cancellationToken);
         if (!result.Succeeded || result.Value is null)
         {
-            return this.ToProblem(result, StatusCodes.Status404NotFound);
+            return this.ToProblem(
+                result,
+                result.ErrorCode == "meal_plan_not_found"
+                    ? StatusCodes.Status404NotFound
+                    : StatusCodes.Status400BadRequest);
         }
 
         return Ok(ToResponse(result.Value));
+    }
+
+    [HttpPost("ensure-current")]
+    [ProducesResponseType<MealPlanResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> EnsureCurrent(CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await mealPlanningService.EnsureDailyCoverageAsync(userId, cancellationToken);
+        return result.Succeeded && result.Value is not null
+            ? Ok(ToResponse(result.Value)) : this.ToProblem(result);
     }
 
     [HttpGet("{planId:guid}")]
