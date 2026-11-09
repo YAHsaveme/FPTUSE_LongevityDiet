@@ -117,6 +117,26 @@ public sealed class AdminRulesController(RuleCatalogService rules, ICurrentUser 
         return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
     }
 
+    [HttpGet("rule-reviews/queue")]
+    [ProducesResponseType<PagedResult<RuleReviewQueueItemDto>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ReviewQueue(
+        CancellationToken cancellationToken,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] bool? medicalSensitive = null)
+    {
+        var result = await rules.GetReviewQueueAsync(page, pageSize, medicalSensitive, cancellationToken);
+        return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
+    }
+
+    [HttpGet("rule-versions/{id:guid}/impact")]
+    [ProducesResponseType<RuleImpactDto>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> VersionImpact(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await rules.GetVersionImpactAsync(id, cancellationToken);
+        return result.Succeeded ? Ok(result.Value) : this.ToProblem(result, StatusCodes.Status404NotFound);
+    }
+
     [HttpGet("rule-versions/{id:guid}/history")]
     public async Task<ActionResult<PagedResult<RuleAuditDto>>> History(Guid id, CancellationToken cancellationToken, [FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? search = null, [FromQuery] string? action = null)
     {

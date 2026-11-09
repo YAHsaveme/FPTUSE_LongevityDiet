@@ -112,6 +112,52 @@ public sealed class RuleCatalogRepository(LongevityDietDbContext dbContext) : IR
         return new RepositoryPage<RuleAudit>(items, total);
     }
 
+    public async Task<RepositoryPage<RuleVersion>> GetReviewQueueAsync(
+        int page, int pageSize, bool? medicalSensitive, CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.RuleVersions.AsNoTracking()
+            .Include(x => x.DietRule)
+            .Where(x => x.State == RuleVersionState.InReview);
+        if (medicalSensitive is { } sensitive)
+            query = query.Where(x => x.DietRule.IsMedicalSensitive == sensitive);
+        var total = await query.CountAsync(cancellationToken);
+        var items = await query.OrderBy(x => x.DietRule.RuleKey)
+            .ThenBy(x => x.VersionNumber).ThenBy(x => x.Id)
+            .Skip((page - 1) * pageSize).Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return new RepositoryPage<RuleVersion>(items, total);
+    }
+
+    public async Task<IReadOnlyList<RuleSetPlanUsage>> GetRuleSetUsageAsync(
+        Guid ruleVersionId, CancellationToken cancellationToken = default)
+    {
+        var sets = await dbContext.RuleSetVersions.AsNoTracking()
+            .Where(x => x.RuleVersions.Any(v => v.Id == ruleVersionId))
+            .Select(x => new { x.VersionLabel, x.IsActive })
+            .ToListAsync(cancellationToken);
+        if (sets.Count == 0) return [];
+
+        var labels = sets.Select(x => x.VersionLabel).ToArray();
+        var stats = await dbContext.MealPlans.AsNoTracking()
+            .Where(x => labels.Contains(x.RuleSetVersion))
+            .GroupBy(x => x.RuleSetVersion)
+            .Select(g => new
+            {
+                VersionLabel = g.Key,
+                Total = g.Count(),
+                Active = g.Count(x => x.Status == LongevityDiet.Domain.Entities.MealPlanStatus.Active),
+                Users = g.Select(x => x.UserId).Distinct().Count()
+            })
+            .ToListAsync(cancellationToken);
+        return sets.Select(x =>
+        {
+            var count = stats.FirstOrDefault(s => s.VersionLabel == x.VersionLabel);
+            return new RuleSetPlanUsage(
+                x.VersionLabel, x.IsActive, count?.Total ?? 0,
+                count?.Active ?? 0, count?.Users ?? 0);
+        }).ToArray();
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }

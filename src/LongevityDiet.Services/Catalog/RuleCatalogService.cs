@@ -225,6 +225,38 @@ public sealed class RuleCatalogService(
     public Task<CatalogServiceResult<RuleVersionDto>> RetireVersionAsync(Guid versionId, Guid actorId, CancellationToken cancellationToken = default) =>
         TransitionAsync(versionId, RuleVersionState.Published, RuleVersionState.Retired, actorId, "Retired", "Retired; historical references retained", cancellationToken);
 
+    public async Task<CatalogServiceResult<PagedResult<RuleReviewQueueItemDto>>> GetReviewQueueAsync(
+        int page, int pageSize, bool? medicalSensitive, CancellationToken cancellationToken = default)
+    {
+        if (page is < 1 or > 100000 || pageSize is < 1 or > 100)
+            return CatalogServiceResult.Failure<PagedResult<RuleReviewQueueItemDto>>(
+                "invalid_page", "Use page 1-100000 and pageSize 1-100.");
+
+        var rows = await rules.GetReviewQueueAsync(page, pageSize, medicalSensitive, cancellationToken);
+        var items = rows.Items.Select(x => new RuleReviewQueueItemDto(
+            x.Id, x.DietRuleId, x.DietRule.RuleKey, x.DietRule.Title,
+            x.VersionNumber, x.DietRule.IsMedicalSensitive, x.State,
+            x.SourceUrl, x.Citation, x.EvidenceLevel, x.CreatedAt)).ToArray();
+        return CatalogServiceResult.Success(PagedResultFactory.Create(
+            items, page, pageSize, rows.TotalItems));
+    }
+
+    public async Task<CatalogServiceResult<RuleImpactDto>> GetVersionImpactAsync(
+        Guid versionId, CancellationToken cancellationToken = default)
+    {
+        var version = await rules.FindVersionAsync(versionId, cancellationToken);
+        if (version is null)
+            return CatalogServiceResult.Failure<RuleImpactDto>(
+                "rule_version_not_found", "Rule version was not found.");
+        var usage = await rules.GetRuleSetUsageAsync(versionId, cancellationToken);
+        var items = usage.Select(x => new RuleSetPlanUsageDto(
+            x.RuleSetVersion, x.IsActiveRuleSet, x.TotalPlans,
+            x.ActivePlans, x.DistinctUsers)).ToArray();
+        return CatalogServiceResult.Success(new RuleImpactDto(
+            versionId, items.Length, items.Sum(x => x.TotalPlans),
+            items.Sum(x => x.ActivePlans), items));
+    }
+
     public async Task<CatalogServiceResult<PagedResult<RuleAuditDto>>> GetHistoryAsync(Guid versionId, int page, int pageSize, string? search = null, string? action = null, CancellationToken cancellationToken = default)
     {
         if (page < 1 || page > 100000 || pageSize < 1 || pageSize > 100)
@@ -268,6 +300,20 @@ public sealed class RuleCatalogService(
             {
                 return CatalogServiceResult.Failure<RuleVersionDto>(validation.Value.Code, validation.Value.Message);
             }
+        }
+
+        // Publication is an independently reviewed safety-critical operation.
+        // The last submitted audit is the authoritative reviewer boundary.
+        if (next == RuleVersionState.Published)
+        {
+            var submissions = await rules.GetHistoryAsync(
+                versionId, page: 1, pageSize: 1,
+                search: null, action: "Submitted", cancellationToken: cancellationToken);
+            var submitted = submissions.Items.Count > 0 ? submissions.Items[0] : null;
+            if (submitted is null || submitted.ActorId == actorId)
+                return CatalogServiceResult.Failure<RuleVersionDto>(
+                    "independent_review_required",
+                    "A different administrator must approve this version after submission.");
         }
 
         version.State = next;

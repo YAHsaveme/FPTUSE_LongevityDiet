@@ -3,8 +3,16 @@ using LongevityDiet.Domain.Catalog.Entities;
 
 namespace LongevityDiet.Repositories.Catalog.Repositories;
 
+public sealed record RuleSetPlanUsage(
+    string RuleSetVersion, bool IsActiveRuleSet, int TotalPlans,
+    int ActivePlans, int DistinctUsers);
+
 public interface IRuleCatalogRepository
 {
+    Task<RepositoryPage<RuleVersion>> GetReviewQueueAsync(
+        int page, int pageSize, bool? medicalSensitive, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<RuleSetPlanUsage>> GetRuleSetUsageAsync(
+        Guid ruleVersionId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<DietRule>> GetActiveRulesAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<DietRule>> GetAllRulesAsync(CancellationToken cancellationToken = default);
     Task<DietRule?> FindRuleAsync(Guid id, bool includeInactive, bool trackChanges = false, CancellationToken cancellationToken = default);

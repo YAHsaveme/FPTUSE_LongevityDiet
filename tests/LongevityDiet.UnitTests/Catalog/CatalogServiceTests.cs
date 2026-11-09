@@ -314,6 +314,21 @@ public sealed class CatalogServiceTests
         public Task AddRuleSetAsync(RuleSetVersion value, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
+        public Task<RepositoryPage<RuleVersion>> GetReviewQueueAsync(
+            int page, int pageSize, bool? medicalSensitive, CancellationToken cancellationToken = default)
+        {
+            var rows = version is { State: RuleVersionState.InReview } &&
+                (medicalSensitive is null || version.DietRule?.IsMedicalSensitive == medicalSensitive)
+                    ? new[] { version }
+                    : Array.Empty<RuleVersion>();
+            return Task.FromResult(new RepositoryPage<RuleVersion>(
+                rows.Skip((page - 1) * pageSize).Take(pageSize).ToArray(), rows.Length));
+        }
+
+        public Task<IReadOnlyList<RuleSetPlanUsage>> GetRuleSetUsageAsync(
+            Guid ruleVersionId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<RuleSetPlanUsage>>([]);
+
         public Task AddAuditAsync(RuleAudit audit, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task<RepositoryPage<RuleAudit>> GetHistoryAsync(Guid versionId, int page, int pageSize, string? search, string? action, CancellationToken cancellationToken = default) =>
             Task.FromResult(new RepositoryPage<RuleAudit>([], 0));

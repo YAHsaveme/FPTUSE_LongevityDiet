@@ -2,6 +2,11 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using LongevityDiet.Domain.Catalog.Entities;
+using LongevityDiet.Domain.Entities;
+using LongevityDiet.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LongevityDiet.IntegrationTests;
 
@@ -17,6 +22,8 @@ public sealed class RuleGovernanceApiTests : IClassFixture<IntegrationTestWebApp
         await _factory.ResetDatabaseAsync();
         using var client = _factory.CreateHttpsClient();
         await AuthenticateAsync(client, admin: true);
+        using var reviewer = _factory.CreateHttpsClient();
+        await AuthenticateAsync(reviewer, admin: true);
         var (ruleId, versionId) = await CreateRuleVersionAsync(client);
 
         var prematurePublish = await client.PostAsync($"/api/v1/admin/rule-versions/{versionId}/publication", null);
@@ -30,7 +37,7 @@ public sealed class RuleGovernanceApiTests : IClassFixture<IntegrationTestWebApp
             $"/api/v1/admin/rule-versions/{versionId}", VersionInput("{\"weight\":2}"));
         Assert.Equal(HttpStatusCode.Conflict, editDuringReview.StatusCode);
 
-        var reject = await client.PostAsync($"/api/v1/admin/rule-versions/{versionId}/rejection", null);
+        var reject = await reviewer.PostAsync($"/api/v1/admin/rule-versions/{versionId}/rejection", null);
         Assert.Equal(HttpStatusCode.OK, reject.StatusCode);
         Assert.Equal(1, await ReadStateAsync(reject));
 
@@ -41,7 +48,10 @@ public sealed class RuleGovernanceApiTests : IClassFixture<IntegrationTestWebApp
         var resubmit = await client.PostAsync($"/api/v1/admin/rule-versions/{versionId}/review", null);
         Assert.Equal(HttpStatusCode.OK, resubmit.StatusCode);
 
-        var publish = await client.PostAsync($"/api/v1/admin/rule-versions/{versionId}/publication", null);
+        var selfPublish = await client.PostAsync(
+            $"/api/v1/admin/rule-versions/{versionId}/publication", null);
+        Assert.Equal(HttpStatusCode.Conflict, selfPublish.StatusCode);
+        var publish = await reviewer.PostAsync($"/api/v1/admin/rule-versions/{versionId}/publication", null);
         Assert.Equal(HttpStatusCode.OK, publish.StatusCode);
         Assert.Equal(2, await ReadStateAsync(publish));
 
@@ -121,6 +131,137 @@ public sealed class RuleGovernanceApiTests : IClassFixture<IntegrationTestWebApp
         var invalidFilter = await client.GetAsync(
             $"/api/v1/admin/rule-versions/{versionId}/history?action=Unknown");
         Assert.Equal(HttpStatusCode.BadRequest, invalidFilter.StatusCode);
+    }
+
+    [Fact]
+    public async Task ReviewQueue_AndVersionImpact_AreAdminOnlyPaginatedAndEvidenceBacked()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var admin = _factory.CreateHttpsClient();
+        await AuthenticateAsync(admin, admin: true);
+
+        var (_, versionId) = await CreateRuleVersionAsync(admin);
+        var before = await admin.GetAsync("/api/v1/admin/rule-reviews/queue");
+        Assert.Equal(HttpStatusCode.OK, before.StatusCode);
+        using (var json = JsonDocument.Parse(await before.Content.ReadAsStringAsync()))
+            Assert.Equal(0, json.RootElement.GetProperty("totalItems").GetInt32());
+
+        var submitted = await admin.PostAsync(
+            $"/api/v1/admin/rule-versions/{versionId}/review", null);
+        Assert.Equal(HttpStatusCode.OK, submitted.StatusCode);
+
+        var queue = await admin.GetAsync("/api/v1/admin/rule-reviews/queue?page=1&pageSize=1");
+        Assert.Equal(HttpStatusCode.OK, queue.StatusCode);
+        using (var json = JsonDocument.Parse(await queue.Content.ReadAsStringAsync()))
+        {
+            Assert.Equal(1, json.RootElement.GetProperty("totalItems").GetInt32());
+            Assert.Equal(1, json.RootElement.GetProperty("totalPages").GetInt32());
+            var item = Assert.Single(json.RootElement.GetProperty("items").EnumerateArray());
+            Assert.Equal(versionId, item.GetProperty("ruleVersionId").GetGuid());
+            Assert.False(item.GetProperty("isMedicalSensitive").GetBoolean());
+            Assert.False(string.IsNullOrWhiteSpace(item.GetProperty("sourceUrl").GetString()));
+        }
+
+        var onlyMedical = await admin.GetAsync(
+            "/api/v1/admin/rule-reviews/queue?medicalSensitive=true");
+        Assert.Equal(HttpStatusCode.OK, onlyMedical.StatusCode);
+        using (var json = JsonDocument.Parse(await onlyMedical.Content.ReadAsStringAsync()))
+            Assert.Equal(0, json.RootElement.GetProperty("totalItems").GetInt32());
+
+        var medicalRule = await admin.PostAsJsonAsync("/api/v1/admin/diet-rules", new
+        {
+            RuleKey = "MEDICAL_REVIEW_RULE",
+            Title = "Specialist review",
+            Description = "A medically sensitive rule requiring independent review",
+            Category = "Safety",
+            IsMedicalSensitive = true,
+        });
+        Assert.Equal(HttpStatusCode.Created, medicalRule.StatusCode);
+        using var medicalRuleJson = JsonDocument.Parse(await medicalRule.Content.ReadAsStringAsync());
+        var medicalRuleId = medicalRuleJson.RootElement.GetProperty("id").GetGuid();
+        var medicalVersion = await admin.PostAsJsonAsync(
+            $"/api/v1/admin/diet-rules/{medicalRuleId}/versions", VersionInput("""{"weight":3}"""));
+        Assert.Equal(HttpStatusCode.Created, medicalVersion.StatusCode);
+        using var medicalVersionJson = JsonDocument.Parse(await medicalVersion.Content.ReadAsStringAsync());
+        var medicalVersionId = medicalVersionJson.RootElement.GetProperty("id").GetGuid();
+        Assert.Equal(HttpStatusCode.OK,
+            (await admin.PostAsync($"/api/v1/admin/rule-versions/{medicalVersionId}/review", null)).StatusCode);
+
+        var medicalOnlyAfter = await admin.GetAsync(
+            "/api/v1/admin/rule-reviews/queue?medicalSensitive=true");
+        Assert.Equal(HttpStatusCode.OK, medicalOnlyAfter.StatusCode);
+        using (var json = JsonDocument.Parse(await medicalOnlyAfter.Content.ReadAsStringAsync()))
+        {
+            Assert.Equal(1, json.RootElement.GetProperty("totalItems").GetInt32());
+            var item = Assert.Single(json.RootElement.GetProperty("items").EnumerateArray());
+            Assert.True(item.GetProperty("isMedicalSensitive").GetBoolean());
+            Assert.Equal(medicalVersionId, item.GetProperty("ruleVersionId").GetGuid());
+        }
+        var secondQueuePage = await admin.GetAsync(
+            "/api/v1/admin/rule-reviews/queue?page=2&pageSize=1");
+        Assert.Equal(HttpStatusCode.OK, secondQueuePage.StatusCode);
+        using (var json = JsonDocument.Parse(await secondQueuePage.Content.ReadAsStringAsync()))
+        {
+            Assert.Equal(2, json.RootElement.GetProperty("totalItems").GetInt32());
+            Assert.Single(json.RootElement.GetProperty("items").EnumerateArray());
+        }
+
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await admin.GetAsync("/api/v1/admin/rule-reviews/queue?pageSize=1001")).StatusCode);
+
+        var emptyImpact = await admin.GetAsync(
+            $"/api/v1/admin/rule-versions/{versionId}/impact");
+        Assert.Equal(HttpStatusCode.OK, emptyImpact.StatusCode);
+        using (var json = JsonDocument.Parse(await emptyImpact.Content.ReadAsStringAsync()))
+            Assert.Equal(0, json.RootElement.GetProperty("totalHistoricalPlans").GetInt32());
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var version = await db.RuleVersions.SingleAsync(x => x.Id == versionId);
+            var userId = await db.Users.Select(x => x.Id).FirstAsync();
+            var label = "impact-" + Guid.NewGuid().ToString("N");
+            db.RuleSetVersions.Add(new RuleSetVersion
+            {
+                VersionLabel = label,
+                IsActive = false,
+                RuleVersions = new List<RuleVersion> { version }
+            });
+            db.MealPlans.Add(new MealPlan
+            {
+                UserId = userId,
+                RuleSetVersion = label,
+                StartDate = new DateOnly(2026, 11, 10),
+                EndDate = new DateOnly(2026, 11, 23),
+                Status = MealPlanStatus.Active
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var impact = await admin.GetAsync(
+            $"/api/v1/admin/rule-versions/{versionId}/impact");
+        Assert.Equal(HttpStatusCode.OK, impact.StatusCode);
+        using (var json = JsonDocument.Parse(await impact.Content.ReadAsStringAsync()))
+        {
+            var root = json.RootElement;
+            Assert.Equal(1, root.GetProperty("referencingRuleSets").GetInt32());
+            Assert.Equal(1, root.GetProperty("totalHistoricalPlans").GetInt32());
+            Assert.Equal(1, root.GetProperty("currentActivePlans").GetInt32());
+            var item = Assert.Single(root.GetProperty("ruleSets").EnumerateArray());
+            Assert.Equal(1, item.GetProperty("distinctUsers").GetInt32());
+            Assert.False(item.GetProperty("isActiveRuleSet").GetBoolean());
+            Assert.False(root.ToString().Contains("example.test", StringComparison.OrdinalIgnoreCase));
+        }
+
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await admin.GetAsync($"/api/v1/admin/rule-versions/{Guid.NewGuid()}/impact")).StatusCode);
+
+        using var member = _factory.CreateHttpsClient();
+        await AuthenticateAsync(member, admin: false);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await member.GetAsync("/api/v1/admin/rule-reviews/queue")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await member.GetAsync($"/api/v1/admin/rule-versions/{versionId}/impact")).StatusCode);
     }
 
     private static async Task<int> ReadStateAsync(HttpResponseMessage response)

@@ -42,3 +42,11 @@
 6. Complete all original Final Assignment demo items (see `docs/assignment/FINAL-ASSIGNMENT-COMPLIANCE-AUDIT-20261109.md`).
 
 Do not mark this task DONE until the above gates have passed. Commit only to the feature branch, and do not merge directly to stable branches without team review.
+## Cập nhật 10/11/2026 — Admin Review Queue + Impact + Independent Approval
+
+- Admin-only GET `/api/v1/admin/rule-reviews/queue?page=1&pageSize=20&medicalSensitive=true`: tìm RuleVersion đang InReview, lọc rule nhạy cảm, phân trang 1–100.
+- Admin-only GET `/api/v1/admin/rule-versions/{id}/impact`: đếm số RuleSetVersion đang/thôi active, số MealPlans lịch sử/hiện hoạt, số tài khoản bị tác động (aggregate, không lộ UserId).
+- Giao diện Admin Rules có queue (lọc/next/prev) và bảng ảnh hưởng phiên bản từ database.
+- Publish bắt buộc actor khác actor của audit Submitted cuối cùng. Self-publish/thiếu dấu vết Submitted trả 409 `independent_review_required`, không có audit Publish sai.
+- Test đã cập nhật hành vi 2 Admin, kiểm tra role ownership, queue và impact được backing bởi RuleSetVersion + MealPlan thực trong SQLite integration.
+- Không có thay đổi EF schema; migration trước đó giữ nguyên. SQL Server concurrency và reviewer người thật vẫn cần kiểm chứng.

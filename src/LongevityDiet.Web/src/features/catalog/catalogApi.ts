@@ -84,6 +84,36 @@ export type RuleVersion = {
   publishedAt?: string | null
 }
 
+export type RuleReviewQueueItem = {
+  ruleVersionId: string
+  dietRuleId: string
+  ruleKey: string
+  ruleTitle: string
+  versionNumber: number
+  isMedicalSensitive: boolean
+  state: number
+  sourceUrl: string
+  citation: string
+  evidenceLevel: number
+  createdAt: string
+}
+
+export type RuleSetPlanUsage = {
+  ruleSetVersion: string
+  isActiveRuleSet: boolean
+  totalPlans: number
+  activePlans: number
+  distinctUsers: number
+}
+
+export type RuleImpact = {
+  ruleVersionId: string
+  referencingRuleSets: number
+  totalHistoricalPlans: number
+  currentActivePlans: number
+  ruleSets: RuleSetPlanUsage[]
+}
+
 export type DietRule = {
   id: string
   ruleKey: string
@@ -247,6 +277,18 @@ export type RuleAudit = {
 
 export async function transitionRuleVersion(versionId: string, action: 'review' | 'rejection' | 'publication' | 'retirement') {
   const response = await api.post<RuleVersion>(`/admin/rule-versions/${versionId}/${action}`)
+  return response.data
+}
+
+export async function getRuleReviewQueue(page = 1, medicalSensitive?: boolean) {
+  const response = await api.get<PagedResult<RuleReviewQueueItem>>('/admin/rule-reviews/queue', {
+    params: { page, pageSize: 20, medicalSensitive },
+  })
+  return response.data
+}
+
+export async function getRuleImpact(versionId: string) {
+  const response = await api.get<RuleImpact>(`/admin/rule-versions/${versionId}/impact`)
   return response.data
 }
 

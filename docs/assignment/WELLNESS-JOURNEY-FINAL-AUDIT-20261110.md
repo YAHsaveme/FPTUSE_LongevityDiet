@@ -84,3 +84,6 @@ Các nguồn này chỉ xác nhận nguyên tắc khoa học, **không phải x�
 ## 7. Điều kiện nghiệm thu 100% còn thiếu
 
 Cần dữ liệu recipe/định lượng/micronutrient đã kiểm tra với chuyên gia dinh dưỡng, kiểm tra dị ứng và cross-contact, quy tắc cá nhân hóa chuyên sâu đúng đối tượng; chạy migration trên SQL thật và demo runtime đầy đủ REST, Worker, Redis, gRPC và Docker; kiểm tra privacy/retention cho nhật ký y tế. Chỉ sau khi có bằng chứng mới nên đề nghị merge vào `develop` hoặc `main`. Các thay đổi đã kiểm chứng cần được commit ngay để không mất dữ liệu. Không đưa `.env`, credentials, dữ liệu sức khỏe người dùng hoặc bản sao DB lên Git.
+## Cập nhật Rule Governance / task thành viên 4
+
+Chi tiết nghiệm thu cả tám task xem tại [MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md](MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md). Admin Rule Governance có hàng đợi InReview phân trang/lọc medical sensitivity, phân tích tác động version -> rule sets -> MealPlans và kiểm soát hai Admin riêng biệt khi công bố. Tính năng đã được kiểm thử trên SQLite integration, **chưa** đủ chứng cứ concurrency/SQL Server triển khai thật hay reviewer ngoài nhóm.

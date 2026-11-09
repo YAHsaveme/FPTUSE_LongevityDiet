@@ -18,6 +18,8 @@ import {
   getRules,
   transitionRuleVersion,
   getRuleHistory,
+  getRuleImpact,
+  getRuleReviewQueue,
   type RuleVersion,
   updateFood,
   updateRecipe,
@@ -486,6 +488,12 @@ function RecipeAdmin() {
 
 function RuleAdmin() {
   const queryClient = useQueryClient()
+  const [medicalQueueOnly, setMedicalQueueOnly] = useState(false)
+  const [queuePage, setQueuePage] = useState(1)
+  const reviewQueue = useQuery({
+    queryKey: ['admin', 'rule-review-queue', queuePage, medicalQueueOnly],
+    queryFn: () => getRuleReviewQueue(queuePage, medicalQueueOnly ? true : undefined),
+  })
   const [ruleKey, setRuleKey] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -525,6 +533,36 @@ function RuleAdmin() {
     <div className="admin-grid rules-admin-grid">
       <section className="admin-list-panel">
         <PanelHeading title="Rules & versions" note={String(rules.data?.length ?? 0) + ' rules'} />
+        <section className="surface-card" style={{ padding: '1rem', marginBlock: '.8rem' }} aria-label="Safety rule review queue">
+          <h3>Safety review queue</h3>
+          <label>
+            <input type="checkbox" checked={medicalQueueOnly}
+              onChange={(event) => { setMedicalQueueOnly(event.target.checked); setQueuePage(1) }} />
+            {' '}Only medically sensitive rules
+          </label>
+          {reviewQueue.isLoading && <p>Loading review queue...</p>}
+          {reviewQueue.isError && <p role="alert">{getApiErrorMessage(reviewQueue.error)}</p>}
+          {reviewQueue.data?.items.length === 0 && <p>No rules awaiting review.</p>}
+          {reviewQueue.data?.items.map((item) => (
+            <div key={item.ruleVersionId} style={{ marginBlock: '.6rem' }}>
+              <button type="button" onClick={() => setSelectedRuleId(item.dietRuleId)}>
+                {item.ruleKey} v{item.versionNumber} — {item.ruleTitle}
+              </button>
+              <p>Evidence level: {item.evidenceLevel}
+                {item.isMedicalSensitive ? ' · Medical sensitivity review required' : ''}
+              </p>
+            </div>
+          ))}
+          {(reviewQueue.data?.totalPages ?? 0) > 1 && (
+            <div className="admin-form-actions">
+              <button type="button" disabled={queuePage <= 1}
+                onClick={() => setQueuePage((page) => page - 1)}>Previous</button>
+              <span>Page {queuePage} / {reviewQueue.data?.totalPages}</span>
+              <button type="button" disabled={queuePage >= (reviewQueue.data?.totalPages ?? 0)}
+                onClick={() => setQueuePage((page) => page + 1)}>Next</button>
+            </div>
+          )}
+        </section>
         {rules.isLoading && <AdminState>Đang tải rules...</AdminState>}
         <div className="admin-item-list">
           {rules.data?.map((rule) => (
@@ -592,6 +630,12 @@ function RuleAdmin() {
 
 function RuleGovernance({ version }: { version: RuleVersion }) {
   const queryClient = useQueryClient()
+  const [showImpact, setShowImpact] = useState(false)
+  const impact = useQuery({
+    queryKey: ['admin', 'rule-impact', version.id],
+    queryFn: () => getRuleImpact(version.id),
+    enabled: showImpact,
+  })
   const [showHistory, setShowHistory] = useState(false)
   const [actionFilter, setActionFilter] = useState('')
   const [page, setPage] = useState(1)
@@ -604,6 +648,8 @@ function RuleGovernance({ version }: { version: RuleVersion }) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin', 'rules'] })
       void queryClient.invalidateQueries({ queryKey: ['admin', 'rule-history', version.id] })
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'rule-review-queue'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'rule-impact', version.id] })
       void queryClient.invalidateQueries({ queryKey: ['catalog', 'rules'] })
     },
   })
@@ -618,10 +664,30 @@ function RuleGovernance({ version }: { version: RuleVersion }) {
     {version.state === 4 && <>
       <button disabled={transition.isPending} onClick={() => transition.mutate('rejection')}>Return to draft</button>
       <button disabled={transition.isPending} onClick={() => transition.mutate('publication')}>Approve and publish</button>
+      <small>Independent review required: a different administrator must approve this submission.</small>
     </>}
     {version.state === 2 && <button disabled={transition.isPending} onClick={() => transition.mutate('retirement')}>Retire version</button>}
     {version.state === 3 && <p>Retired. Historical references are retained.</p>}
     {transition.isError && <p role="alert">{getApiErrorMessage(transition.error)}</p>}
+    <button type="button" aria-expanded={showImpact}
+      onClick={() => setShowImpact(!showImpact)}>Affected plans / version impact</button>
+    {showImpact && <div aria-live="polite">
+      {impact.isLoading && <p>Checking rule-set references...</p>}
+      {impact.isError && <p role="alert">{getApiErrorMessage(impact.error)}</p>}
+      {impact.data && <>
+        <p>Referenced by {impact.data.referencingRuleSets} rule sets,
+          {impact.data.totalHistoricalPlans} historical plans,
+          {impact.data.currentActivePlans} active plans.</p>
+        <ul>
+          {impact.data.ruleSets.map((item) => <li key={item.ruleSetVersion}>
+            {item.ruleSetVersion} · {item.isActiveRuleSet ? 'Active rule set' : 'Historical rule set'}
+            {' '}· {item.totalPlans} plans · {item.distinctUsers} distinct members
+          </li>)}
+          {impact.data.ruleSets.length === 0 && <li>No mapped rule-set references.</li>}
+        </ul>
+        <small>Counts only; member identities and health records are not exposed.</small>
+      </>}
+    </div>}
     <button aria-expanded={showHistory} onClick={() => setShowHistory(!showHistory)}>Audit history</button>
     {showHistory && <div aria-live="polite">
       <label>Filter audit action <select value={actionFilter} onChange={event => { setActionFilter(event.target.value); setPage(1) }}>

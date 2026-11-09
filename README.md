@@ -2,6 +2,8 @@
 
 > **2026-11-10 — Current scope and acceptance status.** The member 1/4 branch now contains reviewed-allergy screening, conservative audience grouping, 14-day rolling meal coverage, Baseline/During/FollowUp self-reported health check-ins, and conditional daily reminders. See [the current implementation and Final Assignment audit](docs/assignment/WELLNESS-JOURNEY-FINAL-AUDIT-20261110.md). **Automated tests passing does not establish medical safety or 100% final acceptance.** The current EF migration snapshots include **56 tables** (45 main + 7 tracking + 4 worker). All four [current C0/C1/C2/Database diagrams](docs/assignment/one-page/README.md) now use the current source, including **22 API controllers and the 56-table physical ERD**. Both Draw.io and one-page PDF exist. Rendered SVG validation passes with **zero label cuts or connector crossings** across all four. The old 32-table diagrams are archived under `docs/assignment/legacy-diagrams`. The 400-day daily rolling continuity test passes. **Production-equivalent Docker/SQL/Redis/gRPC/Worker demos, nutrition safety validation and clinical review remain open.**
 
+**Member 1 + Member 4 acceptance:** [Eight-task completion matrix and remaining live verification](docs/assignment/MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md). Admin Rule Governance now includes independent two-admin publication review, a paginated safety queue and read-only historical plan-impact counts.
+
 ## Project description
 
 PRN232 Final Assignment: distributed .NET application hỗ trợ người dùng xây dựng và theo dõi thói quen longevity diet/lifestyle theo hướng giải thích được, truy vết được rule/source và có distributed architecture rõ ràng.

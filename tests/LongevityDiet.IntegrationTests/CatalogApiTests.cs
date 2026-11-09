@@ -263,7 +263,9 @@ public sealed class CatalogApiTests : IClassFixture<IntegrationTestWebApplicatio
         var submit = await client.PostAsync($"/api/v1/admin/rule-versions/{versionId}/review", null);
         Assert.Equal(HttpStatusCode.OK, submit.StatusCode);
 
-        var publish = await client.PostAsync(
+        using var reviewer = _factory.CreateHttpsClient();
+        await AuthenticateAsAdminAsync(reviewer);
+        var publish = await reviewer.PostAsync(
             $"/api/v1/admin/rule-versions/{versionId}/publication",
             content: null);
 
