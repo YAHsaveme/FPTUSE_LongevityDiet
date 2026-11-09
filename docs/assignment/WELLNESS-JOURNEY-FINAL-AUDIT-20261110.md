@@ -45,7 +45,7 @@ Chạy từ thư mục dự án:
     docker compose --env-file .env.example config --quiet
     .\scripts\Test-ReleaseReadiness.ps1
 
-**Kết quả mới nhất 10/11/2026:** 91/91 unit + 79/79 integration = **170/170 test .NET PASS**; tình huống lộ trình 400 ngày PASS; 12/12 Web tests PASS, Web lint 0 cảnh báo và production build PASS. Tất cả bốn bản PDF/Draw.io đã xuất thành công, SVG 0 giao cắt/0 đường cắt nhãn, kiểm tra sơ đồ tổng thể PASS, structure PASS và ReleaseReadiness static PASS. Snapshot EF `WellnessLongitudinalJourney` không còn thay đổi EF chưa được tạo migration. **Migration mới chưa được áp dụng và kiểm thử trên SQL Server thực tế.**
+**Kết quả mới nhất 10/11/2026:** 91/91 unit + 80/80 integration = **171/171 test .NET PASS**; tình huống lộ trình 400 ngày PASS; 12/12 Web tests PASS, Web lint 0 cảnh báo và production build PASS. Tất cả bốn bản PDF/Draw.io đã xuất thành công, SVG 0 giao cắt/0 đường cắt nhãn, kiểm tra sơ đồ tổng thể PASS, structure PASS và ReleaseReadiness static PASS. Snapshot EF `WellnessLongitudinalJourney` không còn thay đổi EF chưa được tạo migration. **Migration mới chưa được áp dụng và kiểm thử trên SQL Server thực tế.**
 
 ## 4. Đối chiếu rubric PRN232 Final Assignment
 
