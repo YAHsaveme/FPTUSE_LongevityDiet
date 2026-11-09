@@ -23,7 +23,7 @@ while(stack.length){const current=stack.pop();if(visited.has(current))continue;v
 check(visited.size===names.size,'multiple unconnected graphs: '+[...names].filter(x=>!visited.has(x)).join(', '));
 check((xml.match(/edge="1"/g)||[]).length===manifest.relations.length,'native arrows missing');
 check((xml.match(/shape=umlActor/g)||[]).length===0,'database diagram must not show fake people');
-check(xml.includes('page="1"')&&xml.includes('pageWidth="10800"'),'not a single-page diagram');
+check(xml.includes('page="1"')&&xml.includes('pageWidth="9000"'),'not a single-page diagram');
 check(!/fillColor=#(?!FFFFFF)/i.test(xml),'colored table found');
 const geometry=[...xml.matchAll(/<mxCell id="(n\d+)"[^>]*vertex="1"[^>]*><mxGeometry x="(\d+)" y="(\d+)" width="(\d+)" height="(\d+)"/g)];
 check(geometry.length>=56,'not enough source-backed vertices');

@@ -111,9 +111,32 @@ const functional=[
  [m('Foods'),m('MealLogItems'),'food code']
 ];
 for(const [a,b,label] of functional)add(a,b,'APP',label);
-// Ensure no physical table stands unconnected without inventing SQL constraints.
-// When a source-backed service group contains standalone job tables, link its
-// operational relationship to the nearest real owner in that group.
+// Preserve the complete list of 50 source-backed APP associations in the manifest.
+// For the single-page VIEW select a minimal connected subset: all physical FKs
+// plus only the APP associations required to make every table reachable.
+// This is a readability reduction, not a claim that other associations vanished.
+const candidateAssociations=edges.filter(x=>x.kind==='APP').map(x=>({...x}));
+const representative=new Map(all.map(x=>[x.id,x.id]));
+function rootOf(x){const p=representative.get(x);if(p!==x){const r=rootOf(p);representative.set(x,r);return r;}return x;}
+function join(a,b){const x=rootOf(a),y=rootOf(b);if(x===y)return false;representative.set(y,x);return true;}
+for(const physical of fk)join(physical.from,physical.to);
+const panelIndex=new Map(segments.flatMap((g,index)=>g[2].map(name=>[g[1]+':'+name,index])));
+const candidates=candidateAssociations.slice().sort((a,b)=>{
+ function rank(x){
+  const left=panelIndex.get(x.from),right=panelIndex.get(x.to);
+  if(left===undefined||right===undefined)throw Error('Invalid panel reference');
+  return (left===right?0:30+Math.abs(left-right)*8)+(x.field.startsWith('same UserId')?6:0);
+ }
+ return rank(a)-rank(b);
+});
+const selected=[];
+for(const x of candidates)if(join(x.from,x.to))selected.push(x);
+edges.length=0;edges.push(...fk,...selected);
+if(new Set(all.map(x=>rootOf(x.id))).size!==1)
+ throw Error('Source-backed FK and app relations do not connect every table');
+if(edges.length!==all.length-1)
+ throw Error('Expected an acyclic 56-table physical/logical spanning diagram');
+// All 23 physical SQL FKs are rendered, and only source-backed links fill gaps.
 for(const e of edges){degree.set(e.from,(degree.get(e.from)||0)+1);degree.set(e.to,(degree.get(e.to)||0)+1);}
 for(const n of all)if(degree.get(n.id)===0)throw Error('Unconnected table in source-backed model: '+n.id);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -130,7 +153,7 @@ function card(id,x,y,w,h,label,{type='card',font=34}={}){
  if(id)lookup.set(id,{id:mxId,x,y,w,h});
 }
 card(null,155,58,10100,92,'DATABASE DIAGRAM  |  FULL EF CORE SNAPSHOT / 10 NOV 2026',{type:'title',font:66});
-card(null,155,155,10300,94,'56 physical tables in 3 SQL catalogs (main 45 / tracking 7 / reminder worker 4). SQL FK = solid; APP / EVENT = dashed, not enforced.',{type:'note',font:36});
+card(null,155,155,10300,94,'56 physical tables (45 main / 7 tracking / 4 worker). Solid = 23 real SQL FKs; dashed = minimum app links for connected schema. Full association inventory in manifest.',{type:'note',font:33});
 const panelW=3390,panelH=4130;
 for(let si=0;si<segments.length;si++){
  const [title,db,names]=segments[si];
@@ -168,6 +191,6 @@ if([...content.matchAll(/#[0-9a-fA-F]{6}\b/g)].some(m=>!['#000000','#FFFFFF'].in
  throw Error('Non monochrome element');
 const dest=path.join(root,'docs/assignment/one-page/Database Diagram FULL.drawio');
 fs.writeFileSync(dest,content,'utf8');
-const evidence={generatedAt:'2026-11-10',source:snapshots.map(x=>x[1]),tableCount:all.length,groups:Object.fromEntries(snapshots.map(([k])=>[k,all.filter(n=>n.db===k).length])),physicalFkCount:fk.length,logicalAssociations:edges.length-fk.length,allNodesHaveEdges:[...degree.values()].every(x=>x>0),tables:all,relations:rel};
+const evidence={generatedAt:'2026-11-10',source:snapshots.map(x=>x[1]),tableCount:all.length,groups:Object.fromEntries(snapshots.map(([k])=>[k,all.filter(n=>n.db===k).length])),physicalFkCount:fk.length,logicalAssociations:edges.length-fk.length,allRelevantAppCount:candidateAssociations.length,candidateAssociations,allNodesHaveEdges:[...degree.values()].every(x=>x>0),tables:all,relations:rel};
 fs.writeFileSync(path.join(root,'docs/assignment/one-page/full-schema-manifest.json'),JSON.stringify(evidence,null,2)+'\n','utf8');
 console.log('FULL_ERD_SOURCE_AUDIT=PASS tables='+all.length+' FK='+fk.length+' APP='+ (edges.length-fk.length)+' allConnected=true NativeDrawio='+dest);

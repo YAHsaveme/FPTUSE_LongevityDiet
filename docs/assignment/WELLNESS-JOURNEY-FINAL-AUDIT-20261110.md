@@ -1,45 +1,38 @@
-# LongevityDiet - Daily Meal & Wellness Journey acceptance checkpoint
+# LongevityDiet — báo cáo đối chiếu Final Assignment và lộ trình sức khỏe
 
-Date: 10 Nov 2026 (Asia/Ho_Chi_Minh)
-Branch: feature/w3-t4-rule-governance-20261109
-Scope: members 1 + 4; PRN232 Final Assignment; continuous meal journey
-Status: PARTIALLY VERIFIED - NOT 100% ACCEPTED.
+Ngày: 10/11/2026 (UTC+7). Nhánh: `feature/w3-t4-rule-governance-20261109`. Phạm vi: thành viên 1 + thành viên 4, dinh dưỡng mỗi ngày, theo dõi trước–trong–sau. **Chưa đủ chứng cứ để kết luận nghiệm thu 100%.**
 
-## 1. Implemented flows and boundaries
+## 1. Đã triển khai và có kiểm thử
 
-| ID | Flow | Status |
-|---|---|---|
-| W01 | Registration, JWT, member profile, age and time zone | Existing code and API tests |
-| W02 | Health screening, allergies reviewed, health risk flags | Implemented. Risk groups require professional review |
-| W03 | Grouping: adult, older adult, adolescent, age unknown, professional review, wellbeing review | Implemented rules; NOT medically validated diagnosis |
-| W04 | Rolling 14 days with daily meals, no duplicate plan when still covered | API + integration tested. Refreshes on eligible app visits, NOT overnight offline |
-| W05 | Manual generate, regenerate, replace meal and current plan all check screening | Implemented. Allergy changes invalidate outdated daily choices |
-| W06 | Baseline, During, FollowUp daily check-in: energy, mood, digestion, sleep, symptoms, body changes, notes, optional weight | Implemented EF model + JWT scoped CRUD |
-| W07 | Repeated low wellbeing or reported emergency symptoms block self-directed automated planning | Implemented and tested; self-reported ratings are not a clinical assessment |
-| W08 | Daily form shown in planner, opt-in MealLogging reminder also asks about wellness | Implemented; reminder requires running Worker/broker and user opt-in |
-| W09 | History, 30-day display and 365-day summaries | Implemented; not evidence that diet improved health |
-| W10 | Safe recognition of common Vietnamese/English allergens; unknown terms fail closed | Implemented and tested; not safe to infer cross-contact or complete ingredient labels |
+| Hạng mục | Bằng chứng |
+|---|---|
+| Tài khoản, JWT và thông tin cá nhân | Có trong API, kiểm thử xác thực/phân quyền |
+| Xác minh tuổi và dị ứng trước khi lên thực đơn | Sàng lọc theo tài khoản; không đủ 18 tuổi/chưa khai tuổi và nhiều yếu tố rủi ro bị chặn tự lên kế hoạch |
+| Nhóm đối tượng | AdultGeneral, OlderAdult, AgeUnverified, Adolescent, ProfessionalReviewRequired, WellbeingReviewRequired. Các nhóm là hướng điều hướng an toàn **không phải chẩn đoán** |
+| Thực đơn liên tục | 14 ngày trước mắt; khi người dùng mở Planner sẽ nối tiếp phần kế hoạch sắp hết; không chỉ lên một ngày |
+| Không trùng và bảo toàn kế hoạch | Kiểm thử idempotent, giữ các bữa đã lên lịch khi điều kiện không đổi, kiểm tra các ngày liên tiếp |
+| Kiểm tra an toàn toàn bộ các lối vào | API `generate`, `regenerate`, `regenerate meal`, `ensure-current`, `current` không được bỏ qua sàng lọc |
+| Thay đổi dị ứng | Tên dị ứng phổ biến Việt/Anh được ánh xạ; trường hợp không nhận diện được bị chặn; không sử dụng phiên kế hoạch cũ không còn tương thích |
+| Nhật ký sức khỏe | Trước (Baseline), trong (During), sau chu kỳ (FollowUp), mỗi ngày: năng lượng/tinh thần/tiêu hóa/ngủ 1–5, triệu chứng, thay đổi cơ thể, cân nặng và ghi chú |
+| Xu hướng và theo dõi hằng ngày | Bảng hỏi trên Planner, tổng hợp đến 365 ngày; lời nhắc ghi bữa ăn opt-in qua Worker hỏi thêm về sức khỏe |
+| Bảo vệ an toàn | Triệu chứng cấp cứu và nhiều ngày tự chấm rất kém bị cảnh báo/chặn tự lập chế độ ăn; không xem kết quả tự khai là chẩn đoán |
+| Sở hữu dữ liệu | API JWT, cách ly theo tài khoản, không cho xóa nhật ký của người khác |
+| Kiểm thử độ dài lộ trình | Unit test mô phỏng từng ngày **400 ngày liên tục xuyên năm**; phải xem kết quả test cuối trong phần Quality Gates |
 
-Important: menu suggestions use deterministic candidate recipes with illustrative nutrition data. Complete nutrient sufficiency, energy/protein requirements for each individual, clinically validated ingredients, medicine interactions, allergic cross-contact and real lifespan outcomes have NOT been established. High-risk users must consult a qualified dietitian/clinician.
+**Giới hạn chức năng:** Đây là gợi ý món ăn dựa trên recipe và quy tắc, **chưa** phải thực đơn được chuyên gia chứng nhận đủ năng lượng, protein, vitamin, khoáng chất, phù hợp thuốc đang dùng hay loại trừ tất cả nguy cơ dị ứng và tiếp xúc chéo. Không có phương pháp nào đảm bảo tăng tuổi thọ cho từng cá nhân.
 
-## 2. Physical database and diagrams
+## 2. Sơ đồ bốn mức đã đồng bộ với thực trạng
 
-The CURRENT EF migration snapshots map 56 physical SQL tables: LongevityDietDb 45, LongevityTrackingDb 7, LongevityWorkerDb 4. There are 23 EF-defined physical SQL foreign keys, plus 50 documented business/operational APP links. Cross-database links are NEVER represented as physical SQL foreign keys.
+- C0: System Context, actor hình người.
+- C1: Web → API, API ↔ Redis, Worker, gRPC, 3 SQL catalogs.
+- C2: **22 controller**, bốn nhóm nghiệp vụ, luồng HTTP → Controller → Service → Repository; thông tin Redis/gRPC/Worker và DB.
+- ERD: **56 bảng** (45/7/4), **23 SQL FK thực tế** và **32 liên kết logic hiển thị**, phần mô tả đủ **50 liên kết logic** nằm trong `full-schema-manifest.json`.
+- Cả bốn sơ đồ là file Draw.io native và PDF một trang. `Export-OverallDiagrams.ps1` đã ghi nhận **PASS**, bao gồm SVG bố cục **0 chữ bị đường cắt, 0 đường nối giao cắt** trên cả bốn sơ đồ.
+- Bộ sơ đồ cũ 32 bảng lưu trong `docs/assignment/legacy-diagrams` để đối chiếu, không dùng làm sơ đồ hiện tại.
 
-Additional single-page full diagram:
-- docs/assignment/one-page/Database Diagram FULL.drawio (native editable)
-- docs/assignment/one-page/Database Diagram FULL.pdf (vector PDF)
-- docs/assignment/one-page/full-schema-manifest.json (manifest)
-- scripts/Generate-CompleteSchemaDiagram.js (generator)
-- scripts/Validate-CompleteSchemaDiagram.js (validation)
+## 3. Quality Gates
 
-Full-diagram QA verified 56/56 represented and connected, 23 SQL FK and 50 APP links, one page, monochrome, 73 native arrows. These checks do not prove that every semantic relationship or caption is ideal.
-
-The original C0/C1/C2/Database Diagram set still reflects a historical 32-table subset. It is NOT an accurate full physical model of the latest implementation. The legacy Validate-OverallDiagrams.js currently FAILS because the EF table count, FK count and number of diagram files increased. This is an OPEN deliverable rather than a passing acceptance gate. Current physical-schema PDF is the new FULL file, not the historical one. Completing a comprehensive updated C2 diagram remains open.
-
-## 3. Automated checks
-
-Run from repository root in PowerShell:
+Chạy từ thư mục dự án:
 
     dotnet build LongevityDiet.sln -c Release --nologo -v:q
     dotnet test LongevityDiet.sln -c Release --nologo -v:q
@@ -48,46 +41,46 @@ Run from repository root in PowerShell:
     npm --prefix src/LongevityDiet.Web test
     node scripts/Validate-CompleteSchemaDiagram.js
     node scripts/Validate-OverallDiagrams.js
+    .\scripts\Export-OverallDiagrams.ps1
     docker compose --env-file .env.example config --quiet
+    .\scripts\Test-ReleaseReadiness.ps1
 
-Previous passing checkpoint: 90 unit tests and 79 integration tests. Repeat after final edits and record actual current outputs. EF migration WellnessLongitudinalJourney was generated; model snapshot was checked for no pending changes. It has NOT been applied on a fresh production-equivalent SQL Server at this checkpoint.
+**Kết quả mới nhất 10/11/2026:** 91/91 unit + 79/79 integration = **170/170 test .NET PASS**; tình huống lộ trình 400 ngày PASS; 12/12 Web tests PASS, Web lint 0 cảnh báo và production build PASS. Tất cả bốn bản PDF/Draw.io đã xuất thành công, SVG 0 giao cắt/0 đường cắt nhãn, kiểm tra sơ đồ tổng thể PASS, structure PASS và ReleaseReadiness static PASS. Snapshot EF `WellnessLongitudinalJourney` không còn thay đổi EF chưa được tạo migration. **Migration mới chưa được áp dụng và kiểm thử trên SQL Server thực tế.**
 
-Machine had approximately 1.1 GB free on C: during audit. Full Docker SQL Server stack was NOT launched here to avoid filling system disk or deleting unrelated project images.
+## 4. Đối chiếu rubric PRN232 Final Assignment
 
-## 4. PRN232 Final Assignment rubric
+| Nội dung | Tỷ trọng | Trạng thái |
+|---|---:|---|
+| Kiến trúc hệ thống | 20% | C0, C1, C2 và ERD 56 bảng đã kiểm tra, có file bàn giao |
+| REST API | 20% | Code và integration test đã có; chưa demo trực tiếp trên stack Docker |
+| Background Job | 10% | Code Worker/reminder có; **chưa chứng minh lịch chạy và retry thực tế** |
+| Message Broker | 15% | Redis Streams được phép thay Kafka; **chưa live demo publish–consume–ACK** |
+| gRPC | 15% | Service gRPC riêng và API adapter có; **chưa chứng minh live REST → gRPC → phản hồi** |
+| Triển khai Docker/cloud | 10% | Compose/Dockerfile có; **chưa triển khai stack production-equivalent và kiểm tra migration SQL** |
+| Tài liệu/trình bày | 10% | Code, migrations, sơ đồ, báo cáo có; cần bản demo 7 mục thực tế |
 
-| Criterion | Weight | Evidence | Outstanding acceptance proof |
-|---|---:|---|---|
-| Architecture and design | 20% | C0/C1/C2 baseline + 56-table Full ERD | Update canonical C2 to actual scope; manually inspect rendering |
-| REST API | 20% | JWT, layered API/services/repos, CRUD/search/filter/page, wellness endpoints, automated tests | Live Swagger / JWT / roles demonstration |
-| Background jobs | 10% | Worker scheduling/outbox + reminders | Real scheduled execution, retry, persisted status |
-| Broker | 15% | Redis Streams producer/consumer in source | Live XADD, group consumer, ACK, durable side effect |
-| gRPC | 15% | Separate Recommendation.Grpc and API adapter | Live REST -> independent gRPC -> UI response and failure handling |
-| Docker or Cloud | 10% | Dockerfiles and Compose validated statically | Fresh full stack, real SQL migrations, readiness, restart test |
-| Documents/demo | 10% | README, source, migrations, editable diagrams, evidence | Fresh-machine instructions, all 7 live demonstrations/screenshots |
+Rubric gốc cho phép **Kafka hoặc Redis**, và **Docker Compose hoặc Cloud**. Không bắt buộc làm cả hai ở mỗi cặp.
 
-The original final assignment permits Redis Streams OR Kafka and Docker Compose OR cloud. Both alternatives are not required.
+**Rào cản tài nguyên:** tại 02:00 ngày 10/11/2026, ổ C: khoảng **0,36 GB trống**, ổ D: khoảng 108 GB trống. Khởi động SQL Server/Docker/ghi ảnh trên ổ C có nguy cơ cạn hệ thống; **không chạy container và không xóa hoặc dọn dữ liệu cá nhân ngoài dự án**. Phần thử nghiệm live còn mở.
 
-## 5. Seven-step live demo needed
+## 5. Demo đầu-cuối 7 mục cần nghiệm thu
 
-1. Explain architecture and distinguish actual physical SQL constraints from APP links.
-2. Swagger: JWT login; profile, allergies, screening, generate/current and check-in API with unauthorized case.
-3. Show an actual timed Worker reminder and persisted dispatch.
-4. Publish, consume and ACK a Redis Stream event with duplicate suppression.
-5. Show API invoking independent Recommendation.Grpc and responding when unavailable.
-6. Start Docker stack; run database migrations; confirm healthy interservice connectivity.
-7. Walk through register -> screening -> 14-day meals -> daily meal logging -> baseline/during/follow-up check-ins -> allergy/health-change safety response -> ongoing plan.
+1. Giải thích C0/C1/C2/ERD, FK vật lý so với APP liên kết.
+2. Swagger có JWT, profile, sàng lọc, 14 ngày, nhập/xem/sửa nhật ký trước–trong–sau.
+3. Worker thực sự kích hoạt lời nhắc ngày, lưu dấu và chống gửi trùng.
+4. Redis Streams publish/consume/ACK và xử lý lặp.
+5. API → gRPC riêng biệt, cả thành công và lỗi.
+6. Fresh Docker Compose + SQL migrations, health check, restart.
+7. Kịch bản nhiều ngày: đăng ký → xác minh tuổi/dị ứng → thực đơn luân phiên → ghi nhận ăn → check-in → thay dị ứng/triệu chứng → khóa và nối tiếp hợp lệ.
 
-## 6. Safety and evidence references
+## 6. Nguồn tham khảo chuyên môn
 
-WHO Healthy diet (updated 26 January 2026):
-https://www.who.int/news-room/fact-sheets/detail/healthy-diet
+- WHO — Healthy diet, 26/01/2026: https://www.who.int/news-room/fact-sheets/detail/healthy-diet — nguyên tắc adequacy/balance/moderation/diversity, nhu cầu tùy người.
+- US National Institute on Aging — Healthy Meal Planning: https://www.nia.nih.gov/health/healthy-eating-nutrition-and-diet/healthy-meal-planning-tips-older-adults — người cao tuổi cần đa dạng thực phẩm, protein, dinh dưỡng đặc thù.
+- FARE — Prevent Cross-Contact: https://www.foodallergy.org/sites/default/files/2023-05/FARE_CrossContactPoster-042623.pdf — dị nguyên có thể bị lẫn trong chế biến ngay cả khi nhãn món không có.
 
-NIDDK Pregnancy if You Have Diabetes, individual guidance and dietitian care:
-https://www.niddk.nih.gov/health-information/diabetes/diabetes-pregnancy
+Các nguồn này chỉ xác nhận nguyên tắc khoa học, **không phải xác nhận thực đơn trong database đã được kiểm định**.
 
-Nutrition principles include adequacy, balance, moderation and diversity. They do not establish a specific life-extending meal prescription for each user.
+## 7. Điều kiện nghiệm thu 100% còn thiếu
 
-## 7. Honest release decision
-
-NOT 100% COMPLETE. Remaining blockers: independent dietitian review of candidate recipes, allergy source/cross-contact validation, complete nutrient calculations, full canonical C2 update, running SQL Server migration in real Compose stack, full Redis/gRPC/Worker live demonstrations, privacy/retention review. Commit only the verified work on the feature branch; do not push confidential data or falsely mark production safe. Do not merge into main/develop before full verification.
+Cần dữ liệu recipe/định lượng/micronutrient đã kiểm tra với chuyên gia dinh dưỡng, kiểm tra dị ứng và cross-contact, quy tắc cá nhân hóa chuyên sâu đúng đối tượng; chạy migration trên SQL thật và demo runtime đầy đủ REST, Worker, Redis, gRPC và Docker; kiểm tra privacy/retention cho nhật ký y tế. Chỉ sau khi có bằng chứng mới nên đề nghị merge vào `develop` hoặc `main`. Các thay đổi đã kiểm chứng cần được commit ngay để không mất dữ liệu. Không đưa `.env`, credentials, dữ liệu sức khỏe người dùng hoặc bản sao DB lên Git.

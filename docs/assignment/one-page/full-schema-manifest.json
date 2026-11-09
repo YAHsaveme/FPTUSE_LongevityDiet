@@ -12,7 +12,310 @@
     "worker": 4
   },
   "physicalFkCount": 23,
-  "logicalAssociations": 50,
+  "logicalAssociations": 32,
+  "allRelevantAppCount": 50,
+  "candidateAssociations": [
+    {
+      "from": "main:UserProfiles",
+      "to": "main:RefreshTokens",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:RefreshTokens",
+      "to": "main:ReminderPreferences",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:ReminderPreferences",
+      "to": "main:UserNotifications",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:UserNotifications",
+      "to": "main:IdentityOutbox",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "main:WellnessScreenings",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:WellnessScreenings",
+      "to": "main:WellnessCheckIns",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:UserDietaryPreferences",
+      "to": "main:MealPlans",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:MealPlans",
+      "to": "main:PlannedMeals",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:PlannedMeals",
+      "to": "main:MealLogs",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:MealLogs",
+      "to": "main:EatingWindowSnapshots",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:EatingWindowSnapshots",
+      "to": "main:RecommendationFeedbacks",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:RecommendationFeedbacks",
+      "to": "main:MealReplacementHistories",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:MealReplacementHistories",
+      "to": "main:UserFoodPreferences",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:Users",
+      "to": "main:UserDietaryPreferences",
+      "kind": "APP",
+      "field": "same UserId (cross-domain)"
+    },
+    {
+      "from": "main:UserChallenges",
+      "to": "main:DailyWellnessSummaries",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:DailyWellnessSummaries",
+      "to": "main:FmdEducationAcknowledgements",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:FmdEducationAcknowledgements",
+      "to": "main:FmdSafetyAssessments",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:FmdSafetyAssessments",
+      "to": "main:FmdCycles",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:FmdCycles",
+      "to": "main:WeeklyReports",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:WeeklyReports",
+      "to": "main:WorkerJobs",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:Users",
+      "to": "main:UserChallenges",
+      "kind": "APP",
+      "field": "same UserId (cross-domain)"
+    },
+    {
+      "from": "tracking:ActivityGoals",
+      "to": "tracking:ActivityLogs",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "tracking:ActivityLogs",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "tracking:AdherenceScores",
+      "to": "tracking:TrackingScoreSignals",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "tracking:TrackingScoreSignals",
+      "to": "tracking:TrackingOutbox",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:Users",
+      "to": "tracking:ActivityGoals",
+      "kind": "APP",
+      "field": "same UserId (cross-domain)"
+    },
+    {
+      "from": "worker:ReminderSchedules",
+      "to": "worker:ReminderDispatchRecords",
+      "kind": "APP",
+      "field": "same UserId"
+    },
+    {
+      "from": "main:Users",
+      "to": "worker:ReminderSchedules",
+      "kind": "APP",
+      "field": "same UserId (cross-domain)"
+    },
+    {
+      "from": "main:Foods",
+      "to": "main:Recipes",
+      "kind": "APP",
+      "field": "catalog lookup"
+    },
+    {
+      "from": "main:Recipes",
+      "to": "main:DietRules",
+      "kind": "APP",
+      "field": "diet rule applicability"
+    },
+    {
+      "from": "main:DietRules",
+      "to": "main:RuleSetVersions",
+      "kind": "APP",
+      "field": "ruleset governance"
+    },
+    {
+      "from": "main:MealPlans",
+      "to": "main:MealReplacementHistories",
+      "kind": "APP",
+      "field": "MealPlanId"
+    },
+    {
+      "from": "main:PlannedMeals",
+      "to": "main:RecommendationFeedbacks",
+      "kind": "APP",
+      "field": "candidate/plan"
+    },
+    {
+      "from": "main:MealLogs",
+      "to": "main:DailyWellnessSummaries",
+      "kind": "APP",
+      "field": "UserId + LocalDate"
+    },
+    {
+      "from": "main:UserChallenges",
+      "to": "main:ProgressEventReceipts",
+      "kind": "APP",
+      "field": "challenge progress"
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerHeartbeats",
+      "kind": "APP",
+      "field": "worker health"
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerDeadLetters",
+      "kind": "APP",
+      "field": "job failure"
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerProcessedEvents",
+      "kind": "APP",
+      "field": "event processing"
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "main:IdentityInbox",
+      "kind": "APP",
+      "field": "event correlation"
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "worker:WorkerProcessedEvents",
+      "kind": "APP",
+      "field": "EventId"
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "worker:ReminderSchedules",
+      "kind": "APP",
+      "field": "preference events"
+    },
+    {
+      "from": "worker:ReminderDispatchRecords",
+      "to": "worker:WorkerOutbox",
+      "kind": "APP",
+      "field": "notification event"
+    },
+    {
+      "from": "worker:WorkerOutbox",
+      "to": "main:IdentityInbox",
+      "kind": "APP",
+      "field": "EventId"
+    },
+    {
+      "from": "tracking:TrackingOutbox",
+      "to": "tracking:TrackingScoreSignals",
+      "kind": "APP",
+      "field": "tracking events"
+    },
+    {
+      "from": "tracking:TrackingScoreSignals",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "field": "score data"
+    },
+    {
+      "from": "tracking:ScoreConfigurationVersions",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "field": "scoring version"
+    },
+    {
+      "from": "main:UserProfiles",
+      "to": "main:UserFoodPreferences",
+      "kind": "APP",
+      "field": "UserId"
+    },
+    {
+      "from": "main:RuleAudits",
+      "to": "main:RuleVersions",
+      "kind": "APP",
+      "field": "version audit"
+    },
+    {
+      "from": "main:Allergens",
+      "to": "main:Recipes",
+      "kind": "APP",
+      "field": "recipe allergen mapping"
+    },
+    {
+      "from": "main:Foods",
+      "to": "main:MealLogItems",
+      "kind": "APP",
+      "field": "food code"
+    }
+  ],
   "allNodesHaveEdges": true,
   "tables": [
     {
@@ -1406,22 +1709,76 @@
       "label": "FK AdherenceScoreId"
     },
     {
-      "from": "main:UserProfiles",
-      "to": "main:RefreshTokens",
+      "from": "main:Recipes",
+      "to": "main:DietRules",
       "kind": "APP",
-      "label": "APP same UserId"
+      "label": "APP diet rule applicability"
     },
     {
-      "from": "main:RefreshTokens",
-      "to": "main:ReminderPreferences",
+      "from": "main:MealPlans",
+      "to": "main:MealReplacementHistories",
       "kind": "APP",
-      "label": "APP same UserId"
+      "label": "APP MealPlanId"
     },
     {
-      "from": "main:ReminderPreferences",
-      "to": "main:UserNotifications",
+      "from": "main:PlannedMeals",
+      "to": "main:RecommendationFeedbacks",
       "kind": "APP",
-      "label": "APP same UserId"
+      "label": "APP candidate/plan"
+    },
+    {
+      "from": "main:UserChallenges",
+      "to": "main:ProgressEventReceipts",
+      "kind": "APP",
+      "label": "APP challenge progress"
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerHeartbeats",
+      "kind": "APP",
+      "label": "APP worker health"
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerDeadLetters",
+      "kind": "APP",
+      "label": "APP job failure"
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerProcessedEvents",
+      "kind": "APP",
+      "label": "APP event processing"
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "main:IdentityInbox",
+      "kind": "APP",
+      "label": "APP event correlation"
+    },
+    {
+      "from": "worker:ReminderDispatchRecords",
+      "to": "worker:WorkerOutbox",
+      "kind": "APP",
+      "label": "APP notification event"
+    },
+    {
+      "from": "tracking:TrackingOutbox",
+      "to": "tracking:TrackingScoreSignals",
+      "kind": "APP",
+      "label": "APP tracking events"
+    },
+    {
+      "from": "tracking:TrackingScoreSignals",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "label": "APP score data"
+    },
+    {
+      "from": "tracking:ScoreConfigurationVersions",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "label": "APP scoring version"
     },
     {
       "from": "main:UserNotifications",
@@ -1430,26 +1787,8 @@
       "label": "APP same UserId"
     },
     {
-      "from": "main:IdentityOutbox",
-      "to": "main:WellnessScreenings",
-      "kind": "APP",
-      "label": "APP same UserId"
-    },
-    {
-      "from": "main:WellnessScreenings",
-      "to": "main:WellnessCheckIns",
-      "kind": "APP",
-      "label": "APP same UserId"
-    },
-    {
       "from": "main:UserDietaryPreferences",
       "to": "main:MealPlans",
-      "kind": "APP",
-      "label": "APP same UserId"
-    },
-    {
-      "from": "main:MealPlans",
-      "to": "main:PlannedMeals",
       "kind": "APP",
       "label": "APP same UserId"
     },
@@ -1466,28 +1805,10 @@
       "label": "APP same UserId"
     },
     {
-      "from": "main:EatingWindowSnapshots",
-      "to": "main:RecommendationFeedbacks",
-      "kind": "APP",
-      "label": "APP same UserId"
-    },
-    {
-      "from": "main:RecommendationFeedbacks",
-      "to": "main:MealReplacementHistories",
-      "kind": "APP",
-      "label": "APP same UserId"
-    },
-    {
       "from": "main:MealReplacementHistories",
       "to": "main:UserFoodPreferences",
       "kind": "APP",
       "label": "APP same UserId"
-    },
-    {
-      "from": "main:Users",
-      "to": "main:UserDietaryPreferences",
-      "kind": "APP",
-      "label": "APP same UserId (cross-domain)"
     },
     {
       "from": "main:UserChallenges",
@@ -1526,12 +1847,6 @@
       "label": "APP same UserId"
     },
     {
-      "from": "main:Users",
-      "to": "main:UserChallenges",
-      "kind": "APP",
-      "label": "APP same UserId (cross-domain)"
-    },
-    {
       "from": "tracking:ActivityGoals",
       "to": "tracking:ActivityLogs",
       "kind": "APP",
@@ -1544,64 +1859,10 @@
       "label": "APP same UserId"
     },
     {
-      "from": "tracking:AdherenceScores",
-      "to": "tracking:TrackingScoreSignals",
-      "kind": "APP",
-      "label": "APP same UserId"
-    },
-    {
-      "from": "tracking:TrackingScoreSignals",
-      "to": "tracking:TrackingOutbox",
-      "kind": "APP",
-      "label": "APP same UserId"
-    },
-    {
-      "from": "main:Users",
-      "to": "tracking:ActivityGoals",
-      "kind": "APP",
-      "label": "APP same UserId (cross-domain)"
-    },
-    {
       "from": "worker:ReminderSchedules",
       "to": "worker:ReminderDispatchRecords",
       "kind": "APP",
       "label": "APP same UserId"
-    },
-    {
-      "from": "main:Users",
-      "to": "worker:ReminderSchedules",
-      "kind": "APP",
-      "label": "APP same UserId (cross-domain)"
-    },
-    {
-      "from": "main:Foods",
-      "to": "main:Recipes",
-      "kind": "APP",
-      "label": "APP catalog lookup"
-    },
-    {
-      "from": "main:Recipes",
-      "to": "main:DietRules",
-      "kind": "APP",
-      "label": "APP diet rule applicability"
-    },
-    {
-      "from": "main:DietRules",
-      "to": "main:RuleSetVersions",
-      "kind": "APP",
-      "label": "APP ruleset governance"
-    },
-    {
-      "from": "main:MealPlans",
-      "to": "main:MealReplacementHistories",
-      "kind": "APP",
-      "label": "APP MealPlanId"
-    },
-    {
-      "from": "main:PlannedMeals",
-      "to": "main:RecommendationFeedbacks",
-      "kind": "APP",
-      "label": "APP candidate/plan"
     },
     {
       "from": "main:MealLogs",
@@ -1610,34 +1871,22 @@
       "label": "APP UserId + LocalDate"
     },
     {
-      "from": "main:UserChallenges",
-      "to": "main:ProgressEventReceipts",
+      "from": "main:Foods",
+      "to": "main:MealLogItems",
       "kind": "APP",
-      "label": "APP challenge progress"
+      "label": "APP food code"
     },
     {
-      "from": "main:WorkerJobs",
-      "to": "main:WorkerHeartbeats",
+      "from": "main:UserProfiles",
+      "to": "main:UserFoodPreferences",
       "kind": "APP",
-      "label": "APP worker health"
+      "label": "APP UserId"
     },
     {
-      "from": "main:WorkerJobs",
-      "to": "main:WorkerDeadLetters",
+      "from": "main:Users",
+      "to": "tracking:ActivityGoals",
       "kind": "APP",
-      "label": "APP job failure"
-    },
-    {
-      "from": "main:WorkerJobs",
-      "to": "main:WorkerProcessedEvents",
-      "kind": "APP",
-      "label": "APP event processing"
-    },
-    {
-      "from": "main:IdentityOutbox",
-      "to": "main:IdentityInbox",
-      "kind": "APP",
-      "label": "APP event correlation"
+      "label": "APP same UserId (cross-domain)"
     },
     {
       "from": "main:IdentityOutbox",
@@ -1650,60 +1899,6 @@
       "to": "worker:ReminderSchedules",
       "kind": "APP",
       "label": "APP preference events"
-    },
-    {
-      "from": "worker:ReminderDispatchRecords",
-      "to": "worker:WorkerOutbox",
-      "kind": "APP",
-      "label": "APP notification event"
-    },
-    {
-      "from": "worker:WorkerOutbox",
-      "to": "main:IdentityInbox",
-      "kind": "APP",
-      "label": "APP EventId"
-    },
-    {
-      "from": "tracking:TrackingOutbox",
-      "to": "tracking:TrackingScoreSignals",
-      "kind": "APP",
-      "label": "APP tracking events"
-    },
-    {
-      "from": "tracking:TrackingScoreSignals",
-      "to": "tracking:AdherenceScores",
-      "kind": "APP",
-      "label": "APP score data"
-    },
-    {
-      "from": "tracking:ScoreConfigurationVersions",
-      "to": "tracking:AdherenceScores",
-      "kind": "APP",
-      "label": "APP scoring version"
-    },
-    {
-      "from": "main:UserProfiles",
-      "to": "main:UserFoodPreferences",
-      "kind": "APP",
-      "label": "APP UserId"
-    },
-    {
-      "from": "main:RuleAudits",
-      "to": "main:RuleVersions",
-      "kind": "APP",
-      "label": "APP version audit"
-    },
-    {
-      "from": "main:Allergens",
-      "to": "main:Recipes",
-      "kind": "APP",
-      "label": "APP recipe allergen mapping"
-    },
-    {
-      "from": "main:Foods",
-      "to": "main:MealLogItems",
-      "kind": "APP",
-      "label": "APP food code"
     }
   ]
 }

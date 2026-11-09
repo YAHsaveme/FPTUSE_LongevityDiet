@@ -39,7 +39,7 @@ documentation and presentation **10%**.
 
 [One-page PDFs, editing/QA instructions](one-page/README.md).
 
-The canonical baseline ERD shows **all 32 mapped EF Core tables** and 9 physical SQL foreign keys, plus clearly differentiated logical/application/event relationships. The actual migration history and DbContext remain authoritative. The current Rule Governance feature branch introduces an additional `catalog.RuleAudits` table and relationship; **the diagram must be updated and exported again before merging/release**. Do not present the 32-table diagram as complete for this feature branch.
+The **canonical current** database diagram covers **56 actual EF migration-mapped tables** across three catalogs, with **23 SQL foreign keys** and **32 visible application associations** (50 source-backed associations are documented in `one-page/full-schema-manifest.json`). C2 documents all **22 current API controllers**. C0/C1/C2/ERD have native Draw.io and one-page PDF versions, with 0 connector crossings and 0 label cuts in SVG geometry QA. The original 32-table baseline drawings are archived in `legacy-diagrams/`. Diagram correctness does **not** replace a production Docker/SQL/Redis/gRPC/Worker smoke test, nor a dietitian review of recipe data.
 
 ## Presentation notes
 
