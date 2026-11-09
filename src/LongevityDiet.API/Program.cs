@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.RateLimiting;
 using System.Text;
 using LongevityDiet.API.Cloudflare;
+using LongevityDiet.API.Infrastructure;
 using LongevityDiet.API.OpenApi;
 using LongevityDiet.API.Recommendation;
 using LongevityDiet.API.Security;
@@ -11,7 +12,11 @@ using Microsoft.AspNetCore.RateLimiting;
 using Serilog.Context;
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories;
+using LongevityDiet.Repositories.Catalog.Repositories;
+using LongevityDiet.Repositories.Catalog.Seed;
 using LongevityDiet.Repositories.Repositories;
+using LongevityDiet.Repositories.Seed;
+using LongevityDiet.Services.Catalog;
 using LongevityDiet.Services.Identity;
 using LongevityDiet.Services.Reminders;
 using LongevityDiet.Tracking;
@@ -176,6 +181,9 @@ try
     {
         builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     }
+    builder.Services.AddScoped<IFoodRepository, FoodRepository>();
+    builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+    builder.Services.AddScoped<IRuleCatalogRepository, RuleCatalogRepository>();
     builder.Services.AddScoped<AuthenticationService>();
     builder.Services.AddScoped<ProfileService>();
     builder.Services.AddScoped<ReminderService>();
@@ -187,14 +195,23 @@ try
     builder.Services.AddScoped<IFmdRepository, FmdRepository>();
     builder.Services.AddScoped<IMealLogRepository, MealLogRepository>();
     builder.Services.AddScoped<IEatingWindowRepository, EatingWindowRepository>();
+    builder.Services.AddScoped<IChallengeProgressRepository, ChallengeProgressRepository>();
+    builder.Services.AddScoped<IWeeklyReportWorkerRepository, WeeklyReportWorkerRepository>();
     builder.Services.AddScoped<IPlanningInputProvider, PlanningCatalogSnapshotProvider>();
     builder.Services.AddScoped<ITrackingUserScheduleProvider, TrackingUserScheduleProvider>();
     builder.Services.AddSingleton<IRecommendationEngineClient, GrpcRecommendationEngineClient>();
     builder.Services.AddScoped<SafeExplanationRewriter>();
+    builder.Services.AddScoped<FoodCatalogService>();
+    builder.Services.AddScoped<RecipeCatalogService>();
+    builder.Services.AddScoped<RuleCatalogService>();
     builder.Services.AddScoped<MealPlanningService>();
     builder.Services.AddScoped<RecommendationService>();
     builder.Services.AddScoped<FmdService>();
     builder.Services.AddScoped<MealTrackingService>();
+    builder.Services.AddScoped<ChallengeProgressService>();
+    builder.Services.AddScoped<WeeklyReportService>();
+    builder.Services.AddScoped<WorkerReliabilityService>();
+    builder.Services.AddScoped<WeeklyReportStreamPublisher>();
     builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
     builder.Services.AddScoped<IAccessTokenProvider, JwtAccessTokenProvider>();
     builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
@@ -237,6 +254,8 @@ try
         await dbContext.Database.MigrateAsync();
         var trackingDb = scope.ServiceProvider.GetRequiredService<TrackingDbContext>();
         await trackingDb.Database.MigrateAsync();
+        await CatalogSeed.SeedAsync(dbContext);
+        await ChallengeSeed.SeedAsync(dbContext);
     }
 
     app.Use(async (httpContext, next) =>

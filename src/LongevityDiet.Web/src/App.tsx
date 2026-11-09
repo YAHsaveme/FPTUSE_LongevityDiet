@@ -28,6 +28,30 @@ const NotFoundPage = lazy(() =>
   import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })),
 )
 
+const CatalogPage = lazy(() =>
+  import('./features/catalog/CatalogPage').then((module) => ({ default: module.CatalogPage })),
+)
+
+const RecipeDetailPage = lazy(() =>
+  import('./features/catalog/RecipeDetailPage').then((module) => ({ default: module.RecipeDetailPage })),
+)
+
+const AdminCatalogPage = lazy(() =>
+  import('./features/admin/catalog/AdminCatalogPage').then((module) => ({ default: module.AdminCatalogPage })),
+)
+
+const ChallengeDashboardPage = lazy(() =>
+  import('./features/progress/ChallengeDashboardPage').then((module) => ({
+    default: module.ChallengeDashboardPage,
+  })),
+)
+
+const WeeklyReportsPage = lazy(() =>
+  import('./features/reports/WeeklyReportsPage').then((module) => ({
+    default: module.WeeklyReportsPage,
+  })),
+)
+
 const profilePages = () => import('./pages/auth/ProfileEditorPage')
 
 const OnboardingPage = lazy(() =>
@@ -101,7 +125,7 @@ function App() {
         />
 
         <Route
-          path="/activity"
+  path="/activity"
           element={
             <ProtectedRoute>
               <ActivityTrackingPage />
@@ -116,11 +140,56 @@ function App() {
             </ProtectedRoute>
           }
         />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </div>
-    </>
+        <Route
+          path="/catalog"
+          element={
+            <ProtectedRoute>
+              <CatalogPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/progress"
+          element={
+            <ProtectedRoute>
+              <ChallengeDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <WeeklyReportsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/catalog/recipes/:id"
+          element={
+            <ProtectedRoute>
+              <RecipeDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/catalog"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <AdminCatalogPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
+  </div>
+</>
   )
 }
 

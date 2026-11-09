@@ -1,6 +1,7 @@
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories;
 using LongevityDiet.Tracking;
+using LongevityDiet.Repositories.Seed;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -89,10 +90,10 @@ public sealed class IntegrationTestWebApplicationFactory : WebApplicationFactory
 
         await dbContext.Database.EnsureDeletedAsync();
         await dbContext.Database.EnsureCreatedAsync();
-
         var tracking = scope.ServiceProvider.GetRequiredService<TrackingDbContext>();
         await tracking.Database.EnsureDeletedAsync();
         await tracking.Database.EnsureCreatedAsync();
+        await ChallengeSeed.SeedAsync(dbContext);
     }
 
     public async Task DisableUserAsync(string email)
@@ -105,6 +106,21 @@ public sealed class IntegrationTestWebApplicationFactory : WebApplicationFactory
             .SingleAsync(x => x.NormalizedEmail == normalizedEmail);
 
         user.Status = AccountStatus.Disabled;
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task PromoteUserToAdminAsync(string email)
+    {
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+
+        var normalizedEmail = email.Trim().ToUpperInvariant();
+        var user = await dbContext.Users
+            .SingleAsync(x => x.NormalizedEmail == normalizedEmail);
+
+        user.Role = UserRole.Admin;
         user.UpdatedAt = DateTimeOffset.UtcNow;
 
         await dbContext.SaveChangesAsync();
