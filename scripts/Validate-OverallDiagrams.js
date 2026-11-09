@@ -241,7 +241,7 @@ while(pending.length){const current=pending.shift();for(const next of adj.get(cu
 check(reached.size===32,'Disconnected database tables: '+(32-reached.size));
 console.log('UNIFIED_DB_ERD_QA: 32 mapped tables, 9 real SQL FKs, 16 logical, 6 event links, '+reached.size+'/32 reachable, no artificial hubs');
 const contexts=[
- ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',21,8],
+ ['src/LongevityDiet.Repositories/LongevityDietDbContext.cs',33,12],
  ['src/LongevityDiet.Tracking/TrackingDbContext.cs',7,1],
  ['src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs',4,0]
 ];
