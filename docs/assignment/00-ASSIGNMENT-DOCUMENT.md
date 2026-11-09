@@ -39,9 +39,7 @@ documentation and presentation **10%**.
 
 [One-page PDFs, editing/QA instructions](one-page/README.md).
 
-Only implemented business tables are represented. The ERD is a 10-table
-**teaching subset** of the 32 EF Core mapped tables after team integration; the actual migration
-history is authoritative. Omitted outbox and bookkeeping tables still exist.
+The canonical baseline ERD shows **all 32 mapped EF Core tables** and 9 physical SQL foreign keys, plus clearly differentiated logical/application/event relationships. The actual migration history and DbContext remain authoritative. The current Rule Governance feature branch introduces an additional `catalog.RuleAudits` table and relationship; **the diagram must be updated and exported again before merging/release**. Do not present the 32-table diagram as complete for this feature branch.
 
 ## Presentation notes
 

@@ -331,6 +331,41 @@ namespace LongevityDiet.Repositories.Migrations
                     b.ToTable("RecipeIngredients", "catalog");
                 });
 
+            modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RuleAudit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("RuleVersionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RuleVersionId", "OccurredAt");
+
+                    b.ToTable("RuleAudits", "catalog");
+                });
+
             modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RuleSetVersion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -395,6 +430,10 @@ namespace LongevityDiet.Repositories.Migrations
 
                     b.Property<DateTimeOffset?>("PublishedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SourceType")
                         .IsRequired()
@@ -2051,6 +2090,15 @@ namespace LongevityDiet.Repositories.Migrations
                     b.Navigation("Recipe");
                 });
 
+            modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RuleAudit", b =>
+                {
+                    b.HasOne("LongevityDiet.Domain.Catalog.Entities.RuleVersion", null)
+                        .WithMany()
+                        .HasForeignKey("RuleVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RuleVersion", b =>
                 {
                     b.HasOne("LongevityDiet.Domain.Catalog.Entities.DietRule", "DietRule")
@@ -2137,15 +2185,6 @@ namespace LongevityDiet.Repositories.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LongevityDiet.Domain.Entities.UserNotification", b =>
-                {
-                    b.HasOne("LongevityDiet.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("LongevityDiet.Domain.Entities.UserChallenge", b =>
                 {
                     b.HasOne("LongevityDiet.Domain.Entities.ChallengeTemplate", "ChallengeTemplate")
@@ -2166,6 +2205,15 @@ namespace LongevityDiet.Repositories.Migrations
                         .IsRequired();
 
                     b.Navigation("UserChallenge");
+                });
+
+            modelBuilder.Entity("LongevityDiet.Domain.Entities.UserNotification", b =>
+                {
+                    b.HasOne("LongevityDiet.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LongevityDiet.Domain.Entities.UserProfile", b =>

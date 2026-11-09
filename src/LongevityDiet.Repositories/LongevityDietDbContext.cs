@@ -19,6 +19,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     public DbSet<Allergen> Allergens => Set<Allergen>();
     public DbSet<RecipeAllergen> RecipeAllergens => Set<RecipeAllergen>();
     public DbSet<DietRule> DietRules => Set<DietRule>();
+    public DbSet<RuleAudit> RuleAudits => Set<RuleAudit>();
     public DbSet<RuleVersion> RuleVersions => Set<RuleVersion>();
     public DbSet<RuleSetVersion> RuleSetVersions => Set<RuleSetVersion>();
     public DbSet<UserDietaryPreference> UserDietaryPreferences => Set<UserDietaryPreference>();
@@ -47,6 +48,44 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     public DbSet<WorkerProcessedEvent> WorkerProcessedEvents => Set<WorkerProcessedEvent>();
     public DbSet<WorkerDeadLetter> WorkerDeadLetters => Set<WorkerDeadLetter>();
     public DbSet<WorkerHeartbeat> WorkerHeartbeats => Set<WorkerHeartbeat>();
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        GuardRuleHistory();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        GuardRuleHistory();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void GuardRuleHistory()
+    {
+        ChangeTracker.DetectChanges();
+        if (ChangeTracker.Entries<RuleAudit>().Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+        {
+            throw new InvalidOperationException("Rule audit records are append-only.");
+        }
+
+        foreach (var entry in ChangeTracker.Entries<RuleVersion>())
+        {
+            var originalState = entry.OriginalValues.GetValue<LongevityDiet.Domain.Catalog.RuleVersionState>(nameof(RuleVersion.State));
+            if (originalState is not (LongevityDiet.Domain.Catalog.RuleVersionState.Published or LongevityDiet.Domain.Catalog.RuleVersionState.Retired))
+            {
+                continue;
+            }
+
+            var retiring = originalState == LongevityDiet.Domain.Catalog.RuleVersionState.Published &&
+                entry.Entity.State == LongevityDiet.Domain.Catalog.RuleVersionState.Retired;
+            if (entry.State == EntityState.Deleted || (entry.State == EntityState.Modified &&
+                (!retiring || entry.Properties.Any(p => p.IsModified && p.Metadata.Name != nameof(RuleVersion.State) && p.Metadata.Name != nameof(RuleVersion.Revision)))))
+            {
+                throw new InvalidOperationException("Published and retired rule content is immutable.");
+            }
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -5,6 +5,7 @@ namespace LongevityDiet.Domain.Catalog.Entities;
 public sealed class RuleVersion
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Revision { get; set; } = Guid.NewGuid();
     public Guid DietRuleId { get; set; }
     public int VersionNumber { get; set; }
     public string ParametersJson { get; set; } = "{}";

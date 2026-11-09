@@ -10,6 +10,7 @@ public sealed class RuleVersionConfiguration : IEntityTypeConfiguration<RuleVers
     {
         builder.ToTable("RuleVersions", "catalog");
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.Revision).IsConcurrencyToken();
         builder.Property(x => x.ParametersJson).IsRequired();
         builder.Property(x => x.SourceUrl).HasMaxLength(1000).IsRequired();
         builder.Property(x => x.Citation).HasMaxLength(1000).IsRequired();

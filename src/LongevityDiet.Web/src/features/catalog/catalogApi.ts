@@ -239,3 +239,18 @@ export async function publishRuleVersion(versionId: string) {
   const response = await api.post<RuleVersion>(`/admin/rule-versions/${versionId}/publication`)
   return response.data
 }
+
+export type RuleAudit = {
+  id: string; ruleVersionId: string; versionNumber: number; actorId: string
+  occurredAt: string; action: string; details: string
+}
+
+export async function transitionRuleVersion(versionId: string, action: 'review' | 'rejection' | 'publication' | 'retirement') {
+  const response = await api.post<RuleVersion>(`/admin/rule-versions/${versionId}/${action}`)
+  return response.data
+}
+
+export async function getRuleHistory(versionId: string, page = 1, action?: string) {
+  const response = await api.get<PagedResult<RuleAudit>>(`/admin/rule-versions/${versionId}/history`, { params: { page, pageSize: 25, action: action || undefined } })
+  return response.data
+}

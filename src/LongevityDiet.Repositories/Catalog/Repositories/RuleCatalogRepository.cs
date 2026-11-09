@@ -1,3 +1,4 @@
+using LongevityDiet.Repositories.Catalog.Queries;
 using LongevityDiet.Domain.Catalog;
 using LongevityDiet.Domain.Catalog.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -78,6 +79,38 @@ public sealed class RuleCatalogRepository(LongevityDietDbContext dbContext) : IR
 
     public async Task AddRuleSetAsync(RuleSetVersion ruleSet, CancellationToken cancellationToken = default) =>
         await dbContext.RuleSetVersions.AddAsync(ruleSet, cancellationToken);
+
+    public async Task AddAuditAsync(RuleAudit audit, CancellationToken cancellationToken = default) =>
+        await dbContext.RuleAudits.AddAsync(audit, cancellationToken);
+
+    public async Task<RepositoryPage<RuleAudit>> GetHistoryAsync(Guid versionId, int page, int pageSize, string? search, string? action, CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.RuleAudits.AsNoTracking().Where(x => x.RuleVersionId == versionId);
+        if (!string.IsNullOrWhiteSpace(action))
+        {
+            query = query.Where(x => x.Action == action);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(x => x.Action.Contains(search) || x.Details.Contains(search));
+        }
+
+        var total = await query.CountAsync(cancellationToken);
+        if (dbContext.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            // SQLite cannot translate ORDER BY DateTimeOffset. The current runtime uses SQL Server;
+            // this provider-specific branch keeps SQLite integration tests chronologically correct.
+            var sqliteItems = await query.ToListAsync(cancellationToken);
+            var pageItems = sqliteItems.OrderByDescending(x => x.OccurredAt).ThenBy(x => x.Id)
+                .Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return new RepositoryPage<RuleAudit>(pageItems, total);
+        }
+
+        var items = await query.OrderByDescending(x => x.OccurredAt).ThenBy(x => x.Id)
+            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        return new RepositoryPage<RuleAudit>(items, total);
+    }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);

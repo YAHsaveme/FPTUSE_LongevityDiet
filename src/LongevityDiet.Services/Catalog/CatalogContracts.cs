@@ -232,3 +232,5 @@ public sealed record RuleSetDto(
     DateTimeOffset? EffectiveAt,
     DateTimeOffset? PublishedAt,
     IReadOnlyList<RuleVersionDto> Rules);
+
+public sealed record RuleAuditDto(Guid Id, Guid RuleVersionId, int VersionNumber, Guid ActorId, DateTimeOffset OccurredAt, string Action, string Details);

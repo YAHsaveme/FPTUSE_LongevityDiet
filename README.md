@@ -208,7 +208,15 @@ Against an already running Docker Compose full stack:
 npm run test:docker
 ```
 
-Current verified baseline (2026-11-05):
+Latest local verification (2026-11-09, **unmerged feature branch** `feature/w3-t4-rule-governance-20261109`):
+- .NET solution build: **0 errors, 0 warnings**.
+- Unit tests: **66/66 pass**; integration tests: **70/70 pass** (including 3 new Rule Governance cases).
+- Frontend: **12/12 tests pass**, lint/build PASS.
+- Project-structure, C0/C1/C2/baseline ERD geometry, Compose static config, static release readiness, EF pending-model-change detection: PASS.
+- **Not reverified on this branch:** live Docker/SQL Server stack, fresh real SQL migration, E2E broker/gRPC demo, reviewer approval. The new `RuleAudits` table still requires updating the 32-table baseline ERD and PDF export.
+- Detailed official assignment audit: `docs/assignment/FINAL-ASSIGNMENT-COMPLIANCE-AUDIT-20261109.md`.
+
+Historical release baseline (2026-11-05; not the latest test status):
 - UnitTests: 51/51 pass.
 - IntegrationTests: 35/38 pass. The 3 failures are a pre-existing MealLog-create HTTP 500 baseline defect reproduced on clean `origin/develop` commit `474b475`; see `docs/operations/RELEASE-RUNBOOK.md`.
 - Member 2 Week 2 targeted integration tests: 5/5 pass.

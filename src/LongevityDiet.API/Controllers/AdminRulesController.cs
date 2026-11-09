@@ -10,7 +10,7 @@ namespace LongevityDiet.API.Controllers;
 [ApiController]
 [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
 [Route("api/v1/admin")]
-public sealed class AdminRulesController(RuleCatalogService rules) : ControllerBase
+public sealed class AdminRulesController(RuleCatalogService rules, ICurrentUser currentUser) : ControllerBase
 {
     [HttpGet("diet-rules")]
     [ProducesResponseType<IReadOnlyList<DietRuleDto>>(StatusCodes.Status200OK)]
@@ -61,7 +61,7 @@ public sealed class AdminRulesController(RuleCatalogService rules) : ControllerB
         SaveRuleVersionRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await rules.CreateVersionAsync(id, ToCreateVersionCommand(request), cancellationToken);
+        var result = await rules.CreateVersionAsync(id, ToCreateVersionCommand(request), currentUser.UserId!.Value, cancellationToken);
         if (!result.Succeeded || result.Value is null)
         {
             return this.ToProblem(result);
@@ -80,7 +80,7 @@ public sealed class AdminRulesController(RuleCatalogService rules) : ControllerB
         SaveRuleVersionRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await rules.UpdateVersionAsync(id, ToUpdateVersionCommand(request), cancellationToken);
+        var result = await rules.UpdateVersionAsync(id, ToUpdateVersionCommand(request), currentUser.UserId!.Value, cancellationToken);
         return result.Succeeded && result.Value is not null ? Ok(result.Value) : this.ToProblem(result);
     }
 
@@ -92,8 +92,36 @@ public sealed class AdminRulesController(RuleCatalogService rules) : ControllerB
         Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await rules.PublishVersionAsync(id, cancellationToken);
+        var result = await rules.PublishVersionAsync(id, currentUser.UserId!.Value, cancellationToken);
         return result.Succeeded && result.Value is not null ? Ok(result.Value) : this.ToProblem(result);
+    }
+
+    [HttpPost("rule-versions/{id:guid}/review")]
+    public async Task<ActionResult<RuleVersionDto>> SubmitForReview(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await rules.SubmitForReviewAsync(id, currentUser.UserId!.Value, cancellationToken);
+        return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
+    }
+
+    [HttpPost("rule-versions/{id:guid}/rejection")]
+    public async Task<ActionResult<RuleVersionDto>> Reject(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await rules.RejectVersionAsync(id, currentUser.UserId!.Value, cancellationToken);
+        return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
+    }
+
+    [HttpPost("rule-versions/{id:guid}/retirement")]
+    public async Task<ActionResult<RuleVersionDto>> Retire(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await rules.RetireVersionAsync(id, currentUser.UserId!.Value, cancellationToken);
+        return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
+    }
+
+    [HttpGet("rule-versions/{id:guid}/history")]
+    public async Task<ActionResult<PagedResult<RuleAuditDto>>> History(Guid id, CancellationToken cancellationToken, [FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? search = null, [FromQuery] string? action = null)
+    {
+        var result = await rules.GetHistoryAsync(id, page, pageSize, search, action, cancellationToken);
+        return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
     }
 
     private static CreateDietRuleCommand ToCommand(CreateDietRuleRequest request) =>

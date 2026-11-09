@@ -16,7 +16,9 @@ import {
   getFoods,
   getRecipes,
   getRules,
-  publishRuleVersion,
+  transitionRuleVersion,
+  getRuleHistory,
+  type RuleVersion,
   updateFood,
   updateRecipe,
   type Food,
@@ -517,15 +519,7 @@ function RuleAdmin() {
     },
     onError: (error) => setMessage(getApiErrorMessage(error)),
   })
-  const publish = useMutation({
-    mutationFn: publishRuleVersion,
-    onSuccess: () => {
-      setMessage('Đã publish version; version này từ giờ là immutable.')
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'rules'] })
-      void queryClient.invalidateQueries({ queryKey: ['catalog', 'rules'] })
-    },
-    onError: (error) => setMessage(getApiErrorMessage(error)),
-  })
+
 
   return (
     <div className="admin-grid rules-admin-grid">
@@ -544,9 +538,9 @@ function RuleAdmin() {
             <h3>{selectedRule.title}</h3>
             {selectedRule.versions.map((version) => (
               <div key={version.id}>
-                <span>v{version.versionNumber} · {version.state === 2 ? 'Published' : 'Draft'}</span>
+                <span>v{version.versionNumber} · {({ 1: 'Draft', 2: 'Published', 3: 'Retired', 4: 'In review' } as Record<number, string>)[version.state]}</span>
                 <strong>{version.citation || 'Chưa có citation'}</strong>
-                {version.state !== 2 && <button onClick={() => publish.mutate(version.id)}>Publish</button>}
+                <RuleGovernance version={version} />
               </div>
             ))}
           </div>
@@ -594,6 +588,57 @@ function RuleAdmin() {
       </section>
     </div>
   )
+}
+
+function RuleGovernance({ version }: { version: RuleVersion }) {
+  const queryClient = useQueryClient()
+  const [showHistory, setShowHistory] = useState(false)
+  const [actionFilter, setActionFilter] = useState('')
+  const [page, setPage] = useState(1)
+  const history = useQuery({
+    queryKey: ['admin', 'rule-history', version.id, page, actionFilter],
+    queryFn: () => getRuleHistory(version.id, page, actionFilter), enabled: showHistory,
+  })
+  const transition = useMutation({
+    mutationFn: (action: 'review' | 'rejection' | 'publication' | 'retirement') => transitionRuleVersion(version.id, action),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'rules'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'rule-history', version.id] })
+      void queryClient.invalidateQueries({ queryKey: ['catalog', 'rules'] })
+    },
+  })
+  return <section aria-label={`Governance for version ${version.versionNumber}`}>
+    <p>Source type: {version.sourceType}  |  Evidence: {version.evidenceLevel}</p>
+    <a href={version.sourceUrl} target="_blank" rel="noreferrer">Source</a>
+    <details><summary>Review parameters and provenance</summary>
+      <p>{version.citation}</p><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{version.parametersJson}</pre>
+      <p>Effective: {version.effectiveAt ?? 'On publication'}  |  Published: {version.publishedAt ?? 'Not published'}</p>
+    </details>
+    {version.state === 1 && <button disabled={transition.isPending} onClick={() => transition.mutate('review')}>Submit for review</button>}
+    {version.state === 4 && <>
+      <button disabled={transition.isPending} onClick={() => transition.mutate('rejection')}>Return to draft</button>
+      <button disabled={transition.isPending} onClick={() => transition.mutate('publication')}>Approve and publish</button>
+    </>}
+    {version.state === 2 && <button disabled={transition.isPending} onClick={() => transition.mutate('retirement')}>Retire version</button>}
+    {version.state === 3 && <p>Retired. Historical references are retained.</p>}
+    {transition.isError && <p role="alert">{getApiErrorMessage(transition.error)}</p>}
+    <button aria-expanded={showHistory} onClick={() => setShowHistory(!showHistory)}>Audit history</button>
+    {showHistory && <div aria-live="polite">
+      <label>Filter audit action <select value={actionFilter} onChange={event => { setActionFilter(event.target.value); setPage(1) }}>
+        <option value="">All actions</option>
+        {['Created', 'Edited', 'Submitted', 'Rejected', 'Published', 'Retired'].map(action => <option key={action}>{action}</option>)}
+      </select></label>
+      {history.isLoading && <p>Loading history...</p>}
+      {history.isError && <p role="alert">{getApiErrorMessage(history.error)}</p>}
+      {history.data?.items.length === 0 && <p>No audit entries on this page. Existing seeded versions have no retroactive audit.</p>}
+      {history.data?.items.map(entry => <p key={entry.id}>
+        v{entry.versionNumber}  |  {entry.action}  |  {new Date(entry.occurredAt).toLocaleString()}  |  Actor {entry.actorId}<br />{entry.details}
+      </p>)}
+      <button disabled={page === 1 || history.isFetching} onClick={() => setPage(page - 1)}>Previous history page</button>
+      <span> Page {page}  |  {history.data?.totalItems ?? 0} entries </span>
+      <button disabled={history.isFetching || page >= (history.data?.totalPages ?? 0)} onClick={() => setPage(page + 1)}>Next history page</button>
+    </div>}
+  </section>
 }
 
 function PanelHeading({ title, note }: { title: string; note: string }) {
