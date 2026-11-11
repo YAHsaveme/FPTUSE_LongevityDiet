@@ -1,0 +1,23 @@
+# Optional first Target Architecture migration slice.
+# Current Runtime is unchanged without this overlay.
+# docker compose -f docker-compose.yml -f docker-compose.gateway.yml up -d --build
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: src/LongevityDiet.Gateway/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ReverseProxy__Clusters__current-api__Destinations__api__Address: http://api:8080/
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-18080}:8080"
+    depends_on:
+      - api
+    networks:
+      - ldc-network
+
+  web:
+    environment:
+      API_UPSTREAM: gateway:8080
+    depends_on:
+      - gateway
