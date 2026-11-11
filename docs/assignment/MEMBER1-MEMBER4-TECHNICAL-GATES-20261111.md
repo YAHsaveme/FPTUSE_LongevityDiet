@@ -54,3 +54,7 @@ QA script tạo tài khoản giả và ghi SQL; **chỉ chạy vào Compose proj
 - Không tự công bố đủ 100% hoặc merge khi các gate trên chưa được đóng có bằng chứng.
 
 Mốc: tài liệu này cập nhật, thay thế trạng thái “LDAS chưa có meal/window” và “migration chưa chạy SQL” ghi trong audit ngày 10/11. Các runtime kiểm thử đã chạy trên SQL thật; kiểm nghiệm y khoa vẫn chưa đạt.
+
+## SQL Server thật: Member 4 Rule Governance (11/11/2026)
+
+Đã chạy PASS `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Live-Admin-Rule-Governance.ps1` trên Compose QA riêng `prn232-acceptance`. Kịch bản đăng ký **hai tài khoản Admin tổng hợp**, chỉ nâng quyền cho tài khoản QA có email ngẫu nhiên kiểm soát bằng regex, kiểm tra đủ chính xác một dòng SQL cập nhật. Kiểm tra Draft -> InReview -> Published (reviewer độc lập) -> Retired; queue lọc medical sensitive; role-independent approval; 409 tự xuất bản/sửa bản đã publish/re-review bản retire; Audit/history và impact đọc thật từ SQL. Không sử dụng tài khoản Admin thật, không tác động DB dùng chung. Đây là bằng chứng quy trình kỹ thuật, không thay thế phê duyệt chuyên môn y khoa.

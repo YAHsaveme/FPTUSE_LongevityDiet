@@ -79,3 +79,5 @@ Xem [LIVE-DOCKER-E2E-20261111.md](LIVE-DOCKER-E2E-20261111.md). Đã chứng min
 **Đã nghiệm thu thêm:** lịch Worker gửi thông báo đúng thời điểm, tạo notification trên SQL, unread/mark-read và chặn IDOR, Redis Worker back-channel. **Còn cần nghiệm thu:** restart/replay/dead-letter, event meal/eating-window vào LDAS, hiệu năng p95 và UI/accessibility, dữ liệu recipe/dị ứng được chuyên gia xác minh và kiểm tra CI trước merge. Không đánh đồng test pass với hoàn thành 100% mọi nhiệm vụ.
 
 **Đề nghị nghiệm thu:** chỉ khi có bằng chứng vận hành thật, thực đơn được thẩm định, không có lỗi quan trọng và reviewer đồng ý thì mới nâng trạng thái lên 100%.
+
+**Bổ sung 11/11:** Đã kiểm chứng trực tiếp Rule Governance của thành viên 4 trên SQL Server thật với 2 Admin QA độc lập, lifecycle, queue/impact/audit, chặn tự phê duyệt, bất biến phiên bản published/retired. Xem `scripts/Test-Live-Admin-Rule-Governance.ps1` và báo cáo `MEMBER1-MEMBER4-TECHNICAL-GATES-20261111.md`. Vẫn cần review/chứng cứ release của nhóm trước khi tuyên bố 100%.
