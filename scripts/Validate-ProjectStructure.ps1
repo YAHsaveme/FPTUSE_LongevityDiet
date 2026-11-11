@@ -40,6 +40,7 @@ $requiredProjects = @(
     'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj',
     'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj',
     'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj',
+    'src\LongevityDiet.Worker.Ops\LongevityDiet.Worker.Ops.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -115,6 +116,7 @@ $dependencyRules = @{
     'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
     'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj' = @('LongevityDiet.Tracking')
+    'src\LongevityDiet.Worker.Ops\LongevityDiet.Worker.Ops.csproj' = @()
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
@@ -209,6 +211,25 @@ Assert-ProjectRule ($recommendationOverlay -notmatch 'ConnectionStrings__Default
 $recommendationProgram = Read-ProjectText 'src\LongevityDiet.Recommendation.Grpc\Program.cs'
 Assert-ProjectRule ($recommendationProgram -match 'LongevityRecommendationDb') 'Recommendation must fail closed on its SQL catalog name.'
 Assert-ProjectRule ($recommendationProgram -match 'AddJwtBearer') 'Recommendation state REST endpoints need JWT.'
+
+$workerOpsDb = Read-ProjectText 'src\LongevityDiet.Worker.Ops\WorkerOpsDbContext.cs'
+Assert-ProjectRule ($workerOpsDb -match 'DbSet<WorkerReceivedEvent>') 'Worker Ops must persist event receipts in WorkerDb.'
+Assert-ProjectRule ($workerOpsDb -match 'DbSet<WorkerRejectedEvent>') 'Worker Ops must persist dead-letter metadata.'
+Assert-ProjectRule ($workerOpsDb -notmatch 'DbSet<User>|DbSet<MealLog>|DbSet<MealPlan>|DbSet<Food>|DbSet<RecommendationFeedback>') 'Worker Ops must not own domain tables.'
+$workerOpsOverlay = Read-ProjectText 'docker-compose.worker-ops.yml'
+Assert-ProjectRule ($workerOpsOverlay -match 'LongevityWorkerDb') 'Worker Ops must use LongevityWorkerDb.'
+Assert-ProjectRule ($workerOpsOverlay -match '127\.0\.0\.1:') 'Worker Ops QA bind must be loopback only.'
+Assert-ProjectRule ($workerOpsOverlay -notmatch 'ConnectionStrings__Default') 'Worker Ops must not connect to the legacy main SQL database.'
+$workerOpsProgram = Read-ProjectText 'src\LongevityDiet.Worker.Ops\Program.cs'
+Assert-ProjectRule ($workerOpsProgram -match 'LongevityWorkerDb') 'Worker Ops must validate exact SQL catalog name.'
+Assert-ProjectRule ($workerOpsProgram -match 'RequireRole\("Admin"\)') 'Worker operations API must require Admin JWT.'
+$ownedWorkerProgram = Read-ProjectText 'src\LongevityDiet.Worker\Program.cs'
+Assert-ProjectRule ($ownedWorkerProgram -match 'Worker:OwnedOnly') 'Worker must support explicit owner-only mode.'
+Assert-ProjectRule ($ownedWorkerProgram -match 'if \(!ownedOnly\)') 'Legacy shared SQL registration must be absent in target-only mode.'
+$ownedWorkerOverlay = Read-ProjectText 'docker-compose.worker-owned.yml'
+Assert-ProjectRule ($ownedWorkerOverlay -match 'LongevityWorkerDb') 'Target reminder Worker must use its own DB.'
+Assert-ProjectRule ($ownedWorkerOverlay -match 'Worker__OwnedOnly') 'Target reminder Worker must opt into owner-only mode.'
+Assert-ProjectRule ($ownedWorkerOverlay -notmatch '(?m)^\s+ConnectionStrings__Default:') 'Target reminder Worker must not receive a legacy SQL connection.'
 
 
 $gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
