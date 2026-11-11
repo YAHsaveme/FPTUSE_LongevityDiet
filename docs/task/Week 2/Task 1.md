@@ -3,7 +3,7 @@
 **Owner:** Thành viên 1
 **Reviewer:** Thành viên 3
 **Branch:** `feature/w2-t1-activity-ldas`
-**Status:** Planned
+**Status:** In Progress (Current Runtime Activity/LDAS verified on SQL and Redis; ADR-005 domain service/read-model and reviewer pending)
 
 ## Architecture alignment (ADR-005)
 
@@ -55,3 +55,9 @@ Tạo vertical slice từ activity data đến **Longevity Diet Adherence Score 
 ## Definition of Done
 
 User log activity thật, xem progress theo timezone và nhận LDAS từ dữ liệu thật với breakdown/version/disclaimer; build/test pass và không phụ thuộc mock.
+
+
+## Verified Current Runtime checkpoint (11/11/2026)
+
+- LDAS actual MealLog + EatingWindow live SQL coverage and delete/recompute PASS; scripts/Test-Live-Docker-Acceptance.ps1 -VerifyMealLdas; Member 1 current read model remains transitional.
+- Official PDF source matrix: scripts/Validate-Prn232-Final-PDF.cjs; full technical QA runner: scripts/Test-Prn232-Final-Acceptance.ps1. This checkpoint is not reviewer sign-off or proof the ADR-005 Target Architecture is deployed.

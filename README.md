@@ -267,6 +267,16 @@ Core containers:
 - sqlserver;
 - redis.
 
+## Official PRN232 Final Assignment technical acceptance
+
+The original Final Assignment PDF (see the [seven-step demo mapped to its requirements](docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md)) asks for REST/JWT/CRUD/layers/search/filter/sort/pagination, background processing, **Redis or Kafka**, an independent gRPC service, Docker Compose or cloud, EF Core/SQL, migrations, API documentation, a six-section README and a seven-step demo. It does **not** require four independent domain REST services or six databases; those are the team's **additional ADR-005 targets** and remain separately tracked.
+
+- Official-PDF source/deliverables verification (works in Windows, Linux and GitHub CI): `node scripts/Validate-Prn232-Final-PDF.cjs`.
+- Isolated Windows Docker end-to-end full acceptance (creates only synthetic QA users and a JSON evidence report): `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Prn232-Final-Acceptance.ps1 -IncludeGatewayOutage -IncludeIndependentRedisSmoke`.
+- [Seven-step demonstration and explicit human review checklist](docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md).
+
+**Scope:** green automated QA proves technical criteria on the tested environment. It does not certify a lecturer-observed presentation, a 100/100 grade, clinical nutrition safety, or all ADR-005 Target Architecture tasks. `main` must not be merged on those unsupported claims.
+
 ## PRN232 mandatory mapping
 
 - REST API: `LongevityDiet.API`.

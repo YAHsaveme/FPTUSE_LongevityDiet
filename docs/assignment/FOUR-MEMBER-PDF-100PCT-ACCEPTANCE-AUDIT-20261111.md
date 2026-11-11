@@ -93,3 +93,8 @@ Lưu ý: PDF **không bắt buộc** Kafka khi đã chọn Redis và **không b�
 ## 6. Cập nhật sau kiểm toán: Gateway YARP (11/11/2026)
 
 Nhóm đã có **bước dịch chuyển đầu tiên** của ADR-005: một project Gateway .NET 9/YARP độc lập, có Compose overlay tùy chọn và Web Nginx chuyển tiếp qua Gateway. Đã kiểm tra trực tiếp JWT/RBAC, route 404, OpenAPI, readiness 503 khi API ngừng, khôi phục và 10/10 Playwright E2E; .NET 172/172. Đây là tiến triển kỹ thuật sau bản kiểm toán ban đầu, **không phải** một tuyên bố toàn bộ Target Architecture đã triển khai. Bốn domain REST service riêng, các DB ownership và public TLS443 vẫn thiếu. Xem [tài liệu Gateway](../architecture/TARGET-GATEWAY-MIGRATION-20261111.md).
+
+## 7. Final Assignment PDF dedicated acceptance (11/11/2026)
+
+- Official original three-page PDF clauses 2–7 are checked by 22 static source/artifact assertions in scripts/Validate-Prn232-Final-PDF.cjs, and a repeatable all-domain Docker suite in scripts/Test-Prn232-Final-Acceptance.ps1. This includes scheduled notification, SQL Outbox/Redis Streams worker ACK, independent gRPC, two Admin approvals, real SQL Catalog/Challenge/Planner/LDAS/FMD and Playwright, plus optional Gateway failure recovery and independent Redis smoke. Static checks and the full 16-gate QA run passed on 11/11; an additional live search/filter/sort/page test now also passes (13 checks).
+- Seven instructor-facing demonstrations are scripted in docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md, with checklist intentionally unsigned. **This is technical QA evidence, not a lecturer-observed presentation or 100/100 grade.** ADR-005 full target services and reviewer approval remain pending; main must not be merged solely on automated QA.

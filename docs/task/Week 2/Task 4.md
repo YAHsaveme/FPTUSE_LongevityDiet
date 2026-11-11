@@ -3,7 +3,7 @@
 **Owner:** Thành viên 4
 **Reviewer:** Thành viên 2
 **Branch:** `feature/w2-t4-app-ux-integration`
-**Status:** Planned
+**Status:** In Progress (responsive Web, JWT session, YARP Gateway and Playwright E2E verified; full accessibility review/TLS/reviewer pending)
 
 ## Architecture alignment (ADR-005)
 
@@ -52,3 +52,9 @@ Tích hợp các page thành một application thống nhất, responsive, acces
 ## Definition of Done
 
 Critical Member/Admin journeys chạy trong một shell thống nhất; responsive/accessibility/error/loading state đủ tốt để demo và không còn hardcoded/mock production state.
+
+
+## Verified Current Runtime checkpoint (11/11/2026)
+
+- Web lint/test/build, Playwright 10/10 across mobile+desktop, Edge CDP layout 6/6, Nginx default API + optional YARP Gateway auth 200/401/403 PASS; full keyboard/screen-reader manual review not signed.
+- Official PDF source matrix: scripts/Validate-Prn232-Final-PDF.cjs; full technical QA runner: scripts/Test-Prn232-Final-Acceptance.ps1. This checkpoint is not reviewer sign-off or proof the ADR-005 Target Architecture is deployed.

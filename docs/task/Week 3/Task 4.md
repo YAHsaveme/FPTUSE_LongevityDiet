@@ -3,7 +3,7 @@
 **Owner:** Thành viên 4
 **Reviewer:** Thành viên 2
 **Branch:** `feature/w3-t4-rule-governance-audit`
-**Status:** Planned
+**Status:** In Progress (real SQL two-Admin rule lifecycle, audit, immutable publish verified; independent Catalog owner/reviewer pending)
 
 ## Architecture alignment (ADR-005)
 
@@ -57,3 +57,9 @@ Lifecycle: Draft -> InReview -> Published -> Retired.
 ## Definition of Done
 
 Admin có thể biết ai thay đổi gì, khi nào, version nào được dùng; production rule không thể bị sửa âm thầm và Member không truy cập được Admin audit/governance.
+
+
+## Verified Current Runtime checkpoint (11/11/2026)
+
+- Two synthetic Admins on live SQL: sensitive review queue, no self-approval, immutable published version, retirement, impact and audit PASS; scripts/Test-Live-Admin-Rule-Governance.ps1.
+- Official PDF source matrix: scripts/Validate-Prn232-Final-PDF.cjs; full technical QA runner: scripts/Test-Prn232-Final-Acceptance.ps1. This checkpoint is not reviewer sign-off or proof the ADR-005 Target Architecture is deployed.
