@@ -81,18 +81,27 @@ Record 'THREE_HEALTH_PHASES_SQL' ($overview.recentCheckIns.Count -eq 3) ('count=
 $other=New-QAUser 'prn232-qa-other'
 $otherOverview=Request 'Get' '/wellness/overview' $null $other
 Record 'USER_DATA_ISOLATION' ($otherOverview.recentCheckIns.Count -eq 0)
-$activity=Request 'Post' '/activities' @{kind=1;durationMinutes=35;startedAt=(Get-Date).ToUniversalTime().AddMinutes(-2).ToString('o');note='Synthetic QA walk'} $h
+$activityStartedAt=[DateTimeOffset]::UtcNow
+$activity=Request 'Post' '/activities' @{kind=1;durationMinutes=35;startedAt=$activityStartedAt.ToString('o');note='Synthetic QA walk'} $h
 Record 'ACTIVITY_SQL' ($null -ne $activity)
 if($VerifyMealLdas) {
-  $priorScore=Request 'Get' '/ldas/latest' $null $h
+  # Pin all activity and meal signals to one actual Vietnamese local date.
+  # A fixed -90 minute backdate crossed midnight and incorrectly yielded 35% coverage.
+  # The synthetic profile uses Asia/Ho_Chi_Minh (UTC+07:00).
+  # Fixed offset works on Windows PowerShell 5.1 and Linux pwsh.
+  $qaLocalAt=$activityStartedAt.ToOffset([TimeSpan]::FromHours(7))
+  $qaDate=$qaLocalAt.ToString('yyyy-MM-dd')
+  $localMidnight=[DateTimeOffset]::new($qaLocalAt.Year,$qaLocalAt.Month,$qaLocalAt.Day,0,0,0,$qaLocalAt.Offset)
+  $minutesAvailable=[Math]::Min(90.0,[Math]::Max(0.0,($qaLocalAt-$localMidnight).TotalMinutes))
+  $priorScore=Request 'Get' ('/ldas/'+$qaDate) $null $h
   Record 'LDAS_MISSING_DATA_POLICY' ($null -eq $priorScore.score -and @($priorScore.missingData) -contains 'meals')
-  $utcNow=[DateTimeOffset]::UtcNow
+  $utcNow=$activityStartedAt
   $qaLogs=@()
   $slots=@('Breakfast','Lunch','Dinner')
   for($slotIndex=0;$slotIndex -lt 3;$slotIndex++) {
     $kind=$slots[$slotIndex]
     $logged=Request 'Post' '/meal-logs' @{
-      eatenAt=$utcNow.AddMinutes(-90+30*$slotIndex).ToString('o')
+      eatenAt=$utcNow.AddMinutes(-$minutesAvailable*(2-$slotIndex)/2.0).ToString('o')
       mealType=$kind;title=('Synthetic QA '+$kind);plannedMealId=$null
       notes='QA-only synthetic logging; no nutritional/medical validity'
       items=@(@{
@@ -103,10 +112,10 @@ if($VerifyMealLdas) {
     Record ('MEAL_LOG_OWNER_SQL_'+$kind) ($null -ne $logged.id)
     $qaLogs+= $logged.id
   }
-  $fullScore=Request 'Get' '/ldas/latest' $null $h
+  $fullScore=Request 'Get' ('/ldas/'+$qaDate) $null $h
   Record 'LDAS_REAL_MEAL_WINDOW_ACTIVITY' ($null -ne $fullScore.score -and $fullScore.coveragePercent -eq 100) ('coverage='+$fullScore.coveragePercent)
   foreach($logId in $qaLogs) { $null=Request 'Delete' ('/meal-logs/'+$logId) $null $h }
-  $deletedScore=Request 'Get' '/ldas/latest' $null $h
+  $deletedScore=Request 'Get' ('/ldas/'+$qaDate) $null $h
   Record 'LDAS_RECALCULATES_AFTER_MEAL_DELETE' ($null -eq $deletedScore.score -and @($deletedScore.missingData) -contains 'meals')
 }
 $summary=Request 'Get' '/activities/summary' $null $h
