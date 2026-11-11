@@ -121,8 +121,19 @@ if(erd){
   'src/LongevityDiet.Tracking/Migrations/TrackingDbContextModelSnapshot.cs',
   'src/LongevityDiet.Worker/Reminders/Migrations/ReminderWorkerDbContextModelSnapshot.cs'];
  const current=srcFiles.map(p=>fs.readFileSync(path.join(root,p),'utf8'));
- check(current.reduce((acc,s)=>acc+([...s.matchAll(/b\.ToTable\("([^"]+)"/g)].length),0)===56,
-  'Physical EF snapshot count no longer 56');
+ const tables=s=>[...s.matchAll(/b\.ToTable\("([^"]+)"/g)].map(x=>x[1]);
+ const trackingNew=new Set(['MealLogs','MealLogItems','EatingWindowSnapshots']);
+ // This C0/C1/C2/ERD set describes the CURRENT legacy runtime, not the
+ // optional ADR-005 parallel Tracking owner. Those 3 new tables legitimately
+ // appear twice during migration and must not be added to the current diagram.
+ const currentRuntimeCount=tables(current[0]).length+
+     tables(current[1]).filter(x=>!trackingNew.has(x)).length+
+     tables(current[2]).length;
+ check(currentRuntimeCount===schema.tableCount,
+  'Current-runtime EF schema count no longer matches 56-table diagram');
+ const targetTrackingTables=new Set(tables(current[1]));
+ check([...trackingNew].every(x=>targetTrackingTables.has(x)),
+  'Target Tracking migration is missing its separately owned MealLog/Window tables');
 }
 if(errors.length){for(const e of errors)console.error('OVERALL_QA_FAIL',e);process.exitCode=1;}
 else console.log('CURRENT_OVERALL_QA=PASS canonical C0/C1/C2/ERD: actors, 22 live controllers, 56 SQL tables, 23 real SQL FK, 32 visible APP connectors (50 documented), Native Draw.io one-page monochrome, route/service/repository and runtime boundaries verified');

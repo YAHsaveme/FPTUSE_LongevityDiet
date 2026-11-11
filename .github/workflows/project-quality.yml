@@ -49,6 +49,7 @@ jobs:
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
@@ -202,6 +203,12 @@ jobs:
       - name: Verify Planning independent SQL JWT Challenge Outbox Redis
         run: node scripts/Test-Planning-Service-Http.mjs
 
+      - name: Start independent Tracking activity writer and SQL owner
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml up -d --build tracking-api
+
+      - name: Verify Tracking Identity REST, SQL owner, JWT, LDAS and Outbox Redis
+        run: node scripts/Test-Tracking-Writer-Http.mjs
+
       - name: Current runtime and Gateway evidence
         shell: bash
         run: |
@@ -211,4 +218,4 @@ jobs:
 
       - name: Tear down release smoke
         if: always()
-        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml down -v --remove-orphans
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml down -v --remove-orphans

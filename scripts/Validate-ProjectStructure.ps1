@@ -39,6 +39,7 @@ $requiredProjects = @(
     # Independent ADR-005 Identity & Profile owner on its own SQL database.
     'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj',
     'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj',
+    'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -113,10 +114,11 @@ $dependencyRules = @{
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
     'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
     'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj' = @('LongevityDiet.Domain')
+    'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj' = @('LongevityDiet.Tracking')
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
-    'src\LongevityDiet.Tracking\LongevityDiet.Tracking.csproj' = @()
+    'src\LongevityDiet.Tracking\LongevityDiet.Tracking.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.API\LongevityDiet.API.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services', 'LongevityDiet.Tracking')
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj' = @('LongevityDiet.Domain')
@@ -179,6 +181,22 @@ Assert-ProjectRule ($planningOverlay -notmatch 'ConnectionStrings__Default') 'Pl
 $planningProgram = Read-ProjectText 'src\LongevityDiet.Planning\Program.cs'
 Assert-ProjectRule ($planningProgram -match 'LongevityPlanningDb') 'Planning runtime must verify its SQL database name.'
 Assert-ProjectRule ($planningProgram -match 'AddJwtBearer') 'Planning routes must require JWT authentication.'
+$trackingDb = Read-ProjectText 'src\LongevityDiet.Tracking\TrackingDbContext.cs'
+Assert-ProjectRule ($trackingDb -match 'DbSet<ActivityLog>') 'Tracking must own ActivityLogs.'
+Assert-ProjectRule ($trackingDb -match 'DbSet<MealLog>') 'Tracking must own MealLogs.'
+Assert-ProjectRule ($trackingDb -match 'DbSet<EatingWindowSnapshot>') 'Tracking must own EatingWindowSnapshots.'
+Assert-ProjectRule ($trackingDb -match 'DbSet<TrackingOutboxEvent>') 'Tracking must own its transactional Outbox.'
+Assert-ProjectRule ($trackingDb -notmatch 'DbSet<User>|DbSet<Food>|DbSet<MealPlan>|DbSet<WorkerJob>|DbSet<WeeklyReport>') 'Tracking must not own Identity/Catalog/Planning/Worker domain tables.'
+$trackingOverlay = Read-ProjectText 'docker-compose.tracking-api.yml'
+Assert-ProjectRule ($trackingOverlay -match 'LongevityTrackingDb') 'Tracking Compose must own LongevityTrackingDb.'
+Assert-ProjectRule ($trackingOverlay -match '127\.0\.0\.1:') 'Tracking QA bind must be loopback only.'
+Assert-ProjectRule ($trackingOverlay -notmatch 'ConnectionStrings__Default') 'Tracking may not use the legacy default DB.'
+$trackingProgram = Read-ProjectText 'src\LongevityDiet.Tracking.Api\Program.cs'
+Assert-ProjectRule ($trackingProgram -match 'LongevityTrackingDb') 'Tracking must fail-closed on SQL DB name.'
+Assert-ProjectRule ($trackingProgram -match 'AddJwtBearer') 'Tracking must require JWT authentication.'
+$trackingIdentity = Read-ProjectText 'src\LongevityDiet.Tracking.Api\IdentityHttpTrackingUserContext.cs'
+Assert-ProjectRule ($trackingIdentity -match '/api/v1/profile') 'Tracking must verify a user via the Identity service API, not shared SQL.'
+
 
 $gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
 Assert-ProjectRule ($gatewayProject -match 'Yarp\.ReverseProxy') 'Optional gateway must use the YARP package.'
