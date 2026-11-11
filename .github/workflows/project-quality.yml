@@ -178,6 +178,7 @@ jobs:
             sleep 2
           done
           node scripts/Test-Catalog-Service-Http.mjs
+          node scripts/Test-Catalog-Admin-Http.mjs
           migration_count=$(printf 'SET NOCOUNT ON;\nSELECT COUNT(*) FROM [LongevityCatalogDb].[dbo].[__EFMigrationsHistory];\nGO\n' | docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml exec -T sqlserver sh -lc '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -b -h -1 -W')
           test "$(echo "$migration_count" | tr -d '[:space:]')" -ge 1
 

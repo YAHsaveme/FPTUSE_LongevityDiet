@@ -181,6 +181,33 @@ admin.MapPost("/foods", async (CatalogDbContext db, SaveFood input, Cancellation
     await db.SaveChangesAsync(ct);
     return Results.Created($"/api/v1/foods/{entity.Id}", new { entity.Id, entity.Name });
 });
+admin.MapPut("/foods/{id:guid}", async (Guid id, CatalogDbContext db, SaveFood input, CancellationToken ct) =>
+{
+    var name = input.Name?.Trim();
+    var category = input.Category?.Trim();
+    if (string.IsNullOrWhiteSpace(name) || name.Length > 180 ||
+        string.IsNullOrWhiteSpace(category) || category.Length > 80 ||
+        input.Calories is < 0 or > 100000 || input.ProteinG < 0 ||
+        input.CarbohydrateG < 0 || input.FatG < 0)
+        return Results.BadRequest(new { error = "invalid_food" });
+
+    var food = await db.Foods.FirstOrDefaultAsync(x => x.Id == id && x.IsActive, ct);
+    if (food is null) return Results.NotFound();
+
+    food.Name = name;
+    food.NormalizedName = name.ToUpperInvariant();
+    food.Category = category;
+    food.Calories = input.Calories;
+    food.ProteinG = input.ProteinG;
+    food.CarbohydrateG = input.CarbohydrateG;
+    food.FatG = input.FatG;
+    food.IsPlantBased = input.IsPlantBased;
+    food.UpdatedAt = DateTimeOffset.UtcNow;
+    await db.SaveChangesAsync(ct);
+    return Results.Ok(new { food.Id, food.Name, food.Category, food.Calories,
+        food.ProteinG, food.CarbohydrateG, food.FatG, food.IsPlantBased });
+});
+
 admin.MapDelete("/foods/{id:guid}", async (Guid id, CatalogDbContext db, CancellationToken ct) =>
 {
     var food = await db.Foods.FirstOrDefaultAsync(x => x.Id == id && x.IsActive, ct);
