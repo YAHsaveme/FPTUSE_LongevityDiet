@@ -3,7 +3,7 @@
 **Owner:** Thành viên 1
 **Reviewer:** Thành viên 3
 **Branch:** `feature/w3-t1-reminder-notification`
-**Status:** Planned
+**Status:** In Progress (Current Runtime scheduled notification, outbox and Redis Worker verified; standalone Identity service and reviewer pending)
 
 ## Architecture alignment (ADR-005)
 
@@ -49,3 +49,9 @@ Tạo reminder/notification flow chạy bằng Worker, theo timezone và user pr
 ## Definition of Done
 
 Reminder được schedule đúng theo preference và tạo notification đúng một lần; restart/retry không tạo duplicate và user quản lý read state qua UI thật.
+
+
+## Verified Current Runtime checkpoint (11/11/2026)
+
+- SQL Outbox -> Redis Streams -> Worker ACK and timed notification inbox/read/IDOR PASS; scripts/Test-Live-Docker-Acceptance.ps1 -VerifyTimedNotification and scripts/Run-Member1RedisSmoke.ps1.
+- Official PDF source matrix: scripts/Validate-Prn232-Final-PDF.cjs; full technical QA runner: scripts/Test-Prn232-Final-Acceptance.ps1. This checkpoint is not reviewer sign-off or proof the ADR-005 Target Architecture is deployed.
