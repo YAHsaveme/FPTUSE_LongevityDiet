@@ -129,3 +129,10 @@ Một clean environment có thể dựng **Target Architecture** bằng document
 - Full integration suite is `35/38 PASS`. The same three MealLog create failures (`Expected Created`, `Actual InternalServerError`) were reproduced on clean `origin/develop` commit `474b475`; CI is intentionally not weakened or configured to skip them.
 - Target communication matrix remains partially unimplemented by repository architecture: current runtime proves Browser -> Web -> API, API -> gRPC, API/Worker -> SQL, API/Worker -> Redis, Worker Redis Streams and persisted-result visibility. Gateway -> four REST domain services, Worker Ops as separate :8086 deployable, service-owned databases and public TLS :443 remain Target-only and must stay labeled as such.
 - Branch push remains blocked externally: authenticated GitHub account `ThanLeThanhVinh04` receives HTTP 403 when pushing to `YAHsaveme/FPTUSE_LongevityDiet`. Reviewer (Thành viên 4) approval is still required before Done.
+
+## Target Gateway migration checkpoint — 11/11/2026
+
+- A separate .NET 9 YARP host has now been implemented at `src/LongevityDiet.Gateway`, with an opt-in Compose overlay. The default Current Runtime remains unchanged.
+- Docker QA verified Browser -> Web Nginx -> YARP -> existing REST API, JWT/403, OpenAPI, 404 route restrictions, /gateway/ready 503 on backend outage, restart recovery, and 10/10 Playwright E2E. 172/172 .NET tests PASS. CI now exercises both default and Gateway E2E paths before PR merge.
+- Gateway **still routes to the transitional API**, not to four distinct REST services. Separate owner DBs, domain Outbox ownership, and full target communication matrix are not complete; keep task In Progress until target and reviewer gates pass.
+- Details: [YARP migration evidence](../../architecture/TARGET-GATEWAY-MIGRATION-20261111.md).

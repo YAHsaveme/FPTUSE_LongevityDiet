@@ -89,3 +89,7 @@ Lưu ý: PDF **không bắt buộc** Kafka khi đã chọn Redis và **không b�
 - GitHub evidence: PR #22, Project Quality Gate SUCCESS; protected main should remain unchanged until full gating.
 
 **Phạm vi các script live:** chỉ chạy trên Docker QA project prn232-acceptance, localhost, dữ liệu giả. Không chạy các script có dữ liệu thay đổi trên production.
+
+## 6. Cập nhật sau kiểm toán: Gateway YARP (11/11/2026)
+
+Nhóm đã có **bước dịch chuyển đầu tiên** của ADR-005: một project Gateway .NET 9/YARP độc lập, có Compose overlay tùy chọn và Web Nginx chuyển tiếp qua Gateway. Đã kiểm tra trực tiếp JWT/RBAC, route 404, OpenAPI, readiness 503 khi API ngừng, khôi phục và 10/10 Playwright E2E; .NET 172/172. Đây là tiến triển kỹ thuật sau bản kiểm toán ban đầu, **không phải** một tuyên bố toàn bộ Target Architecture đã triển khai. Bốn domain REST service riêng, các DB ownership và public TLS443 vẫn thiếu. Xem [tài liệu Gateway](../architecture/TARGET-GATEWAY-MIGRATION-20261111.md).

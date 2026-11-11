@@ -32,6 +32,8 @@ $requiredProjects = @(
     # W2-T1 implementation owns an isolated TrackingDbContext in its own project.
     'src\LongevityDiet.Tracking\LongevityDiet.Tracking.csproj',
     'src\LongevityDiet.API\LongevityDiet.API.csproj',
+    # First optional ADR-005 migration slice; does not change legacy deployment.
+    'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -102,6 +104,7 @@ foreach ($project in $sourceProjectFiles) {
 }
 
 $dependencyRules = @{
+    'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj' = @()
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
@@ -135,6 +138,21 @@ $vite = Read-ProjectText 'src\LongevityDiet.Web\vite.config.ts'
 Assert-ProjectRule ($vite -notmatch 'LongevityDiet\.API[/\\]wwwroot') 'Frontend must not build into API/wwwroot.'
 Assert-ProjectRule ($vite -match '5173') 'Frontend development port 5173 is missing from Vite config.'
 Assert-ProjectRule ($vite -match 'https://localhost:7110') 'Vite proxy must target API HTTPS 7110 by default.'
+
+# The opt-in ADR-005 gateway slice is real code with a restricted YARP route,
+# not a speculative diagram and not a replacement for the Current Runtime.
+$gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
+Assert-ProjectRule ($gatewayProject -match 'Yarp\.ReverseProxy') 'Optional gateway must use the YARP package.'
+$gatewayConfig = Read-ProjectText 'src\LongevityDiet.Gateway\appsettings.json'
+Assert-ProjectRule ($gatewayConfig -match '/api/\{\*\*catch-all\}') 'Gateway must route the API prefix.'
+Assert-ProjectRule ($gatewayConfig -match '/openapi/\{\*\*catch-all\}') 'Gateway must preserve OpenAPI.'
+Assert-ProjectRule ($gatewayConfig -notmatch '"Path"\s*:\s*"\{\*\*catch-all\}"') 'Gateway must not route every URL.'
+$gatewayOverlay = Read-ProjectText 'docker-compose.gateway.yml'
+Assert-ProjectRule ($gatewayOverlay -match 'gateway:') 'Gateway Compose overlay must contain a separate gateway container.'
+Assert-ProjectRule ($gatewayOverlay -match 'API_UPSTREAM:\s*gateway:8080') 'Gateway Compose overlay must route Nginx through YARP.'
+$webDocker = Read-ProjectText 'src\LongevityDiet.Web\Dockerfile'
+Assert-ProjectRule ($webDocker -match 'API_UPSTREAM=api:8080') 'Default Nginx route must preserve the direct API path.'
+Assert-ProjectRule ($webDocker -match 'default\.conf\.template') 'Nginx must support the opt-in upstream template.'
 
 $compose = Read-ProjectText 'docker-compose.yml'
 foreach ($service in @('sqlserver:', 'redis:', 'recommendation-grpc:', 'api:', 'worker:', 'web:')) {

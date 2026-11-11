@@ -239,6 +239,12 @@ Historical release baseline (2026-11-05; not the latest test status):
 
 The complete current-runtime operations and release evidence is documented in `docs/operations/RELEASE-RUNBOOK.md`. ADR-005 Gateway/domain-service/TLS topology remains **Target Architecture** until those deployables and service-owned databases exist.
 
+## Optional target-architecture Gateway migration slice
+
+A separate **.NET 9 / YARP API Gateway** is now available without replacing the verified Current Runtime. With `docker-compose.gateway.yml`, Browser → Web/Nginx → Gateway → existing API is exercised in real Docker; the default Compose remains Browser → Web/Nginx → API. Gateway readiness checks the actual backend and intentionally returns HTTP 503 if it is unavailable. This does **not** yet implement four independent REST domain services, six service-owned databases or public TLS443.
+
+[Gateway setup, API routing, local E2E, outage recovery and remaining architecture gaps](docs/architecture/TARGET-GATEWAY-MIGRATION-20261111.md).
+
 ## Deployment instructions
 
 For the verified current demo runtime, follow `docs/operations/RELEASE-RUNBOOK.md`.
