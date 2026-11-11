@@ -36,4 +36,5 @@ node scripts/Test-Catalog-Admin-Http.mjs
 - EF migration phải được áp dụng thật trên `LongevityCatalogDb`, seed 4 Foods/2 Recipes/2 Rules.
 - JWT 401/200 và Member role 403, đọc 3 domain Catalog thật trên DB riêng; `node scripts/Test-Catalog-Admin-Http.mjs` kiểm chứng **59/59 ca QA Docker**: Food/Recipe CRUD, nguyên liệu/Allergen, active reference guard, tràn số trang, hai Admin QA độc lập, nguồn/citation, chặn duplicate JSON, chống tự phê duyệt, immutable published, retirement, SQL audit và không lộ Draft/Retired cho Member. Bộ `Test-Catalog-Service-Http.mjs` **11/11 PASS**; GitHub Actions cho nhánh Rule Governance phải hoàn tất trước khi merge.
 - Các bộ kiểm thử Legacy .NET/Web/E2E và Gateway QA vẫn PASS.
+- Ma trận nghiệm thu Rule Governance và giới hạn phát hành: [TARGET-CATALOG-RULE-GOVERNANCE-QA-20261111.md](TARGET-CATALOG-RULE-GOVERNANCE-QA-20261111.md).
 - Chỉ ghi `Target Catalog Service slice PASS` sau khi Docker QA và GitHub CI đạt. **Không coi toàn bộ ADR-005 hay 16 task đạt 100%.**
