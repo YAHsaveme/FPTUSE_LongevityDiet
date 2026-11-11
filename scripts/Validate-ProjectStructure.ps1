@@ -197,6 +197,19 @@ Assert-ProjectRule ($trackingProgram -match 'AddJwtBearer') 'Tracking must requi
 $trackingIdentity = Read-ProjectText 'src\LongevityDiet.Tracking.Api\IdentityHttpTrackingUserContext.cs'
 Assert-ProjectRule ($trackingIdentity -match '/api/v1/profile') 'Tracking must verify a user via the Identity service API, not shared SQL.'
 
+$recommendationDb = Read-ProjectText 'src\LongevityDiet.Recommendation.Grpc\Ownership\RecommendationDbContext.cs'
+Assert-ProjectRule ($recommendationDb -match 'DbSet<RecommendationFeedback>') 'Recommendation owner must persist feedback.'
+Assert-ProjectRule ($recommendationDb -match 'DbSet<UserFoodPreference>') 'Recommendation owner must persist food preferences.'
+Assert-ProjectRule ($recommendationDb -match 'DbSet<RecommendationOutbox>') 'Recommendation owner must have a local Outbox.'
+Assert-ProjectRule ($recommendationDb -notmatch 'DbSet<User>|DbSet<MealPlan>|DbSet<MealLog>|DbSet<Food>|DbSet<WorkerJob>') 'Recommendation owner must not own foreign-domain tables.'
+$recommendationOverlay = Read-ProjectText 'docker-compose.recommendation-owner.yml'
+Assert-ProjectRule ($recommendationOverlay -match 'LongevityRecommendationDb') 'Recommendation Compose must use its owned SQL database.'
+Assert-ProjectRule ($recommendationOverlay -match '127\.0\.0\.1:') 'Recommendation QA ports must bind to loopback only.'
+Assert-ProjectRule ($recommendationOverlay -notmatch 'ConnectionStrings__Default') 'Recommendation cannot read the legacy default SQL database.'
+$recommendationProgram = Read-ProjectText 'src\LongevityDiet.Recommendation.Grpc\Program.cs'
+Assert-ProjectRule ($recommendationProgram -match 'LongevityRecommendationDb') 'Recommendation must fail closed on its SQL catalog name.'
+Assert-ProjectRule ($recommendationProgram -match 'AddJwtBearer') 'Recommendation state REST endpoints need JWT.'
+
 
 $gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
 Assert-ProjectRule ($gatewayProject -match 'Yarp\.ReverseProxy') 'Optional gateway must use the YARP package.'

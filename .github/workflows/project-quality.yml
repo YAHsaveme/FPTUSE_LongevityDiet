@@ -50,6 +50,7 @@ jobs:
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
@@ -211,6 +212,12 @@ jobs:
       - name: Verify Tracking Identity REST, SQL owner, JWT, LDAS and Outbox Redis
         run: node scripts/Test-Tracking-Writer-Http.mjs
 
+      - name: Start optional Recommendation gRPC owner and independent SQL
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml up -d --build recommendation-owner
+
+      - name: Verify Recommendation SQL owner, HTTP2 gRPC, JWT feedback and Redis
+        run: node scripts/Test-Recommendation-Owner-Http.mjs
+
       - name: Current runtime and Gateway evidence
         shell: bash
         run: |
@@ -220,4 +227,4 @@ jobs:
 
       - name: Tear down release smoke
         if: always()
-        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml down -v --remove-orphans
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml down -v --remove-orphans
