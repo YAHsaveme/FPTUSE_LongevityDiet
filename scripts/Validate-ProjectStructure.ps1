@@ -36,6 +36,8 @@ $requiredProjects = @(
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj',
     # Second opt-in ADR-005 slice: process+database isolated Catalog.
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj',
+    # Independent ADR-005 Identity & Profile owner on its own SQL database.
+    'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -108,6 +110,7 @@ foreach ($project in $sourceProjectFiles) {
 $dependencyRules = @{
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj' = @()
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
+    'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
@@ -152,6 +155,15 @@ Assert-ProjectRule ($catalogDb -notmatch 'DbSet<User>|DbSet<MealPlan>|DbSet<Acti
 $catalogCompose = Read-ProjectText 'docker-compose.catalog.yml'
 Assert-ProjectRule ($catalogCompose -match 'LongevityCatalogDb') 'Catalog Compose overlay must own LongevityCatalogDb.'
 Assert-ProjectRule ($catalogCompose -match '127\.0\.0\.1:') 'Optional catalog must bind only to localhost QA.'
+
+$identityDb = Read-ProjectText 'src\LongevityDiet.Identity\IdentityDbContext.cs'
+Assert-ProjectRule ($identityDb -match 'DbSet<User>') 'Identity owner must include a User DbSet.'
+Assert-ProjectRule ($identityDb -match 'DbSet<IdentityOutboxEvent>') 'Identity owner must include an Outbox.'
+Assert-ProjectRule ($identityDb -notmatch 'DbSet<MealPlan>|DbSet<Recipe>|DbSet<WorkerJob>|DbSet<ActivityLog>') 'Identity owner may not include foreign-domain tables.'
+$identityOverlay = Read-ProjectText 'docker-compose.identity.yml'
+Assert-ProjectRule ($identityOverlay -match 'LongevityIdentityDb') 'Identity Compose must own LongevityIdentityDb.'
+Assert-ProjectRule ($identityOverlay -match '127\.0\.0\.1:') 'Identity QA must bind only to localhost.'
+Assert-ProjectRule ($identityOverlay -notmatch 'ConnectionStrings__Default') 'Identity service must never connect to legacy default DB.'
 
 $gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
 Assert-ProjectRule ($gatewayProject -match 'Yarp\.ReverseProxy') 'Optional gateway must use the YARP package.'
