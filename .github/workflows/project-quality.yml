@@ -84,7 +84,9 @@ jobs:
     # Keep the post-merge main check as a separate safety net.
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: validate
-    runs-on: ubuntu-latest
+    # Playwright --with-deps uses apt; pin a stable release instead of the
+    # migrating ubuntu-latest (Ubuntu 26 'resolute' DNS/mirror outage on CI).
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
