@@ -77,7 +77,7 @@ api.MapGet("/activities", async (ClaimsPrincipal principal, TrackingDbContext db
     CancellationToken ct = default) =>
 {
     if (!TryUserId(principal, out var userId)) return Results.Unauthorized();
-    if (page < 1 || pageSize is < 1 or > 100 || (from.HasValue && to.HasValue && from > to))
+    if (!ValidPagination(page, pageSize) || (from.HasValue && to.HasValue && from > to))
         return Results.BadRequest(new { error = "invalid_query" });
 
     var query = db.Activities.AsNoTracking().Where(a => a.UserId == userId && !a.IsDeleted);
@@ -133,7 +133,7 @@ api.MapGet("/ldas/history", async (ClaimsPrincipal principal, TrackingDbContext 
     int page = 1, int pageSize = 20, CancellationToken ct = default) =>
 {
     if (!TryUserId(principal, out var userId)) return Results.Unauthorized();
-    if (page < 1 || pageSize is < 1 or > 100)
+    if (!ValidPagination(page, pageSize))
         return Results.BadRequest(new { error = "invalid_pagination" });
     var query = db.Scores.AsNoTracking().Where(s => s.UserId == userId);
     var total = await query.CountAsync(ct);
@@ -150,5 +150,9 @@ app.Run();
 
 static bool TryUserId(ClaimsPrincipal principal, out Guid userId) =>
     Guid.TryParse(principal.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
+
+// SQL OFFSET uses a 32-bit integer; reject excessively large page numbers before arithmetic overflow.
+static bool ValidPagination(int page, int pageSize) =>
+    page >= 1 && pageSize is >= 1 and <= 100 && (long)(page - 1) * pageSize <= int.MaxValue;
 
 public partial class Program;

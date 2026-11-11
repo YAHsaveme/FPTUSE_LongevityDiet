@@ -96,7 +96,7 @@ Nhóm đã có **bước dịch chuyển đầu tiên** của ADR-005: một pro
 
 ## 9. Independent Tracking REST read-only checkpoint (11/11/2026)
 
-- Tracking REST .NET 9 now runs in a separate process at :8084 and only connects to pre-existing LongevityTrackingDb. Its read paths consume the actual legacy TrackingService writes in the same owned DB. A cross-platform 15-case QA proves two-member JWT isolation, read-your-own Activity, IDOR 404 and persisted LDAS without fabricated scores.
+- Tracking REST .NET 9 now runs in a separate process at :8084 and only connects to pre-existing LongevityTrackingDb. Its read paths consume the actual legacy TrackingService writes in the same owned DB. A cross-platform 27-case QA proves two-member JWT isolation, read-your-own Activity/Goal, IDOR 404, persisted LDAS history without fabricated scores, date filtering, invalid JWT and overflow-safe pagination.
 - Not a full Target Tracking cutover: write/recompute remains in transitional API pending copied user timezone, versioned meal/window signals and event Outbox ownership. See docs/architecture/TARGET-TRACKING-READ-MIGRATION-20261111.md.
 
 ## 8. Independent Catalog Service migration checkpoint (11/11/2026)

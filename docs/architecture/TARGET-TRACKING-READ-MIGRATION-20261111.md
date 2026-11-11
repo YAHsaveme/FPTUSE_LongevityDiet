@@ -12,7 +12,7 @@ Ngày: 11/11/2026. **Hiện trạng: dịch vụ đọc dữ liệu độc lập
 
 ## Test thực tế
 
-`node scripts/Test-Tracking-Service-Http.mjs` trên QA Docker: **15/15 PASS**: đăng ký hai tài khoản giả qua Gateway, cập nhật Profile, ghi Activity qua **owner transitional API** vào TrackingDb, service Tracking riêng đọc được đúng bản ghi, JWT 401, cross-user IDOR 404, xem snapshot LDAS thực và bảo đảm không có điểm giả cho tài khoản chưa phát sinh số liệu, phân trang lỗi 400, POST mới bị chặn 405.
+`node scripts/Test-Tracking-Service-Http.mjs` trên QA Docker: **27/27 PASS**: đăng ký hai tài khoản giả qua Gateway, cập nhật Profile, ghi Activity qua **owner transitional API** vào TrackingDb; Tracking REST riêng đọc đúng bản ghi, Activity Goal và lịch sử LDAS; JWT 401 (gồm token sai), cross-user IDOR 404 và lịch sử dữ liệu cách ly, lọc từ/ngày đến, chặn khoảng ngày đảo ngược, chặn page/pageSize không hợp lệ hoặc gây tràn 32-bit SQL OFFSET; snapshot LDAS thực và không bịa điểm khi chưa có dữ liệu; POST chưa an toàn vẫn 405.
 
 Các trường hợp này chứng minh **tái sử dụng cùng TrackingDb đã được tách logic**, không tạo bản sao dữ liệu/SQL join chéo domain.
 

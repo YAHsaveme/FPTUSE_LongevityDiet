@@ -82,4 +82,38 @@ const disabledMutation = await request(tracking + '/api/v1/activities', {
 check('TRACKING_DOES_NOT_BYPASS_OWNER_SCORE_EVENTS', disabledMutation.response.status === 405);
 const legacyReady = await request(identity + '/gateway/ready');
 check('GATEWAY_STILL_READY', legacyReady.response.status === 200);
+
+const goalA = await request(tracking + '/api/v1/activities/goal', { token: a });
+check('TRACKING_GOAL_READ_OWNER', goalA.response.status === 200 &&
+  typeof goalA.payload?.weeklyMinutesTarget === 'number');
+const anonGoal = await request(tracking + '/api/v1/activities/goal');
+check('TRACKING_GOAL_REQUIRES_JWT', anonGoal.response.status === 401);
+const historyA = await request(tracking + '/api/v1/ldas/history?page=1&pageSize=20', { token: a });
+check('TRACKING_LDAS_HISTORY_OWNER', historyA.response.status === 200 &&
+  historyA.payload?.totalItems >= 1 &&
+  historyA.payload?.items.some(item => item.version === 'ldas-v1'));
+const historyB = await request(tracking + '/api/v1/ldas/history', { token: b });
+check('TRACKING_LDAS_HISTORY_ISOLATION', historyB.response.status === 200 &&
+  historyB.payload?.totalItems === 0);
+const anonHistory = await request(tracking + '/api/v1/ldas/history');
+check('TRACKING_LDAS_HISTORY_REQUIRES_JWT', anonHistory.response.status === 401);
+const from = encodeURIComponent(new Date(Date.now() - 3600000).toISOString());
+const to = encodeURIComponent(new Date(Date.now() + 3600000).toISOString());
+const recent = await request(tracking + '/api/v1/activities?from=' + from + '&to=' + to, { token: a });
+check('TRACKING_ACTIVITY_DATE_FILTER_INCLUDES_MATCH', recent.response.status === 200 &&
+  recent.payload?.items.some(item => item.id === activityId));
+const oldTo = encodeURIComponent(new Date(Date.now() - 86400000).toISOString());
+const previous = await request(tracking + '/api/v1/activities?to=' + oldTo, { token: a });
+check('TRACKING_ACTIVITY_DATE_FILTER_EXCLUDES_MATCH', previous.response.status === 200 &&
+  !previous.payload?.items.some(item => item.id === activityId));
+const reversed = await request(tracking + '/api/v1/activities?from=' + to + '&to=' + oldTo, { token: a });
+check('TRACKING_INVALID_DATE_RANGE_REJECTED', reversed.response.status === 400);
+const hugeActivityPage = await request(tracking + '/api/v1/activities?page=2147483647&pageSize=100', { token: a });
+check('TRACKING_ACTIVITY_PAGE_OVERFLOW_REJECTED', hugeActivityPage.response.status === 400);
+const hugeHistoryPage = await request(tracking + '/api/v1/ldas/history?page=2147483647&pageSize=100', { token: a });
+check('TRACKING_HISTORY_PAGE_OVERFLOW_REJECTED', hugeHistoryPage.response.status === 400);
+const invalidHistoryPage = await request(tracking + '/api/v1/ldas/history?pageSize=0', { token: a });
+check('TRACKING_HISTORY_INVALID_PAGE_REJECTED', invalidHistoryPage.response.status === 400);
+const badToken = await request(tracking + '/api/v1/activities', { token: 'not.a.valid.jwt' });
+check('TRACKING_INVALID_BEARER_REJECTED', badToken.response.status === 401);
 console.log('TARGET_TRACKING_READ_HTTP_SMOKE=PASS checks=' + passed);
