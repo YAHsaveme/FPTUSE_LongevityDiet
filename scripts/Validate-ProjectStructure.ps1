@@ -241,6 +241,25 @@ Assert-ProjectRule ($gatewayConfig -notmatch '"Path"\s*:\s*"\{\*\*catch-all\}"')
 $gatewayOverlay = Read-ProjectText 'docker-compose.gateway.yml'
 Assert-ProjectRule ($gatewayOverlay -match 'gateway:') 'Gateway Compose overlay must contain a separate gateway container.'
 Assert-ProjectRule ($gatewayOverlay -match 'API_UPSTREAM:\s*gateway:8080') 'Gateway Compose overlay must route Nginx through YARP.'
+$targetGatewayJson = Read-ProjectText 'src\LongevityDiet.Gateway\appsettings.Target.json'
+$targetGateway = $targetGatewayJson | ConvertFrom-Json
+Assert-ProjectRule ($targetGateway.Gateway.TargetRouting -eq $true) 'Target YARP config must explicitly opt in.'
+Assert-ProjectRule ($targetGateway.ReverseProxy.Routes.'current-api'.Order -ge 100) 'Target YARP legacy fallback must have low route priority.'
+foreach ($cluster in @('identity','catalog','planning','tracking','recommendation-rest','worker-ops')) {
+    Assert-ProjectRule ($null -ne $targetGateway.ReverseProxy.Clusters.$cluster) "Target Gateway missing own-service cluster $cluster"
+}
+foreach ($route in @('identity-auth-root','catalog-foods-root','planning-meal-plans-root',
+                   'tracking-meal-logs-root','recommendation-feedback-root','worker-admin-events-root')) {
+    Assert-ProjectRule ($null -ne $targetGateway.ReverseProxy.Routes.$route) "Target Gateway missing owner route $route"
+}
+$targetGatewayOverlay = Read-ProjectText 'docker-compose.gateway-target.yml'
+Assert-ProjectRule ($targetGatewayOverlay -match 'gateway-target:') 'Gateway target must be a separate service.'
+Assert-ProjectRule ($targetGatewayOverlay -match '127\.0\.0\.1:') 'Gateway target QA host bind must be localhost only.'
+Assert-ProjectRule ($targetGatewayOverlay -notmatch 'API_UPSTREAM:') 'Gateway target must not switch the current Web API upstream.'
+$targetGatewayProgram = Read-ProjectText 'src\LongevityDiet.Gateway\Program.cs'
+Assert-ProjectRule ($targetGatewayProgram -match 'Untrusted or missing target Gateway cluster') 'Gateway target cluster addresses must fail closed.'
+Assert-ProjectRule ($targetGatewayProgram -match '/gateway/target/ready') 'Gateway target needs independent readiness.'
+
 $webDocker = Read-ProjectText 'src\LongevityDiet.Web\Dockerfile'
 Assert-ProjectRule ($webDocker -match 'API_UPSTREAM=api:8080') 'Default Nginx route must preserve the direct API path.'
 Assert-ProjectRule ($webDocker -match 'default\.conf\.template') 'Nginx must support the opt-in upstream template.'

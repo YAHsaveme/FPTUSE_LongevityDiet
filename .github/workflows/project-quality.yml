@@ -53,6 +53,7 @@ jobs:
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
@@ -243,6 +244,12 @@ jobs:
       - name: Verify independent WorkerDb scheduler and Redis notification delivery
         run: node scripts/Test-Worker-Owned-Reminder.mjs
 
+      - name: Start opt-in target YARP API Gateway sidecar
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml up -d --build gateway-target
+
+      - name: Verify target Gateway JWT across six independently owned service APIs
+        run: node scripts/Test-Target-Gateway-Http.mjs
+
       - name: Current runtime and Gateway evidence
         shell: bash
         run: |
@@ -252,4 +259,4 @@ jobs:
 
       - name: Tear down release smoke
         if: always()
-        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml down -v --remove-orphans
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml down -v --remove-orphans
