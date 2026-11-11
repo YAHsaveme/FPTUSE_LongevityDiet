@@ -90,6 +90,10 @@ public sealed class RecommendationAndReplacementApiTests : IClassFixture<Integra
     {
         await _factory.ResetDatabaseAsync();
         using var client = await CreateAuthenticatedClientAsync("w2-replace-audit@example.com");
+        var allergyReview = await client.PutAsJsonAsync("/api/v1/wellness/screening",
+            new { RiskFlags = Array.Empty<string>(), AllergiesReviewed = true,
+                Allergies = new List<string> { "fish", "shellfish" } });
+        Assert.Equal(HttpStatusCode.OK, allergyReview.StatusCode);
 
         // 1. Generate a 7-day plan with fish & shellfish allergy
         var generateResponse = await client.PostAsJsonAsync(
@@ -195,6 +199,23 @@ public sealed class RecommendationAndReplacementApiTests : IClassFixture<Integra
 
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", session.AccessToken);
+        // The planner now requires an age-verified profile; keep these legacy
+        // replacement-flow tests focused on replacement semantics.
+        var profileResponse = await client.PutAsJsonAsync("/api/v1/profile", new
+        {
+            DisplayName = "Member W2 Test",
+            BirthYear = 1995,
+            TimeZone = "Asia/Ho_Chi_Minh",
+            WakeTime = "06:30:00",
+            SleepTime = "22:30:00",
+            PreferredMealFrequency = 3,
+            FoodPreference = "PlantForward",
+        });
+        Assert.Equal(HttpStatusCode.OK, profileResponse.StatusCode);
+        var reviewed = await client.PutAsJsonAsync("/api/v1/wellness/screening",
+            new { RiskFlags = Array.Empty<string>(), AllergiesReviewed = true,
+                Allergies = Array.Empty<string>() });
+        Assert.Equal(HttpStatusCode.OK, reviewed.StatusCode);
         return client;
     }
 }

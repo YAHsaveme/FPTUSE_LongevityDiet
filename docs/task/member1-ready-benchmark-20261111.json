@@ -1,0 +1,14 @@
+﻿{
+    "timestampUtc":  "2026-11-11T01:29:52.1754670Z",
+    "endpoint":  "http://127.0.0.1:8080/ready",
+    "iterations":  100,
+    "p50Ms":  6.8,
+    "p95Ms":  10.43,
+    "p99Ms":  26.4,
+    "meanMs":  7.52,
+    "failures":  0,
+    "rateLimited":  0,
+    "failurePercent":  0,
+    "elapsedSeconds":  0.76,
+    "environment":  "live-target; hardware/load characteristics must be documented separately"
+}

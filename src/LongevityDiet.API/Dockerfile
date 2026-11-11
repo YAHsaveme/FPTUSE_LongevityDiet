@@ -9,6 +9,7 @@ COPY ["src/LongevityDiet.API/LongevityDiet.API.csproj", "src/LongevityDiet.API/"
 COPY ["src/LongevityDiet.Domain/LongevityDiet.Domain.csproj", "src/LongevityDiet.Domain/"]
 COPY ["src/LongevityDiet.Repositories/LongevityDiet.Repositories.csproj", "src/LongevityDiet.Repositories/"]
 COPY ["src/LongevityDiet.Services/LongevityDiet.Services.csproj", "src/LongevityDiet.Services/"]
+COPY ["src/LongevityDiet.Tracking/LongevityDiet.Tracking.csproj", "src/LongevityDiet.Tracking/"]
 RUN dotnet restore "src/LongevityDiet.API/LongevityDiet.API.csproj"
 COPY . .
 RUN dotnet publish "src/LongevityDiet.API/LongevityDiet.API.csproj" -c Release -o /out --no-restore

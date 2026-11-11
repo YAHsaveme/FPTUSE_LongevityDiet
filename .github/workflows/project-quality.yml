@@ -73,7 +73,9 @@ jobs:
 
 
   current-runtime-release-smoke:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Verify real SQL/Redis/API/gRPC/Worker/Web behavior *before* merging to develop.
+    # Keep the post-merge main check as a separate safety net.
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: validate
     runs-on: ubuntu-latest
 

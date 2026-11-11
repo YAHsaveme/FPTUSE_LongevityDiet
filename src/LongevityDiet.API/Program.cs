@@ -26,6 +26,7 @@ using LongevityDiet.Services.Fmd;
 using LongevityDiet.Services.Planning;
 using LongevityDiet.Services.Recommendation;
 using LongevityDiet.Services.Tracking;
+using LongevityDiet.Services.Wellness;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +128,7 @@ try
     builder.Services.AddDbContext<TrackingDbContext>(options =>
         options.UseSqlServer(trackingConnection, sql => sql.EnableRetryOnFailure()));
     builder.Services.AddScoped<ITrackingUserContext, IdentityTrackingUserContext>();
+    builder.Services.AddScoped<ITrackingDailySignalSource, MainDbTrackingDailySignalSource>();
     builder.Services.AddScoped<TrackingService>();
 
     // Resolve the final configuration via DI, including host-level test overrides.
@@ -191,6 +193,7 @@ try
     if (!builder.Environment.IsEnvironment("Testing"))
         builder.Services.AddHostedService<IdentityRedisBridge>();
     builder.Services.AddScoped<IMealPlanRepository, MealPlanRepository>();
+    builder.Services.AddScoped<IWellnessRepository, WellnessRepository>();
     builder.Services.AddScoped<IRecommendationRepository, RecommendationRepository>();
     builder.Services.AddScoped<IFmdRepository, FmdRepository>();
     builder.Services.AddScoped<IMealLogRepository, MealLogRepository>();
@@ -205,6 +208,7 @@ try
     builder.Services.AddScoped<RecipeCatalogService>();
     builder.Services.AddScoped<RuleCatalogService>();
     builder.Services.AddScoped<MealPlanningService>();
+    builder.Services.AddScoped<WellnessJourneyService>();
     builder.Services.AddScoped<RecommendationService>();
     builder.Services.AddScoped<FmdService>();
     builder.Services.AddScoped<MealTrackingService>();

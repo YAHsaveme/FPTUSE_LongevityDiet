@@ -9,7 +9,8 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:5173',
-    channel: 'chrome',
+    // GitHub CI installs Playwright Chromium; local Windows can use existing Edge.
+    ...(process.env.CI ? {} : { channel: 'msedge' }),
     headless: true,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

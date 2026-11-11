@@ -8,6 +8,14 @@ public interface ITrackingUserContext
     Task<string?> GetActiveUserTimeZoneAsync(Guid userId, CancellationToken cancellationToken);
 }
 
+public sealed record DailyMealWindowSignals(decimal? MealPercent, decimal? EatingWindowPercent);
+
+/// <summary>Read-only user/date scoped observations supplied by the meal/window owner.</summary>
+public interface ITrackingDailySignalSource
+{
+    Task<DailyMealWindowSignals> ReadAsync(Guid userId, DateOnly localDate, CancellationToken ct);
+}
+
 public sealed record ActivityInput(
     ActivityKind Kind, DateTimeOffset StartedAt, int DurationMinutes, string? Note);
 public sealed record ActivityView(
@@ -40,7 +48,8 @@ public sealed class TrackingInputException(string code, string message) : Except
 public sealed class TrackingService(
     TrackingDbContext db,
     ITrackingUserContext userContext,
-    TimeProvider clock)
+    TimeProvider clock,
+    ITrackingDailySignalSource? ownerSignals = null)
 {
     public async Task<ActivityView> CreateAsync(Guid userId, ActivityInput input, CancellationToken ct)
     {
@@ -237,6 +246,14 @@ public sealed class TrackingService(
             .Where(s => s.UserId == userId && s.LocalDate == date).ToListAsync(ct);
         decimal? meal = signals.SingleOrDefault(s => s.DimensionCode == "meals")?.Percent;
         decimal? window = signals.SingleOrDefault(s => s.DimensionCode == "eating_window")?.Percent;
+        if (ownerSignals is not null)
+        {
+            // Real owner facts take precedence over copied external signals.
+            // Missing values remain nullable: absence of a log is not bad adherence.
+            var observed = await ownerSignals.ReadAsync(userId, date, ct);
+            meal = observed.MealPercent;
+            window = observed.EatingWindowPercent;
+        }
         var outcome = LdasCalculator.Calculate(config,
             LdasCalculator.ActivityPercent(activities, goal), meal, window);
 

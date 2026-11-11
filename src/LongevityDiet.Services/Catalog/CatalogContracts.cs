@@ -232,3 +232,19 @@ public sealed record RuleSetDto(
     DateTimeOffset? EffectiveAt,
     DateTimeOffset? PublishedAt,
     IReadOnlyList<RuleVersionDto> Rules);
+
+public sealed record RuleReviewQueueItemDto(
+    Guid RuleVersionId, Guid DietRuleId, string RuleKey, string RuleTitle,
+    int VersionNumber, bool IsMedicalSensitive, RuleVersionState State,
+    string SourceUrl, string Citation, EvidenceLevel EvidenceLevel,
+    DateTimeOffset CreatedAt);
+
+public sealed record RuleImpactDto(
+    Guid RuleVersionId, int ReferencingRuleSets, int TotalHistoricalPlans,
+    int CurrentActivePlans, IReadOnlyList<RuleSetPlanUsageDto> RuleSets);
+
+public sealed record RuleSetPlanUsageDto(
+    string RuleSetVersion, bool IsActiveRuleSet, int TotalPlans,
+    int ActivePlans, int DistinctUsers);
+
+public sealed record RuleAuditDto(Guid Id, Guid RuleVersionId, int VersionNumber, Guid ActorId, DateTimeOffset OccurredAt, string Action, string Details);

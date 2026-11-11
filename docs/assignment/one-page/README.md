@@ -1,38 +1,26 @@
-# LongevityDiet — bộ sơ đồ kiến trúc hiện tại
+# PRN232 — Sơ đồ C0 / C1 / C2 / Database Diagram (10/11/2026)
 
-**Bộ bàn giao chính thức chỉ có bốn sơ đồ:** `C0`, `C1`, `C2` và `Database Diagram`. Đây là bản thiết kế lại với cùng một ngôn ngữ hình học: **nền trắng, đường đen, chữ đen, căn hàng theo lưới, nhãn ngắn và khoảng cách nhất quán**. Mỗi sơ đồ là một trang PDF có thể phóng to, kèm file Draw.io chứa các shape và connector native để chỉnh sửa.
+Bốn sơ đồ chính trong thư mục này được xây dựng từ **mã nguồn đang triển khai**, không phải thiết kế dự kiến. Mỗi sơ đồ có bản `.drawio` chỉnh sửa được và PDF một trang; tất cả dùng đen trắng.
 
-**Actor và routing (07/11/2026):** C0/C1 dùng **UML Actor hình người** cho `MEMBER` và `ADMIN`, với tên đặt **phía dưới hình**. Các nhãn mũi tên được đặt lệch khỏi nét đường trên nền trắng; riêng hai chiều API↔Redis có vị trí nhãn riêng để tránh dính nhau. Mũi tên là các đoạn ngang/dọc gấp góc 90°, ưu tiên cùng trục qua tâm service/database. Bộ kiểm tra tự động xác minh 4 Actor, khoảng lệch của nhãn có chữ, các đầu nối có thật và bố cục 10 tuyến component ở C2; SVG render được kiểm tra thêm giao cắt và đường chạm chữ.
+| Sơ đồ | Nội dung |
+|---|---|
+| [C0.pdf](C0.pdf) / [C0.drawio](C0.drawio) | System Context: actor MEMBER, ADMIN và hệ thống |
+| [C1.pdf](C1.pdf) / [C1.drawio](C1.drawio) | Container: Web/Nginx, REST API, gRPC, Redis Streams, Worker và ba SQL catalogs, chiều liên lạc, cổng |
+| [C2.pdf](C2.pdf) / [C2.drawio](C2.drawio) | Component: **22 controller hiện có**, phân thành 4 nhóm, đầy đủ HTTP -> Controller -> Service -> Repository, các nhóm DB và các luồng Redis/gRPC/Worker |
+| [Database Diagram.pdf](Database%20Diagram.pdf) / [Database Diagram.drawio](Database%20Diagram.drawio) | **56 bảng vật lý** (45 main, 7 tracking, 4 worker), **23 khóa ngoại SQL**, **32 quan hệ ứng dụng tối thiểu** giúp toàn bộ đồ thị kết nối; các quan hệ APP được vẽ nét đứt, không nhầm với FK |
 
-| Sơ đồ | PDF | Draw.io | Cách đọc |
-| --- | --- | --- | --- |
-| **C0** | [C0.pdf](C0.pdf) | [C0.drawio](C0.drawio) | Member và Admin tương tác với hệ thống LongevityDiet; mức System Context nên không nhồi cổng hoặc database |
-| **C1** | [C1.pdf](C1.pdf) | [C1.drawio](C1.drawio) | Client → Web/Nginx → REST API → gRPC, Redis, Worker và **3 SQL catalogs**; tất cả đường giao tiếp đều có chiều |
-| **C2 mở rộng** | [C2.pdf](C2.pdf) | [C2.drawio](C2.drawio) | Trái: 10 tuyến Controller → Service → Persistence → DATA REFERENCE; phải: 32 bảng và 31 quan hệ; mã A01–A10 đối chiếu hai bên |
-| **Database Diagram** | [Database Diagram.pdf](Database%20Diagram.pdf) | [Database Diagram.drawio](Database%20Diagram.drawio) | ERD tổng thể 32 bảng, 9 FK SQL thật và các liên hệ APP/EVENT có phân biệt |
+## Phạm vi và bằng chứng kiểm tra
 
-## Thiết kế và kiểm chứng
+- `full-schema-manifest.json` liệt kê **đầy đủ 50 quan hệ APP nguồn-backed**. Trong bản ERD một trang chỉ chọn 32 quan hệ để không rối và giữ tất cả 56 bảng kết nối; 18 liên kết còn lại vẫn truy xuất được trong manifest.
+- `c2-current-manifest.json`: nguồn controller, nhóm và số mũi tên C2.
+- `full-schema-layout-geometry.json`: vị trí các bảng và đường đi trong ERD để kiểm tra bố cục.
+- Bản ERD `Database Diagram FULL.drawio/pdf` là bản sao đồng nội dung của hai file ERD chính ở trên.
+- Bản sơ đồ **32 bảng cũ** đã được lưu sang `../legacy-diagrams/` chỉ để đối chiếu lịch sử; không phải bản bàn giao hiện tại.
+- Test được thực hiện bằng: `node scripts/Validate-OverallDiagrams.js`, `node scripts/Validate-CompleteSchemaDiagram.js`, và `.\scripts\Export-OverallDiagrams.ps1`.
+- Kết quả xuất và kiểm tra SVG thực tế tại checkpoint: **C0, C1, C2, Database Diagram đều 0 đường cắt nhãn và 0 giao cắt connector**. PDF một trang, hình người UML actor, lối nối trực giao và giữ nguyên mã nguồn quan hệ.
 
-- **Đủ 32 bảng đã triển khai qua EF Core**, gồm `LongevityDietDb` (21), `LongevityTrackingDb` (7) và `LongevityWorkerDb` (4).
-- **9 SQL FK có thật** được vẽ bằng nét liền và Crow's Foot. **16 liên hệ APP** là nét đứt; **6 luồng EVENT** là nét chấm. APP/EVENT **không phải SQL FK**.
-- C1 thể hiện cổng đã đối chiếu với Docker Compose: Web **5173 → 80**, REST API **8080**, gRPC HTTP/2 **8081**, Redis **6379**, SQL Server **14330 → 1433**. Worker không có HTTP listener; gRPC là dịch vụ **stateless không sở hữu database riêng**.
-- C2 là **bản C2 mở rộng để cùng lúc xem component và các bảng**, không phải một Component Diagram C4 thuần túy. Những ô DATA REFERENCE là điểm tra cứu, **không phải bảng SQL mới**.
-- **31 đường nối bảng–bảng được gắn thật vào hai bảng**, có thể lần theo từ Users qua các chuỗi meal planning, meal logs, FMD, tracking và reminder events. Mọi bảng đều nằm trong một mạng **quan hệ nghiệp vụ/sự kiện**, nhưng chỉ 9 đường được khai báo là FK ở tầng CSDL.
-- Trong sơ đồ nhiều thành phần, chỉ hiển thị **một số trường quan trọng** để bảng không biến thành khối chữ. Trường còn lại xem trực tiếp ở DbContext trong source. Không nhập các bảng thuộc **mô hình dinh dưỡng 52 bảng dự kiến** vào sơ đồ hiện hành.
+## Ghi chú quan trọng
 
-## Cách mở và kiểm tra
+Sơ đồ là bằng chứng về **thiết kế/tĩnh**. Để chứng minh yêu cầu Final Assignment, vẫn cần chạy chứng minh thực tế Worker, Redis producer/consumer, gRPC, triển khai Docker + migration SQL, API có JWT và kịch bản end-to-end. Không đồng nhất việc pass sơ đồ với việc đã chạy toàn bộ hệ thống.
 
-**Xem toàn cảnh trước, rồi phóng to từng nhánh**, đặc biệt là C2. Bản PDF là vector, chữ và nét nối vẫn sắc khi phóng to. Có thể mở file `.drawio` bằng diagrams.net để chỉnh sửa từng shape, nhãn và đầu mũi tên.
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
-node scripts/Validate-OverallDiagrams.js
-```
-
-Pipeline kiểm tra: bốn tên canonical, **source EF Core**, Docker Compose, 10 Controller hiện có, 32 bảng, đúng 9 FK và bội số, liên thông của C1/C2/ERD, độ vừa khung chữ của C1/C2, số trang PDF, quan hệ native và giao cắt/đường cắt chữ từ SVG được render.
-
-Chi tiết theo component và các bảng xem [tài liệu kiến trúc](../02-SYSTEM-ARCHITECTURE-C4.md), [bảng kiểm tra toàn bộ 32 bảng và đường đi](../04-ARCHITECTURE-CONNECTIVITY-REGISTER.md), và [giải thích Database Diagram](../03-DATA-MODEL.md).
-
-**Nguồn quy chuẩn:** [C4 Model — Notation](https://c4model.com/diagrams/notation) · [C4 Model — Component](https://c4model.com/diagrams/component) · [draw.io — Consistency](https://www.drawio.com/docs/best-practice/consistent-diagrams/) · [draw.io — Diagram layouts](https://www.drawio.com/docs/manual/layouts/).
-
-> Giới hạn kiểm chứng: các phép kiểm tra tự động và kiểm tra trực quan PDF có thể phát hiện những lỗi đã định nghĩa, nhưng không chứng minh hoàn hảo trên mọi màn hình/mức zoom hoặc chứng minh dữ liệu đã chạy E2E trên SQL Server thật. Không thay đổi migration hoặc code nghiệp vụ khi vẽ lại.
+Đọc chi tiết trong [báo cáo nghiệm thu](../WELLNESS-JOURNEY-FINAL-AUDIT-20261110.md).

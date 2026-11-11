@@ -74,6 +74,10 @@ public sealed class ReleaseRegressionSuiteTests : IClassFixture<IntegrationTestW
                 FoodPreference = "Plant-forward Vietnamese",
             });
         Assert.Equal(HttpStatusCode.OK, profileRes.StatusCode);
+        var allergyReview = await client.PutAsJsonAsync("/api/v1/wellness/screening",
+            new { RiskFlags = Array.Empty<string>(), AllergiesReviewed = true,
+                Allergies = new List<string> { "peanut", "shellfish" } });
+        Assert.Equal(HttpStatusCode.OK, allergyReview.StatusCode);
 
         // Verify Profile endpoint
         var meRes = await client.GetAsync("/api/v1/profile");

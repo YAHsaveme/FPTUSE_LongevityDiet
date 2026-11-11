@@ -1,0 +1,90 @@
+{
+  "status": "CURRENT_SOURCE_BACKED_C2_56",
+  "controllers": [
+    "AuthController",
+    "ProfileController",
+    "WellnessController",
+    "ReminderNotificationsController",
+    "MealPlansController",
+    "MealLogsController",
+    "EatingWindowController",
+    "RecommendationsController",
+    "TrackingController",
+    "RecommendationController",
+    "FoodsController",
+    "RecipesController",
+    "AllergensController",
+    "DietRulesController",
+    "AdminFoodsController",
+    "AdminRecipesController",
+    "AdminRulesController",
+    "ChallengesController",
+    "DashboardController",
+    "FmdController",
+    "WeeklyReportsController",
+    "WorkerOperationsController"
+  ],
+  "groups": [
+    {
+      "title": "IDENTITY / WELLNESS",
+      "db": "main",
+      "controllers": [
+        "AuthController",
+        "ProfileController",
+        "WellnessController",
+        "ReminderNotificationsController"
+      ]
+    },
+    {
+      "title": "MEAL PLANS / ACTIVITY",
+      "db": "main+tracking",
+      "controllers": [
+        "MealPlansController",
+        "MealLogsController",
+        "EatingWindowController",
+        "RecommendationsController",
+        "TrackingController",
+        "RecommendationController"
+      ]
+    },
+    {
+      "title": "CATALOG / RULE GOVERNANCE",
+      "db": "main",
+      "controllers": [
+        "FoodsController",
+        "RecipesController",
+        "AllergensController",
+        "DietRulesController",
+        "AdminFoodsController",
+        "AdminRecipesController",
+        "AdminRulesController"
+      ]
+    },
+    {
+      "title": "CHALLENGES / FMD / OPS",
+      "db": "main+worker",
+      "controllers": [
+        "ChallengesController",
+        "DashboardController",
+        "FmdController",
+        "WeeklyReportsController",
+        "WorkerOperationsController"
+      ]
+    }
+  ],
+  "sqlTables": 56,
+  "foreignKeys": 23,
+  "dbFk": {
+    "main": 22,
+    "tracking": 1,
+    "worker": 0
+  },
+  "c2Vertices": 98,
+  "c2Edges": 108,
+  "edgeLabelsExist": false,
+  "sqlCatalogs": [
+    "main",
+    "tracking",
+    "worker"
+  ]
+}

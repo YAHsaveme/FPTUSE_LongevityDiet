@@ -39,9 +39,7 @@ documentation and presentation **10%**.
 
 [One-page PDFs, editing/QA instructions](one-page/README.md).
 
-Only implemented business tables are represented. The ERD is a 10-table
-**teaching subset** of the 32 EF Core mapped tables after team integration; the actual migration
-history is authoritative. Omitted outbox and bookkeeping tables still exist.
+The **canonical current** database diagram covers **56 actual EF migration-mapped tables** across three catalogs, with **23 SQL foreign keys** and **32 visible application associations** (50 source-backed associations are documented in `one-page/full-schema-manifest.json`). C2 documents all **22 current API controllers**. C0/C1/C2/ERD have native Draw.io and one-page PDF versions, with 0 connector crossings and 0 label cuts in SVG geometry QA. The original 32-table baseline drawings are archived in `legacy-diagrams/`. Diagram correctness does **not** replace a production Docker/SQL/Redis/gRPC/Worker smoke test, nor a dietitian review of recipe data.
 
 ## Presentation notes
 

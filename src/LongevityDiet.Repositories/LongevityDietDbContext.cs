@@ -8,6 +8,8 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<WellnessScreening> WellnessScreenings => Set<WellnessScreening>();
+    public DbSet<WellnessCheckIn> WellnessCheckIns => Set<WellnessCheckIn>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<ReminderPreference> ReminderPreferences => Set<ReminderPreference>();
     public DbSet<UserNotification> Notifications => Set<UserNotification>();
@@ -19,6 +21,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     public DbSet<Allergen> Allergens => Set<Allergen>();
     public DbSet<RecipeAllergen> RecipeAllergens => Set<RecipeAllergen>();
     public DbSet<DietRule> DietRules => Set<DietRule>();
+    public DbSet<RuleAudit> RuleAudits => Set<RuleAudit>();
     public DbSet<RuleVersion> RuleVersions => Set<RuleVersion>();
     public DbSet<RuleSetVersion> RuleSetVersions => Set<RuleSetVersion>();
     public DbSet<UserDietaryPreference> UserDietaryPreferences => Set<UserDietaryPreference>();
@@ -47,6 +50,44 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     public DbSet<WorkerProcessedEvent> WorkerProcessedEvents => Set<WorkerProcessedEvent>();
     public DbSet<WorkerDeadLetter> WorkerDeadLetters => Set<WorkerDeadLetter>();
     public DbSet<WorkerHeartbeat> WorkerHeartbeats => Set<WorkerHeartbeat>();
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        GuardRuleHistory();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        GuardRuleHistory();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void GuardRuleHistory()
+    {
+        ChangeTracker.DetectChanges();
+        if (ChangeTracker.Entries<RuleAudit>().Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+        {
+            throw new InvalidOperationException("Rule audit records are append-only.");
+        }
+
+        foreach (var entry in ChangeTracker.Entries<RuleVersion>())
+        {
+            var originalState = entry.OriginalValues.GetValue<LongevityDiet.Domain.Catalog.RuleVersionState>(nameof(RuleVersion.State));
+            if (originalState is not (LongevityDiet.Domain.Catalog.RuleVersionState.Published or LongevityDiet.Domain.Catalog.RuleVersionState.Retired))
+            {
+                continue;
+            }
+
+            var retiring = originalState == LongevityDiet.Domain.Catalog.RuleVersionState.Published &&
+                entry.Entity.State == LongevityDiet.Domain.Catalog.RuleVersionState.Retired;
+            if (entry.State == EntityState.Deleted || (entry.State == EntityState.Modified &&
+                (!retiring || entry.Properties.Any(p => p.IsModified && p.Metadata.Name != nameof(RuleVersion.State) && p.Metadata.Name != nameof(RuleVersion.Revision)))))
+            {
+                throw new InvalidOperationException("Published and retired rule content is immutable.");
+            }
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -115,6 +156,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
 
         // Preserve Identity/Reminder and team Meal Planning/Tracking/Recommendation/FMD models.
         ConfigurePlanningModel(modelBuilder);
+        ConfigureWellnessModel(modelBuilder);
         ConfigureTrackingModel(modelBuilder);
         ConfigureRecommendationModel(modelBuilder);
         ConfigureFmdModel(modelBuilder);
@@ -182,6 +224,30 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         plannedMeal.Property(x => x.ExplanationSummary).HasMaxLength(1000).IsRequired();
         plannedMeal.HasIndex(x => new { x.MealPlanDayId, x.SlotOrder }).IsUnique();
         plannedMeal.HasIndex(x => new { x.UserId, x.MealPlanId });
+    }
+
+    private static void ConfigureWellnessModel(ModelBuilder modelBuilder)
+    {
+        var screening = modelBuilder.Entity<WellnessScreening>();
+        screening.ToTable("WellnessScreenings");
+        screening.HasKey(x => x.UserId);
+        screening.Property(x => x.RiskFlagsCsv).HasMaxLength(500).IsRequired();
+        screening.Property(x => x.ReviewedAllergiesCsv).HasMaxLength(1000).IsRequired();
+        screening.HasOne<User>().WithOne()
+            .HasForeignKey<WellnessScreening>(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var checkIn = modelBuilder.Entity<WellnessCheckIn>();
+        checkIn.ToTable("WellnessCheckIns");
+        checkIn.HasKey(x => x.Id);
+        checkIn.Property(x => x.Phase).HasMaxLength(16).IsRequired();
+        checkIn.Property(x => x.SymptomsCsv).HasMaxLength(500).IsRequired();
+        checkIn.Property(x => x.BodyChangesCsv).HasMaxLength(500).IsRequired();
+        checkIn.Property(x => x.WeightKg).HasPrecision(6, 2);
+        checkIn.Property(x => x.Notes).HasMaxLength(500);
+        checkIn.HasIndex(x => new { x.UserId, x.LocalDate, x.Phase }).IsUnique();
+        checkIn.HasOne<User>().WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 
     private static void ConfigureTrackingModel(ModelBuilder modelBuilder)

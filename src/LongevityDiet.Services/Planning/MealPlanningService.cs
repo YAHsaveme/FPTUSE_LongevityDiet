@@ -2,12 +2,14 @@ using System.Globalization;
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories.Repositories;
 using LongevityDiet.Services.Identity;
+using LongevityDiet.Services.Wellness;
 
 namespace LongevityDiet.Services.Planning;
 
 public sealed class MealPlanningService(
     IMealPlanRepository mealPlanRepository,
     IPlanningInputProvider planningInputProvider,
+    IWellnessRepository wellnessRepository,
     TimeProvider timeProvider)
 {
     private static readonly HashSet<string> SupportedDietaryPatterns =
@@ -125,6 +127,18 @@ public sealed class MealPlanningService(
                 "No active meal plan was found for the current user.");
         }
 
+        var context = await planningInputProvider.GetUserContextAsync(userId, cancellationToken);
+        if (context is not null)
+        {
+            var safety = await VerifySafetyAsync(context, requireScreening: true, cancellationToken);
+            if (!safety.Succeeded)
+                return ServiceResult.Failure<MealPlanSummary>(
+                    safety.ErrorCode ?? "meal_plan_safety", safety.ErrorMessage ?? "A health safety review is needed.");
+            if (!PlanCoversUserConstraints(plan, context))
+                return ServiceResult.Failure<MealPlanSummary>(
+                    "outdated_meal_plan_restrictions", "Diet preferences or allergies changed. Refresh the plan before using it.");
+        }
+
         return ServiceResult.Success(ToSummary(plan));
     }
 
@@ -151,6 +165,104 @@ public sealed class MealPlanningService(
         var plans = await mealPlanRepository.ListByUserAsync(userId, cancellationToken);
         var summaries = plans.Select(ToSummary).ToList();
         return ServiceResult.Success<IReadOnlyList<MealPlanSummary>>(summaries);
+    }
+
+    /// <summary>Idempotent rolling 14-day coverage when the member opens the planner.</summary>
+    public async Task<ServiceResult<MealPlanSummary>> EnsureDailyCoverageAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        var userContext = await planningInputProvider.GetUserContextAsync(userId, cancellationToken);
+        if (userContext is null)
+            return ServiceResult.Failure<MealPlanSummary>("user_not_found", "User not found.");
+
+        var safety = await VerifySafetyAsync(userContext, requireScreening: true, cancellationToken);
+        if (!safety.Succeeded)
+            return ServiceResult.Failure<MealPlanSummary>(
+                safety.ErrorCode ?? "screening_required", safety.ErrorMessage ?? "Screening required.");
+
+        var now = timeProvider.GetUtcNow();
+        var today = ResolveLocalDate(now, userContext.TimeZone);
+        var active = await mealPlanRepository.GetActiveByUserAsync(userId, cancellationToken);
+        var restrictionsMatch = active is not null && PlanCoversUserConstraints(active, userContext);
+        // A change in allergies or exclusions must invalidate yesterday's plan immediately.
+        if (restrictionsMatch && active!.StartDate <= today && active.EndDate >= today.AddDays(4))
+            return ServiceResult.Success(ToSummary(active));
+
+        var keepDays = restrictionsMatch
+            ? active!.Days.Where(x => x.PlanDate >= today && x.PlanDate <= today.AddDays(13))
+                .OrderBy(x => x.PlanDate).ToArray()
+            : [];
+
+        var ruleSet = await planningInputProvider.GetActiveRuleSetAsync(cancellationToken);
+        var candidates = await planningInputProvider.GetCandidateMealsAsync(cancellationToken);
+        var result = BuildDeterministicPlan(
+            userContext, ruleSet, candidates, today, 14,
+            (active?.RevisionNumber ?? 0) + 1, active?.Id, keepDays, now);
+
+        if (!result.Succeeded || result.Value is null)
+            return ServiceResult.Failure<MealPlanSummary>(result.ErrorCode ?? "plan_generation_failed", result.ErrorMessage ?? "Could not build a daily plan.");
+
+        if (active is not null)
+        {
+            active.Status = MealPlanStatus.Superseded;
+            active.UpdatedAt = now;
+        }
+        await mealPlanRepository.AddAsync(result.Value, cancellationToken);
+        await mealPlanRepository.SaveChangesAsync(cancellationToken);
+        return ServiceResult.Success(ToSummary(result.Value));
+    }
+
+    private static bool PlanCoversUserConstraints(MealPlan active, PlanningUserContextSnapshot context)
+    {
+        var recordedAllergens = AllergenVocabulary.Expand(
+            PlanningCatalogSnapshotProvider.SplitTokens(active.AppliedAllergiesCsv));
+        var recordedExclusions = AllergenVocabulary.Expand(
+            PlanningCatalogSnapshotProvider.SplitTokens(active.AppliedExclusionsCsv));
+        return active.MealsPerDay == context.PreferredMealFrequency &&
+            string.Equals(active.DietaryPattern, context.DietaryPattern, StringComparison.OrdinalIgnoreCase) &&
+            AllergenVocabulary.Expand(context.Allergies).All(recordedAllergens.Contains) &&
+            AllergenVocabulary.Expand(context.ExcludedFoods).All(recordedExclusions.Contains);
+    }
+
+    private async Task<ServiceResult<bool>> VerifySafetyAsync(
+        PlanningUserContextSnapshot context, bool requireScreening, CancellationToken cancellationToken)
+    {
+        var screening = await wellnessRepository.GetScreeningAsync(context.UserId, cancellationToken);
+        if (screening is null && requireScreening)
+            return ServiceResult.Failure<bool>("screening_required", "Complete health and allergy screening before continuing.");
+
+        if (context.Allergies.Any(x => !AllergenVocabulary.IsKnown(x)))
+            return ServiceResult.Failure<bool>(
+                "unverified_allergen",
+                "At least one allergy name could not be mapped safely. Request professional review before using an automatic meal plan.");
+
+        var assessment = WellnessSafetyPolicy.Assess(context.BirthYear,
+            PlanningCatalogSnapshotProvider.SplitTokens(screening?.RiskFlagsCsv),
+            ResolveLocalDate(timeProvider.GetUtcNow(), context.TimeZone).Year);
+        if (assessment.RequiresProfessionalReview)
+            return ServiceResult.Failure<bool>(
+                "professional_review_required", assessment.Guidance);
+
+        if (screening is not null &&
+            (!screening.AllergiesReviewed ||
+             !string.Equals(screening.ReviewedAllergiesCsv,
+                 string.Join(',', context.Allergies), StringComparison.Ordinal)))
+            return ServiceResult.Failure<bool>(
+                "allergy_review_required", "Review current allergies before generating or changing a plan.");
+
+        var today = ResolveLocalDate(timeProvider.GetUtcNow(), context.TimeZone);
+        var checkIns = await wellnessRepository.GetCheckInsAsync(context.UserId, today.AddDays(-6), today, cancellationToken);
+        if (checkIns.Where(x => x.LocalDate == today).Any(x => WellnessSafetyPolicy.IsUrgent(
+            PlanningCatalogSnapshotProvider.SplitTokens(x.SymptomsCsv))))
+            return ServiceResult.Failure<bool>(
+                "urgent_health_warning", "Seek urgent medical assistance for reported severe symptoms.");
+
+        if (WellnessSafetyPolicy.RequiresWellbeingReview(checkIns, today))
+            return ServiceResult.Failure<bool>(
+                "wellbeing_review_required",
+                "Repeated low self-reported wellbeing needs review. Pause automated diet planning and consult a qualified professional.");
+
+        return ServiceResult.Success(true);
     }
 
     public async Task<ServiceResult<MealPlanSummary>> GeneratePlanAsync(
@@ -192,6 +304,20 @@ public sealed class MealPlanningService(
 
         var now = timeProvider.GetUtcNow();
 
+        var effectiveContext = userContext with
+        {
+            DietaryPattern = effectivePattern,
+            Allergies = mergedAllergies,
+            ExcludedFoods = mergedExclusions,
+            PreferredCuisine = effectiveCuisine,
+        };
+
+        // Validate the entire requested restriction set before staging preference changes.
+        var safety = await VerifySafetyAsync(effectiveContext, requireScreening: true, cancellationToken);
+        if (!safety.Succeeded)
+            return ServiceResult.Failure<MealPlanSummary>(
+                safety.ErrorCode ?? "plan_safety", safety.ErrorMessage ?? "Plan not available.");
+
         if (command.DietaryPattern is not null ||
             command.Allergies is not null ||
             command.ExcludedFoods is not null ||
@@ -209,14 +335,6 @@ public sealed class MealPlanningService(
                 },
                 cancellationToken);
         }
-
-        var effectiveContext = userContext with
-        {
-            DietaryPattern = effectivePattern,
-            Allergies = mergedAllergies,
-            ExcludedFoods = mergedExclusions,
-            PreferredCuisine = effectiveCuisine,
-        };
 
         var ruleSet = await planningInputProvider.GetActiveRuleSetAsync(cancellationToken);
         var candidates = await planningInputProvider.GetCandidateMealsAsync(cancellationToken);
@@ -279,6 +397,11 @@ public sealed class MealPlanningService(
                 "User was not found.");
         }
 
+        var safety = await VerifySafetyAsync(userContext, requireScreening: true, cancellationToken);
+        if (!safety.Succeeded)
+            return ServiceResult.Failure<MealPlanSummary>(
+                safety.ErrorCode ?? "plan_safety", safety.ErrorMessage ?? "Plan not available.");
+
         var ruleSet = await planningInputProvider.GetActiveRuleSetAsync(cancellationToken);
         var candidates = await planningInputProvider.GetCandidateMealsAsync(cancellationToken);
         var now = timeProvider.GetUtcNow();
@@ -286,10 +409,12 @@ public sealed class MealPlanningService(
         var totalDays = existingPlan.Days.Count >= 7 ? existingPlan.Days.Count : 7;
         var fromDate = command.FromDate ?? existingPlan.StartDate;
 
-        var preservedDays = existingPlan.Days
-            .Where(d => d.PlanDate < fromDate)
-            .OrderBy(d => d.DayNumber)
-            .ToList();
+        // Do not preserve old meals if the current user's allergies, exclusions
+        // or dietary pattern are not all satisfied by the historical revision.
+        var preservedDays = PlanCoversUserConstraints(existingPlan, userContext)
+            ? existingPlan.Days.Where(d => d.PlanDate < fromDate)
+                .OrderBy(d => d.DayNumber).ToList()
+            : [];
 
         var newRevisionNumber = existingPlan.RevisionNumber + 1;
 
@@ -364,6 +489,18 @@ public sealed class MealPlanningService(
                     PlanningCatalogSnapshotProvider.SplitTokens(plan.AppliedExclusionsCsv)),
                 extraExclusions),
         };
+
+        // Optional extra exclusions are safe, but the screening must match the
+        // user's CURRENT allergies. Historical allergy tags may be more restrictive.
+        var safety = await VerifySafetyAsync(userContext, requireScreening: true, cancellationToken);
+        if (!safety.Succeeded)
+            return ServiceResult.Failure<MealPlanSummary>(
+                safety.ErrorCode ?? "plan_safety", safety.ErrorMessage ?? "Plan not available.");
+
+        if (!PlanCoversUserConstraints(plan, userContext))
+            return ServiceResult.Failure<MealPlanSummary>(
+                "outdated_meal_plan_restrictions",
+                "Allergies or dietary restrictions changed. Refresh the plan before changing a meal.");
 
         var ruleSet = await planningInputProvider.GetActiveRuleSetAsync(cancellationToken);
         var candidates = await planningInputProvider.GetCandidateMealsAsync(cancellationToken);
@@ -458,7 +595,7 @@ public sealed class MealPlanningService(
             AppliedAllergiesCsv = string.Join(',', userContext.Allergies),
             AppliedExclusionsCsv = string.Join(',', userContext.ExcludedFoods),
             ReasonCodesCsv = string.Join(',', ruleSet.Rules.Select(r => r.RuleKey)),
-            PlanExplanation = BuildPlanExplanation(userContext, ruleSet),
+            PlanExplanation = BuildPlanExplanation(userContext, ruleSet, daysCount),
             GeneratedAt = now,
             UpdatedAt = now,
         };
@@ -470,7 +607,7 @@ public sealed class MealPlanningService(
         {
             var dayNumber = dayIndex + 1;
             var planDate = startDate.AddDays(dayIndex);
-            var (focusCode, focusTitle) = DailyFocusRotation[dayIndex % DailyFocusRotation.Length];
+            var (focusCode, focusTitle) = DailyFocusRotation[planDate.DayNumber % DailyFocusRotation.Length];
 
             if (preservedByDate.TryGetValue(planDate, out var preservedDay))
             {
@@ -493,7 +630,7 @@ public sealed class MealPlanningService(
             {
                 var (slotType, plannedTime) = slots[slotIndex];
                 var slotPool = rankedBySlot[slotType];
-                var pickIndex = (dayIndex + rotationOffset + slotIndex) % slotPool.Count;
+                var pickIndex = (planDate.DayNumber + rotationOffset + slotIndex) % slotPool.Count;
                 var selected = slotPool[pickIndex];
 
                 var plannedMeal = new PlannedMeal
@@ -525,13 +662,11 @@ public sealed class MealPlanningService(
         MealSlotType slotType,
         int currentYear)
     {
-        var allergySet = new HashSet<string>(
-            userContext.Allergies.Select(PlanningCatalogSnapshotProvider.NormalizeToken),
-            StringComparer.OrdinalIgnoreCase);
+        var allergySet = AllergenVocabulary.Expand(userContext.Allergies)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var exclusionSet = new HashSet<string>(
-            userContext.ExcludedFoods.Select(PlanningCatalogSnapshotProvider.NormalizeToken),
-            StringComparer.OrdinalIgnoreCase);
+        var exclusionSet = AllergenVocabulary.Expand(userContext.ExcludedFoods)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var strictlyPlantBased = string.Equals(
             userContext.DietaryPattern,
@@ -541,6 +676,7 @@ public sealed class MealPlanningService(
         var safeCandidates = candidates
             .Where(c => c.IsActive)
             .Where(c => c.SupportedSlots.Contains(slotType))
+            .Where(c => c.Ingredients.Count > 0) // Fail closed when the ingredient list is unavailable.
             .Where(c => !strictlyPlantBased || (c.IsPlantBased && !c.ContainsFish))
             .Where(c => !ViolatesHardConstraints(c, allergySet, exclusionSet))
             .Select(c => ScoreCandidate(c, userContext, ruleSet, currentYear))
@@ -561,9 +697,11 @@ public sealed class MealPlanningService(
             return false;
         }
 
-        foreach (var allergen in candidate.Allergens)
+        if (candidate.ContainsFish && (allergies.Contains("fish") || exclusions.Contains("fish")))
+            return true;
+
+        foreach (var normalized in AllergenVocabulary.Expand(candidate.Allergens))
         {
-            var normalized = PlanningCatalogSnapshotProvider.NormalizeToken(allergen);
             if (allergies.Contains(normalized) || exclusions.Contains(normalized))
             {
                 return true;
@@ -852,20 +990,19 @@ public sealed class MealPlanningService(
     }
 
     private static string BuildPlanExplanation(
-        PlanningUserContextSnapshot userContext,
-        PlanningRuleSetSnapshot ruleSet)
+        PlanningUserContextSnapshot context,
+        PlanningRuleSetSnapshot ruleSet,
+        int daysCount)
     {
-        var allergyNote = userContext.Allergies.Count > 0
-            ? $"Đã loại trừ cứng dị ứng: {string.Join(", ", userContext.Allergies)}."
-            : "Không có dị ứng khai báo.";
-
-        var exclusionNote = userContext.ExcludedFoods.Count > 0
-            ? $"Đã loại trừ thực phẩm: {string.Join(", ", userContext.ExcludedFoods)}."
-            : "Không có thực phẩm loại trừ riêng.";
-
+        var allergyDescription = context.Allergies.Count > 0
+            ? string.Join(", ", context.Allergies)
+            : "none declared";
+        var exclusions = context.ExcludedFoods.Count > 0
+            ? string.Join(", ", context.ExcludedFoods)
+            : "none declared";
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"Kế hoạch 7 ngày được tạo tất định theo bộ quy tắc {ruleSet.RuleSetVersion} (Five Pillars), chế độ {userContext.DietaryPattern}, {userContext.PreferredMealFrequency} bữa/ngày. {allergyNote} {exclusionNote}");
+            $"A {daysCount}-day meal idea schedule based on educational rule set {ruleSet.RuleSetVersion}; dietary pattern: {context.DietaryPattern}; meals per day: {context.PreferredMealFrequency}. Declared allergens: {allergyDescription}; exclusions: {exclusions}. Illustrative recipe values are not validated for individual energy, protein, micronutrient or cross-contact needs. Consult a qualified dietitian when appropriate. This is not clinical guidance or a prediction of lifespan.");
     }
 
     private static string BuildMealExplanation(

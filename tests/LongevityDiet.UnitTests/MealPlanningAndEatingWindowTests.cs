@@ -22,12 +22,12 @@ public sealed class MealPlanningAndEatingWindowTests
         var service1 = new MealPlanningService(
             planRepo1,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo1),
-            timeProvider);
+            new EmptyWellnessRepository("peanut"), timeProvider);
 
         var service2 = new MealPlanningService(
             planRepo2,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo2),
-            timeProvider);
+            new EmptyWellnessRepository("peanut"), timeProvider);
 
         var command = new GenerateMealPlanCommand(
             StartDate: new DateOnly(2026, 11, 2),
@@ -70,7 +70,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository("peanut,shellfish,soy,tree-nut"), new FixedTimeProvider(FixedNow));
 
         var command = new GenerateMealPlanCommand(
             StartDate: new DateOnly(2026, 11, 2),
@@ -103,7 +103,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var command = new GenerateMealPlanCommand(
             StartDate: new DateOnly(2026, 11, 2),
@@ -135,7 +135,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository("peanut,shellfish"), new FixedTimeProvider(FixedNow));
 
         var generated = await service.GeneratePlanAsync(
             userId,
@@ -174,7 +174,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var service = new MealPlanningService(
             planRepo,
             new PlanningCatalogSnapshotProvider(userRepo, planRepo),
-            new FixedTimeProvider(FixedNow));
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var startDate = new DateOnly(2026, 11, 2);
         var first = await service.GeneratePlanAsync(
@@ -361,6 +361,69 @@ public sealed class MealPlanningAndEatingWindowTests
         Assert.Equal(1, windowAfterDelete.Value!.CaloricMealCount);
         Assert.Equal(0, windowAfterDelete.Value.EatingWindowMinutes);
         Assert.Equal("SingleMeal", windowAfterDelete.Value.StatusCode);
+    }
+
+    [Fact]
+    public async Task RollingJourney_CoversFourHundredConsecutiveDays_AcrossYearEnd()
+    {
+        var userId = Guid.NewGuid();
+        var userRepo = CreateUserRepositoryWithOnboardedUser(userId, mealFrequency: 3);
+        var planRepo = new InMemoryMealPlanRepository();
+        var time = new MutableTimeProvider(new DateTimeOffset(2026, 12, 1, 4, 0, 0, TimeSpan.Zero));
+        var planning = new MealPlanningService(
+            planRepo,
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo),
+            new EmptyWellnessRepository(), time);
+
+        Guid? previousPlan = null;
+        Dictionary<DateOnly, string>? previousMeals = null;
+        for (var index = 0; index < 400; index++)
+        {
+            var today = new DateOnly(2026, 12, 1).AddDays(index);
+            var result = await planning.EnsureDailyCoverageAsync(userId);
+            Assert.True(result.Succeeded, result.ErrorMessage);
+            var plan = Assert.IsType<MealPlanSummary>(result.Value);
+
+            Assert.True(plan.StartDate <= today);
+            Assert.True(plan.EndDate >= today.AddDays(4));
+            Assert.Equal(14, plan.Days.Count);
+            Assert.Equal(14, plan.Days.Select(x => x.PlanDate).Distinct().Count());
+            for (var upcoming = 0; upcoming < 5; upcoming++)
+            {
+                var day = Assert.Single(plan.Days, x => x.PlanDate == today.AddDays(upcoming));
+                Assert.Equal(3, day.Meals.Count);
+            }
+
+            if (previousPlan == plan.Id)
+            {
+                Assert.Equal(previousMeals,
+                    plan.Days.ToDictionary(x => x.PlanDate,
+                        x => string.Join("|", x.Meals.Select(m => m.CandidateCode))));
+            }
+            else if (previousPlan is not null)
+            {
+                Assert.Equal(previousPlan, plan.PreviousPlanId);
+                var overlapping = plan.Days.Where(x => previousMeals!.ContainsKey(x.PlanDate)).ToArray();
+                Assert.NotEmpty(overlapping);
+                Assert.All(overlapping, x => Assert.Equal(previousMeals![x.PlanDate],
+                    string.Join("|", x.Meals.Select(m => m.CandidateCode))));
+            }
+
+            previousPlan = plan.Id;
+            previousMeals = plan.Days.ToDictionary(x => x.PlanDate,
+                x => string.Join("|", x.Meals.Select(m => m.CandidateCode)));
+            Assert.Single(planRepo.Plans, x => x.Status == MealPlanStatus.Active);
+            time.Advance(TimeSpan.FromDays(1));
+        }
+        // Continuous coverage is achieved by rolling revisions, not a single-day plan.
+        Assert.InRange(planRepo.Plans.Count, 35, 45);
+    }
+
+    private sealed class MutableTimeProvider(DateTimeOffset start) : TimeProvider
+    {
+        private DateTimeOffset _now = start;
+        public override DateTimeOffset GetUtcNow() => _now;
+        public void Advance(TimeSpan duration) => _now = _now.Add(duration);
     }
 
     private static InMemoryUserRepository CreateUserRepositoryWithOnboardedUser(

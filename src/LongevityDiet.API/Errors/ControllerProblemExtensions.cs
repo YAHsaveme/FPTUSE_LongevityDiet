@@ -54,6 +54,7 @@ public static class ControllerProblemExtensions
             ["active_rule_set_not_found"] = StatusCodes.Status404NotFound,
             ["published_rule_immutable"] = StatusCodes.Status409Conflict,
             ["rule_version_conflict"] = StatusCodes.Status409Conflict,
+            ["independent_review_required"] = StatusCodes.Status409Conflict,
         };
 
     public static ObjectResult ToProblem<T>(

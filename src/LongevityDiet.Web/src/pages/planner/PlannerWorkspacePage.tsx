@@ -18,12 +18,13 @@ import {
   UserRound,
   Utensils,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/authState'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
 import { FmdWorkspaceSection } from './FmdWorkspaceSection'
+import { WellnessJourneyPanel } from './WellnessJourneyPanel'
 
 export type PlannedMealDto = {
   id: string
@@ -350,7 +351,20 @@ export function PlannerWorkspacePage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  const todayIso = useMemo(() => getTodayIsoDate(), [])
+  const [todayIso, setTodayIso] = useState(getTodayIsoDate)
+  useEffect(() => {
+    // Refresh the planner's date when a browser tab remains open overnight.
+    const refreshDate = () => setTodayIso(getTodayIsoDate())
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refreshDate()
+    }
+    const timer = window.setInterval(refreshDate, 60_000)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
   const [trackingDate, setTrackingDate] = useState(todayIso)
   const [logFromDate, setLogFromDate] = useState(() => {
@@ -859,6 +873,7 @@ export function PlannerWorkspacePage() {
       </header>
 
       <main className="workspace-main">
+        <WellnessJourneyPanel todayIso={todayIso} />
         {/* EATING WINDOW SUMMARY SECTION */}
         <section className="workspace-section" id="eating-window">
           <div className="workspace-header-row">

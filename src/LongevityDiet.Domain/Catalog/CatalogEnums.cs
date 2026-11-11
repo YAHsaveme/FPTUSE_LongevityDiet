@@ -4,7 +4,8 @@ public enum RuleVersionState
 {
     Draft = 1,
     Published = 2,
-    Retired = 3
+    Retired = 3,
+    InReview = 4
 }
 
 public enum EvidenceLevel

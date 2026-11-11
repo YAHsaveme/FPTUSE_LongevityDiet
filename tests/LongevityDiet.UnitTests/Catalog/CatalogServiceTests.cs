@@ -119,7 +119,7 @@ public sealed class CatalogServiceTests
                 SourceType.OfficialGuidance,
                 "New citation",
                 EvidenceLevel.High,
-                null));
+                null), Guid.NewGuid());
 
         Assert.False(result.Succeeded);
         Assert.Equal("published_rule_immutable", result.ErrorCode);
@@ -133,7 +133,7 @@ public sealed class CatalogServiceTests
         {
             DietRuleId = Guid.NewGuid(),
             VersionNumber = 1,
-            State = RuleVersionState.Draft,
+            State = RuleVersionState.InReview,
             ParametersJson = "{}",
             SourceUrl = string.Empty,
             Citation = string.Empty,
@@ -141,11 +141,11 @@ public sealed class CatalogServiceTests
         var repository = new FakeRuleRepository(version: version);
         var service = new RuleCatalogService(repository, TimeProvider.System);
 
-        var result = await service.PublishVersionAsync(version.Id);
+        var result = await service.PublishVersionAsync(version.Id, Guid.NewGuid());
 
         Assert.False(result.Succeeded);
         Assert.Equal("missing_provenance", result.ErrorCode);
-        Assert.Equal(RuleVersionState.Draft, version.State);
+        Assert.Equal(RuleVersionState.InReview, version.State);
         Assert.Equal(0, repository.SaveCount);
     }
 
@@ -314,6 +314,24 @@ public sealed class CatalogServiceTests
         public Task AddRuleSetAsync(RuleSetVersion value, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
+        public Task<RepositoryPage<RuleVersion>> GetReviewQueueAsync(
+            int page, int pageSize, bool? medicalSensitive, CancellationToken cancellationToken = default)
+        {
+            var rows = version is { State: RuleVersionState.InReview } &&
+                (medicalSensitive is null || version.DietRule?.IsMedicalSensitive == medicalSensitive)
+                    ? new[] { version }
+                    : Array.Empty<RuleVersion>();
+            return Task.FromResult(new RepositoryPage<RuleVersion>(
+                rows.Skip((page - 1) * pageSize).Take(pageSize).ToArray(), rows.Length));
+        }
+
+        public Task<IReadOnlyList<RuleSetPlanUsage>> GetRuleSetUsageAsync(
+            Guid ruleVersionId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<RuleSetPlanUsage>>([]);
+
+        public Task AddAuditAsync(RuleAudit audit, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task<RepositoryPage<RuleAudit>> GetHistoryAsync(Guid versionId, int page, int pageSize, string? search, string? action, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new RepositoryPage<RuleAudit>([], 0));
         public Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             SaveCount++;

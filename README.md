@@ -1,5 +1,9 @@
 ﻿# Longevity Diet Companion
 
+> **2026-11-10 — Current scope and acceptance status.** The member 1/4 branch now contains reviewed-allergy screening, conservative audience grouping, 14-day rolling meal coverage, Baseline/During/FollowUp self-reported health check-ins, and conditional daily reminders. See [the current implementation and Final Assignment audit](docs/assignment/WELLNESS-JOURNEY-FINAL-AUDIT-20261110.md). **Automated tests passing does not establish medical safety or 100% final acceptance.** The current EF migration snapshots include **56 tables** (45 main + 7 tracking + 4 worker). All four [current C0/C1/C2/Database diagrams](docs/assignment/one-page/README.md) now use the current source, including **22 API controllers and the 56-table physical ERD**. Both Draw.io and one-page PDF exist. Rendered SVG validation passes with **zero label cuts or connector crossings** across all four. The old 32-table diagrams are archived under `docs/assignment/legacy-diagrams`. The 400-day daily rolling continuity test passes. **Production-equivalent Docker/SQL/Redis/gRPC/Worker demos, nutrition safety validation and clinical review remain open.**
+
+**Member 1 + Member 4 acceptance:** [Eight-task completion matrix and remaining live verification](docs/assignment/MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md). Admin Rule Governance now includes independent two-admin publication review, a paginated safety queue and read-only historical plan-impact counts.
+
 ## Project description
 
 PRN232 Final Assignment: distributed .NET application hỗ trợ người dùng xây dựng và theo dõi thói quen longevity diet/lifestyle theo hướng giải thích được, truy vết được rule/source và có distributed architecture rõ ràng.
@@ -208,7 +212,15 @@ Against an already running Docker Compose full stack:
 npm run test:docker
 ```
 
-Current verified baseline (2026-11-05):
+Latest local verification (2026-11-09, **unmerged feature branch** `feature/w3-t4-rule-governance-20261109`):
+- .NET solution build: **0 errors, 0 warnings**.
+- Unit tests: **66/66 pass**; integration tests: **70/70 pass** (including 3 new Rule Governance cases).
+- Frontend: **12/12 tests pass**, lint/build PASS.
+- Project-structure, C0/C1/C2/baseline ERD geometry, Compose static config, static release readiness, EF pending-model-change detection: PASS.
+- **Not reverified on this branch:** live Docker/SQL Server stack, fresh real SQL migration, E2E broker/gRPC demo, reviewer approval. The new `RuleAudits` table still requires updating the 32-table baseline ERD and PDF export.
+- Detailed official assignment audit: `docs/assignment/FINAL-ASSIGNMENT-COMPLIANCE-AUDIT-20261109.md`.
+
+Historical release baseline (2026-11-05; not the latest test status):
 - UnitTests: 51/51 pass.
 - IntegrationTests: 35/38 pass. The 3 failures are a pre-existing MealLog-create HTTP 500 baseline defect reproduced on clean `origin/develop` commit `474b475`; see `docs/operations/RELEASE-RUNBOOK.md`.
 - Member 2 Week 2 targeted integration tests: 5/5 pass.

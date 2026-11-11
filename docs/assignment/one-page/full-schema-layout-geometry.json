@@ -1,0 +1,563 @@
+{
+  "page": {
+    "W": 9000,
+    "H": 8010
+  },
+  "rowGap": 132,
+  "cardH": 109,
+  "tableOrder": [
+    "main:Users",
+    "main:RefreshTokens",
+    "main:ReminderPreferences",
+    "main:UserNotifications",
+    "main:IdentityOutbox",
+    "main:IdentityInbox",
+    "worker:ReminderSchedules",
+    "worker:ReminderDispatchRecords",
+    "worker:WorkerOutbox",
+    "worker:WorkerProcessedEvents",
+    "main:UserProfiles",
+    "main:UserFoodPreferences",
+    "main:MealReplacementHistories",
+    "main:MealPlans",
+    "main:MealPlanDays",
+    "main:PlannedMeals",
+    "main:MealLogs",
+    "main:EatingWindowSnapshots",
+    "main:MealLogItems",
+    "main:Foods",
+    "main:RecipeIngredients",
+    "main:Recipes",
+    "main:DietRules",
+    "main:RuleVersions",
+    "main:RuleAudits",
+    "main:RuleSetVersionItems",
+    "main:RuleSetVersions",
+    "main:RecipeAllergens",
+    "main:Allergens",
+    "main:DailyWellnessSummaries",
+    "main:FmdEducationAcknowledgements",
+    "main:FmdSafetyAssessments",
+    "main:FmdCycles",
+    "main:FmdCycleDays",
+    "main:WeeklyReports",
+    "main:WeeklyReportMetrics",
+    "main:WorkerJobs",
+    "main:WorkerDeadLetters",
+    "main:WorkerHeartbeats",
+    "main:WorkerProcessedEvents",
+    "main:UserChallenges",
+    "main:ChallengeTemplates",
+    "main:ChallengeDayTemplates",
+    "main:ProgressEventReceipts",
+    "main:UserChallengeDays",
+    "main:RecommendationFeedbacks",
+    "main:UserDietaryPreferences",
+    "main:WellnessCheckIns",
+    "main:WellnessScreenings",
+    "tracking:ActivityGoals",
+    "tracking:ActivityLogs",
+    "tracking:AdherenceScores",
+    "tracking:ScoreConfigurationVersions",
+    "tracking:ScoreDimensions",
+    "tracking:TrackingScoreSignals",
+    "tracking:TrackingOutbox"
+  ],
+  "edges": [
+    {
+      "from": "main:Allergens",
+      "to": "main:RecipeAllergens",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 4068,
+      "endY": 3985
+    },
+    {
+      "from": "main:Recipes",
+      "to": "main:RecipeAllergens",
+      "kind": "SQL_FK",
+      "span": 6,
+      "rail": 3970,
+      "startY": 3182,
+      "endY": 3936
+    },
+    {
+      "from": "main:Foods",
+      "to": "main:RecipeIngredients",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 2929,
+      "endY": 3012
+    },
+    {
+      "from": "main:Recipes",
+      "to": "main:RecipeIngredients",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 3144,
+      "endY": 3061
+    },
+    {
+      "from": "main:RuleVersions",
+      "to": "main:RuleAudits",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 3468,
+      "endY": 3540
+    },
+    {
+      "from": "main:DietRules",
+      "to": "main:RuleVersions",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 3325,
+      "endY": 3408
+    },
+    {
+      "from": "main:ChallengeTemplates",
+      "to": "main:ChallengeDayTemplates",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 5833,
+      "endY": 5916
+    },
+    {
+      "from": "main:FmdCycles",
+      "to": "main:FmdCycleDays",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 4656,
+      "endY": 4728
+    },
+    {
+      "from": "main:MealLogs",
+      "to": "main:MealLogItems",
+      "kind": "SQL_FK",
+      "span": 2,
+      "rail": 3590,
+      "startY": 2533,
+      "endY": 2748
+    },
+    {
+      "from": "main:MealPlans",
+      "to": "main:MealPlanDays",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 2148,
+      "endY": 2220
+    },
+    {
+      "from": "main:MealPlanDays",
+      "to": "main:PlannedMeals",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 2269,
+      "endY": 2352
+    },
+    {
+      "from": "main:Users",
+      "to": "main:RefreshTokens",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 446,
+      "endY": 504
+    },
+    {
+      "from": "main:Users",
+      "to": "main:ReminderPreferences",
+      "kind": "SQL_FK",
+      "span": 2,
+      "rail": 3590,
+      "startY": 437,
+      "endY": 636
+    },
+    {
+      "from": "main:ChallengeTemplates",
+      "to": "main:UserChallenges",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 5784,
+      "endY": 5717
+    },
+    {
+      "from": "main:UserChallenges",
+      "to": "main:UserChallengeDays",
+      "kind": "SQL_FK",
+      "span": 4,
+      "rail": 3780,
+      "startY": 5685,
+      "endY": 6180
+    },
+    {
+      "from": "main:Users",
+      "to": "main:UserNotifications",
+      "kind": "SQL_FK",
+      "span": 3,
+      "rail": 3685,
+      "startY": 429,
+      "endY": 768
+    },
+    {
+      "from": "main:Users",
+      "to": "main:UserProfiles",
+      "kind": "SQL_FK",
+      "span": 10,
+      "rail": 4350,
+      "startY": 421,
+      "endY": 1692
+    },
+    {
+      "from": "main:WeeklyReports",
+      "to": "main:WeeklyReportMetrics",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 4920,
+      "endY": 4992
+    },
+    {
+      "from": "main:Users",
+      "to": "main:WellnessCheckIns",
+      "kind": "SQL_FK",
+      "span": 47,
+      "rail": 7865,
+      "startY": 413,
+      "endY": 6576
+    },
+    {
+      "from": "main:Users",
+      "to": "main:WellnessScreenings",
+      "kind": "SQL_FK",
+      "span": 48,
+      "rail": 7960,
+      "startY": 405,
+      "endY": 6708
+    },
+    {
+      "from": "main:RuleSetVersions",
+      "to": "main:RuleSetVersionItems",
+      "kind": "SQL_FK",
+      "span": 1,
+      "rail": 3495,
+      "startY": 3804,
+      "endY": 3721
+    },
+    {
+      "from": "main:RuleVersions",
+      "to": "main:RuleSetVersionItems",
+      "kind": "SQL_FK",
+      "span": 2,
+      "rail": 3590,
+      "startY": 3446,
+      "endY": 3672
+    },
+    {
+      "from": "tracking:AdherenceScores",
+      "to": "tracking:ScoreDimensions",
+      "kind": "SQL_FK",
+      "span": 2,
+      "rail": 3590,
+      "startY": 7153,
+      "endY": 7368
+    },
+    {
+      "from": "main:Recipes",
+      "to": "main:DietRules",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 3204,
+      "endY": 3276
+    },
+    {
+      "from": "main:MealPlans",
+      "to": "main:MealReplacementHistories",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 2088,
+      "endY": 2005
+    },
+    {
+      "from": "main:PlannedMeals",
+      "to": "main:RecommendationFeedbacks",
+      "kind": "APP",
+      "span": 30,
+      "rail": 6250,
+      "startY": 2390,
+      "endY": 6312
+    },
+    {
+      "from": "main:UserChallenges",
+      "to": "main:ProgressEventReceipts",
+      "kind": "APP",
+      "span": 3,
+      "rail": 3685,
+      "startY": 5701,
+      "endY": 6048
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerHeartbeats",
+      "kind": "APP",
+      "span": 2,
+      "rail": 3590,
+      "startY": 5173,
+      "endY": 5388
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerDeadLetters",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 5189,
+      "endY": 5256
+    },
+    {
+      "from": "main:WorkerJobs",
+      "to": "main:WorkerProcessedEvents",
+      "kind": "APP",
+      "span": 3,
+      "rail": 3685,
+      "startY": 5157,
+      "endY": 5520
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "main:IdentityInbox",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 965,
+      "endY": 1032
+    },
+    {
+      "from": "worker:ReminderDispatchRecords",
+      "to": "worker:WorkerOutbox",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 1345,
+      "endY": 1428
+    },
+    {
+      "from": "tracking:TrackingOutbox",
+      "to": "tracking:TrackingScoreSignals",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 7632,
+      "endY": 7549
+    },
+    {
+      "from": "tracking:TrackingScoreSignals",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "span": 3,
+      "rail": 3685,
+      "startY": 7500,
+      "endY": 7137
+    },
+    {
+      "from": "tracking:ScoreConfigurationVersions",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 7236,
+      "endY": 7169
+    },
+    {
+      "from": "main:UserNotifications",
+      "to": "main:IdentityOutbox",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 817,
+      "endY": 900
+    },
+    {
+      "from": "main:UserDietaryPreferences",
+      "to": "main:MealPlans",
+      "kind": "APP",
+      "span": 33,
+      "rail": 6535,
+      "startY": 6444,
+      "endY": 2126
+    },
+    {
+      "from": "main:PlannedMeals",
+      "to": "main:MealLogs",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 2412,
+      "endY": 2484
+    },
+    {
+      "from": "main:MealLogs",
+      "to": "main:EatingWindowSnapshots",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 2549,
+      "endY": 2616
+    },
+    {
+      "from": "main:MealReplacementHistories",
+      "to": "main:UserFoodPreferences",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 1956,
+      "endY": 1873
+    },
+    {
+      "from": "main:UserChallenges",
+      "to": "main:DailyWellnessSummaries",
+      "kind": "APP",
+      "span": 11,
+      "rail": 4445,
+      "startY": 5652,
+      "endY": 4238
+    },
+    {
+      "from": "main:DailyWellnessSummaries",
+      "to": "main:FmdEducationAcknowledgements",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 4260,
+      "endY": 4332
+    },
+    {
+      "from": "main:FmdEducationAcknowledgements",
+      "to": "main:FmdSafetyAssessments",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 4381,
+      "endY": 4464
+    },
+    {
+      "from": "main:FmdSafetyAssessments",
+      "to": "main:FmdCycles",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 4513,
+      "endY": 4596
+    },
+    {
+      "from": "main:FmdCycles",
+      "to": "main:WeeklyReports",
+      "kind": "APP",
+      "span": 2,
+      "rail": 3590,
+      "startY": 4634,
+      "endY": 4860
+    },
+    {
+      "from": "main:WeeklyReports",
+      "to": "main:WorkerJobs",
+      "kind": "APP",
+      "span": 2,
+      "rail": 3590,
+      "startY": 4898,
+      "endY": 5124
+    },
+    {
+      "from": "tracking:ActivityGoals",
+      "to": "tracking:ActivityLogs",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 6889,
+      "endY": 6972
+    },
+    {
+      "from": "tracking:ActivityLogs",
+      "to": "tracking:AdherenceScores",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 7021,
+      "endY": 7104
+    },
+    {
+      "from": "worker:ReminderSchedules",
+      "to": "worker:ReminderDispatchRecords",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 1213,
+      "endY": 1296
+    },
+    {
+      "from": "main:MealLogs",
+      "to": "main:DailyWellnessSummaries",
+      "kind": "APP",
+      "span": 13,
+      "rail": 4635,
+      "startY": 2517,
+      "endY": 4200
+    },
+    {
+      "from": "main:Foods",
+      "to": "main:MealLogItems",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 2880,
+      "endY": 2797
+    },
+    {
+      "from": "main:UserProfiles",
+      "to": "main:UserFoodPreferences",
+      "kind": "APP",
+      "span": 1,
+      "rail": 3495,
+      "startY": 1741,
+      "endY": 1824
+    },
+    {
+      "from": "main:Users",
+      "to": "tracking:ActivityGoals",
+      "kind": "APP",
+      "span": 49,
+      "rail": 8055,
+      "startY": 397,
+      "endY": 6840
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "worker:WorkerProcessedEvents",
+      "kind": "APP",
+      "span": 5,
+      "rail": 3875,
+      "startY": 933,
+      "endY": 1560
+    },
+    {
+      "from": "main:IdentityOutbox",
+      "to": "worker:ReminderSchedules",
+      "kind": "APP",
+      "span": 2,
+      "rail": 3590,
+      "startY": 949,
+      "endY": 1164
+    }
+  ]
+}

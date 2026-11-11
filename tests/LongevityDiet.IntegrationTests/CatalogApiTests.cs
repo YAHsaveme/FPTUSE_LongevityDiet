@@ -260,7 +260,12 @@ public sealed class CatalogApiTests : IClassFixture<IntegrationTestWebApplicatio
         using var versionJson = JsonDocument.Parse(await createVersion.Content.ReadAsStringAsync());
         var versionId = versionJson.RootElement.GetProperty("id").GetGuid();
 
-        var publish = await client.PostAsync(
+        var submit = await client.PostAsync($"/api/v1/admin/rule-versions/{versionId}/review", null);
+        Assert.Equal(HttpStatusCode.OK, submit.StatusCode);
+
+        using var reviewer = _factory.CreateHttpsClient();
+        await AuthenticateAsAdminAsync(reviewer);
+        var publish = await reviewer.PostAsync(
             $"/api/v1/admin/rule-versions/{versionId}/publication",
             content: null);
 
