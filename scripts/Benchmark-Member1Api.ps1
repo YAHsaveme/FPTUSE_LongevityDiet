@@ -6,6 +6,9 @@ param(
     [string]$OutputPath=''
 )
 $ErrorActionPreference='Stop'
+# Windows PowerShell 5.1 does not always preload System.Net.Http. Explicitly
+# resolve the assembly for reproducible HttpClient benchmarks on team laptops.
+Add-Type -AssemblyName System.Net.Http
 $uri=[Uri]::new($BaseUrl.TrimEnd('/')+$Path)
 if($uri.Scheme -ne 'https' -and $uri.Host -notin @('localhost','127.0.0.1','::1')){
     throw 'Only HTTPS or loopback HTTP is supported for performance checks.'

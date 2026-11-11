@@ -128,6 +128,7 @@ try
     builder.Services.AddDbContext<TrackingDbContext>(options =>
         options.UseSqlServer(trackingConnection, sql => sql.EnableRetryOnFailure()));
     builder.Services.AddScoped<ITrackingUserContext, IdentityTrackingUserContext>();
+    builder.Services.AddScoped<ITrackingDailySignalSource, MainDbTrackingDailySignalSource>();
     builder.Services.AddScoped<TrackingService>();
 
     // Resolve the final configuration via DI, including host-level test overrides.

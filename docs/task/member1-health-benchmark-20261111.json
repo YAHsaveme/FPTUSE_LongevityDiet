@@ -1,0 +1,14 @@
+﻿{
+    "timestampUtc":  "2026-11-11T01:29:25.9339004Z",
+    "endpoint":  "http://127.0.0.1:8080/health",
+    "iterations":  100,
+    "p50Ms":  0.95,
+    "p95Ms":  1.25,
+    "p99Ms":  1.81,
+    "meanMs":  1.23,
+    "failures":  0,
+    "rateLimited":  0,
+    "failurePercent":  0,
+    "elapsedSeconds":  0.13,
+    "environment":  "live-target; hardware/load characteristics must be documented separately"
+}

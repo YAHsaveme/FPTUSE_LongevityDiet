@@ -1,6 +1,8 @@
 param(
   [string]$BaseUri = 'http://127.0.0.1:8080/api/v1',
-  [switch]$VerifyTimedNotification
+  [switch]$VerifyTimedNotification,
+  [switch]$VerifyMealLdas,
+  [switch]$VerifyPerformance
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -81,9 +83,48 @@ $otherOverview=Request 'Get' '/wellness/overview' $null $other
 Record 'USER_DATA_ISOLATION' ($otherOverview.recentCheckIns.Count -eq 0)
 $activity=Request 'Post' '/activities' @{kind=1;durationMinutes=35;startedAt=(Get-Date).ToUniversalTime().AddMinutes(-2).ToString('o');note='Synthetic QA walk'} $h
 Record 'ACTIVITY_SQL' ($null -ne $activity)
+if($VerifyMealLdas) {
+  $priorScore=Request 'Get' '/ldas/latest' $null $h
+  Record 'LDAS_MISSING_DATA_POLICY' ($null -eq $priorScore.score -and @($priorScore.missingData) -contains 'meals')
+  $utcNow=[DateTimeOffset]::UtcNow
+  $qaLogs=@()
+  $slots=@('Breakfast','Lunch','Dinner')
+  for($slotIndex=0;$slotIndex -lt 3;$slotIndex++) {
+    $kind=$slots[$slotIndex]
+    $logged=Request 'Post' '/meal-logs' @{
+      eatenAt=$utcNow.AddMinutes(-90+30*$slotIndex).ToString('o')
+      mealType=$kind;title=('Synthetic QA '+$kind);plannedMealId=$null
+      notes='QA-only synthetic logging; no nutritional/medical validity'
+      items=@(@{
+        foodCode=$null;foodName='Synthetic QA item';servingAmount=100;servingUnit='g'
+        caloriesKcal=100;proteinGrams=5;carbsGrams=10;fatGrams=2;fiberGrams=3;isPlantBased=$true
+      })
+    } $h
+    Record ('MEAL_LOG_OWNER_SQL_'+$kind) ($null -ne $logged.id)
+    $qaLogs+= $logged.id
+  }
+  $fullScore=Request 'Get' '/ldas/latest' $null $h
+  Record 'LDAS_REAL_MEAL_WINDOW_ACTIVITY' ($null -ne $fullScore.score -and $fullScore.coveragePercent -eq 100) ('coverage='+$fullScore.coveragePercent)
+  foreach($logId in $qaLogs) { $null=Request 'Delete' ('/meal-logs/'+$logId) $null $h }
+  $deletedScore=Request 'Get' '/ldas/latest' $null $h
+  Record 'LDAS_RECALCULATES_AFTER_MEAL_DELETE' ($null -eq $deletedScore.score -and @($deletedScore.missingData) -contains 'meals')
+}
 $summary=Request 'Get' '/activities/summary' $null $h
 $advice=Request 'Get' '/recommendations/activity' $null $h
 Record 'REST_TO_GRPC_LIVE' ($null -ne $advice -and $advice.completedMinutes -eq $summary.equivalentMinutes) ('completed='+$advice.completedMinutes)
+if($VerifyPerformance) {
+  $env:LONGEVITY_BENCHMARK_ACCESS_TOKEN=$h.Authorization.Substring(7)
+  $reportDir=Join-Path (Split-Path $PSScriptRoot -Parent) 'docs\task'
+  try {
+    foreach($pair in @(@('/api/v1/activities','member1-activities-benchmark-20261111.json'),
+                       @('/api/v1/notifications','member1-notifications-benchmark-20261111.json'))) {
+      $evidence=Join-Path $reportDir $pair[1]
+      & (Join-Path $PSScriptRoot 'Benchmark-Member1Api.ps1') -BaseUrl 'http://127.0.0.1:8080' -Path $pair[0] -Iterations 30 -OutputPath $evidence
+      $stats=Get-Content -Raw $evidence|ConvertFrom-Json
+      Record ('AUTH_BENCHMARK_'+$pair[0]) ($stats.failures -eq 0) ('p95ms='+$stats.p95Ms+' requests='+$stats.iterations)
+    }
+  } finally { Remove-Item Env:\LONGEVITY_BENCHMARK_ACCESS_TOKEN -ErrorAction SilentlyContinue }
+}
 try {
   $null=Request 'Get' '/admin/rule-reviews/queue' $null $h
   throw 'Regular member was allowed to read admin queue'
