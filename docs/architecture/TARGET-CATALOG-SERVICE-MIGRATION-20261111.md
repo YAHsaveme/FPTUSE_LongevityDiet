@@ -13,7 +13,7 @@ Ngày cập nhật: 11/11/2026. **Đây là bước tách Catalog DB và tiến 
 ## Hạn chế còn lại
 
 - Default `docker-compose.yml` vẫn dùng legacy API + MainDb Catalog để các luồng đang bán chạy đúng; **Gateway chưa routing sản phẩm sang Catalog DB mới** vì người lập kế hoạch còn đọc các recipe từ MainDb và chưa có transaction/outbox hai phía. Chuyển read-only routes mà không chuyển admin writer sẽ tạo dữ liệu lệch; không làm điều này.
-- Admin CRUD mới hỗ trợ Food/Recipe Create/Update/SoftDelete trên service độc lập, **chưa chuyển Rule Governance, RuleVersion approval và event ownership**. Catalog có rule tables và seed, nhưng rule approval workflow vẫn ở transitional MainDb. Dữ liệu dinh dưỡng mẫu và khai báo dị ứng không phải xác nhận an toàn lâm sàng.
+- Admin CRUD hỗ trợ Food/Recipe Create/Update/SoftDelete và **Rule Governance phiên bản trên service Catalog riêng**: Draft → InReview → Published → Retired, provenance/JSON validation, two-Admin independent publication, append-only RuleAudit, active-rule projection không lộ Draft/Retired. Đây là owner-level QA, **chưa chuyển Gateway/Web sang owner mới, chưa đồng bộ RuleSet activation, cross-domain rule impact, event/outbox propagation hoặc reviewer sign-off**. Workflow production hiện vẫn dùng MainDb transitional. Giá trị dinh dưỡng mẫu và khai báo dị ứng không phải xác nhận an toàn lâm sàng.
 - Sau bước này vẫn cần chuyển trọn Catalog writer/read-model theo event, rồi tách Identity, Planning, Tracking domain services, Ownership Outbox, TLS443 và reviewer sign-off.
 - Các test mới đều chạy trên **Docker project prn232-acceptance**, bằng JWT của user QA tổng hợp, chưa có phê duyệt chuyên gia dinh dưỡng. Seed nutrition values mang tính minh họa.
 
@@ -34,6 +34,6 @@ node scripts/Test-Catalog-Admin-Http.mjs
 ## Bằng chứng và tiêu chuẩn công bố
 
 - EF migration phải được áp dụng thật trên `LongevityCatalogDb`, seed 4 Foods/2 Recipes/2 Rules.
-- JWT 401/200 và Member role 403, đọc 3 domain Catalog thật trên DB riêng; `node scripts/Test-Catalog-Admin-Http.mjs` kiểm chứng **35 ca QA**, gồm SQL promotion đúng một Admin tổng hợp, Food/Recipe create/update/deactivate, Member chỉ đọc active, kiểm tra tham chiếu Food/Allergen và trùng nguyên liệu, page overflow, Food đang trong active Recipe không được deactivate, dữ liệu SQL vẫn lưu khi inactive. Bộ test `Test-Catalog-Service-Http.mjs` có 11 ca độc lập; kết quả từng commit cần được chạy lại trên Windows và GitHub Actions.
+- JWT 401/200 và Member role 403, đọc 3 domain Catalog thật trên DB riêng; `node scripts/Test-Catalog-Admin-Http.mjs` kiểm chứng **59/59 ca QA Docker**: Food/Recipe CRUD, nguyên liệu/Allergen, active reference guard, tràn số trang, hai Admin QA độc lập, nguồn/citation, chặn duplicate JSON, chống tự phê duyệt, immutable published, retirement, SQL audit và không lộ Draft/Retired cho Member. Bộ `Test-Catalog-Service-Http.mjs` **11/11 PASS**; GitHub Actions cho nhánh Rule Governance phải hoàn tất trước khi merge.
 - Các bộ kiểm thử Legacy .NET/Web/E2E và Gateway QA vẫn PASS.
 - Chỉ ghi `Target Catalog Service slice PASS` sau khi Docker QA và GitHub CI đạt. **Không coi toàn bộ ADR-005 hay 16 task đạt 100%.**

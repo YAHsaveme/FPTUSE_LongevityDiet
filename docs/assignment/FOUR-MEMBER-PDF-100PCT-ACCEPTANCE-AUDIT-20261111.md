@@ -96,7 +96,7 @@ Nhóm đã có **bước dịch chuyển đầu tiên** của ADR-005: một pro
 
 ## 8. Independent Catalog Service migration checkpoint (11/11/2026)
 
-- CatalogDbContext :8082 owns LongevityCatalogDb, EF migrated 10 tables in independent Docker process. Default current runtime remains unchanged; 4 Foods, 2 Recipes, 2 Rules seed; 11-case read/JWT QA and 35-case synthetic Food/Recipe Admin CRUD QA, including referenced-ingredient protection, validated Food/Allergen IDs, SQL persisted state and Member 403, PASS locally. CI job includes the independent Admin gate; fresh GitHub Actions and reviewer approval must be confirmed before merge.
+- CatalogDbContext :8082 owns LongevityCatalogDb, EF migrated 10 tables in independent Docker process. Default current runtime remains unchanged; 4 Foods, 2 Recipes, 2 Rules seed; 11-case read/JWT QA and 59-case Food/Recipe/RuleGovernance QA PASS on isolated Docker SQL with two synthetic Admins. This verifies independent two-Admin publication, append-only history, immutable published revisions and hiding unpublished rules. No RuleSet activation events or Gateway/Web cutover yet; this is not reviewer or medical approval. CI for the new rule-governance branch must be confirmed before merging.
 - This new fourth logical DB is **opt-in**; existing 3 databases remain for Current Runtime. Full ADR-005 still lacks independent Identity/Planning/Tracking REST services, writer migration, domain events/Outbox and TLS443. Do **not** mark 16 tasks complete.
 - See docs/architecture/TARGET-CATALOG-SERVICE-MIGRATION-20261111.md and scripts/Test-Live-Catalog-Service.ps1.
 

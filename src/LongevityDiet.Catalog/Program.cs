@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using LongevityDiet.Catalog;
+using LongevityDiet.Domain.Catalog;
 using LongevityDiet.Domain.Catalog.Entities;
 using LongevityDiet.Repositories.Catalog.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -151,7 +152,8 @@ api.MapGet("/recipes", async (CatalogDbContext db, int page = 1, int pageSize = 
 });
 
 api.MapGet("/diet-rules", async (CatalogDbContext db, CancellationToken ct) =>
-    Results.Ok(await db.DietRules.AsNoTracking().Where(x => x.IsActive)
+    Results.Ok(await db.DietRules.AsNoTracking().Where(x => x.IsActive &&
+        x.Versions.Any(v => v.State == RuleVersionState.Published))
         .OrderBy(x => x.RuleKey)
         .Select(x => new { x.Id, x.RuleKey, x.Title, x.Description,
             x.Category, x.IsMedicalSensitive })
@@ -222,6 +224,7 @@ admin.MapDelete("/foods/{id:guid}", async (Guid id, CatalogDbContext db, Cancell
 });
 
 api.MapRecipeOwnerEndpoints(admin);
+api.MapRuleOwnerEndpoints(admin);
 
 app.Run();
 
