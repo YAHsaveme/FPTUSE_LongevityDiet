@@ -144,16 +144,22 @@ try {
 $beforeConsumer=RedisGroupCounters
 $beforeLen=[int](docker exec prn232-acceptance-redis-1 redis-cli XLEN ldc:identity-events)
 $localMealTime='13:00:00'
+$qaQuietStart='23:30:00'
+$qaQuietEnd='06:30:00'
 if($VerifyTimedNotification) {
-  $vn=[TimeZoneInfo]::ConvertTime([DateTimeOffset]::UtcNow,
-    [TimeZoneInfo]::FindSystemTimeZoneById('SE Asia Standard Time'))
+  # The hard-coded 23:30-06:30 quiet window suppressed nightly QA reminders.
+  # Place the synthetic quiet hour two hours AFTER the scheduled QA meal.
+  # Asia/Ho_Chi_Minh is UTC+07 without DST, valid on Windows and Linux.
+  $vn=[DateTimeOffset]::UtcNow.ToOffset([TimeSpan]::FromHours(7))
   $localMealTime=$vn.AddSeconds(35).ToString('HH:mm:ss')
+  $qaQuietStart=$vn.AddHours(2).ToString('HH:mm:ss')
+  $qaQuietEnd=$vn.AddHours(3).ToString('HH:mm:ss')
 }
 $reminders=Request 'Put' '/reminders/preferences' @{
   optedIn=$true;mealLoggingEnabled=$true;activityEnabled=$false;
   challengeEnabled=$false;weeklySummaryEnabled=$false;
   mealTime=$localMealTime;activityTime='16:00:00';challengeTime='19:00:00';
-  weeklySummaryTime='20:00:00';quietStart='23:30:00';quietEnd='06:30:00'
+  weeklySummaryTime='20:00:00';quietStart=$qaQuietStart;quietEnd=$qaQuietEnd
 } $h
 Record 'REMINDER_PREFERENCE_SQL_OUTBOX' ($reminders.optedIn -and $reminders.mealLoggingEnabled)
 $acknowledged=$false

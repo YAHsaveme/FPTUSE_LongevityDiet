@@ -250,6 +250,9 @@ jobs:
       - name: Verify target Gateway JWT across six independently owned service APIs
         run: node scripts/Test-Target-Gateway-Http.mjs
 
+      - name: Verify QA cutover preflight fails closed until audited migration
+        run: node scripts/Test-ADR005-Cutover-Readiness.mjs
+
       - name: Current runtime and Gateway evidence
         shell: bash
         run: |

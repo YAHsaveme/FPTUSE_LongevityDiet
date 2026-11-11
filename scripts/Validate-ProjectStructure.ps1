@@ -259,6 +259,13 @@ Assert-ProjectRule ($targetGatewayOverlay -notmatch 'API_UPSTREAM:') 'Gateway ta
 $targetGatewayProgram = Read-ProjectText 'src\LongevityDiet.Gateway\Program.cs'
 Assert-ProjectRule ($targetGatewayProgram -match 'Untrusted or missing target Gateway cluster') 'Gateway target cluster addresses must fail closed.'
 Assert-ProjectRule ($targetGatewayProgram -match '/gateway/target/ready') 'Gateway target needs independent readiness.'
+$cutoverAudit = Read-ProjectText 'scripts\Audit-ADR005-Cutover-Readiness.mjs'
+Assert-ProjectRule ($cutoverAudit -match 'isolated_qa_read_only') 'Cutover audit must identify its isolated QA-only scope.'
+Assert-ProjectRule ($cutoverAudit -match 'identity_level_migration_reconciliation_not_performed') 'Cutover cannot treat row-count matches as migration completeness.'
+Assert-ProjectRule ($cutoverAudit -match 'backupsVerified: false') 'Cutover audit must fail closed before verified backups.'
+Assert-ProjectRule ($cutoverAudit -match 'process.exitCode = 2') 'Cutover strict preflight must reject blocked migration.'
+$cutoverQaTest = Read-ProjectText 'scripts\Test-ADR005-Cutover-Readiness.mjs'
+Assert-ProjectRule ($cutoverQaTest -match 'CUTOVER_STRICT_FAILS_CLOSED') 'CI must verify the cutover guard rejects unsafe releases.'
 
 $webDocker = Read-ProjectText 'src\LongevityDiet.Web\Dockerfile'
 Assert-ProjectRule ($webDocker -match 'API_UPSTREAM=api:8080') 'Default Nginx route must preserve the direct API path.'
