@@ -143,7 +143,15 @@ jobs:
         working-directory: tests/LongevityDiet.E2ETests
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          # GitHub-hosted Ubuntu includes Chrome. Avoid apt downloads during
+          # transient Ubuntu package-mirror DNS outages. Retain a fallback for
+          # future runner images without Chrome.
+          if command -v google-chrome-stable >/dev/null 2>&1 || command -v google-chrome >/dev/null 2>&1; then
+            echo 'PLAYWRIGHT_USE_SYSTEM_CHROME=1' >> "$GITHUB_ENV"
+            google-chrome --version || google-chrome-stable --version
+          else
+            npx playwright install chromium
+          fi
 
       - name: Run Docker E2E
         working-directory: tests/LongevityDiet.E2ETests
