@@ -212,11 +212,16 @@ admin.MapDelete("/foods/{id:guid}", async (Guid id, CatalogDbContext db, Cancell
 {
     var food = await db.Foods.FirstOrDefaultAsync(x => x.Id == id && x.IsActive, ct);
     if (food is null) return Results.NotFound();
+    // Do not silently invalidate an active recipe that still uses this ingredient.
+    if (await db.RecipeIngredients.AnyAsync(x => x.FoodId == id && x.Recipe.IsActive, ct))
+        return Results.Conflict(new { error = "food_used_by_active_recipe" });
     food.IsActive = false;
     food.UpdatedAt = DateTimeOffset.UtcNow;
     await db.SaveChangesAsync(ct);
     return Results.NoContent();
 });
+
+api.MapRecipeOwnerEndpoints(admin);
 
 app.Run();
 

@@ -3,7 +3,7 @@
 **Owner:** Thành viên 2  
 **Reviewer:** Thành viên 4  
 **Branch:** `feature/w1-t2-catalog-rules`  
-**Status:** In Progress (independent Catalog REST :8082 + LongevityCatalogDb migrations/seed verified in Docker QA; Admin Food create/update/deactivate on owned DB and 17-case synthetic SQL/JWT test PASS; Recipe/Rule Governance cutover, reviewer and Gateway routing pending)
+**Status:** In Progress (independent Catalog REST :8082 + LongevityCatalogDb migration/seed and Food/Recipe CRUD QA on owned DB; Rule Governance/event cutover, reviewer and Gateway routing still pending)
 
 ## Architecture alignment (ADR-005)
 

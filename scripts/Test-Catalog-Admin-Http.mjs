@@ -115,6 +115,108 @@ const memberUpdate = await request(catalog + '/api/v1/admin/foods/' + foodId, {
   method: 'PUT', token: account.memberToken, body: foodBody,
 });
 check('CATALOG_MEMBER_UPDATE_FORBIDDEN', memberUpdate.status === 403);
+const recipeBody = {
+  name: 'QA Recipe ' + randomUUID().slice(0, 8),
+  description: 'Synthetic owner-only QA recipe, not clinical advice',
+  category: 'Synthetic', cuisine: null, tags: null,
+  servingCount: 2, prepMinutes: 10, caloriesPerServing: 100,
+  proteinGPerServing: 5, carbohydrateGPerServing: 12, fatGPerServing: 4,
+  saturatedFatGPerServing: null, sugarGPerServing: null, fiberGPerServing: null,
+  isPlantForward: true, hasLegume: false, hasWholeGrain: false, hasFish: false,
+  ingredients: [{ foodId, amount: 100, unit: 'g', isOptional: false }],
+  allergenIds: [],
+};
+const memberRecipeWrite = await request(catalog + '/api/v1/admin/recipes', {
+  method: 'POST', token: account.memberToken, body: recipeBody,
+});
+check('CATALOG_MEMBER_RECIPE_WRITE_FORBIDDEN', memberRecipeWrite.status === 403);
+const unknownFood = await request(catalog + '/api/v1/admin/recipes', {
+  method: 'POST', token: adminToken,
+  body: { ...recipeBody, ingredients: [{ ...recipeBody.ingredients[0], foodId: randomUUID() }] },
+});
+check('CATALOG_RECIPE_REJECTS_UNKNOWN_FOOD', unknownFood.status === 400);
+const duplicateIngredients = await request(catalog + '/api/v1/admin/recipes', {
+  method: 'POST', token: adminToken,
+  body: { ...recipeBody, ingredients: [...recipeBody.ingredients, ...recipeBody.ingredients] },
+});
+check('CATALOG_RECIPE_REJECTS_DUPLICATE_INGREDIENT', duplicateIngredients.status === 400);
+const unknownAllergen = await request(catalog + '/api/v1/admin/recipes', {
+  method: 'POST', token: adminToken,
+  body: { ...recipeBody, allergenIds: [randomUUID()] },
+});
+check('CATALOG_RECIPE_REJECTS_UNKNOWN_ALLERGEN', unknownAllergen.status === 400);
+const createdRecipe = await request(catalog + '/api/v1/admin/recipes', {
+  method: 'POST', token: adminToken, body: recipeBody,
+});
+const recipeId = createdRecipe.data?.id;
+check('CATALOG_OWNER_CREATES_RECIPE', createdRecipe.status === 201 &&
+  typeof recipeId === 'string' &&
+  createdRecipe.headers.get('location')?.endsWith(recipeId));
+const memberRecipe = await request(catalog + '/api/v1/recipes/' + recipeId, {
+  token: account.memberToken,
+});
+check('CATALOG_MEMBER_READS_RECIPE_WITH_OWNED_INGREDIENTS', memberRecipe.status === 200 &&
+  memberRecipe.data?.ingredients?.[0]?.foodId === foodId &&
+  memberRecipe.data.ingredients[0].amount === 100);
+const updatedRecipeBody = { ...recipeBody, name: recipeBody.name + ' Updated',
+  caloriesPerServing: 111, ingredients: [{ ...recipeBody.ingredients[0], amount: 120 }] };
+const updatedRecipe = await request(catalog + '/api/v1/admin/recipes/' + recipeId, {
+  method: 'PUT', token: adminToken, body: updatedRecipeBody,
+});
+check('CATALOG_OWNER_UPDATES_RECIPE', updatedRecipe.status === 200 &&
+  updatedRecipe.data?.id === recipeId &&
+  updatedRecipe.data?.ingredients?.[0]?.amount === 120);
+const recipeAfterUpdate = await request(catalog + '/api/v1/recipes/' + recipeId, {
+  token: account.memberToken,
+});
+check('CATALOG_MEMBER_READS_RECIPE_UPDATE', recipeAfterUpdate.status === 200 &&
+  recipeAfterUpdate.data?.name === updatedRecipeBody.name &&
+  recipeAfterUpdate.data?.caloriesPerServing === 111);
+const invalidRecipeUpdate = await request(catalog + '/api/v1/admin/recipes/' + recipeId, {
+  method: 'PUT', token: adminToken, body: { ...updatedRecipeBody, ingredients: [] },
+});
+check('CATALOG_OWNER_REJECTS_RECIPE_WITHOUT_INGREDIENTS', invalidRecipeUpdate.status === 400);
+const adminRecipeList = await request(catalog + '/api/v1/admin/recipes?page=1&pageSize=100', {
+  token: adminToken,
+});
+check('CATALOG_ADMIN_RECIPE_LIST', adminRecipeList.status === 200 &&
+  adminRecipeList.data?.items?.some(x => x.id === recipeId));
+const referencedFoodDelete = await request(catalog + '/api/v1/admin/foods/' + foodId, {
+  method: 'DELETE', token: adminToken,
+});
+check('CATALOG_PREVENTS_DELETING_ACTIVE_RECIPE_INGREDIENT', referencedFoodDelete.status === 409);
+const invalidRecipePage = await request(catalog + '/api/v1/admin/recipes?page=2147483647&pageSize=100', {
+  token: adminToken,
+});
+check('CATALOG_ADMIN_RECIPE_PAGE_OVERFLOW_REJECTED', invalidRecipePage.status === 400);
+const recipeAnon = await request(catalog + '/api/v1/recipes/' + recipeId);
+check('CATALOG_RECIPE_DETAIL_REQUIRES_JWT', recipeAnon.status === 401);
+const deactivatedRecipe = await request(catalog + '/api/v1/admin/recipes/' + recipeId, {
+  method: 'DELETE', token: adminToken,
+});
+check('CATALOG_OWNER_DEACTIVATES_RECIPE', deactivatedRecipe.status === 204);
+const hiddenRecipe = await request(catalog + '/api/v1/recipes/' + recipeId, {
+  token: account.memberToken,
+});
+check('CATALOG_MEMBER_CANNOT_READ_INACTIVE_RECIPE', hiddenRecipe.status === 404);
+const adminInactiveRecipe = await request(catalog + '/api/v1/admin/recipes/' + recipeId, {
+  token: adminToken,
+});
+check('CATALOG_ADMIN_READS_RECIPE_HISTORY', adminInactiveRecipe.status === 200 &&
+  adminInactiveRecipe.data?.isActive === false);
+const repeatedRecipeDelete = await request(catalog + '/api/v1/admin/recipes/' + recipeId, {
+  method: 'DELETE', token: adminToken,
+});
+check('CATALOG_RECIPE_DELETE_REPEAT_NOT_FOUND', repeatedRecipeDelete.status === 404);
+if (!/^[0-9a-f-]{36}$/i.test(recipeId)) throw new Error('QA recipe identifier invalid');
+const persistedRecipe = sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
+  '[LongevityCatalogDb].[catalog].[Recipes] AS r INNER JOIN ' +
+  '[LongevityCatalogDb].[catalog].[RecipeIngredients] AS i ON i.RecipeId=r.Id ' +
+  "WHERE r.Id='" + recipeId + "' AND r.IsActive=0 AND r.CaloriesPerServing=111 " +
+  "AND i.FoodId='" + foodId + "' AND i.Amount=120;");
+check('CATALOG_DB_PRESERVES_RECIPE_AND_INGREDIENT_AFTER_DEACTIVATE',
+  persistedRecipe.split(/\s+/).includes('1'));
+
 const gone = await request(catalog + '/api/v1/admin/foods/' + foodId, {
   method: 'DELETE', token: adminToken,
 });
