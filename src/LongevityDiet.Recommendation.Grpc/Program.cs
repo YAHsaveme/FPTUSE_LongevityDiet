@@ -11,6 +11,9 @@ var app = builder.Build();
 
 app.MapHealthChecks("/health");
 app.MapGrpcService<RecommendationProtoGrpcService>();
+// REST activity coaching uses the legacy, strongly-typed gRPC contract.
+// Keep both contracts hosted in the same independent HTTP/2 process.
+app.MapGrpcService<ActivityCoachEndpoint>();
 app.MapGet("/", () => Results.Ok(new
 {
     service = "LongevityDiet.Recommendation.Grpc",

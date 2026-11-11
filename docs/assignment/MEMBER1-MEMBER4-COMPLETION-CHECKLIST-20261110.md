@@ -72,4 +72,10 @@ docker compose --env-file .env.example config --quiet
 6. Full Compose + SQL migration/health + inter-service routing.
 7. User từ onboarding → xác nhận dị ứng → lộ trình nhiều ngày → ghi bữa ăn/hoạt động/sức khỏe → thay đổi dị ứng → khóa/tái tạo hợp lệ → thống kê lịch sử.
 
+## Cập nhật nghiệm thu runtime 11/11/2026
+
+Xem [LIVE-DOCKER-E2E-20261111.md](LIVE-DOCKER-E2E-20261111.md). Đã chứng minh trên Docker/SQL Server thực tế: 14 ngày/42 bữa ăn, nhật ký Baseline/During/FollowUp, hai user tách dữ liệu, Tracking activity, REST → gRPC độc lập, Member → Admin 403, SQL Outbox → Redis Streams → Worker ACK. Lỗi 500 do dịch vụ gRPC ActivityCoach chưa map đã được khắc phục và kiểm chứng lại thành công. Test script có thể chạy lại trong QA độc lập; không chạy trên production.
+
+**Còn cần nghiệm thu:** lịch gửi thông báo đúng hạn và notification đầu-cuối, event meal/eating-window vào LDAS, hiệu năng p95 và UI/accessibility, dữ liệu recipe/dị ứng được chuyên gia xác minh và kiểm tra CI trước merge. Không đánh đồng test pass với hoàn thành 100% mọi nhiệm vụ.
+
 **Đề nghị nghiệm thu:** chỉ khi có bằng chứng vận hành thật, thực đơn được thẩm định, không có lỗi quan trọng và reviewer đồng ý thì mới nâng trạng thái lên 100%.

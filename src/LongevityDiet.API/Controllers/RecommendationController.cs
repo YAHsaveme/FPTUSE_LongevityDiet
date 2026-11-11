@@ -70,7 +70,8 @@ public sealed partial class RecommendationController(
                 reply.Guidance, reply.Disclaimer));
         }
         catch (RpcException error) when (error.StatusCode is
-            Grpc.Core.StatusCode.Unavailable or Grpc.Core.StatusCode.DeadlineExceeded)
+            Grpc.Core.StatusCode.Unavailable or Grpc.Core.StatusCode.DeadlineExceeded
+            or Grpc.Core.StatusCode.Unimplemented)
         {
             WarnGrpcUnavailable(logger, error.StatusCode);
             return Problem(statusCode: StatusCodes.Status503ServiceUnavailable,
