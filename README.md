@@ -275,6 +275,12 @@ This is an **opt-in migration slice**, not a cutover: default Web, Gateway, Plan
 
 To verify on isolated QA (synthetic accounts): `node scripts/Test-Catalog-Service-Http.mjs` and `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Live-Catalog-Service.ps1`.
 
+## Independent Tracking REST — optional ADR-005 read-only slice
+
+A standalone `.NET 9` Tracking REST process now reads **only `LongevityTrackingDb`**, via internal `:8084` (isolated QA `127.0.0.1:18084`). Its read endpoints are JWT scoped to the authenticated user and provide Activity, Goals and persisted LDAS snapshots without querying the legacy MainDb. Cross-user records return 404. **Writes still go through the original TrackingService on the shared REST host** because full owner-signal, timezone read-model and Outbox migration are not yet complete.
+
+[Architecture, migration restrictions and QA](docs/architecture/TARGET-TRACKING-READ-MIGRATION-20261111.md). Test: `node scripts/Test-Tracking-Service-Http.mjs` (15 cross-process/IDOR checks on synthetic Docker QA accounts). This is not a completed Target Architecture cutover.
+
 ## Official PRN232 Final Assignment technical acceptance
 
 The original Final Assignment PDF (see the [seven-step demo mapped to its requirements](docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md)) asks for REST/JWT/CRUD/layers/search/filter/sort/pagination, background processing, **Redis or Kafka**, an independent gRPC service, Docker Compose or cloud, EF Core/SQL, migrations, API documentation, a six-section README and a seven-step demo. It does **not** require four independent domain REST services or six databases; those are the team's **additional ADR-005 targets** and remain separately tracked.

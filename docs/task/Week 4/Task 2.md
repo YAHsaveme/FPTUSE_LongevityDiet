@@ -104,6 +104,11 @@ Document và verify:
 - Secret/generated-artifact scan.
 - Clean setup theo README/runbook.
 
+## Optional Tracking REST read checkpoint — 11/11/2026
+
+- Tracking is now separately deployed as a read-only REST process :8084 using existing LongevityTrackingDb and 2 EF migrations. Synthetic JWT activity written by legacy TrackingService is immediately readable by independent Tracking REST, with UserId/IDOR isolation and persisted LDAS history; 15/15 E2E PASS.
+- No extra logical database introduced; optional CatalogDb gives 4 actual SQL DBs total (Main + Catalog + Tracking + Worker), below six target owner databases. Tracking writes, signal read models, domain outbox and public TLS remain pending.
+
 ## Optional Catalog ownership checkpoint — 11/11/2026
 
 - A new independently deployed Catalog REST service :8082 and owned `LongevityCatalogDb` were migrated in isolated Docker QA with 10 catalog entity tables; JWT 401/200/403, 4/2/2 seed counts and 11-case HTTP smoke PASS.

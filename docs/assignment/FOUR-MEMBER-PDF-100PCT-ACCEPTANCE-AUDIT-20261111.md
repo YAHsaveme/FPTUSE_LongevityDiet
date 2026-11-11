@@ -94,6 +94,11 @@ Lưu ý: PDF **không bắt buộc** Kafka khi đã chọn Redis và **không b�
 
 Nhóm đã có **bước dịch chuyển đầu tiên** của ADR-005: một project Gateway .NET 9/YARP độc lập, có Compose overlay tùy chọn và Web Nginx chuyển tiếp qua Gateway. Đã kiểm tra trực tiếp JWT/RBAC, route 404, OpenAPI, readiness 503 khi API ngừng, khôi phục và 10/10 Playwright E2E; .NET 172/172. Đây là tiến triển kỹ thuật sau bản kiểm toán ban đầu, **không phải** một tuyên bố toàn bộ Target Architecture đã triển khai. Bốn domain REST service riêng, các DB ownership và public TLS443 vẫn thiếu. Xem [tài liệu Gateway](../architecture/TARGET-GATEWAY-MIGRATION-20261111.md).
 
+## 9. Independent Tracking REST read-only checkpoint (11/11/2026)
+
+- Tracking REST .NET 9 now runs in a separate process at :8084 and only connects to pre-existing LongevityTrackingDb. Its read paths consume the actual legacy TrackingService writes in the same owned DB. A cross-platform 15-case QA proves two-member JWT isolation, read-your-own Activity, IDOR 404 and persisted LDAS without fabricated scores.
+- Not a full Target Tracking cutover: write/recompute remains in transitional API pending copied user timezone, versioned meal/window signals and event Outbox ownership. See docs/architecture/TARGET-TRACKING-READ-MIGRATION-20261111.md.
+
 ## 8. Independent Catalog Service migration checkpoint (11/11/2026)
 
 - CatalogDbContext :8082 owns LongevityCatalogDb, EF migrated 10 tables in independent Docker process. Default current runtime remains unchanged; 4 Foods, 2 Recipes, 2 Rules seed; 11-case HTTP/JWT/role QA plus direct SQL ownership and migration verification PASS.

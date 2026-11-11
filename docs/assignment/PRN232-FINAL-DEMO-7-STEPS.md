@@ -13,7 +13,7 @@ Máy cần có Docker Desktop, .NET 9, Node 24. Đường dẫn repository: D:\P
     Invoke-WebRequest http://127.0.0.1:8080/ready -UseBasicParsing
     Invoke-WebRequest http://127.0.0.1:18080/gateway/ready -UseBasicParsing
 
-Kỳ vọng: SQL Server và Redis healthy, API và Gateway ready 200. Docker QA có sáu container Current Runtime, bảy container khi bật Gateway, hoặc tám container khi bật thêm Catalog Service thử nghiệm. Catalog dùng database riêng, chưa chuyển đường Web/Planning sang service mới.
+Kỳ vọng: SQL Server và Redis healthy, API và Gateway ready 200. Docker QA có sáu container Current Runtime, bảy container khi bật Gateway, tám container khi bật Catalog Service, hoặc chín container khi bật thêm Tracking REST read-only. Hai service tùy chọn chưa được Gateway/Web chuyển tuyến vào production. Catalog dùng database riêng, chưa chuyển đường Web/Planning sang service mới.
 
 ## 01. System architecture
 

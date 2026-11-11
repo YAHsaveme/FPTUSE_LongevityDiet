@@ -57,6 +57,12 @@ Tạo vertical slice từ activity data đến **Longevity Diet Adherence Score 
 User log activity thật, xem progress theo timezone và nhận LDAS từ dữ liệu thật với breakdown/version/disclaimer; build/test pass và không phụ thuộc mock.
 
 
+## Independent Tracking REST checkpoint (11/11/2026)
+
+- A new .NET 9 Tracking REST read-only process (:8084) reads only LongevityTrackingDb, verifies JWT and user-scoped Activity/Goals/persisted LDAS. Docker QA cross-process read, 2-member isolation/IDOR and no fabricated score: 15/15 PASS.
+- The original REST host continues write/recalculate/Outbox until the owned profile timezone read model and meal/window signals are migrated. Not marked DONE or deployed as entire ADR-005 target.
+- Evidence: docs/architecture/TARGET-TRACKING-READ-MIGRATION-20261111.md and scripts/Test-Tracking-Service-Http.mjs.
+
 ## Verified Current Runtime checkpoint (11/11/2026)
 
 - LDAS actual MealLog + EatingWindow live SQL coverage and delete/recompute PASS; scripts/Test-Live-Docker-Acceptance.ps1 -VerifyMealLdas; Member 1 current read model remains transitional.

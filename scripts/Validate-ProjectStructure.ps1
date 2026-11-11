@@ -36,6 +36,8 @@ $requiredProjects = @(
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj',
     # Second opt-in ADR-005 slice: process+database isolated Catalog.
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj',
+    # Tracking read-only target process on its already independent TrackingDb.
+    'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -108,6 +110,7 @@ foreach ($project in $sourceProjectFiles) {
 $dependencyRules = @{
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj' = @()
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
+    'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj' = @('LongevityDiet.Tracking')
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
@@ -144,6 +147,13 @@ Assert-ProjectRule ($vite -match 'https://localhost:7110') 'Vite proxy must targ
 
 # The opt-in ADR-005 gateway slice is real code with a restricted YARP route,
 # not a speculative diagram and not a replacement for the Current Runtime.
+$trackingReadSource = Read-ProjectText 'src\LongevityDiet.Tracking.Api\Program.cs'
+Assert-ProjectRule ($trackingReadSource -match 'LongevityTrackingDb') 'Tracking REST process must own TrackingDb.'
+Assert-ProjectRule ($trackingReadSource -notmatch 'LongevityDietDbContext|ConnectionStrings__Default') 'Tracking REST process must not reference legacy MainDb.'
+Assert-ProjectRule ($trackingReadSource -notmatch 'MapPost\(|MapPut\(|MapDelete\(') 'Tracking reads cannot bypass scoring/outbox by writing directly.'
+$trackingCompose = Read-ProjectText 'docker-compose.tracking.yml'
+Assert-ProjectRule ($trackingCompose -match '127\.0\.0\.1:') 'Tracking QA port must be localhost only.'
+
 $catalogProject = Read-ProjectText 'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj'
 Assert-ProjectRule ($catalogProject -match 'LongevityDiet.Repositories') 'Catalog service must reuse catalog configuration without new cross-domain tables.'
 $catalogDb = Read-ProjectText 'src\LongevityDiet.Catalog\CatalogDbContext.cs'
