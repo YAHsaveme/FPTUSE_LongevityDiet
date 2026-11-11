@@ -1,0 +1,43 @@
+{
+    "source":  "PRN232 Final Assignment original 3-page PDF, requirements 2-7",
+    "status":  "TECHNICAL_QA_PASS_NOT_GRADED",
+    "environment":  "localhost isolated prn232-acceptance Docker project; synthetic QA users only",
+    "localGitSha":  "66cf505349aba1c332ef91412df0ada40e06f2a9",
+    "startedAtUtc":  "2026-11-11T09:02:59.2263616+00:00",
+    "completedAtUtc":  "2026-11-11T09:05:13.4896172+00:00",
+    "gatewayOutageTested":  true,
+    "independentRedisSmokeTested":  true,
+    "passedGateCount":  18,
+    "passedGates":  [
+                        "PDF_OFFICIAL_STATIC_22_REQUIREMENTS",
+                        "SOURCE_SOLUTION_172_DOTNET_TESTS",
+                        "WEB_TESTS",
+                        "WEB_LINT",
+                        "WEB_PRODUCTION_BUILD",
+                        "WEB_PRODUCTION_DEPENDENCY_AUDIT",
+                        "C0_C1_C2_ERD",
+                        "ASSIGNMENT_DOC_LINKS",
+                        "DOCKER_COMPOSE_CURRENT_AND_GATEWAY",
+                        "LIVE_DOCKER_SQL_REDIS_API_READY",
+                        "LIVE_THREE_EF_SQL_DATABASES_MIGRATED",
+                        "LIVE_REST_JWT_SQL_LDAS_GRPC_REDIS_WORKER_SCHEDULED",
+                        "LIVE_REST_SEARCH_FILTER_SORT_PAGINATION",
+                        "LIVE_ADMIN_RULE_GOVERNANCE_TWO_REVIEWERS",
+                        "LIVE_CATALOG_CHALLENGE_FMD_WEEKLY_REPORT",
+                        "LIVE_GATEWAY_JWT_RBAC_RECOVERY",
+                        "PLAYWRIGHT_BROWSER_E2E",
+                        "INDEPENDENT_REDIS_STREAMS_WORKER_QA"
+                    ],
+    "courseRubricWeights":  {
+                                "architecture":  20,
+                                "rest":  20,
+                                "backgroundJob":  10,
+                                "messageBroker":  15,
+                                "grpc":  15,
+                                "dockerCloud":  10,
+                                "docsPresentation":  10
+                            },
+    "humanInstructorDemoAndGradeVerified":  false,
+    "fullAdr005FourDomainServicesVerified":  false,
+    "medicalCertificationVerified":  false
+}
