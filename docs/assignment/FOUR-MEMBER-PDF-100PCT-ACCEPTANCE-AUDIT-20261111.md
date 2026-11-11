@@ -94,6 +94,12 @@ Lưu ý: PDF **không bắt buộc** Kafka khi đã chọn Redis và **không b�
 
 Nhóm đã có **bước dịch chuyển đầu tiên** của ADR-005: một project Gateway .NET 9/YARP độc lập, có Compose overlay tùy chọn và Web Nginx chuyển tiếp qua Gateway. Đã kiểm tra trực tiếp JWT/RBAC, route 404, OpenAPI, readiness 503 khi API ngừng, khôi phục và 10/10 Playwright E2E; .NET 172/172. Đây là tiến triển kỹ thuật sau bản kiểm toán ban đầu, **không phải** một tuyên bố toàn bộ Target Architecture đã triển khai. Bốn domain REST service riêng, các DB ownership và public TLS443 vẫn thiếu. Xem [tài liệu Gateway](../architecture/TARGET-GATEWAY-MIGRATION-20261111.md).
 
+## 8. Independent Catalog Service migration checkpoint (11/11/2026)
+
+- CatalogDbContext :8082 owns LongevityCatalogDb, EF migrated 10 tables in independent Docker process. Default current runtime remains unchanged; 4 Foods, 2 Recipes, 2 Rules seed; 11-case HTTP/JWT/role QA plus direct SQL ownership and migration verification PASS.
+- This new fourth logical DB is **opt-in**; existing 3 databases remain for Current Runtime. Full ADR-005 still lacks independent Identity/Planning/Tracking REST services, writer migration, domain events/Outbox and TLS443. Do **not** mark 16 tasks complete.
+- See docs/architecture/TARGET-CATALOG-SERVICE-MIGRATION-20261111.md and scripts/Test-Live-Catalog-Service.ps1.
+
 ## 7. Final Assignment PDF dedicated acceptance (11/11/2026)
 
 - Official original three-page PDF clauses 2–7 are checked by 22 static source/artifact assertions in scripts/Validate-Prn232-Final-PDF.cjs, and a repeatable all-domain Docker suite in scripts/Test-Prn232-Final-Acceptance.ps1. This includes scheduled notification, SQL Outbox/Redis Streams worker ACK, independent gRPC, two Admin approvals, real SQL Catalog/Challenge/Planner/LDAS/FMD and Playwright, plus optional Gateway failure recovery and independent Redis smoke. Static checks and the full 16-gate QA run passed on 11/11; an additional live search/filter/sort/page test now also passes (13 checks).

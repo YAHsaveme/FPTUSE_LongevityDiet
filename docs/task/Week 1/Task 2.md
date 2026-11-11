@@ -3,7 +3,7 @@
 **Owner:** Thành viên 2  
 **Reviewer:** Thành viên 4  
 **Branch:** `feature/w1-t2-catalog-rules`  
-**Status:** Ready for Review
+**Status:** In Progress (independent Catalog REST :8082 + LongevityCatalogDb migrations/seed verified in Docker QA; full CRUD/Rule Governance and Gateway cutover pending)
 
 ## Architecture alignment (ADR-005)
 

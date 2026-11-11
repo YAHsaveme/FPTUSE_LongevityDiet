@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LongevityDiet.Repositories;
 
-public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbContext> options) : DbContext(options)
+public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbContext> options) : DbContext(options), LongevityDiet.Repositories.Catalog.Seed.ICatalogSeedDbContext
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();

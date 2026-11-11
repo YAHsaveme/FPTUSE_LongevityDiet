@@ -29,6 +29,8 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LongevityDiet.Gateway", "src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj", "{A0E29F1A-016E-4D5D-915E-0CF0EB8AA538}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LongevityDiet.Catalog", "src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj", "{F916320A-3FCE-443B-A3C8-82EB4E74AC68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +161,18 @@ Global
 		{A0E29F1A-016E-4D5D-915E-0CF0EB8AA538}.Release|x64.Build.0 = Release|Any CPU
 		{A0E29F1A-016E-4D5D-915E-0CF0EB8AA538}.Release|x86.ActiveCfg = Release|Any CPU
 		{A0E29F1A-016E-4D5D-915E-0CF0EB8AA538}.Release|x86.Build.0 = Release|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Debug|x64.Build.0 = Debug|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Debug|x86.Build.0 = Debug|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Release|x64.ActiveCfg = Release|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Release|x64.Build.0 = Release|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Release|x86.ActiveCfg = Release|Any CPU
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -174,5 +188,6 @@ Global
 		{C9059718-9685-46D0-9F0D-C1AE2744139C} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{955F1753-6985-4545-B95C-A1852AA876D4} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{A0E29F1A-016E-4D5D-915E-0CF0EB8AA538} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{F916320A-3FCE-443B-A3C8-82EB4E74AC68} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
