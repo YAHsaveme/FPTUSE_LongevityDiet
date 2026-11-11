@@ -48,6 +48,7 @@ jobs:
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
@@ -195,6 +196,12 @@ jobs:
           done
           node scripts/Test-Identity-Service-Http.mjs
 
+      - name: Start independent Planning owned DB and service
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml up -d --build planning
+
+      - name: Verify Planning independent SQL JWT Challenge Outbox Redis
+        run: node scripts/Test-Planning-Service-Http.mjs
+
       - name: Current runtime and Gateway evidence
         shell: bash
         run: |
@@ -204,4 +211,4 @@ jobs:
 
       - name: Tear down release smoke
         if: always()
-        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml down -v --remove-orphans
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml down -v --remove-orphans

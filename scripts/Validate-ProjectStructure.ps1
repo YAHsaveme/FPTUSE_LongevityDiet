@@ -38,6 +38,7 @@ $requiredProjects = @(
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj',
     # Independent ADR-005 Identity & Profile owner on its own SQL database.
     'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj',
+    'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -111,6 +112,7 @@ $dependencyRules = @{
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj' = @()
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
     'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
+    'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
@@ -164,6 +166,19 @@ $identityOverlay = Read-ProjectText 'docker-compose.identity.yml'
 Assert-ProjectRule ($identityOverlay -match 'LongevityIdentityDb') 'Identity Compose must own LongevityIdentityDb.'
 Assert-ProjectRule ($identityOverlay -match '127\.0\.0\.1:') 'Identity QA must bind only to localhost.'
 Assert-ProjectRule ($identityOverlay -notmatch 'ConnectionStrings__Default') 'Identity service must never connect to legacy default DB.'
+
+$planningDb = Read-ProjectText 'src\LongevityDiet.Planning\PlanningDbContext.cs'
+Assert-ProjectRule ($planningDb -match 'DbSet<MealPlan>') 'Planning owner must include MealPlans.'
+Assert-ProjectRule ($planningDb -match 'DbSet<ChallengeTemplate>') 'Planning owner must include ChallengeTemplates.'
+Assert-ProjectRule ($planningDb -match 'DbSet<PlanningOutboxEvent>') 'Planning owner must include an Outbox.'
+Assert-ProjectRule ($planningDb -notmatch 'DbSet<User>|DbSet<Food>|DbSet<MealLog>|DbSet<WorkerJob>|DbSet<WeeklyReport>') 'PlanningDbContext must not own foreign-domain tables.'
+$planningOverlay = Read-ProjectText 'docker-compose.planning.yml'
+Assert-ProjectRule ($planningOverlay -match 'LongevityPlanningDb') 'Planning Compose must own LongevityPlanningDb.'
+Assert-ProjectRule ($planningOverlay -match '127\.0\.0\.1:') 'Planning QA must bind only to localhost.'
+Assert-ProjectRule ($planningOverlay -notmatch 'ConnectionStrings__Default') 'Planning service must never connect to legacy default DB.'
+$planningProgram = Read-ProjectText 'src\LongevityDiet.Planning\Program.cs'
+Assert-ProjectRule ($planningProgram -match 'LongevityPlanningDb') 'Planning runtime must verify its SQL database name.'
+Assert-ProjectRule ($planningProgram -match 'AddJwtBearer') 'Planning routes must require JWT authentication.'
 
 $gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
 Assert-ProjectRule ($gatewayProject -match 'Yarp\.ReverseProxy') 'Optional gateway must use the YARP package.'
