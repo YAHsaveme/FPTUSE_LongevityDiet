@@ -7,6 +7,8 @@ Repo: `D:\PRN232\FPTUSE_LongevityDiet`. Nhánh kiểm thử: `feature/w3-t4-rule
 ```powershell
 Set-Location D:\PRN232\FPTUSE_LongevityDiet
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-Live-Docker-Acceptance.ps1
+# Full scheduled-notification test (takes approximately one local due-time window):
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Test-Live-Docker-Acceptance.ps1 -VerifyTimedNotification
 ```
 
 Bài kiểm thử chỉ cho phép `localhost`/`127.0.0.1`/`::1`; tạo account và ghi bản ghi vào SQL Server QA, **không được chạy vào môi trường production hoặc database dùng chung**.
@@ -25,6 +27,9 @@ Bài kiểm thử chỉ cho phép `localhost`/`127.0.0.1`/`::1`; tạo account v
 | Thành viên thường không thể mở admin rule queue (403) | PASS |
 | PUT reminder preferences tạo identity SQL outbox | PASS |
 | API outbox -> Redis identity stream -> Worker đọc & ACK, pending 0 | PASS |
+| Lịch nhắc đúng giờ, Worker tạo notification thật trên SQL | PASS |
+| Unread count, mark-read, chống IDOR giữa hai tài khoản | PASS |
+| Redis worker event đi ngược về API notifications | PASS |
 
 **Lỗi thực tế đã tìm ra và sửa:** API gọi `ActivityCoach.Recommend` nhưng server gRPC chỉ map `RecommendationProtoGrpcService`, dẫn đến HTTP 500 `Unimplemented` khi gọi `GET /api/v1/recommendations/activity`. Sửa `src/LongevityDiet.Recommendation.Grpc/Program.cs` map cả `ActivityCoachEndpoint`; API chuyển lỗi `Unimplemented` thành 503 có kiểm soát. Sau build lại API+gRPC và chạy lại cùng test trên SQL thật, **REST_TO_GRPC_LIVE=PASS**.
 
@@ -32,7 +37,7 @@ Bài kiểm thử chỉ cho phép `localhost`/`127.0.0.1`/`::1`; tạo account v
 
 ## Những phần chưa thể ghi 100% nghiệm thu
 
-- Worker **lịch gửi nhắc theo đúng giờ**, notification end-to-end, restart/replay/dead-letter đồng thời: chưa có smoke thực tế riêng. Bài test này chỉ xác nhận preference event được Worker ACK.
+- Worker **đã thực sự gửi thông báo theo lịch** và API nhận về qua Redis rồi lưu SQL, test unread/mark read/IDOR đạt. **Chưa kiểm chứng riêng** restart/replay, xử lý dead-letter và nhiều Worker cạnh tranh.
 - Tracking LDAS: chưa có bằng chứng meal/eating-window signals từ owner chạy vào TrackingDb; không được tự gán điểm hoặc khẳng định đủ mọi dữ liệu.
 - Benchmark p50/p95, browser/manual accessibility và kịch bản full release (đặc biệt trên trình duyệt di động) chưa kiểm chứng.
 - Công thức nấu ăn, chất dinh dưỡng và các nguy cơ dị ứng chéo chưa được chuyên gia kiểm định; không tuyên bố cá nhân hóa y khoa hoặc kéo dài tuổi thọ chắc chắn.

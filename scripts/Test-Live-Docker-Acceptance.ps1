@@ -1,5 +1,6 @@
 param(
-  [string]$BaseUri = 'http://127.0.0.1:8080/api/v1'
+  [string]$BaseUri = 'http://127.0.0.1:8080/api/v1',
+  [switch]$VerifyTimedNotification
 )
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -92,10 +93,16 @@ try {
 }
 $beforeConsumer=RedisGroupCounters
 $beforeLen=[int](docker exec prn232-acceptance-redis-1 redis-cli XLEN ldc:identity-events)
+$localMealTime='13:00:00'
+if($VerifyTimedNotification) {
+  $vn=[TimeZoneInfo]::ConvertTime([DateTimeOffset]::UtcNow,
+    [TimeZoneInfo]::FindSystemTimeZoneById('SE Asia Standard Time'))
+  $localMealTime=$vn.AddSeconds(35).ToString('HH:mm:ss')
+}
 $reminders=Request 'Put' '/reminders/preferences' @{
   optedIn=$true;mealLoggingEnabled=$true;activityEnabled=$false;
   challengeEnabled=$false;weeklySummaryEnabled=$false;
-  mealTime='13:00:00';activityTime='16:00:00';challengeTime='19:00:00';
+  mealTime=$localMealTime;activityTime='16:00:00';challengeTime='19:00:00';
   weeklySummaryTime='20:00:00';quietStart='23:30:00';quietEnd='06:30:00'
 } $h
 Record 'REMINDER_PREFERENCE_SQL_OUTBOX' ($reminders.optedIn -and $reminders.mealLoggingEnabled)
@@ -110,4 +117,28 @@ for($try=0;$try -lt 16;$try++) {
   }
 }
 Record 'SQL_OUTBOX_REDIS_STREAM_WORKER_ACK' $acknowledged ('streamEntries='+($length-$beforeLen))
+if($VerifyTimedNotification) {
+  $notice=$null
+  for($i=0;$i -lt 45;$i++) {
+    Start-Sleep -Seconds 2
+    $page=Request 'Get' '/notifications' $null $h
+    if($page.items.Count -gt 0) {$notice=$page.items[0];break}
+  }
+  Record 'SCHEDULED_WORKER_NOTIFICATION_SQL' ($null -ne $notice)
+  Record 'NOTIFICATION_INBOX_CATEGORY' ($null -ne $notice.category -and $notice.id -ne [guid]::Empty)
+  $count=Request 'Get' '/notifications/unread-count' $null $h
+  Record 'NOTIFICATION_UNREAD_COUNT' ($count.count -ge 1)
+  $null=Request 'Post' ('/notifications/'+$notice.id+'/read') $null $h
+  $afterCount=Request 'Get' '/notifications/unread-count' $null $h
+  Record 'NOTIFICATION_READ_IDEMPOTENT' ($afterCount.count -eq 0)
+  try {
+    $null=Request 'Post' ('/notifications/'+$notice.id+'/read') $null $other
+    throw 'Another member was allowed to mark QA notification read'
+  } catch [System.Net.WebException] {
+    $status=[int]$_.Exception.Response.StatusCode
+    Record 'NOTIFICATION_IDOR_BLOCKED' ($status -eq 404) ('HTTP='+$status)
+  }
+  $workerEntries=[int](docker exec prn232-acceptance-redis-1 redis-cli XLEN ldc:worker-events)
+  Record 'REDIS_NOTIFICATION_BACK_CHANNEL' ($workerEntries -ge 1) ('entries='+$workerEntries)
+}
 Write-Output 'LIVE_DOCKER_E2E=PASS'
