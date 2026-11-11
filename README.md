@@ -267,6 +267,14 @@ Core containers:
 - sqlserver;
 - redis.
 
+## Independent Catalog & Rules Service — optional ADR-005 migration slice
+
+A distinct .NET 9 **Catalog Service** now owns its own **LongevityCatalogDb** (ten physical catalog tables plus EF migration history). It validates JWT independently and serves Foods, Recipes and Diet Rules through Docker port **127.0.0.1:18082**, protected by role-based authorization. It reuses the identical source-controlled seed data and catalog mapping without referencing another service's DbContext at runtime.
+
+This is an **opt-in migration slice**, not a cutover: default Web, Gateway, Planner and Admin Rule Governance still use the existing Current Runtime. Moving all admin writers, Planning read models, four REST domain services, domain Outbox ownership and TLS443 remains outstanding; no 100% ADR-005 claim. [Architecture, startup and remaining gaps](docs/architecture/TARGET-CATALOG-SERVICE-MIGRATION-20261111.md).
+
+To verify on isolated QA (synthetic accounts): `node scripts/Test-Catalog-Service-Http.mjs` and `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Live-Catalog-Service.ps1`.
+
 ## Official PRN232 Final Assignment technical acceptance
 
 The original Final Assignment PDF (see the [seven-step demo mapped to its requirements](docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md)) asks for REST/JWT/CRUD/layers/search/filter/sort/pagination, background processing, **Redis or Kafka**, an independent gRPC service, Docker Compose or cloud, EF Core/SQL, migrations, API documentation, a six-section README and a seven-step demo. It does **not** require four independent domain REST services or six databases; those are the team's **additional ADR-005 targets** and remain separately tracked.

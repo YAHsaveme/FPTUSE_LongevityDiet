@@ -104,6 +104,13 @@ Document và verify:
 - Secret/generated-artifact scan.
 - Clean setup theo README/runbook.
 
+## Optional Catalog ownership checkpoint — 11/11/2026
+
+- A new independently deployed Catalog REST service :8082 and owned `LongevityCatalogDb` were migrated in isolated Docker QA with 10 catalog entity tables; JWT 401/200/403, 4/2/2 seed counts and 11-case HTTP smoke PASS.
+- Current default Compose still has 3 SQL DBs. The opt-in catalog overlay adds a **fourth logical database**, not the six required by the team's ADR-005 Target.
+- Catalog consumer routes are not cut over while legacy Planning/Admin still use MainDb. No claim full Target topology, domain Outbox or TLS443 complete.
+- Evidence: docs/architecture/TARGET-CATALOG-SERVICE-MIGRATION-20261111.md.
+
 ## Definition of Done
 
 Một clean environment có thể dựng **Target Architecture** bằng documented commands; migration/seed/Docker/config không phụ thuộc secret hoặc state ngầm trên máy developer; target communication matrix pass; `sql-data`/`redis-data` persistence được chứng minh; chỉ :443 public; và mọi target container/database trong C1 có runtime/Compose evidence. Nếu chưa đạt các điều này thì tài liệu phải tiếp tục ghi rõ Target, không được claim đã deploy.

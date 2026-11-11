@@ -34,6 +34,8 @@ $requiredProjects = @(
     'src\LongevityDiet.API\LongevityDiet.API.csproj',
     # First optional ADR-005 migration slice; does not change legacy deployment.
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj',
+    # Second opt-in ADR-005 slice: process+database isolated Catalog.
+    'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -105,6 +107,7 @@ foreach ($project in $sourceProjectFiles) {
 
 $dependencyRules = @{
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj' = @()
+    'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
@@ -141,6 +144,15 @@ Assert-ProjectRule ($vite -match 'https://localhost:7110') 'Vite proxy must targ
 
 # The opt-in ADR-005 gateway slice is real code with a restricted YARP route,
 # not a speculative diagram and not a replacement for the Current Runtime.
+$catalogProject = Read-ProjectText 'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj'
+Assert-ProjectRule ($catalogProject -match 'LongevityDiet.Repositories') 'Catalog service must reuse catalog configuration without new cross-domain tables.'
+$catalogDb = Read-ProjectText 'src\LongevityDiet.Catalog\CatalogDbContext.cs'
+Assert-ProjectRule ($catalogDb -match 'ICatalogSeedDbContext') 'Catalog must have its own seedable DbContext.'
+Assert-ProjectRule ($catalogDb -notmatch 'DbSet<User>|DbSet<MealPlan>|DbSet<ActivityLog>|DbSet<WorkerJob>') 'CatalogDbContext must not own Identity/Planning/Tracking/Worker entities.'
+$catalogCompose = Read-ProjectText 'docker-compose.catalog.yml'
+Assert-ProjectRule ($catalogCompose -match 'LongevityCatalogDb') 'Catalog Compose overlay must own LongevityCatalogDb.'
+Assert-ProjectRule ($catalogCompose -match '127\.0\.0\.1:') 'Optional catalog must bind only to localhost QA.'
+
 $gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
 Assert-ProjectRule ($gatewayProject -match 'Yarp\.ReverseProxy') 'Optional gateway must use the YARP package.'
 $gatewayConfig = Read-ProjectText 'src\LongevityDiet.Gateway\appsettings.json'

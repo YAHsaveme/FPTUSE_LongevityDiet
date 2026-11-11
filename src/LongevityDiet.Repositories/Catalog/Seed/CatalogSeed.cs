@@ -27,7 +27,7 @@ public static class CatalogSeed
     private static readonly Guid InitialRuleSetId = Guid.Parse("60000000-0000-0000-0000-000000000001");
 
     public static async Task SeedAsync(
-        LongevityDietDbContext dbContext,
+        ICatalogSeedDbContext dbContext,
         CancellationToken cancellationToken = default)
     {
         await SeedFoodsAndAllergensAsync(dbContext, cancellationToken);
@@ -36,7 +36,7 @@ public static class CatalogSeed
     }
 
     private static async Task SeedFoodsAndAllergensAsync(
-        LongevityDietDbContext dbContext,
+        ICatalogSeedDbContext dbContext,
         CancellationToken cancellationToken)
     {
         var existingFoodIds = await dbContext.Foods
@@ -74,7 +74,7 @@ public static class CatalogSeed
     }
 
     private static async Task SeedRecipesAsync(
-        LongevityDietDbContext dbContext,
+        ICatalogSeedDbContext dbContext,
         CancellationToken cancellationToken)
     {
         if (!await dbContext.Recipes.AnyAsync(x => x.Id == LentilRiceBowlId, cancellationToken))
@@ -204,7 +204,7 @@ public static class CatalogSeed
     }
 
     private static async Task SeedRulesAsync(
-        LongevityDietDbContext dbContext,
+        ICatalogSeedDbContext dbContext,
         CancellationToken cancellationToken)
     {
         var plantRule = await dbContext.DietRules
