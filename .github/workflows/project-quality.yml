@@ -56,6 +56,9 @@ jobs:
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml -f docker-compose.email-qa.yml config --quiet
+          # Validate the Web Push QA overlay schema without deploying or exposing VAPID secrets.
+          WEBPUSH_VAPID_PUBLIC_KEY=config-only-placeholder WEBPUSH_VAPID_PRIVATE_KEY=config-only-placeholder docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.webpush-qa.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
@@ -245,6 +248,21 @@ jobs:
 
       - name: Verify RabbitMQ confirms, SQL ACK, replay, quarantine and broker outage recovery
         run: node scripts/Test-RabbitMq-Domain-Events.mjs --outage
+
+      - name: Verify RabbitMQ notification email transport with opt-in, revoke and Mailpit
+        shell: bash
+        run: |
+          # This overlay is explicitly local/CI only: fake @example.test
+          # addresses, in-container Mailpit, no real email provider secrets.
+          docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml -f docker-compose.email-qa.yml up -d --build api mailpit
+          for i in {1..45}; do
+            if curl --fail --silent http://127.0.0.1:8080/ready >/dev/null &&
+               curl --fail --silent http://127.0.0.1:18025/api/v1/messages >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          EMAIL_QA_PROJECT=longevity-diet node scripts/Test-RabbitMq-Smtp-Email-QA.mjs
 
       - name: Stop transitional Worker and start WorkerDb-only reminder dispatcher
         shell: bash

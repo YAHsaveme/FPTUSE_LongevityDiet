@@ -1,0 +1,10 @@
+# Synthetic-only, isolated browser Push QA. All traffic restricted to the
+# localhost Compose project and a temporary VAPID key pair stored OUTSIDE Git.
+# Not a production deployment. Never commit the private key or recipients.
+services:
+  api:
+    environment:
+      WebPush__Enabled: "true"
+      WebPush__PublicKey: ${WEBPUSH_VAPID_PUBLIC_KEY:?must_be_generated_for_isolated_qa}
+      WebPush__PrivateKey: ${WEBPUSH_VAPID_PRIVATE_KEY:?must_be_generated_for_isolated_qa}
+      WebPush__Subject: "mailto:qa@example.test"

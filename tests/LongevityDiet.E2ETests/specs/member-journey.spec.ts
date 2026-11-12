@@ -178,13 +178,24 @@ test('member can complete catalog, planning, activity, challenge, report and rem
   await test.step('Save reminder preferences via Web and verify SQL API readback', async () => {
     await page.goto('/notifications')
     await expect(page.getByRole('heading', { name: 'Giữ nhịp theo cách bạn chọn' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Bật thông báo trình duyệt/ })).toBeVisible()
+    const emailConsent = page.getByLabel(/Đồng ý nhận email nhắc lịch/)
+    await expect(emailConsent).not.toBeChecked()
     await page.getByLabel('Cho phép nhắc lịch').check()
+    await emailConsent.check()
     await page.getByRole('button', { name: 'Lưu lịch nhắc' }).click()
     await expect(page.getByRole('status')).toContainText('Đã lưu cài đặt', { timeout: 10000 })
     const response = await page.request.get('/api/v1/reminders/preferences', { headers })
     expect(response.status()).toBe(200)
-    const preferences = await response.json() as { optedIn: boolean }
+    const preferences = await response.json() as { optedIn: boolean, emailOptedIn: boolean }
     expect(preferences.optedIn).toBe(true)
+    expect(preferences.emailOptedIn).toBe(true)
+    await emailConsent.uncheck()
+    await page.getByRole('button', { name: 'Lưu lịch nhắc' }).click()
+    await expect.poll(async () => {
+      const latest = await page.request.get('/api/v1/reminders/preferences', { headers })
+      return (await latest.json() as { emailOptedIn: boolean }).emailOptedIn
+    }).toBe(false)
   })
 
   await test.step('Protected routes and final logout', async () => {

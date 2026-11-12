@@ -56,7 +56,16 @@ for (let i = 0; i < 30; i++) {
 }
 check('IDENTITY_OWNED_SQL_READY', ready);
 const migrationSql = sql('SET NOCOUNT ON; SELECT COUNT(*) FROM [LongevityIdentityDb].[dbo].[__EFMigrationsHistory];');
-check('IDENTITY_EF_MIGRATION_APPLIED', Number(migrationSql.split(/\s+/).find(x => /^\d+$/.test(x))) >= 1);
+check('IDENTITY_EF_MIGRATION_APPLIED', Number(migrationSql.split(/\s+/).find(x => /^\d+$/.test(x))) >= 2);
+// Shared reminder models must be migrated independently in the Identity-owned DB.
+// Otherwise an EF PendingModelChangesWarning crashes the service on startup.
+const emailSchema = sql("SET NOCOUNT ON; SELECT COUNT(*) FROM [LongevityIdentityDb].sys.columns c " +
+  "JOIN [LongevityIdentityDb].sys.tables t ON t.object_id = c.object_id " +
+  "WHERE (t.name='ReminderPreferences' AND c.name='EmailOptedIn') OR " +
+  "(t.name='UserNotifications' AND c.name IN " +
+  "('EmailDeliveryStatus','EmailDeliveryAttempts','EmailQueuedAtUtc','EmailSentAtUtc','EmailLeaseUntilUtc'));");
+check('IDENTITY_EMAIL_DELIVERY_COLUMNS_MIGRATED',
+  emailSchema.split(/\s+/).includes('6'));
 check('IDENTITY_SERVICE_HEALTH', (await req('/health')).status === 200);
 check('IDENTITY_JWT_REQUIRED', (await req('/api/v1/profile')).status === 401);
 check('LEGACY_GATEWAY_UNCHANGED', (await fetch(legacy + '/gateway/ready')).status === 200);

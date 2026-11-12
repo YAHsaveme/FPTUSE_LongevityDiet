@@ -192,6 +192,22 @@ try
     builder.Services.AddTransient<LongevityDiet.API.Security.ReadinessCheck>();
     if (!builder.Environment.IsEnvironment("Testing"))
         builder.Services.AddHostedService<IdentityRedisBridge>();
+    builder.Services.AddSingleton<WebPushSubscriptionStore>();
+    // Real background Web Push is opt-in, separately from SMTP and in-app alerts.
+    // VAPID private key is read from deployment secrets and never returned to UI.
+    if (builder.Configuration.GetValue<bool>("WebPush:Enabled"))
+    {
+        _ = WebPushSubscriptionStore.Config(builder.Configuration);
+        if (!builder.Environment.IsEnvironment("Testing"))
+            builder.Services.AddHostedService<WebPushReminderHostedService>();
+    }
+    // Delivery is strictly opt-in; no Gmail/SMTP traffic in the default runtime.
+    if (builder.Configuration.GetValue<bool>("EmailNotifications:Enabled"))
+    {
+        _ = EmailDeliveryConfiguration.Read(builder.Configuration, builder.Environment);
+        if (!builder.Environment.IsEnvironment("Testing"))
+            builder.Services.AddHostedService<RabbitEmailNotificationService>();
+    }
     builder.Services.AddScoped<IMealPlanRepository, MealPlanRepository>();
     builder.Services.AddScoped<IWellnessRepository, WellnessRepository>();
     builder.Services.AddScoped<IRecommendationRepository, RecommendationRepository>();

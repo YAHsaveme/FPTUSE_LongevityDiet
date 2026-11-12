@@ -6,6 +6,7 @@ using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories;
 using LongevityDiet.Services.Reminders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LongevityDiet.IntegrationTests;
@@ -26,6 +27,7 @@ public sealed class ReminderNotificationsApiTests : IClassFixture<IntegrationTes
         var pref = await client.GetFromJsonAsync<ReminderPreferencesView>("/api/v1/reminders/preferences");
         Assert.NotNull(pref);
         Assert.False(pref.OptedIn);
+        Assert.False(pref.EmailOptedIn);
         Assert.Empty((await client.GetFromJsonAsync<ReminderScheduleItem[]>(
             "/api/v1/reminders/preview"))!);
     }
@@ -206,6 +208,81 @@ public sealed class ReminderNotificationsApiTests : IClassFixture<IntegrationTes
             service.PersistNotificationResultAsync(new NotificationReadyEvent(
                 Guid.NewGuid(), user.Id, ReminderCategory.Activity, "Title",
                 "Content", "https://phishing.invalid", "valid-key"), default));
+    }
+
+    [Fact]
+    public async Task EmailNotifications_RequireSeparateConsent_AndNeverBackfillOldRows()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var client = await AuthClientAsync();
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+        var userId = await db.Users.AsNoTracking().Select(x => x.Id).SingleAsync();
+        var service = scope.ServiceProvider.GetRequiredService<ReminderService>();
+        var pref = new ReminderPreferencesInput(
+            true, true, true, true, true,
+            new TimeOnly(20, 0), new TimeOnly(18, 30),
+            new TimeOnly(21, 0), new TimeOnly(9, 0),
+            new TimeOnly(22, 0), new TimeOnly(7, 0),
+            EmailOptedIn: false);
+        await service.UpdatePreferencesAsync(userId, pref, default);
+
+        var first = new NotificationReadyEvent(Guid.NewGuid(), userId,
+            ReminderCategory.Activity, "Synthetic QA reminder", "Generic text",
+            "/activity", "qa-no-email-1");
+        Assert.True(await service.PersistNotificationResultAsync(first, default));
+        Assert.Equal("None", (await db.Notifications.AsNoTracking()
+            .SingleAsync(x => x.DeduplicationKey == first.DeduplicationKey)).EmailDeliveryStatus);
+
+        await service.UpdatePreferencesAsync(userId,
+            pref with { EmailOptedIn = true }, default);
+        var enabled = await client.GetFromJsonAsync<ReminderPreferencesView>(
+            "/api/v1/reminders/preferences");
+        Assert.True(enabled!.EmailOptedIn);
+        var second = first with { EventId = Guid.NewGuid(), DeduplicationKey = "qa-email-2" };
+        Assert.True(await service.PersistNotificationResultAsync(second, default));
+        var pending = await db.Notifications.AsNoTracking()
+            .SingleAsync(x => x.DeduplicationKey == second.DeduplicationKey);
+        Assert.Equal("Pending", pending.EmailDeliveryStatus);
+        Assert.Null(pending.EmailQueuedAtUtc);
+        Assert.Equal(0, pending.EmailDeliveryAttempts);
+        Assert.False(await service.PersistNotificationResultAsync(second, default));
+
+        await service.UpdatePreferencesAsync(userId,
+            pref with { EmailOptedIn = false }, default);
+        var third = first with { EventId = Guid.NewGuid(), DeduplicationKey = "qa-opted-out-3" };
+        Assert.True(await service.PersistNotificationResultAsync(third, default));
+        Assert.Equal("None", (await db.Notifications.AsNoTracking()
+            .SingleAsync(x => x.DeduplicationKey == third.DeduplicationKey)).EmailDeliveryStatus);
+
+        var messages = await client.GetFromJsonAsync<NotificationPage>("/api/v1/notifications");
+        Assert.Equal(3, messages!.Items.Count);
+        Assert.Contains(messages.Items, x => x.EmailDeliveryStatus == "Pending");
+        Assert.Equal(2, messages.Items.Count(x => x.EmailDeliveryStatus == "None"));
+    }
+
+    [Fact]
+    public void SmtpEmailConfiguration_IsExplicitAndRecipientAllowlisted()
+    {
+        var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["RabbitMq:HostName"] = "rabbitmq",
+                ["RabbitMq:UserName"] = "synthetic-qa",
+                ["RabbitMq:Password"] = "synthetic-only",
+                ["RabbitMq:UseTls"] = "false",
+                ["EmailNotifications:SmtpHost"] = "mailpit",
+                ["EmailNotifications:SmtpPort"] = "1025",
+                ["EmailNotifications:SmtpTls"] = "false",
+                ["EmailNotifications:FromAddress"] = "sender@longevitydiet.test",
+                ["EmailNotifications:PublicBaseUrl"] = "http://localhost:5173",
+                ["EmailNotifications:AllowedRecipientDomains"] = "example.test"
+            }).Build();
+        var environment = _factory.Services.GetRequiredService<Microsoft.Extensions.Hosting.IHostEnvironment>();
+        var options = LongevityDiet.API.Reminders.EmailDeliveryConfiguration.Read(config, environment);
+        Assert.True(options.CanSendTo("synthetic@example.test"));
+        Assert.False(options.CanSendTo("someone@gmail.com"));
+        Assert.False(options.CanSendTo("malformed-not-an-email"));
     }
 
     private async Task<HttpClient> AuthClientAsync()

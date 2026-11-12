@@ -13,6 +13,8 @@ public sealed class ReminderPreference
 {
     public Guid UserId { get; set; }
     public bool OptedIn { get; set; }
+    // Separate, explicit consent for email; existing in-app reminders do not imply consent.
+    public bool EmailOptedIn { get; set; }
     public bool MealLoggingEnabled { get; set; } = true;
     public bool ActivityEnabled { get; set; } = true;
     public bool ChallengeEnabled { get; set; }
@@ -38,6 +40,12 @@ public sealed class UserNotification
     public string DeduplicationKey { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? ReadAtUtc { get; set; }
+    // Persisted delivery lifecycle; never send historical notifications by default.
+    public string EmailDeliveryStatus { get; set; } = "None";
+    public DateTime? EmailQueuedAtUtc { get; set; }
+    public DateTime? EmailSentAtUtc { get; set; }
+    public DateTime? EmailLeaseUntilUtc { get; set; }
+    public int EmailDeliveryAttempts { get; set; }
 }
 
 public sealed class IdentityOutboxEvent

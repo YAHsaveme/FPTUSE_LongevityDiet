@@ -9,16 +9,18 @@ public sealed record ReminderPreferencesInput(
     bool OptedIn, bool MealLoggingEnabled, bool ActivityEnabled,
     bool ChallengeEnabled, bool WeeklySummaryEnabled,
     TimeOnly MealTime, TimeOnly ActivityTime, TimeOnly ChallengeTime,
-    TimeOnly WeeklySummaryTime, TimeOnly QuietStart, TimeOnly QuietEnd);
+    TimeOnly WeeklySummaryTime, TimeOnly QuietStart, TimeOnly QuietEnd,
+    bool EmailOptedIn = false);
 public sealed record ReminderPreferencesView(
     bool OptedIn, bool MealLoggingEnabled, bool ActivityEnabled,
     bool ChallengeEnabled, bool WeeklySummaryEnabled,
     TimeOnly MealTime, TimeOnly ActivityTime, TimeOnly ChallengeTime,
     TimeOnly WeeklySummaryTime, TimeOnly QuietStart, TimeOnly QuietEnd,
-    int Version, string TimeZone);
+    int Version, string TimeZone, bool EmailOptedIn);
 public sealed record NotificationView(
     Guid Id, ReminderCategory Category, string Title, string Body,
-    string DeepLink, DateTime CreatedAtUtc, DateTime? ReadAtUtc);
+    string DeepLink, DateTime CreatedAtUtc, DateTime? ReadAtUtc,
+    string EmailDeliveryStatus);
 public sealed record NotificationPage(
     IReadOnlyList<NotificationView> Items, int Page, int PageSize,
     int TotalItems, int TotalPages);
@@ -68,6 +70,7 @@ public sealed class ReminderService(
             pref.Version++;
         }
         pref.OptedIn = request.OptedIn;
+        pref.EmailOptedIn = request.OptedIn && request.EmailOptedIn;
         pref.MealLoggingEnabled = request.MealLoggingEnabled;
         pref.ActivityEnabled = request.ActivityEnabled;
         pref.ChallengeEnabled = request.ChallengeEnabled;
@@ -107,7 +110,8 @@ public sealed class ReminderService(
         var items = await query.OrderByDescending(n => n.CreatedAtUtc).ThenBy(n => n.Id)
             .Skip((page - 1) * pageSize).Take(pageSize)
             .Select(n => new NotificationView(
-                n.Id, n.Category, n.Title, n.Body, n.DeepLink, n.CreatedAtUtc, n.ReadAtUtc))
+                n.Id, n.Category, n.Title, n.Body, n.DeepLink, n.CreatedAtUtc, n.ReadAtUtc,
+                n.EmailDeliveryStatus))
             .ToArrayAsync(ct);
         return new NotificationPage(items, page, pageSize,
             total, (total + pageSize - 1) / pageSize);
@@ -194,6 +198,7 @@ public sealed class ReminderService(
                     DeepLink = incoming.DeepLink,
                     DeduplicationKey = incoming.DeduplicationKey,
                     CreatedAtUtc = clock.GetUtcNow().UtcDateTime,
+                    EmailDeliveryStatus = pref is { EmailOptedIn: true } ? "Pending" : "None",
                 });
             }
             db.IdentityInbox.Add(new IdentityInboxEvent
@@ -216,5 +221,6 @@ public sealed class ReminderService(
     private static ReminderPreferencesView Project(ReminderPreference p, string timeZone) =>
         new(p.OptedIn, p.MealLoggingEnabled, p.ActivityEnabled, p.ChallengeEnabled,
             p.WeeklySummaryEnabled, p.MealTime, p.ActivityTime, p.ChallengeTime,
-            p.WeeklySummaryTime, p.QuietStart, p.QuietEnd, p.Version, timeZone);
+            p.WeeklySummaryTime, p.QuietStart, p.QuietEnd, p.Version, timeZone,
+            p.EmailOptedIn);
 }
