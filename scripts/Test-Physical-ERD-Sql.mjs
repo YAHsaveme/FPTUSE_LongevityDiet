@@ -78,6 +78,19 @@ for(const [owner,{db,fks}] of Object.entries(sources)){
   assert.ok(rawFkCaption.includes(child+' → '+parent),
     owner+': undocumented physical SQL FK '+relation);
  }
+ // Draw.io arrows are authoritative, not a prose-only FK ledger. Check every
+ // native source/target against the REAL SQL sys.foreign_keys inventory.
+ const cellNames=new Map([...xml.matchAll(/<mxCell id="(tbl-[a-z]+-[0-9]+)" value="([^"]+)"/g)]
+  .map(match=>[match[1],match[2]]));
+ const nativeFks=[...xml.matchAll(/<mxCell id="edge-fk-([a-z]+)-([0-9]+)"[^>]*source="([^"]+)" target="([^"]+)"/g)]
+  .filter(match=>match[1]===owner)
+  .map(match=>{
+   const child=cellNames.get(match[3]),parent=cellNames.get(match[4]);
+   assert.ok(child&&parent,owner+': native FK endpoint not a physical table');
+   return child+'>'+parent;
+  }).sort();
+ assert.deepEqual(nativeFks,actualFks,
+  owner+': native child->parent FK arrows mismatch REAL SQL relationships');
  // Unowned intermediate tables (such as many-to-many Catalog join) must be
  // included even if there is no public EF Core DbSet property.
  report.push({owner,db,tables:actualTables.length,fks:actualFks.length});

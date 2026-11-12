@@ -38,7 +38,12 @@ class Diagram {
   this.nodes.push(n);return n;
  }
  note(id,value,x,y,w,h,opts={}){return this.box(id,value,x,y,w,h,{...opts,note:true})}
- actor(id,value,x,y,w=300,h=160){return this.box(id,value,x,y,w,h,{actor:true,font:31,line:2.5})}
+ actor(id,value,x,y,w=300,h=160){
+  // Actor is a compact, proportional human icon. Caption is a separate label
+  // ABOVE the figure so its outgoing connector never crosses letterforms.
+  this.note('actor-caption-'+id,value,x,y,w,55,{font:27,bold:true,align:'center'});
+  return this.box(id,'',x+(w-104)/2,y+100,104,124,{actor:true,font:20,line:2.2});
+ }
  edge(id,from,to,opts={}){
   if(!this.ids.has(from)||!this.ids.has(to))throw Error('Unconnected edge '+id);
   this.claim('edge-'+id);
@@ -262,7 +267,7 @@ const groups=[
   d.edge('domain-'+key,'endpoint-'+key,'service-'+key,{
    label:'Validate / business rules',labelX:2040,labelY:y+209});
   d.edge('persistence-'+key,'service-'+key,'repo-'+key,{
-   label:'Transaction / EF Core',labelX:2040,labelY:y+372,labelWidth:185});
+   label:'SQL / EF Core',labelX:2040,labelY:y+372,labelWidth:205});
   d.edge('emit-'+key,'repo-'+key,'event-spine',{
    from:[1,0.5],to:[0,(y+466-1250)/3790],
    dashed:true,label:g.id==='catalog'?'Domain event':'Outbox',labelX:2270,labelY:y+402,labelWidth:160});
@@ -303,19 +308,61 @@ const groups=[
   bus(d,'spine-'+key,spineX,spineY,spineH);
   d.edge('own-'+key,'db-'+key,'spine-'+key,{to:[0.5,0],
     label:'Owns tables',labelX:x+885,labelY:y+205,labelFont:19});
+  // Registry lanes give every physical table an explicit database owner.
+  // Pale/dashed ownership strokes must never be mistaken for SQL foreign keys.
   for(let j=0;j<g.tables.length;j++){
    const isLeft=j%2===0,r=Math.floor(j/2),table=g.tables[j];
    const ty=y+332+r*89,id='tbl-'+key+'-'+j;
    const tx=x+(isLeft?35:735);
-   d.box(id,table,tx,ty,500,64,{font:table.length>23?19:23});
+   d.box(id,table,tx,ty,500,64,{font:table.length>23?23:26});
    const frac=(ty+32-spineY)/spineH;
    if(isLeft)d.edge('table-'+key+'-'+j,'spine-'+key,id,{
-    from:[0,frac],to:[1,0.5],arrow:false,line:1.7});
+    from:[0,frac],to:[1,0.5],arrow:false,line:1.1,dashed:true});
    else d.edge('table-'+key+'-'+j,'spine-'+key,id,{
-    from:[1,frac],to:[0,0.5],arrow:false,line:1.7});
+    from:[1,frac],to:[0,0.5],arrow:false,line:1.1,dashed:true});
   }
-  d.note('fk-'+key,'FK VẬT LÝ (BẢNG CON → BẢNG CHA):\n'+g.fks,
-   x+55,y+984,w-110,242,{font:18});
+  // Actual verified child -> parent foreign keys, as native Draw.io edges.
+  // Vertical waypoints stay in the empty gutter: NEVER across table text.
+  // Identity/Catalog/Planning/Tracking contribute 4+8+6+2 = 20 physical FKs.
+  const fks=g.fks.split(String.fromCharCode(10))
+   .map(row=>row.split('→').map(part=>part.trim()))
+   .filter(parts=>parts.length===2);
+  const expectedFks={identity:4,catalog:8,planning:6,tracking:2,recommendation:0,worker:0};
+  if(fks.length!==expectedFks[key])throw Error('Wrong FK count '+key+': '+fks.length);
+  for(let ri=0;ri<fks.length;ri++){
+   const child=g.tables.indexOf(fks[ri][0]),parent=g.tables.indexOf(fks[ri][1]);
+   if(child<0||parent<0)throw Error('Unresolved SQL FK '+key+' '+fks[ri].join(' → '));
+   const childLeft=(child%2)===0,parentLeft=(parent%2)===0;
+   const cy=y+332+Math.floor(child/2)*89+32;
+   const py=y+332+Math.floor(parent/2)*89+32;
+   let from,to,points;
+   if(childLeft===parentLeft){
+    // Same-column relationships bend around the outer margin of the registry.
+    const lane=x+(childLeft?14:w-14);
+    from=childLeft?[0,0.5]:[1,0.5];
+    to=parentLeft?[0,0.5]:[1,0.5];
+    points=[{x:lane,y:cy},{x:lane,y:py}];
+   }else if(Math.abs(cy-py)<2){
+    // Same-row relationships route ABOVE both table cells, not through a label.
+    const lane=cy-48;
+    from=[0.5,0];to=[0.5,0];
+    points=[
+     {x:x+(childLeft?285:985),y:lane},
+     {x:x+(parentLeft?285:985),y:lane}
+    ];
+   }else{
+    // Opposite-column relationships stay entirely within the center gutter.
+    const lane=x+580+(ri%5)*22;
+    from=childLeft?[1,0.5]:[0,0.5];
+    to=parentLeft?[1,0.5]:[0,0.5];
+    points=[{x:lane,y:cy},{x:lane,y:py}];
+   }
+   d.edge('fk-'+key+'-'+ri,'tbl-'+key+'-'+child,
+    'tbl-'+key+'-'+parent,{from,to,points,line:2.5});
+  }
+  d.note('fk-'+key,
+   'FK VẬT LÝ (BẢNG CON → BẢNG CHA): '+fks.length+' đường có mũi tên'+String.fromCharCode(10)+g.fks,
+   x+55,y+982,w-110,250,{font:21});
  }
  d.footer('Đường vào bus = quyền sở hữu bảng; bảng liệt kê FK vật lý kiểm chứng bằng SQL bên dưới mỗi database. Không có FK SQL xuyên service.');
  d.save();
@@ -365,25 +412,26 @@ const groups=[
   labelX:1920,labelY:1280});
  // FMD branch originates from Planning, and terminates in an explicit
  // business outcome, never silently bypassing a safety gate.
- d.box('fmd-request','FMD: Người dùng yêu cầu\nĐọc cảnh báo + đồng ý',245,1740,695,160,{font:27});
- d.box('fmd-gate','SAFETY GATE\nĐủ điều kiện?',245,2060,695,165,{font:28});
- d.box('fmd-yes','YES: Theo dõi chu kỳ FMD\nCó lịch sử, audit',245,2375,695,150,{font:25});
- d.box('fmd-no','NO: Dừng riêng FMD\nThông báo, không ghi chu kỳ',245,2630,695,165,{font:25,dashed:true});
+ // Split FMD safety outcomes into aligned parallel branches. A straight
+ // YES branch rejoins Tracking; NO remains a terminal outcome for FMD only.
+ d.box('fmd-request','FMD: Người dùng yêu cầu\nĐọc cảnh báo + đồng ý',140,1740,800,160,{font:27});
+ d.box('fmd-gate','SAFETY GATE\nĐủ điều kiện?',140,2060,800,165,{font:28});
+ d.box('fmd-no','NO — KHÔNG ĐỦ ĐIỀU KIỆN\nKhông tạo chu kỳ FMD',100,2375,440,170,{font:24,dashed:true});
+ d.box('fmd-yes','YES — ĐỦ ĐIỀU KIỆN\nTheo dõi chu kỳ FMD',565,2375,440,170,{font:24});
  d.edge('planning-fmd','planning','fmd-request',{
   from:[0,0.5],to:[1,0.5],label:'Chọn FMD',
-  labelX:735,labelY:1670});
+  labelX:945,labelY:1668,labelWidth:185});
  d.edge('fmd-1','fmd-request','fmd-gate',{label:'Safety assessment',
-  labelX:905,labelY:1930});
- d.edge('fmd-2','fmd-gate','fmd-yes',{label:'YES',
-  labelX:955,labelY:2275,labelWidth:105});
+  labelX:980,labelY:1940,labelWidth:235});
+ d.edge('fmd-2','fmd-gate','fmd-yes',{
+  from:[0.80625,1],to:[0.5,0],label:'YES',
+  labelX:805,labelY:2275,labelWidth:100});
  d.edge('fmd-3','fmd-gate','fmd-no',{
-  from:[0,1],to:[1,0],points:[{x:160,y:2300},{x:160,y:2560}],
-  label:'NO',labelX:170,labelY:2560,labelWidth:65});
- // A successfully screened FMD cycle rejoins normal meal/activity tracking;
- // the rejected FMD branch is terminal only for the FMD feature.
+  from:[0.225,1],to:[0.5,0],label:'NO',
+  labelX:155,labelY:2275,labelWidth:95});
  d.edge('fmd-accepted-to-tracking','fmd-yes','tracking',{
   from:[1,0.35],to:[0,0.95],label:'FMD → Log',
-  labelX:954,labelY:2345,labelWidth:140,labelFont:18});
+  labelX:960,labelY:2315,labelWidth:125,labelFont:18});
  // RabbitMQ is a real opt-in metadata audit mirror from Redis Streams.
  d.box('rabbit','RABBITMQ — AMQP :5672\nOPTIONAL — durable audit queue\nPublisher confirm / ACK',2150,3410,750,190,{font:27,dashed:true});
  d.edge('redis-rabbit','redis','rabbit',{from:[1,0.5],to:[0,0.5],

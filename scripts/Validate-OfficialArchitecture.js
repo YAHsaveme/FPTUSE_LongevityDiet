@@ -43,7 +43,7 @@ for(const name of names){
  }
  for(const cell of vertices){
   const id=(cell.match(/\bid="([^"]+)"/)||[])[1];
-  const freeText=/^(title-|label-|heading-|fk-|footer|bottom-rule)/.test(id);
+  const freeText=/^(title-|label-|heading-|fk-|actor-caption-|footer|bottom-rule)/.test(id);
   const group=/^(panel-|box-)/.test(id);
   check(freeText||group||connected.has(id),
     name+' orphan functional node '+id);
@@ -128,6 +128,31 @@ check(physicalTableCount===50,'Unexpected target physical table count: '+physica
 check(tableCells===physicalTableCount,
  'ERD must list ALL physical tables including implicit EF join: '+tableCells+
  ' != '+physicalTableCount);
+// Ownership rails alone are not SQL relationships. The official ERD MUST
+// depict all 20 source-confirmed physical FKs as native child -> parent arrows.
+const fkEdges=(diagrams['Database Diagram']?.edges||[])
+ .filter(e=>e.includes('id="edge-fk-'));
+const expectedOwnerCounts={identity:4,catalog:8,planning:6,tracking:2,recommendation:0,worker:0};
+check(fkEdges.length===20,'ERD must draw 20 native physical foreign-key arrows, not only prose: '+fkEdges.length);
+for(const [owner,count] of Object.entries(expectedOwnerCounts)){
+ check(fkEdges.filter(e=>e.includes('id="edge-fk-'+owner+'-')).length===count,
+  'ERD wrong physical FK arrow count for '+owner);
+}
+for(const e of fkEdges){
+ const source=(e.match(/source="([^"]+)"/)||[])[1]||'';
+ const target=(e.match(/target="([^"]+)"/)||[])[1]||'';
+ const fromOwner=(source.match(/^tbl-([a-z]+)-/)||[])[1];
+ const toOwner=(target.match(/^tbl-([a-z]+)-/)||[])[1];
+ check(!!fromOwner&&fromOwner===toOwner,
+  'Physical FK must connect physical tables inside the SAME owner: '+source+' -> '+target);
+ check(e.includes('endArrow=block')&&e.includes('endFill=1'),
+  'Physical FK needs a clear filled arrowhead: '+source+' -> '+target);
+}
+for(const actorDiagram of ['C0','C1','C2','Business Flow']){
+ const xml=diagrams[actorDiagram]?.xml||'';
+ check(xml.includes('actor-caption-member')&&xml.includes('actor-caption-admin'),
+  actorDiagram+' must separate actor labels from proportional stick-person icons');
+}
 check(diagrams['Database Diagram']?.xml.includes('RuleSetVersionItems'),
  'ERD must show real RuleSetVersionItems SQL join table.');
 // The lecturer-facing handover must describe the same physical SQL inventory
