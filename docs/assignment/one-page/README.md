@@ -27,12 +27,23 @@ planned **public HTTPS :443** for browser access separately from **internal
 Web HTTP :80** and **YARP HTTP :8080**; the public TLS ingress/cutover is
 **not** claimed as deployed.
 
-In the Database Diagram, short horizontal links to the central vertical
-spine mean **ownership by a database**, NOT physical FK relations. All **20
-SQL-verified local foreign keys** are annotated at the foot of their owner
-panels (Identity 4, Catalog 8, Planning 6, Tracking 2). The 50 physical
-tables include Catalog's implicit many-to-many join table. Cross-owner
-UUID/DomainEvent references never become SQL foreign keys.
+In the Database Diagram, **dashed thin** horizontal links to each central
+vertical spine show **ownership by one SQL database**, NOT a physical FK.
+The **20 SQL-verified FK relationships are now native, solid, filled-arrow
+connectors directly between the child and parent table boxes**. Each relation
+is also listed at the bottom of its owner panel for independent checking:
+Identity 4, Catalog 8, Planning 6, Tracking 2, Recommendation 0, Worker 0.
+Same-column FK arrows route through the panel's outside margin; cross-column
+FK arrows use the middle gutter, so no arrow must pass through table text.
+The 50 physical tables include Catalog's implicit many-to-many join table.
+Cross-owner UUID/DomainEvent references never become SQL foreign keys.
+
+The Member and Admin actor icons were resized to human proportions, with
+their captions detached above the figure so connector strokes do not cross
+captions. The Business Flow FMD safety decision is explicitly split into
+two vertical YES/NO branches, and only the eligible branch rejoins Tracking.
+All files were exported again and visually inspected from the rendered PNGs.
+The validators now reject missing physical FK arrows or non-owner FK edges.
 
 The Business Flow keeps Admin (publishing RuleVersion) connected to
 Catalog; FMD requests branch from Planning through an eligibility gate;

@@ -48,12 +48,16 @@ Identity 7, Catalog 10 (9 DbSets + RuleSetVersionItems), Planning 13,
 Tracking 10, Recommendation 4 and Worker 6: **50 physical tables** in all,
 including the source-confirmed implicit EF Core many-to-many Catalog join.
 The Worker count includes two DbContexts sharing one Worker-owned SQL catalog.
-Every table connects to a vertical ownership spine, but those short
-connectors are **not** physical foreign keys; real within-owner FK
-relationships are written at the foot of each panel.
-No cross-service database FK is invented. The displayed 20 local FK
-relationships are reconciled against live SQL Server via
-`scripts/Test-Physical-ERD-Sql.mjs`, not inferred from diagram annotations.
+Every table connects to a vertical ownership spine by **thin dashed**
+ownership links, which are NOT physical foreign keys. **All 20 real,
+within-owner FK relationships also have native, solid arrows** linking
+the actual child table box to the parent table box, routed in the middle
+gutter or clear outside margin. Each FK pair is written at the foot of
+its owner panel for readability and independent reference. No
+cross-service database FK is invented. The script
+`scripts/Test-Physical-ERD-Sql.mjs` reconciles **every arrow source and
+target, not just the count**, against the actual SQL Server
+`sys.foreign_keys` and verifies all 50 physical table names.
 
 ## Business Flow
 

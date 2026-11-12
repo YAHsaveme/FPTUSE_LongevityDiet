@@ -15,9 +15,11 @@ Database Diagram Overall, Business Flow Overall.
 - C1: six service owners and their own databases; independent event rail.
 - C2: REST endpoint → application service → repository/DbContext per owner;
   no direct cross-domain SQL/foreign-key dependencies.
-- Database Diagram: all 50 physical target-owned tables (including Catalog join table); links to database
-  ownership spines indicate membership, **not physical FKs**. Record local
-  FK relationships separately within the relevant owner group.
+- Database Diagram: all 50 physical target-owned tables (including the Catalog join table). Thin dashed links to
+  database ownership spines indicate membership, **not physical FKs**.
+  Each of the 20 genuine local SQL FK pairs MUST also be drawn as a
+  solid child-table → parent-table arrow routed outside table text;
+  verify every directed pair against real `sys.foreign_keys`.
 - Business Flow: Admin rules connected to Catalog, member happy path,
   guarded FMD YES/NO outcomes, Redis business Worker, optional RabbitMQ
   metadata-only audit consumer and Worker SQL receipt.
