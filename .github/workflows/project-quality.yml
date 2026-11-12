@@ -15,15 +15,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET 9
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 9.0.x
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -31,12 +31,31 @@ jobs:
             src/LongevityDiet.Web/package-lock.json
             tests/LongevityDiet.E2ETests/package-lock.json
 
+      - name: Validate five official C0 C1 C2 Database and Business Flow diagrams
+        run: |
+          node ./scripts/Validate-OverallDiagrams.js
+          node ./scripts/Validate-OfficialDiagram-Geometry.js --strict
+          node ./scripts/Validate-CourseLinks.js
+          node ./scripts/Validate-NutritionPlanContract.js
+          node ./scripts/Validate-Prn232-Final-PDF.cjs
+
       - name: Validate frozen project structure
         shell: pwsh
         run: ./scripts/Validate-ProjectStructure.ps1
 
       - name: Validate Docker Compose configuration
-        run: docker compose --env-file .env.example config --quiet
+        run: |
+          docker compose --env-file .env.example config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
@@ -53,6 +72,10 @@ jobs:
         working-directory: src/LongevityDiet.Web
         run: npm ci
 
+      - name: Test frontend
+        working-directory: src/LongevityDiet.Web
+        run: npm test
+
       - name: Lint frontend
         working-directory: src/LongevityDiet.Web
         run: npm run lint
@@ -60,3 +83,194 @@ jobs:
       - name: Build frontend
         working-directory: src/LongevityDiet.Web
         run: npm run build
+
+
+  current-runtime-release-smoke:
+    # Verify real SQL/Redis/API/gRPC/Worker/Web behavior *before* merging to develop.
+    # Keep the post-merge main check as a separate safety net.
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    needs: validate
+    # Playwright --with-deps uses apt; pin a stable release instead of the
+    # migrating ubuntu-latest (Ubuntu 26 'resolute' DNS/mirror outage on CI).
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tests/LongevityDiet.E2ETests/package-lock.json
+
+      - name: Generate ephemeral runtime configuration
+        shell: bash
+        run: |
+          python - <<'PY'
+          import secrets
+          from pathlib import Path
+          sql = "Ci_" + secrets.token_urlsafe(30) + "_Aa1!"
+          jwt = secrets.token_urlsafe(48)
+          Path(".env").write_text(
+              "MSSQL_SA_PASSWORD=" + sql + "\n"
+              "JWT_SIGNING_KEY=" + jwt + "\n"
+              "JWT_ISSUER=LongevityDiet.API\n"
+              "JWT_AUDIENCE=LongevityDiet.Web\n"
+              "SQLSERVER_PORT=14330\n"
+              "REDIS_PORT=6379\n"
+              "API_PORT=8080\n"
+              "GRPC_PORT=8081\n"
+              "WEB_PORT=5173\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Build and start current Compose runtime
+        run: docker compose up -d --build
+
+      - name: Wait for current runtime
+        shell: bash
+        run: |
+          for i in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null &&
+               curl --fail --silent http://127.0.0.1:5173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose ps
+          docker compose logs --no-color --tail 200
+          exit 1
+
+      - name: Install Docker E2E dependencies
+        working-directory: tests/LongevityDiet.E2ETests
+        run: |
+          npm ci
+          # GitHub-hosted Ubuntu includes Chrome. Avoid apt downloads during
+          # transient Ubuntu package-mirror DNS outages. Retain a fallback for
+          # future runner images without Chrome.
+          if command -v google-chrome-stable >/dev/null 2>&1 || command -v google-chrome >/dev/null 2>&1; then
+            echo 'PLAYWRIGHT_USE_SYSTEM_CHROME=1' >> "$GITHUB_ENV"
+            google-chrome --version || google-chrome-stable --version
+          else
+            npx playwright install chromium
+          fi
+
+      - name: Run Docker E2E
+        working-directory: tests/LongevityDiet.E2ETests
+        run: npm run test:docker
+
+      - name: Build and start optional YARP gateway migration slice
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml up -d --build gateway web
+
+      - name: Verify Web to YARP to REST and safe route matching
+        shell: bash
+        run: |
+          for i in {1..40}; do
+            if curl --fail --silent http://127.0.0.1:18080/gateway/ready >/dev/null &&
+               curl --fail --silent http://127.0.0.1:5173/ >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          curl --fail --silent http://127.0.0.1:18080/gateway/ready
+          curl --fail --silent http://127.0.0.1:18080/openapi/v1.json >/dev/null
+          test "$(curl --silent -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/api/v1/foods)" = "401"
+          test "$(curl --silent -o /dev/null -w '%{http_code}' http://127.0.0.1:18080/not-a-route)" = "404"
+          test "$(curl --silent -o /dev/null -w '%{http_code}' http://127.0.0.1:5173/api/v1/foods)" = "401"
+          docker compose -f docker-compose.yml -f docker-compose.gateway.yml exec -T web grep -q 'proxy_pass http://gateway:8080/api/' /etc/nginx/conf.d/default.conf
+
+      - name: Playwright E2E through YARP Gateway
+        working-directory: tests/LongevityDiet.E2ETests
+        run: npm run test:docker
+
+      - name: Build and start optional independent Catalog database/service
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml up -d --build catalog
+
+      - name: Validate independent Catalog runtime and JWT across services
+        shell: bash
+        run: |
+          for i in {1..40}; do
+            if curl --fail --silent http://127.0.0.1:18082/ready >/dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/Test-Catalog-Service-Http.mjs
+          node scripts/Test-Catalog-Admin-Http.mjs
+          migration_count=$(printf 'SET NOCOUNT ON;\nSELECT COUNT(*) FROM [LongevityCatalogDb].[dbo].[__EFMigrationsHistory];\nGO\n' | docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml exec -T sqlserver sh -lc '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -b -h -1 -W')
+          test "$(echo "$migration_count" | tr -d '[:space:]')" -ge 1
+
+      - name: Build and start independent Identity DB and REST service
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml up -d --build identity
+
+      - name: Validate Identity SQL ownership JWT refresh and profile outbox
+        shell: bash
+        run: |
+          for i in {1..40}; do
+            if curl --fail --silent http://127.0.0.1:18081/ready >/dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/Test-Identity-Service-Http.mjs
+
+      - name: Start independent Planning owned DB and service
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml up -d --build planning
+
+      - name: Verify Planning independent SQL JWT Challenge Outbox Redis
+        run: node scripts/Test-Planning-Service-Http.mjs
+
+      - name: Start independent Tracking activity writer and SQL owner
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml up -d --build tracking-api
+
+      - name: Verify Tracking Identity REST, SQL owner, JWT, LDAS and Outbox Redis
+        run: node scripts/Test-Tracking-Writer-Http.mjs
+
+      - name: Start optional Recommendation gRPC owner and independent SQL
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml up -d --build recommendation-owner
+
+      - name: Verify Recommendation SQL owner, HTTP2 gRPC, JWT feedback and Redis
+        run: node scripts/Test-Recommendation-Owner-Http.mjs
+
+      - name: Start opt-in Worker Ops own database event consumer
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml up -d --build worker-ops
+
+      - name: Verify Worker event inbox, SQL dedupe, dead-letter, Admin JWT and Redis ACK
+        run: node scripts/Test-Worker-Ops-Http.mjs
+
+      - name: Verify real SQL physical ERD (6 owners, 50 tables, 20 FKs)
+        run: node scripts/Test-Physical-ERD-Sql.mjs
+
+      - name: Start optional RabbitMQ 4 and real Redis-to-Rabbit domain event mirror
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml up -d --build rabbitmq worker-ops
+
+      - name: Verify RabbitMQ confirms, SQL ACK, replay, quarantine and broker outage recovery
+        run: node scripts/Test-RabbitMq-Domain-Events.mjs --outage
+
+      - name: Stop transitional Worker and start WorkerDb-only reminder dispatcher
+        shell: bash
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.gateway.yml stop worker
+          docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml up -d --build worker-owned
+
+      - name: Verify independent WorkerDb scheduler and Redis notification delivery
+        run: node scripts/Test-Worker-Owned-Reminder.mjs
+
+      - name: Start opt-in target YARP API Gateway sidecar
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml up -d --build gateway-target
+
+      - name: Verify target Gateway JWT across six independently owned service APIs
+        run: node scripts/Test-Target-Gateway-Http.mjs
+
+      - name: Verify QA cutover preflight fails closed until audited migration
+        run: node scripts/Test-ADR005-Cutover-Readiness.mjs
+
+      - name: Current runtime and Gateway evidence
+        shell: bash
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.gateway.yml ps
+          docker compose -f docker-compose.yml -f docker-compose.gateway.yml exec -T redis redis-cli ping
+          docker compose -f docker-compose.yml -f docker-compose.gateway.yml exec -T redis redis-cli XINFO GROUPS longevity:weekly-report-events || true
+
+      - name: Tear down release smoke
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml -f docker-compose.rabbitmq.yml down -v --remove-orphans

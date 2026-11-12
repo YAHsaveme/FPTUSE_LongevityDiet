@@ -1,74 +1,91 @@
-# System Architecture - C4
+# LongevityDiet — five official C4, database and business-flow views
 
-## 1. Modelling rule
-- Assignment C0 = official C4 System Context.
-- Assignment C1 = official C4 Container view.
-- C0 shows people, the whole system, and direct external systems only.
-- C1 shows target deployable applications/data stores and their communication.
+The only official native drawings and one-page PDF exports are in
+[one-page/README.md](one-page/README.md). Each is black and white, centered
+from the top of the page downward, with generous gaps between endpoints.
 
-## 2. C0 - System Context
-C0 remains intentionally simple: Guest, Member and Administrator use Longevity Diet Companion; the system may call Optional Local AI Runtime only for explanation rewriting. C0 does not show React, Gateway, services, databases, Redis, gRPC, Worker or ports.
-
-## 3. C1 - Target Architecture
-The C1 title must say **Target Architecture**. It is not a claim that the current code/Docker Compose already contains these target services.
-
-### Target containers
-| Container | Technology/Port | Data owner | Short responsibility |
+| View | Editable drawing | One-page PDF | Main question |
 |---|---|---|---|
-| Web Application | React + TypeScript / HTTPS :443 | — | Browser UI |
-| API Gateway | YARP + .NET 9 / :8080 behind :443 | — | Route and edge policy |
-| Identity & Profile Service | ASP.NET Core / REST :8081 | LongevityIdentityDb | Auth/profile |
-| Catalog & Rules Service | ASP.NET Core / REST :8082 | LongevityCatalogDb | Catalog/rules |
-| Planning Service | ASP.NET Core / REST :8083 | LongevityPlanningDb | Plans/challenge/FMD |
-| Tracking & Progress Service | ASP.NET Core / REST :8084 | LongevityTrackingDb | Logs/LDAS/progress |
-| Recommendation Service | .NET gRPC / HTTP2 :8085 | LongevityRecommendationDb | Safety/ranking |
-| Background Worker | .NET Worker + internal ops :8086 | LongevityWorkerDb | Async jobs |
-| Event Streams | Redis 7 Streams :6379 | Redis persistence | Integration events |
-| Local AI Runtime | external HTTP :11434 optional | external | Explanation rewrite |
+| C0 System Context | [Draw.io](one-page/C0.drawio) | [PDF](one-page/C0.pdf) | Who uses the system? |
+| C1 Containers | [Draw.io](one-page/C1.drawio) | [PDF](one-page/C1.pdf) | Which service, database, broker and protocol handles each request? |
+| C2 Components | [Draw.io](one-page/C2.drawio) | [PDF](one-page/C2.pdf) | What is the domain processing path inside each service? |
+| Database Diagram Overall | [Draw.io](one-page/Database%20Diagram.drawio) | [PDF](one-page/Database%20Diagram.pdf) | Which of the 50 physical tables belongs to which SQL catalog? |
+| Business Flow | [Draw.io](one-page/Business%20Flow.drawio) | [PDF](one-page/Business%20Flow.pdf) | How does a member request become a plan, tracking, notification and audit? |
 
-All SQL databases use private EF Core/TDS :1433. Multiple logical databases may share one SQL Server instance in local/demo; ownership is still exclusive.
+## C0
 
-## 4. C1 communication
-- Actors -> Web: HTTPS :443.
-- Web -> API Gateway: HTTPS/REST :443.
-- Gateway -> Identity/Catalog/Planning/Tracking: REST :8081/:8082/:8083/:8084.
-- Gateway -> Worker operations endpoint: Ops :8086, Admin only.
-- Planning -> Recommendation: gRPC/HTTP2 :8085.
-- Recommendation -> optional Local AI: HTTP :11434.
-- Each business service -> its own database only: EF Core/TDS :1433.
-- Identity/Catalog/Planning/Tracking publish integration events to Event Streams.
-- Worker consumes/acknowledges events and may publish result/retry/dead-letter events.
-- Recommendation may consume approved catalog/rule snapshot events into its own read model.
+Member uses LongevityDiet for registration, profiling, meal plans, activity
+logs, LDAS and progress. Admin publishes approved rule versions and reviews
+operations. Both actors connect explicitly to one system boundary.
 
-Redis Streams is never isolated. Producers use XADD; consumers use XREADGROUP/XACK in supporting Dynamic views. To keep the teacher-facing C1 one-glance readable, the draw.io C1 shows representative publish/read lanes; the complete Tracking -> Event Streams relationship remains authoritative in Structurizr and is expanded in `06-outbox-redis-dynamic.drawio`.
+## C1
 
-## 5. Database-per-service rule
-Every business service has exactly one owned logical database in C1. No service may connect to another service's database. Cross-service reads use APIs or copied event-driven read models; no cross-database FK or SQL join crosses service boundaries.
+From top to bottom: Member/Admin → React/Nginx → opt-in YARP API Gateway
+→ shared route spine → each of six independent target REST service owners
+→ its own SQL database. Database/outbox events attach to the right event
+spine; existing Redis Streams is the primary business transport and the
+optional RabbitMQ durable audit mirror sits beside Redis.
 
-## 6. Gateway rule
-The Web Application never calls internal services directly. YARP API Gateway is the single public API routing boundary. Gateway performs routing, JWT edge policy, rate limiting and correlation/forwarding only; business rules remain in services.
+Ports: Identity REST 8081; Catalog REST 8082; Planning REST 8083;
+Tracking REST 8084; Recommendation gRPC 8085 and REST 8087; Worker Ops
+REST 8086; SQL Server 1433; Redis TCP 6379; RabbitMQ AMQP 5672 (internal).
+Public Web and Gateway ports depend on deployment/overlay.
 
-## 7. Current Runtime versus Target Architecture
-Current Local Deployment still contains one primary REST API, one Recommendation gRPC process, one Worker, one shared application database, Redis and Web/Nginx. That remains truthful until code/runtime migration occurs. Target C1 and Production Target show the approved future architecture from ADR-005.
+## C2
 
-## 8. Diagram presentation standard
-- English element names.
-- Minimal box text: name, type, technology/port, one short responsibility.
-- Orthogonal connectors only.
-- Dedicated whitespace corridor around every relationship label.
-- No line through text/box; no connector crossing/overlap.
-- Database visually paired directly beneath/adjacent to its owning service.
-- Event Streams centered in an async lane with representative producer/read lanes; complete async relationships remain in Structurizr/Dynamic views.
-- No controller/repository/table/class detail in C1.
+All service internal paths are drawn from top to bottom:
+HTTP Endpoint/Controller → Application/Domain rules → DbContext/
+Repository with its own SQL catalog and Outbox/event interfaces.
+In the diagram, six bounded-context panels are independent siblings,
+not a single chain of cross-domain SQL calls.
+RabbitMQ is an actual opt-in event audit integration, described in
+[the implementation guide](../architecture/RABBITMQ-INTEGRATION-20261112.md).
 
-## 9. Supporting views
-Engineering documentation additionally uses Component, Dynamic and Deployment views. They answer different questions and must not be mixed into C1.
+## Database Diagram
 
-- `03-docker-deployment.drawio`: actual Current Local Docker Compose topology.
-- `06-outbox-redis-dynamic.drawio`: target Outbox -> XADD -> Redis Streams -> XREADGROUP/XACK -> result/dead-letter flow.
-- `10-production-secure-deployment.drawio`: secure Production Target placement.
-- `11-cloud-docker-deployment.drawio`: assignment-friendly Cloud Docker Target on one IaaS VM.
+Six physically distinct target logical databases:
+Identity 7, Catalog 10 (9 DbSets + RuleSetVersionItems), Planning 13,
+Tracking 10, Recommendation 4 and Worker 6: **50 physical tables** in all,
+including the source-confirmed implicit EF Core many-to-many Catalog join.
+The Worker count includes two DbContexts sharing one Worker-owned SQL catalog.
+Every table connects to a vertical ownership spine by **thin dashed**
+ownership links, which are NOT physical foreign keys. **All 20 real,
+within-owner FK relationships also have native, solid arrows** linking
+the actual child table box to the parent table box, routed in the middle
+gutter or clear outside margin. Each FK pair is written at the foot of
+its owner panel for readability and independent reference. No
+cross-service database FK is invented. The script
+`scripts/Test-Physical-ERD-Sql.mjs` reconciles **every arrow source and
+target, not just the count**, against the actual SQL Server
+`sys.foreign_keys` and verifies all 50 physical table names.
 
-The Cloud Docker view makes deployment storage explicit: `sql-data` mounts to SQL Server `/var/opt/mssql`; `redis-data` mounts to Redis `/data` with AOF; Docker manages both named volumes on the VM's persistent cloud disk. Only HTTPS :443 is public. Internal service, SQL and Redis traffic stays on the private `ldc-network` and uses Docker service DNS.
+## Business Flow
 
-The Assignment permits Kafka or Redis Pub/Sub/Streams. ADR-002 selects Redis Streams for this project; Kafka is not added merely to imitate an example diagram.
+Member registers with Identity, completes safety/allergen profile, reads
+Catalog's approved RuleVersion, generates a Planning meal plan, records
+Tracking/LDAS events, then the transaction/outbox delivers via Redis
+to Worker for scheduled reminders/progress. Admin authentication, approval
+and publication of rules connects into Catalog. FMD requests branch from
+Planning through a separate safety gate with two logically distinct
+YES/NO outcomes; YES rejoins Tracking, while NO stops FMD only.
+
+With the RabbitMQ overlay enabled, metadata from the same owner events is
+mirrored into a durable RabbitMQ queue and stored as Worker-owned,
+deduplicated audit receipts. **RabbitMQ audit receipts are not the
+business reminder trigger**; Redis remains the current primary Worker path.
+
+## Scope honesty / limitations
+
+ADR-005 independent service/databases and target YARP Gateway are opt-in
+migration slices. The current Web still uses legacy API/SQL for portions
+of the application. Code, diagrams, automated tests and broker QA do not
+establish full historic data migration, clinical approval, public TLS/443,
+or production cutover readiness.
+
+## Commands
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
+node scripts/Validate-OfficialArchitecture.js
+node scripts/Test-RabbitMq-Domain-Events.mjs
+```

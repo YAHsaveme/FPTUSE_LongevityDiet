@@ -3,7 +3,7 @@
 **Owner:** Thành viên 1
 **Reviewer:** Thành viên 3
 **Branch:** `feature/w4-t1-hardening`
-**Status:** Planned
+**Status:** In Progress (JWT/RBAC/IDOR, SQL/Redis/gRPC and sequential benchmarks verified; target distributed traces, load and reviewer pending)
 
 ## Architecture alignment (ADR-005)
 
@@ -83,3 +83,9 @@ Hardening toàn hệ thống trước release để auth/ownership, DI lifetime,
 ## Definition of Done
 
 Critical security regression pass; DI composition/lifetime hợp lệ; exception contract nhất quán; dependency failure predictable; một business action trace được end-to-end; bottleneck quan trọng được fix hoặc ghi accepted trade-off có số đo.
+
+
+## Verified Current Runtime checkpoint (11/11/2026)
+
+- JWT/RBAC/IDOR, gateway 503/200 resilience, 172/172 .NET, sequential endpoint p50/p95 baseline and 0 production npm audit vulnerabilities PASS; target distributed trace/load remain.
+- Official PDF source matrix: scripts/Validate-Prn232-Final-PDF.cjs; full technical QA runner: scripts/Test-Prn232-Final-Acceptance.ps1. This checkpoint is not reviewer sign-off or proof the ADR-005 Target Architecture is deployed.

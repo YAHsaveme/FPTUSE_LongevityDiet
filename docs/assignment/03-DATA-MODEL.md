@@ -1,283 +1,54 @@
-# Data Model - Conceptual ERD and Physical Database
+# Database Diagram - sơ đồ CSDL tổng thể đen trắng
 
-## 1. Modelling rule
+[Xem PDF một trang](one-page/Database%20Diagram.pdf) | [Mở Draw.io để phóng to và chỉnh sửa](one-page/Database%20Diagram.drawio)
 
-Two data views are provided:
+Database Diagram được thiết kế trên **một trang, chỉ có nét đen và nền trắng**. Mọi kết nối đều gắn trực tiếp vào **bảng nguồn và bảng đích thật**, không có vách ngăn năm cột, trục giả hay đường nối trang trí.
 
-- **Conceptual ERD:** business concepts and their main relationships; no SQL types.
-- **Physical Database:** target MVP relational schema with PK/FK and implementation-oriented fields.
+## Quy ước xem kết nối
 
-The conceptual view is intentionally much smaller so it can be understood in one glance.
+| Ký hiệu đen trắng | Loại kết nối | Ý nghĩa |
+| --- | --- | --- |
+| **Nét liền đậm + Crow's Foot** | **9 FK SQL** | Quan hệ thật có ràng buộc trong EF Core, thể hiện 1–1 hoặc 1–N. |
+| **Nét đứt dài + nhãn APP** | **16 liên hệ logic** | Khóa dùng chung/quan hệ theo nghiệp vụ (ví dụ UserId, PlannedMealId, Version hoặc cùng ngày). **Không phải FK SQL**. |
+| **Nét chấm + nhãn EVENT** | **6 luồng sự kiện** | Trao đổi sự kiện/trạng thái Outbox/Inbox/Worker. **Không phải FK SQL**. |
 
----
+**Mọi nhãn APP chỉ biểu thị liên hệ theo khóa hoặc ngữ cảnh nghiệp vụ.** Hai bảng cùng `UserId` không đồng nghĩa một bản ghi ở bảng A có một bản ghi cha ở bảng B. Các liên hệ EVENT thể hiện định danh sự kiện hoặc luồng xử lý, không phải kết nối vật lý trong SQL Server.
 
-## 2. Conceptual ERD
+## Cách đọc bản bố cục tối ưu
 
-### Core concepts
+Thay vì lặp lại tên database dài trong mỗi ô, tiêu đề bảng sử dụng mã ngắn **[I] = LongevityDietDb**, **[T] = LongevityTrackingDb**, và **[W] = LongevityWorkerDb**. Cả ba tên database, số bảng và ý nghĩa đường nối được ghi trong hàng chú giải ở đầu trang.
 
-| Concept | Meaning |
-|---|---|
-| User | Account owner or administrator |
-| User Profile | Personal schedule/preferences used for planning |
-| Food | Reusable food reference |
-| Recipe | Meal composed from foods |
-| Diet Rule | Versioned longevity-diet rule |
-| Meal Plan | Generated plan owned by a user |
-| Planned Meal | Meal slot inside a plan |
-| Meal Log | What a user actually consumed |
-| Activity Log | User activity record |
-| Adherence Score | Daily/weekly adherence result |
+Font các trường PK/FK và tên bảng được tăng tỷ lệ hiển thị so với chiều rộng trang; bố cục được thu gọn đồng bộ, không để đường nối hoặc kích thước ô lệch nhau. Nhãn đường **APP: UserId**, **APP: PlannedMealId**, **APP: Version**, **EVENT: EventId**, **EVENT: Notification** v.v. cho biết chính xác khóa hoặc ngữ cảnh sự kiện, thay vì ghi chung chung "business key" hoặc "EVENT".
 
-### Main conceptual relationships
+File PDF vẫn chỉ có **một trang chứa toàn bộ 32 bảng**. Khi cần đọc tất cả thuộc tính, hãy phóng to ở mức 150–200% hoặc dùng Draw.io; đây là giới hạn thực tế của một ERD 32 bảng trên màn hình nhỏ.
 
-- User **has one** User Profile.
-- User **has many** Meal Plans.
-- Meal Plan **contains many** Planned Meals.
-- Planned Meal **references one** Recipe.
-- Recipe **uses many** Foods.
-- User **creates many** Meal Logs.
-- Meal Log **references food/recipe content**.
-- User **creates many** Activity Logs.
-- User **receives many** Adherence Scores.
-- Diet Rules **govern** plan generation and adherence scoring.
+## Dữ liệu đã triển khai
 
-### Conceptual boundary
-Messaging tables, refresh tokens, audit logs and technical idempotency records are intentionally omitted from the conceptual ERD because they are implementation infrastructure rather than primary business concepts.
+| Database | Số bảng | FK SQL thật |
+| --- | ---: | ---: |
+| `LongevityDietDb` - Identity, Planning, Meal Logging, Recommendation và FMD | 21 | 8 |
+| `LongevityTrackingDb` - Activity và Adherence | 7 | 1 |
+| `LongevityWorkerDb` - Reminder Worker | 4 | 0 |
+| **Tổng** | **32** | **9** |
 
----
+**Chín FK thật có tên cột rõ ràng:**
 
-## 3. Physical Database - Core Field Detail
+| Bảng cha | Bảng con | Bội số |
+| --- | --- | --- |
+| `Users.Id` | `UserProfiles.UserId` | 1–1 |
+| `Users.Id` | `RefreshTokens.UserId` | 1–N |
+| `Users.Id` | `ReminderPreferences.UserId` | 1–1 |
+| `Users.Id` | `UserNotifications.UserId` | 1–N |
+| `MealPlans.Id` | `MealPlanDays.MealPlanId` | 1–N |
+| `MealPlanDays.Id` | `PlannedMeals.MealPlanDayId` | 1–N |
+| `MealLogs.Id` | `MealLogItems.MealLogId` | 1–N |
+| `FmdCycles.Id` | `FmdCycleDays.FmdCycleId` | 1–N |
+| `AdherenceScores.Id` | `ScoreDimensions.AdherenceScoreId` | 1–N |
 
-### Identity
+Bảng nào không có FK SQL nhưng có mã dùng chung hoặc tạo/nhận sự kiện sẽ được nối bằng kiểu nét tương ứng. **Không tạo thêm FK, migration hay bảng giả** để làm hình ảnh có nhiều dây.
 
-#### Users
-- `Id uniqueidentifier PK`
-- `Email nvarchar(320)`
-- `NormalizedEmail nvarchar(320) UNIQUE`
-- `PasswordHash nvarchar(512)`
-- `DisplayName nvarchar(120)`
-- `Role nvarchar(24)`
-- `Status nvarchar(24)`
-- `CreatedAt datetimeoffset`
-- `UpdatedAt datetimeoffset`
+**Độ đầy đủ:** Sơ đồ có **32/32 bảng hiện tại** và **31 đường nối native** (9 SQL, 16 APP, 6 EVENT). Mỗi bảng chỉ xuất hiện một lần, trong cùng một đồ thị liên thông. Các ô ưu tiên cột PK/FK và cột liên hệ quan trọng để đọc được ở mức phóng to hợp lý; các thuộc tính còn lại vẫn nằm trong source.
 
-#### UserProfiles
-- `UserId uniqueidentifier PK/FK -> Users.Id`
-- `BirthYear int NULL`
-- `TimeZone nvarchar(100)`
-- `WakeTime time NULL`
-- `SleepTime time NULL`
-- `PreferredMealFrequency int`
-- `FoodPreference nvarchar(500) NULL`
-- `ProfileCompleted bit`
-- `UpdatedAt datetimeoffset`
+**Nguồn đối chiếu:** `src/LongevityDiet.Repositories/LongevityDietDbContext.cs`, `src/LongevityDiet.Tracking/TrackingDbContext.cs`, `src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs`. Danh sách và lý do của tất cả 31 kết nối được lưu trong [manifest](../../scripts/unified-erd-manifest.json). Cách thể hiện Crow's Foot tham khảo [Microsoft](https://support.microsoft.com/en-us/visio/create-a-diagram-with-crow-s-foot-database-notation), [draw.io](https://www.drawio.com/docs/diagram-types/entity-relationship-tables/) và [dbdiagram](https://docs.dbdiagram.io/relationships/).
 
-#### RefreshTokens
-- `Id uniqueidentifier PK`
-- `UserId uniqueidentifier FK -> Users.Id`
-- `TokenHash nvarchar(64) UNIQUE`
-- `CreatedAt datetimeoffset`
-- `ExpiresAt datetimeoffset`
-- `RevokedAt datetimeoffset NULL`
-- `ReplacedByTokenId uniqueidentifier NULL`
-
-### Catalog
-
-#### Foods
-- `Id uniqueidentifier PK`
-- `Name nvarchar(200)`
-- `NormalizedName nvarchar(200)`
-- `Category nvarchar(80)`
-- `Calories decimal`
-- `ProteinG decimal`
-- `CarbohydrateG decimal`
-- `FatG decimal`
-- `IsPlantBased bit`
-- `IsWholeGrain bit`
-- `IsLegume bit`
-- `IsFish bit`
-- `IsActive bit`
-
-#### Recipes
-- `Id uniqueidentifier PK`
-- `Name nvarchar(200)`
-- `MealType nvarchar(40)`
-- `Description nvarchar(1000) NULL`
-- `PrepMinutes int NULL`
-- `IsPlantForward bit`
-- `IsActive bit`
-
-#### RecipeIngredients
-- `RecipeId uniqueidentifier PK/FK -> Recipes.Id`
-- `FoodId uniqueidentifier PK/FK -> Foods.Id`
-- `Amount decimal`
-- `Unit nvarchar(40)`
-- `IsOptional bit`
-
-### Rules
-
-#### DietRules
-- `Id uniqueidentifier PK`
-- `Code nvarchar(80) UNIQUE`
-- `Name nvarchar(200)`
-- `Category nvarchar(80)`
-- `IsMedicalSensitive bit`
-- `IsActive bit`
-
-#### RuleVersions
-- `Id uniqueidentifier PK`
-- `DietRuleId uniqueidentifier FK -> DietRules.Id`
-- `VersionNumber int`
-- `ParametersJson nvarchar(max)`
-- `SourceUrl nvarchar(1000)`
-- `EvidenceLevel nvarchar(40)`
-- `PublishedAtUtc datetime2 NULL`
-- `IsCurrent bit`
-- UNIQUE(`DietRuleId`, `VersionNumber`)
-
-### Planning
-
-#### MealPlans
-- `Id uniqueidentifier PK`
-- `UserId uniqueidentifier FK -> Users.Id`
-- `StartDate date`
-- `EndDate date`
-- `Revision int`
-- `Status nvarchar(40)`
-- `GeneratedAtUtc datetime2`
-
-#### MealPlanDays
-- `Id uniqueidentifier PK`
-- `MealPlanId uniqueidentifier FK -> MealPlans.Id`
-- `Date date`
-- UNIQUE(`MealPlanId`, `Date`)
-
-#### PlannedMeals
-- `Id uniqueidentifier PK`
-- `MealPlanDayId uniqueidentifier FK -> MealPlanDays.Id`
-- `RecipeId uniqueidentifier FK -> Recipes.Id`
-- `MealType nvarchar(40)`
-- `ScheduledTime time NULL`
-- `Position int`
-- `ReasonJson nvarchar(max) NULL`
-
-### Tracking and progress
-
-#### MealLogs
-- `Id uniqueidentifier PK`
-- `UserId uniqueidentifier FK -> Users.Id`
-- `ConsumedAtUtc datetime2`
-- `MealType nvarchar(40)`
-- `Note nvarchar(1000) NULL`
-- `IsDeleted bit`
-
-#### ActivityLogs
-- `Id uniqueidentifier PK`
-- `UserId uniqueidentifier FK -> Users.Id`
-- `ActivityType nvarchar(40)`
-- `StartedAtUtc datetime2`
-- `DurationMinutes int`
-- `Intensity nvarchar(40) NULL`
-- `IsDeleted bit`
-
-#### AdherenceScores
-- `Id uniqueidentifier PK`
-- `UserId uniqueidentifier FK -> Users.Id`
-- `LocalDate date`
-- `Score decimal(5,2)`
-- `IsPartial bit`
-- `CalculatedAtUtc datetime2`
-
-### Messaging
-
-#### OutboxMessages
-- `Id uniqueidentifier PK`
-- `EventType nvarchar(120)`
-- `PayloadJson nvarchar(max)`
-- `OccurredAtUtc datetime2`
-- `PublishedAtUtc datetime2 NULL`
-- `AttemptCount int`
-- `LastError nvarchar(max) NULL`
-
-#### ProcessedEvents
-- `EventId uniqueidentifier PK`
-- `ConsumerName nvarchar(100)`
-- `ProcessedAtUtc datetime2`
-
----
-
-## 4. Physical Database - Full Target Coverage
-
-The final Assignment Physical DB diagram now shows the **full 33-table Target MVP**. Tables are grouped by domain so the page stays readable, and cross-domain foreign keys are written inside the table cards rather than creating long spaghetti connectors.
-
-### Identity & Profile
-- Users
-- UserProfiles
-- RefreshTokens
-- Allergies
-- UserAllergies
-- UserExcludedFoods
-
-### Catalog & Versioned Rules
-- Foods
-- Recipes
-- RecipeIngredients
-- RecipeAllergens
-- DietRules
-- RuleVersions
-- RuleSetVersions
-- RuleSetVersionItems
-
-### Planning & Tracking
-- MealPlans
-- MealPlanDays
-- PlannedMeals
-- MealLogs
-- MealLogItems
-- ActivityLogs
-- EatingWindowSnapshots
-
-### Progress, Engagement & Safety
-- AdherenceScores
-- ScoreDimensions
-- Challenges
-- ChallengeDays
-- RecommendationFeedback
-- FmdSafetyAssessments
-- FmdCycles
-- Reminders
-- WeeklyReports
-
-### Messaging, Reliability & Operations
-- OutboxMessages
-- ProcessedEvents
-- AuditLogs
-
-The detailed field-level specification for all of these tables remains in `../06-DATABASE-DESIGN.md`; the Assignment diagram deliberately shows only PK/FK and the important fields required to understand implementation.
-
----
-
-## 5. Important Physical Constraints
-
-1. `Users.NormalizedEmail` unique.
-2. `RefreshTokens.TokenHash` unique.
-3. Recipe ingredient pair `RecipeId + FoodId` unique/composite key.
-4. `RuleVersions(DietRuleId, VersionNumber)` unique.
-5. `MealPlanDays(MealPlanId, Date)` unique.
-6. User-owned records always carry `UserId`.
-7. Referenced Food/Recipe history should use soft-delete/deactivation instead of destructive delete.
-8. Published rule versions are immutable.
-9. Outbox unpublished rows are indexed by publish/time fields.
-10. Event consumers are idempotent through ProcessedEvents.
-
-## 6. Current Implementation vs Target
-
-### Implemented now
-- Users
-- UserProfiles
-- RefreshTokens
-
-### Target Assignment MVP
-The remaining core tables in this document are introduced by Week 1 Tasks 2-4 and later roadmap tasks.
-
-This distinction is deliberate: the Assignment diagrams describe the agreed target architecture/data design, while the implementation status stays truthful.
+Bộ 52 bảng dinh dưỡng tương lai là **đề xuất**, không thuộc schema đang chạy: [đặc tả](05-LONGITUDINAL-NUTRITION-TARGET.md).

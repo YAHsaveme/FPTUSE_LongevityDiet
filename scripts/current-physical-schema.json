@@ -1,0 +1,267 @@
+{
+  "groups": {
+    "identity": {
+      "context": "src/LongevityDiet.Repositories/LongevityDietDbContext.cs",
+      "database": "LongevityDietDb",
+      "columns": {
+        "Users": [
+          "PK Id",
+          "Email",
+          "Role",
+          "Status"
+        ],
+        "UserProfiles": [
+          "PK/FK UserId",
+          "TimeZone",
+          "FoodPreference"
+        ],
+        "RefreshTokens": [
+          "PK Id",
+          "FK UserId",
+          "TokenHash",
+          "ExpiresAt"
+        ],
+        "ReminderPreferences": [
+          "PK/FK UserId",
+          "OptedIn",
+          "QuietStart",
+          "QuietEnd"
+        ],
+        "UserNotifications": [
+          "PK Id",
+          "FK UserId",
+          "Category",
+          "DeduplicationKey"
+        ],
+        "IdentityOutbox": [
+          "PK Id",
+          "EventType",
+          "PublishedAtUtc"
+        ],
+        "IdentityInbox": [
+          "PK EventId",
+          "ReceivedAtUtc"
+        ],
+        "UserDietaryPreferences": [
+          "PK UserId",
+          "DietaryPattern",
+          "AllergiesCsv"
+        ],
+        "MealPlans": [
+          "PK Id",
+          "UserId [logical owner]",
+          "Status",
+          "TimeZone"
+        ],
+        "MealPlanDays": [
+          "PK Id",
+          "FK MealPlanId",
+          "DayNumber",
+          "DailyFocusCode"
+        ],
+        "PlannedMeals": [
+          "PK Id",
+          "FK MealPlanDayId",
+          "SlotType",
+          "CandidateCode"
+        ],
+        "MealLogs": [
+          "PK Id",
+          "UserId [logical owner]",
+          "LocalDate",
+          "EatenAt"
+        ],
+        "MealLogItems": [
+          "PK Id",
+          "FK MealLogId",
+          "FoodCode",
+          "ServingAmount"
+        ],
+        "EatingWindowSnapshots": [
+          "PK Id",
+          "UserId [logical owner]",
+          "LocalDate",
+          "StatusCode"
+        ],
+        "RecommendationFeedbacks": [
+          "PK Id",
+          "UserId [logical owner]",
+          "FeedbackType",
+          "CandidateCode"
+        ],
+        "MealReplacementHistories": [
+          "PK Id",
+          "MealPlanId [logical]",
+          "PlannedMealId [logical]"
+        ],
+        "UserFoodPreferences": [
+          "PK Id",
+          "UserId [logical owner]",
+          "FoodToken"
+        ],
+        "FmdEducationAcknowledgements": [
+          "PK Id",
+          "UserId [logical owner]",
+          "EducationVersion"
+        ],
+        "FmdSafetyAssessments": [
+          "PK Id",
+          "UserId [logical owner]",
+          "ResultStatus"
+        ],
+        "FmdCycles": [
+          "PK Id",
+          "UserId [logical owner]",
+          "Status"
+        ],
+        "FmdCycleDays": [
+          "PK Id",
+          "FK FmdCycleId",
+          "DayNumber",
+          "Symptoms"
+        ]
+      }
+    },
+    "tracking": {
+      "context": "src/LongevityDiet.Tracking/TrackingDbContext.cs",
+      "database": "LongevityTrackingDb",
+      "columns": {
+        "ActivityLogs": [
+          "PK Id",
+          "UserId [logical only]",
+          "Kind",
+          "DurationMinutes"
+        ],
+        "ActivityGoals": [
+          "PK UserId [logical only]",
+          "WeeklyMinutesTarget"
+        ],
+        "AdherenceScores": [
+          "PK Id",
+          "UserId [logical only]",
+          "Score"
+        ],
+        "ScoreDimensions": [
+          "PK Id",
+          "FK AdherenceScoreId",
+          "WeightedScore"
+        ],
+        "ScoreConfigurationVersions": [
+          "PK Version",
+          "ActivityWeight",
+          "MealWeight"
+        ],
+        "TrackingScoreSignals": [
+          "PK Id",
+          "UserId [logical only]",
+          "DimensionCode"
+        ],
+        "TrackingOutbox": [
+          "PK EventId",
+          "EventType",
+          "PublishedAtUtc"
+        ]
+      }
+    },
+    "worker": {
+      "context": "src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs",
+      "database": "LongevityWorkerDb",
+      "columns": {
+        "ReminderSchedules": [
+          "PK Id",
+          "UserId [logical only]",
+          "Category",
+          "NextDueUtc"
+        ],
+        "ReminderDispatchRecords": [
+          "PK Id",
+          "UserId [logical only]",
+          "DueAtUtc"
+        ],
+        "WorkerProcessedEvents": [
+          "PK EventId",
+          "ProcessedAtUtc"
+        ],
+        "WorkerOutbox": [
+          "PK EventId",
+          "EventType",
+          "PublishedAtUtc"
+        ]
+      }
+    }
+  },
+  "refs": [
+    [
+      "identity",
+      "Users",
+      "Id",
+      "UserProfiles",
+      "UserId",
+      "1:1"
+    ],
+    [
+      "identity",
+      "Users",
+      "Id",
+      "RefreshTokens",
+      "UserId",
+      "1:N"
+    ],
+    [
+      "identity",
+      "Users",
+      "Id",
+      "ReminderPreferences",
+      "UserId",
+      "1:1"
+    ],
+    [
+      "identity",
+      "Users",
+      "Id",
+      "UserNotifications",
+      "UserId",
+      "1:N"
+    ],
+    [
+      "identity",
+      "MealPlans",
+      "Id",
+      "MealPlanDays",
+      "MealPlanId",
+      "1:N"
+    ],
+    [
+      "identity",
+      "MealPlanDays",
+      "Id",
+      "PlannedMeals",
+      "MealPlanDayId",
+      "1:N"
+    ],
+    [
+      "identity",
+      "MealLogs",
+      "Id",
+      "MealLogItems",
+      "MealLogId",
+      "1:N"
+    ],
+    [
+      "identity",
+      "FmdCycles",
+      "Id",
+      "FmdCycleDays",
+      "FmdCycleId",
+      "1:N"
+    ],
+    [
+      "tracking",
+      "AdherenceScores",
+      "Id",
+      "ScoreDimensions",
+      "AdherenceScoreId",
+      "1:N"
+    ]
+  ]
+}

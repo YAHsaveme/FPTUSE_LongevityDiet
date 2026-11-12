@@ -3,7 +3,7 @@
 **Owner:** Thành viên 4  
 **Reviewer:** Thành viên 2  
 **Branch:** `feature/w1-t4-distributed-slice`  
-**Status:** Not Started
+**Status:** In Progress (Current Runtime gRPC/Redis/Worker and optional Gateway E2E verified; full ADR-005 service boundaries and reviewer gate pending)
 
 ## Architecture alignment (ADR-005)
 
@@ -130,3 +130,10 @@ Demo lặp lại được:
 3. Controlled failure/restart không làm mất event hoặc double side effect.
 
 Rubric evidence phải đủ để giảng viên nhìn thấy riêng: gRPC interaction, producer, consumer và BackgroundService.
+
+## Target Gateway migration checkpoint — 11/11/2026
+
+- A separate .NET 9 YARP host has now been implemented at `src/LongevityDiet.Gateway`, with an opt-in Compose overlay. The default Current Runtime remains unchanged.
+- Docker QA verified Browser -> Web Nginx -> YARP -> existing REST API, JWT/403, OpenAPI, 404 route restrictions, /gateway/ready 503 on backend outage, restart recovery, and 10/10 Playwright E2E. 172/172 .NET tests PASS. CI now exercises both default and Gateway E2E paths before PR merge.
+- Gateway **still routes to the transitional API**, not to four distinct REST services. Separate owner DBs, domain Outbox ownership, and full target communication matrix are not complete; keep task In Progress until target and reviewer gates pass.
+- Details: [YARP migration evidence](../../architecture/TARGET-GATEWAY-MIGRATION-20261111.md).

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 
 const HomePage = lazy(() =>
@@ -14,6 +14,44 @@ const RegisterPage = lazy(() =>
   import('./pages/auth/RegisterPage').then((module) => ({ default: module.RegisterPage })),
 )
 
+const NotificationsPage = lazy(() =>
+  import('./pages/tracking/NotificationsPage')
+    .then((module) => ({ default: module.NotificationsPage })),
+)
+
+const ActivityTrackingPage = lazy(() =>
+  import('./pages/tracking/ActivityTrackingPage')
+    .then((module) => ({ default: module.ActivityTrackingPage })),
+)
+
+const NotFoundPage = lazy(() =>
+  import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })),
+)
+
+const CatalogPage = lazy(() =>
+  import('./features/catalog/CatalogPage').then((module) => ({ default: module.CatalogPage })),
+)
+
+const RecipeDetailPage = lazy(() =>
+  import('./features/catalog/RecipeDetailPage').then((module) => ({ default: module.RecipeDetailPage })),
+)
+
+const AdminCatalogPage = lazy(() =>
+  import('./features/admin/catalog/AdminCatalogPage').then((module) => ({ default: module.AdminCatalogPage })),
+)
+
+const ChallengeDashboardPage = lazy(() =>
+  import('./features/progress/ChallengeDashboardPage').then((module) => ({
+    default: module.ChallengeDashboardPage,
+  })),
+)
+
+const WeeklyReportsPage = lazy(() =>
+  import('./features/reports/WeeklyReportsPage').then((module) => ({
+    default: module.WeeklyReportsPage,
+  })),
+)
+
 const profilePages = () => import('./pages/auth/ProfileEditorPage')
 
 const OnboardingPage = lazy(() =>
@@ -22,6 +60,12 @@ const OnboardingPage = lazy(() =>
 
 const ProfilePage = lazy(() =>
   profilePages().then((module) => ({ default: module.ProfilePage })),
+)
+
+const PlannerWorkspacePage = lazy(() =>
+  import('./pages/planner/PlannerWorkspacePage').then((module) => ({
+    default: module.PlannerWorkspacePage,
+  })),
 )
 
 function RouteLoading() {
@@ -35,8 +79,16 @@ function RouteLoading() {
 
 function App() {
   return (
-    <Suspense fallback={<RouteLoading />}>
-      <Routes>
+    <>
+      {import.meta.env.VITE_STATIC_PREVIEW === 'true' && (
+        <div role="status" style={{ padding: '0.85rem 1.25rem', background: '#fff2d8', color: '#513a1c', fontWeight: 600, textAlign: 'center' }}>
+          Bản xem giao diện miễn phí phục vụ học tập. Chưa kết nối máy chủ API; không đăng ký tài khoản hoặc nhập dữ liệu cá nhân thật.
+        </div>
+      )}
+      <a className="skip-link" href="#main-content">Bỏ qua điều hướng</a>
+      <div id="main-content" tabIndex={-1}>
+        <Suspense fallback={<RouteLoading />}>
+          <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -63,14 +115,86 @@ function App() {
           path="/app"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <PlannerWorkspacePage />
             </ProtectedRoute>
           }
         />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="/planner"
+          element={
+            <ProtectedRoute>
+              <PlannerWorkspacePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+  path="/activity"
+          element={
+            <ProtectedRoute>
+              <ActivityTrackingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/catalog"
+          element={
+            <ProtectedRoute>
+              <CatalogPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/progress"
+          element={
+            <ProtectedRoute>
+              <ChallengeDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <WeeklyReportsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/catalog/recipes/:id"
+          element={
+            <ProtectedRoute>
+              <RecipeDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/catalog"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <AdminCatalogPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
+  </div>
+</>
   )
 }
 

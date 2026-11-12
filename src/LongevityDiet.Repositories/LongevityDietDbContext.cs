@@ -1,13 +1,93 @@
+using LongevityDiet.Domain.Catalog.Entities;
 using LongevityDiet.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace LongevityDiet.Repositories;
 
-public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbContext> options) : DbContext(options)
+public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbContext> options) : DbContext(options), LongevityDiet.Repositories.Catalog.Seed.ICatalogSeedDbContext
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<WellnessScreening> WellnessScreenings => Set<WellnessScreening>();
+    public DbSet<WellnessCheckIn> WellnessCheckIns => Set<WellnessCheckIn>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<ReminderPreference> ReminderPreferences => Set<ReminderPreference>();
+    public DbSet<UserNotification> Notifications => Set<UserNotification>();
+    public DbSet<IdentityOutboxEvent> IdentityOutbox => Set<IdentityOutboxEvent>();
+    public DbSet<IdentityInboxEvent> IdentityInbox => Set<IdentityInboxEvent>();
+    public DbSet<Food> Foods => Set<Food>();
+    public DbSet<Recipe> Recipes => Set<Recipe>();
+    public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
+    public DbSet<Allergen> Allergens => Set<Allergen>();
+    public DbSet<RecipeAllergen> RecipeAllergens => Set<RecipeAllergen>();
+    public DbSet<DietRule> DietRules => Set<DietRule>();
+    public DbSet<RuleAudit> RuleAudits => Set<RuleAudit>();
+    public DbSet<RuleVersion> RuleVersions => Set<RuleVersion>();
+    public DbSet<RuleSetVersion> RuleSetVersions => Set<RuleSetVersion>();
+    public DbSet<UserDietaryPreference> UserDietaryPreferences => Set<UserDietaryPreference>();
+    public DbSet<MealPlan> MealPlans => Set<MealPlan>();
+    public DbSet<MealPlanDay> MealPlanDays => Set<MealPlanDay>();
+    public DbSet<PlannedMeal> PlannedMeals => Set<PlannedMeal>();
+    public DbSet<MealLog> MealLogs => Set<MealLog>();
+    public DbSet<MealLogItem> MealLogItems => Set<MealLogItem>();
+    public DbSet<EatingWindowSnapshot> EatingWindowSnapshots => Set<EatingWindowSnapshot>();
+    public DbSet<RecommendationFeedback> RecommendationFeedbacks => Set<RecommendationFeedback>();
+    public DbSet<MealReplacementHistory> MealReplacementHistories => Set<MealReplacementHistory>();
+    public DbSet<UserFoodPreference> UserFoodPreferences => Set<UserFoodPreference>();
+    public DbSet<FmdEducationAcknowledgement> FmdEducationAcknowledgements => Set<FmdEducationAcknowledgement>();
+    public DbSet<FmdSafetyAssessment> FmdSafetyAssessments => Set<FmdSafetyAssessment>();
+    public DbSet<FmdCycle> FmdCycles => Set<FmdCycle>();
+    public DbSet<FmdCycleDay> FmdCycleDays => Set<FmdCycleDay>();
+    public DbSet<ChallengeTemplate> ChallengeTemplates => Set<ChallengeTemplate>();
+    public DbSet<ChallengeDayTemplate> ChallengeDayTemplates => Set<ChallengeDayTemplate>();
+    public DbSet<UserChallenge> UserChallenges => Set<UserChallenge>();
+    public DbSet<UserChallengeDay> UserChallengeDays => Set<UserChallengeDay>();
+    public DbSet<DailyWellnessSummary> DailyWellnessSummaries => Set<DailyWellnessSummary>();
+    public DbSet<ProgressEventReceipt> ProgressEventReceipts => Set<ProgressEventReceipt>();
+    public DbSet<WeeklyReport> WeeklyReports => Set<WeeklyReport>();
+    public DbSet<WeeklyReportMetric> WeeklyReportMetrics => Set<WeeklyReportMetric>();
+    public DbSet<WorkerJob> WorkerJobs => Set<WorkerJob>();
+    public DbSet<WorkerProcessedEvent> WorkerProcessedEvents => Set<WorkerProcessedEvent>();
+    public DbSet<WorkerDeadLetter> WorkerDeadLetters => Set<WorkerDeadLetter>();
+    public DbSet<WorkerHeartbeat> WorkerHeartbeats => Set<WorkerHeartbeat>();
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        GuardRuleHistory();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        GuardRuleHistory();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void GuardRuleHistory()
+    {
+        ChangeTracker.DetectChanges();
+        if (ChangeTracker.Entries<RuleAudit>().Any(x => x.State is EntityState.Modified or EntityState.Deleted))
+        {
+            throw new InvalidOperationException("Rule audit records are append-only.");
+        }
+
+        foreach (var entry in ChangeTracker.Entries<RuleVersion>())
+        {
+            var originalState = entry.OriginalValues.GetValue<LongevityDiet.Domain.Catalog.RuleVersionState>(nameof(RuleVersion.State));
+            if (originalState is not (LongevityDiet.Domain.Catalog.RuleVersionState.Published or LongevityDiet.Domain.Catalog.RuleVersionState.Retired))
+            {
+                continue;
+            }
+
+            var retiring = originalState == LongevityDiet.Domain.Catalog.RuleVersionState.Published &&
+                entry.Entity.State == LongevityDiet.Domain.Catalog.RuleVersionState.Retired;
+            if (entry.State == EntityState.Deleted || (entry.State == EntityState.Modified &&
+                (!retiring || entry.Properties.Any(p => p.IsModified && p.Metadata.Name != nameof(RuleVersion.State) && p.Metadata.Name != nameof(RuleVersion.Revision)))))
+            {
+                throw new InvalidOperationException("Published and retired rule content is immutable.");
+            }
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,5 +122,368 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
             .WithMany(x => x.RefreshTokens)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        var preferences = modelBuilder.Entity<ReminderPreference>();
+        preferences.ToTable("ReminderPreferences");
+        preferences.HasKey(p => p.UserId);
+        preferences.HasOne<User>().WithOne()
+            .HasForeignKey<ReminderPreference>(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var notifications = modelBuilder.Entity<UserNotification>();
+        notifications.ToTable("UserNotifications");
+        notifications.HasKey(n => n.Id);
+        notifications.Property(n => n.Category).HasConversion<string>().HasMaxLength(32);
+        notifications.Property(n => n.Title).HasMaxLength(120);
+        notifications.Property(n => n.Body).HasMaxLength(500);
+        notifications.Property(n => n.DeepLink).HasMaxLength(120);
+        notifications.Property(n => n.DeduplicationKey).HasMaxLength(160);
+        notifications.HasIndex(n => new { n.UserId, n.CreatedAtUtc });
+        notifications.HasIndex(n => new { n.UserId, n.DeduplicationKey }).IsUnique();
+        notifications.HasOne<User>().WithMany()
+            .HasForeignKey(n => n.UserId).OnDelete(DeleteBehavior.Cascade);
+
+        var outbox = modelBuilder.Entity<IdentityOutboxEvent>();
+        outbox.ToTable("IdentityOutbox");
+        outbox.HasKey(o => o.Id);
+        outbox.Property(o => o.EventType).HasMaxLength(96);
+        outbox.Property(o => o.PayloadJson).HasMaxLength(4096);
+        outbox.HasIndex(o => new { o.PublishedAtUtc, o.CreatedAtUtc });
+
+        var inbox = modelBuilder.Entity<IdentityInboxEvent>();
+        inbox.ToTable("IdentityInbox");
+        inbox.HasKey(i => i.EventId);
+
+        // Preserve Identity/Reminder and team Meal Planning/Tracking/Recommendation/FMD models.
+        ConfigurePlanningModel(modelBuilder);
+        ConfigureWellnessModel(modelBuilder);
+        ConfigureTrackingModel(modelBuilder);
+        ConfigureRecommendationModel(modelBuilder);
+        ConfigureFmdModel(modelBuilder);
+        ConfigureChallengeProgressModel(modelBuilder);
+        ConfigureWeeklyReportWorkerModel(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(LongevityDietDbContext).Assembly);
+    }
+
+    private static void ConfigurePlanningModel(ModelBuilder modelBuilder)
+    {
+        var dietaryPreference = modelBuilder.Entity<UserDietaryPreference>();
+        dietaryPreference.ToTable("UserDietaryPreferences");
+        dietaryPreference.HasKey(x => x.UserId);
+        dietaryPreference.Property(x => x.DietaryPattern).HasMaxLength(64).IsRequired();
+        dietaryPreference.Property(x => x.AllergiesCsv).HasMaxLength(1000).IsRequired();
+        dietaryPreference.Property(x => x.ExcludedFoodsCsv).HasMaxLength(1000).IsRequired();
+        dietaryPreference.Property(x => x.PreferredCuisine).HasMaxLength(120);
+
+        var mealPlan = modelBuilder.Entity<MealPlan>();
+        mealPlan.ToTable("MealPlans");
+        mealPlan.HasKey(x => x.Id);
+        mealPlan.Property(x => x.RuleSetVersion).HasMaxLength(64).IsRequired();
+        mealPlan.Property(x => x.Status).HasConversion<string>().HasMaxLength(24);
+        mealPlan.Property(x => x.TimeZone).HasMaxLength(100).IsRequired();
+        mealPlan.Property(x => x.DietaryPattern).HasMaxLength(64).IsRequired();
+        mealPlan.Property(x => x.AppliedAllergiesCsv).HasMaxLength(1000).IsRequired();
+        mealPlan.Property(x => x.AppliedExclusionsCsv).HasMaxLength(1000).IsRequired();
+        mealPlan.Property(x => x.ReasonCodesCsv).HasMaxLength(500).IsRequired();
+        mealPlan.Property(x => x.PlanExplanation).HasMaxLength(1000).IsRequired();
+        mealPlan.HasIndex(x => new { x.UserId, x.Status, x.GeneratedAt });
+        mealPlan.HasMany(x => x.Days)
+            .WithOne(x => x.MealPlan)
+            .HasForeignKey(x => x.MealPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var mealPlanDay = modelBuilder.Entity<MealPlanDay>();
+        mealPlanDay.ToTable("MealPlanDays");
+        mealPlanDay.HasKey(x => x.Id);
+        mealPlanDay.Property(x => x.DailyFocusCode).HasMaxLength(64).IsRequired();
+        mealPlanDay.Property(x => x.DailyFocusTitle).HasMaxLength(240).IsRequired();
+        mealPlanDay.HasIndex(x => new { x.MealPlanId, x.DayNumber }).IsUnique();
+        mealPlanDay.HasMany(x => x.Meals)
+            .WithOne(x => x.MealPlanDay)
+            .HasForeignKey(x => x.MealPlanDayId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var plannedMeal = modelBuilder.Entity<PlannedMeal>();
+        plannedMeal.ToTable("PlannedMeals");
+        plannedMeal.HasKey(x => x.Id);
+        plannedMeal.Property(x => x.SlotType).HasConversion<string>().HasMaxLength(24);
+        plannedMeal.Property(x => x.CandidateCode).HasMaxLength(80).IsRequired();
+        plannedMeal.Property(x => x.Title).HasMaxLength(200).IsRequired();
+        plannedMeal.Property(x => x.Description).HasMaxLength(600).IsRequired();
+        plannedMeal.Property(x => x.Cuisine).HasMaxLength(80).IsRequired();
+        plannedMeal.Property(x => x.ServingSize).HasPrecision(8, 2);
+        plannedMeal.Property(x => x.ServingUnit).HasMaxLength(64).IsRequired();
+        plannedMeal.Property(x => x.ProteinGrams).HasPrecision(8, 2);
+        plannedMeal.Property(x => x.CarbsGrams).HasPrecision(8, 2);
+        plannedMeal.Property(x => x.FatGrams).HasPrecision(8, 2);
+        plannedMeal.Property(x => x.FiberGrams).HasPrecision(8, 2);
+        plannedMeal.Property(x => x.AllergensCsv).HasMaxLength(500).IsRequired();
+        plannedMeal.Property(x => x.IngredientsCsv).HasMaxLength(800).IsRequired();
+        plannedMeal.Property(x => x.DeterministicScore).HasPrecision(8, 2);
+        plannedMeal.Property(x => x.ReasonCodesCsv).HasMaxLength(500).IsRequired();
+        plannedMeal.Property(x => x.ExplanationSummary).HasMaxLength(1000).IsRequired();
+        plannedMeal.HasIndex(x => new { x.MealPlanDayId, x.SlotOrder }).IsUnique();
+        plannedMeal.HasIndex(x => new { x.UserId, x.MealPlanId });
+    }
+
+    private static void ConfigureWellnessModel(ModelBuilder modelBuilder)
+    {
+        var screening = modelBuilder.Entity<WellnessScreening>();
+        screening.ToTable("WellnessScreenings");
+        screening.HasKey(x => x.UserId);
+        screening.Property(x => x.RiskFlagsCsv).HasMaxLength(500).IsRequired();
+        screening.Property(x => x.ReviewedAllergiesCsv).HasMaxLength(1000).IsRequired();
+        screening.HasOne<User>().WithOne()
+            .HasForeignKey<WellnessScreening>(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var checkIn = modelBuilder.Entity<WellnessCheckIn>();
+        checkIn.ToTable("WellnessCheckIns");
+        checkIn.HasKey(x => x.Id);
+        checkIn.Property(x => x.Phase).HasMaxLength(16).IsRequired();
+        checkIn.Property(x => x.SymptomsCsv).HasMaxLength(500).IsRequired();
+        checkIn.Property(x => x.BodyChangesCsv).HasMaxLength(500).IsRequired();
+        checkIn.Property(x => x.WeightKg).HasPrecision(6, 2);
+        checkIn.Property(x => x.Notes).HasMaxLength(500);
+        checkIn.HasIndex(x => new { x.UserId, x.LocalDate, x.Phase }).IsUnique();
+        checkIn.HasOne<User>().WithMany()
+            .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+    }
+
+    private static void ConfigureTrackingModel(ModelBuilder modelBuilder)
+    {
+        var mealLog = modelBuilder.Entity<MealLog>();
+        mealLog.ToTable("MealLogs");
+        mealLog.HasKey(x => x.Id);
+        mealLog.Property(x => x.TimeZone).HasMaxLength(100).IsRequired();
+        mealLog.Property(x => x.MealType).HasConversion<string>().HasMaxLength(24);
+        mealLog.Property(x => x.Title).HasMaxLength(200).IsRequired();
+        mealLog.Property(x => x.Notes).HasMaxLength(1000);
+        mealLog.Property(x => x.TotalProteinGrams).HasPrecision(8, 2);
+        mealLog.Property(x => x.TotalCarbsGrams).HasPrecision(8, 2);
+        mealLog.Property(x => x.TotalFatGrams).HasPrecision(8, 2);
+        mealLog.Property(x => x.TotalFiberGrams).HasPrecision(8, 2);
+        mealLog.HasIndex(x => new { x.UserId, x.LocalDate, x.IsDeleted });
+        mealLog.HasIndex(x => new { x.UserId, x.EatenAt });
+        mealLog.HasMany(x => x.Items)
+            .WithOne(x => x.MealLog)
+            .HasForeignKey(x => x.MealLogId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var mealLogItem = modelBuilder.Entity<MealLogItem>();
+        mealLogItem.ToTable("MealLogItems");
+        mealLogItem.HasKey(x => x.Id);
+        mealLogItem.Property(x => x.FoodCode).HasMaxLength(80);
+        mealLogItem.Property(x => x.FoodName).HasMaxLength(200).IsRequired();
+        mealLogItem.Property(x => x.ServingAmount).HasPrecision(8, 2);
+        mealLogItem.Property(x => x.ServingUnit).HasMaxLength(64).IsRequired();
+        mealLogItem.Property(x => x.ProteinGrams).HasPrecision(8, 2);
+        mealLogItem.Property(x => x.CarbsGrams).HasPrecision(8, 2);
+        mealLogItem.Property(x => x.FatGrams).HasPrecision(8, 2);
+        mealLogItem.Property(x => x.FiberGrams).HasPrecision(8, 2);
+
+        var eatingWindow = modelBuilder.Entity<EatingWindowSnapshot>();
+        eatingWindow.ToTable("EatingWindowSnapshots");
+        eatingWindow.HasKey(x => x.Id);
+        eatingWindow.Property(x => x.TimeZone).HasMaxLength(100).IsRequired();
+        eatingWindow.Property(x => x.StatusCode).HasMaxLength(64).IsRequired();
+        eatingWindow.Property(x => x.SummaryMessage).HasMaxLength(600).IsRequired();
+        eatingWindow.HasIndex(x => new { x.UserId, x.LocalDate }).IsUnique();
+    }
+
+    private static void ConfigureRecommendationModel(ModelBuilder modelBuilder)
+    {
+        var feedback = modelBuilder.Entity<RecommendationFeedback>();
+        feedback.ToTable("RecommendationFeedbacks");
+        feedback.HasKey(x => x.Id);
+        feedback.Property(x => x.CandidateCode).HasMaxLength(80).IsRequired();
+        feedback.Property(x => x.CandidateTitle).HasMaxLength(200).IsRequired();
+        feedback.Property(x => x.FeedbackType).HasConversion<string>().HasMaxLength(24);
+        feedback.Property(x => x.ReasonCode).HasMaxLength(80).IsRequired();
+        feedback.Property(x => x.Notes).HasMaxLength(600);
+        feedback.Property(x => x.RuleSetVersion).HasMaxLength(64).IsRequired();
+        feedback.Property(x => x.WeightProfileVersion).HasMaxLength(64).IsRequired();
+        feedback.HasIndex(x => new { x.UserId, x.CandidateCode, x.CreatedAt });
+
+        var replacementHistory = modelBuilder.Entity<MealReplacementHistory>();
+        replacementHistory.ToTable("MealReplacementHistories");
+        replacementHistory.HasKey(x => x.Id);
+        replacementHistory.Property(x => x.SlotType).HasConversion<string>().HasMaxLength(24);
+        replacementHistory.Property(x => x.PreviousCandidateCode).HasMaxLength(80).IsRequired();
+        replacementHistory.Property(x => x.PreviousTitle).HasMaxLength(200).IsRequired();
+        replacementHistory.Property(x => x.PreviousScore).HasPrecision(8, 2);
+        replacementHistory.Property(x => x.ReplacementCandidateCode).HasMaxLength(80).IsRequired();
+        replacementHistory.Property(x => x.ReplacementTitle).HasMaxLength(200).IsRequired();
+        replacementHistory.Property(x => x.ReplacementScore).HasPrecision(8, 2);
+        replacementHistory.Property(x => x.ReplacementReasonCode).HasMaxLength(80).IsRequired();
+        replacementHistory.Property(x => x.ReasonSummary).HasMaxLength(1000).IsRequired();
+        replacementHistory.Property(x => x.AppliedAllergiesCsv).HasMaxLength(1000).IsRequired();
+        replacementHistory.Property(x => x.AppliedExclusionsCsv).HasMaxLength(1000).IsRequired();
+        replacementHistory.Property(x => x.RuleSetVersion).HasMaxLength(64).IsRequired();
+        replacementHistory.Property(x => x.WeightProfileVersion).HasMaxLength(64).IsRequired();
+        replacementHistory.HasIndex(x => new { x.UserId, x.MealPlanId, x.ReplacedAt });
+        replacementHistory.HasIndex(x => new { x.PlannedMealId, x.ReplacedAt });
+
+        var foodPreference = modelBuilder.Entity<UserFoodPreference>();
+        foodPreference.ToTable("UserFoodPreferences");
+        foodPreference.HasKey(x => x.Id);
+        foodPreference.Property(x => x.FoodToken).HasMaxLength(120).IsRequired();
+        foodPreference.Property(x => x.DisplayLabel).HasMaxLength(200).IsRequired();
+        foodPreference.Property(x => x.PreferenceKind).HasConversion<string>().HasMaxLength(32);
+        foodPreference.Property(x => x.Source).HasMaxLength(64).IsRequired();
+        foodPreference.Property(x => x.Notes).HasMaxLength(500);
+        foodPreference.HasIndex(x => new { x.UserId, x.FoodToken }).IsUnique();
+    }
+
+    private static void ConfigureFmdModel(ModelBuilder modelBuilder)
+    {
+        var acknowledgement = modelBuilder.Entity<FmdEducationAcknowledgement>();
+        acknowledgement.ToTable("FmdEducationAcknowledgements");
+        acknowledgement.HasKey(x => x.Id);
+        acknowledgement.Property(x => x.EducationVersion).HasMaxLength(64).IsRequired();
+        acknowledgement.Property(x => x.SourceCitation).HasMaxLength(300).IsRequired();
+        acknowledgement.HasIndex(x => new { x.UserId, x.EducationVersion });
+
+        var assessment = modelBuilder.Entity<FmdSafetyAssessment>();
+        assessment.ToTable("FmdSafetyAssessments");
+        assessment.HasKey(x => x.Id);
+        assessment.Property(x => x.AssessmentVersion).HasMaxLength(64).IsRequired();
+        assessment.Property(x => x.ResultStatus).HasConversion<string>().HasMaxLength(32);
+        assessment.Property(x => x.TriggeredRiskCodesCsv).HasMaxLength(1000).IsRequired();
+        assessment.Property(x => x.RecommendationsSummary).HasMaxLength(1000).IsRequired();
+        assessment.Property(x => x.AnswersJson).HasMaxLength(4000).IsRequired();
+        assessment.Property(x => x.Notes).HasMaxLength(600);
+        assessment.HasIndex(x => new { x.UserId, x.EvaluatedAt });
+
+        var cycle = modelBuilder.Entity<FmdCycle>();
+        cycle.ToTable("FmdCycles");
+        cycle.HasKey(x => x.Id);
+        cycle.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
+        cycle.Property(x => x.Notes).HasMaxLength(1000);
+        cycle.Property(x => x.StopReason).HasMaxLength(500);
+        cycle.HasIndex(x => new { x.UserId, x.Status });
+        cycle.HasMany(x => x.Days)
+            .WithOne(x => x.FmdCycle)
+            .HasForeignKey(x => x.FmdCycleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var cycleDay = modelBuilder.Entity<FmdCycleDay>();
+        cycleDay.ToTable("FmdCycleDays");
+        cycleDay.HasKey(x => x.Id);
+        cycleDay.Property(x => x.WaterIntakeLiters).HasPrecision(5, 2);
+        cycleDay.Property(x => x.Symptoms).HasMaxLength(500);
+        cycleDay.Property(x => x.DailyNotes).HasMaxLength(1000);
+        cycleDay.HasIndex(x => new { x.FmdCycleId, x.DayNumber }).IsUnique();
+    }
+
+    private static void ConfigureChallengeProgressModel(ModelBuilder modelBuilder)
+    {
+        var template = modelBuilder.Entity<ChallengeTemplate>();
+        template.ToTable("ChallengeTemplates");
+        template.HasKey(x => x.Id);
+        template.Property(x => x.Code).HasMaxLength(64).IsRequired();
+        template.Property(x => x.Title).HasMaxLength(200).IsRequired();
+        template.Property(x => x.Description).HasMaxLength(1000).IsRequired();
+        template.HasIndex(x => x.Code).IsUnique();
+        template.HasMany(x => x.Days)
+            .WithOne(x => x.ChallengeTemplate)
+            .HasForeignKey(x => x.ChallengeTemplateId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var templateDay = modelBuilder.Entity<ChallengeDayTemplate>();
+        templateDay.ToTable("ChallengeDayTemplates");
+        templateDay.HasKey(x => x.Id);
+        templateDay.Property(x => x.Title).HasMaxLength(200).IsRequired();
+        templateDay.Property(x => x.Guidance).HasMaxLength(1000).IsRequired();
+        templateDay.HasIndex(x => new { x.ChallengeTemplateId, x.DayNumber }).IsUnique();
+
+        var challenge = modelBuilder.Entity<UserChallenge>();
+        challenge.ToTable("UserChallenges");
+        challenge.HasKey(x => x.Id);
+        challenge.Property(x => x.TimeZone).HasMaxLength(100).IsRequired();
+        challenge.Property(x => x.Status).HasConversion<string>().HasMaxLength(24);
+        challenge.HasIndex(x => new { x.UserId, x.Status });
+        challenge.HasIndex(x => new { x.UserId, x.StartDate });
+        challenge.HasOne(x => x.ChallengeTemplate)
+            .WithMany()
+            .HasForeignKey(x => x.ChallengeTemplateId)
+            .OnDelete(DeleteBehavior.Restrict);
+        challenge.HasMany(x => x.Days)
+            .WithOne(x => x.UserChallenge)
+            .HasForeignKey(x => x.UserChallengeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var challengeDay = modelBuilder.Entity<UserChallengeDay>();
+        challengeDay.ToTable("UserChallengeDays");
+        challengeDay.HasKey(x => x.Id);
+        challengeDay.HasIndex(x => new { x.UserChallengeId, x.DayNumber }).IsUnique();
+        challengeDay.HasIndex(x => new { x.UserChallengeId, x.LocalDate }).IsUnique();
+
+        var daily = modelBuilder.Entity<DailyWellnessSummary>();
+        daily.ToTable("DailyWellnessSummaries");
+        daily.HasKey(x => x.Id);
+        daily.Property(x => x.LoggingConsistencyScore).HasPrecision(5, 4);
+        daily.Property(x => x.DataAvailability).HasMaxLength(300).IsRequired();
+        daily.HasIndex(x => new { x.UserId, x.LocalDate }).IsUnique();
+
+        var receipt = modelBuilder.Entity<ProgressEventReceipt>();
+        receipt.ToTable("ProgressEventReceipts");
+        receipt.HasKey(x => x.EventId);
+        receipt.Property(x => x.EventType).HasMaxLength(120).IsRequired();
+        receipt.HasIndex(x => x.ProcessedAt);
+    }
+
+    private static void ConfigureWeeklyReportWorkerModel(ModelBuilder modelBuilder)
+    {
+        var report = modelBuilder.Entity<WeeklyReport>();
+        report.ToTable("WeeklyReports");
+        report.HasKey(x => x.Id);
+        report.Property(x => x.Status).HasConversion<string>().HasMaxLength(24);
+        report.Property(x => x.TimeZone).HasMaxLength(100).IsRequired();
+        report.Property(x => x.Summary).HasMaxLength(1500).IsRequired();
+        report.HasIndex(x => new { x.UserId, x.WeekStart, x.ReportVersion }).IsUnique();
+        report.HasMany(x => x.Metrics)
+            .WithOne(x => x.WeeklyReport)
+            .HasForeignKey(x => x.WeeklyReportId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        var metric = modelBuilder.Entity<WeeklyReportMetric>();
+        metric.ToTable("WeeklyReportMetrics");
+        metric.HasKey(x => x.Id);
+        metric.Property(x => x.MetricKey).HasMaxLength(80).IsRequired();
+        metric.Property(x => x.NumericValue).HasPrecision(12, 4);
+        metric.Property(x => x.TextValue).HasMaxLength(500);
+        metric.Property(x => x.Unit).HasMaxLength(40).IsRequired();
+        metric.HasIndex(x => new { x.WeeklyReportId, x.MetricKey }).IsUnique();
+
+        var job = modelBuilder.Entity<WorkerJob>();
+        job.ToTable("WorkerJobs");
+        job.HasKey(x => x.Id);
+        job.Property(x => x.JobType).HasMaxLength(80).IsRequired();
+        job.Property(x => x.IdempotencyKey).HasMaxLength(180).IsRequired();
+        job.Property(x => x.Status).HasConversion<string>().HasMaxLength(24);
+        job.Property(x => x.LastError).HasMaxLength(2000);
+        job.Property(x => x.LockedBy).HasMaxLength(120);
+        job.HasIndex(x => x.IdempotencyKey).IsUnique();
+        job.HasIndex(x => new { x.Status, x.NextAttemptAt });
+
+        var processed = modelBuilder.Entity<WorkerProcessedEvent>();
+        processed.ToTable("WorkerProcessedEvents");
+        processed.HasKey(x => x.EventId);
+        processed.Property(x => x.EventType).HasMaxLength(120).IsRequired();
+
+        var deadLetter = modelBuilder.Entity<WorkerDeadLetter>();
+        deadLetter.ToTable("WorkerDeadLetters");
+        deadLetter.HasKey(x => x.Id);
+        deadLetter.Property(x => x.JobType).HasMaxLength(80).IsRequired();
+        deadLetter.Property(x => x.IdempotencyKey).HasMaxLength(180).IsRequired();
+        deadLetter.Property(x => x.Error).HasMaxLength(2000).IsRequired();
+        deadLetter.HasIndex(x => x.WorkerJobId);
+
+        var heartbeat = modelBuilder.Entity<WorkerHeartbeat>();
+        heartbeat.ToTable("WorkerHeartbeats");
+        heartbeat.HasKey(x => x.WorkerName);
+        heartbeat.Property(x => x.WorkerName).HasMaxLength(80);
+        heartbeat.Property(x => x.InstanceId).HasMaxLength(120).IsRequired();
     }
 }

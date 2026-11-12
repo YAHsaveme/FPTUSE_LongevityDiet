@@ -1,30 +1,23 @@
-# Architecture Diagrams
+# Official LongevityDiet architecture
 
-This folder contains engineering C4/supporting views for Longevity Diet Companion.
+There are exactly five system-wide official diagrams in
+[docs/assignment/one-page](../assignment/one-page/README.md):
 
-## Architecture states
-- **Current Runtime:** actual code/Docker Compose. Local Deployment must match it.
-- **Target Architecture:** ADR-005. Target C1 and Production Target may show future Gateway/service/database boundaries, but must be labelled Target.
+- [C0 Context](../assignment/one-page/C0.drawio)
+- [C1 Container Architecture](../assignment/one-page/C1.drawio)
+- [C2 Component Architecture](../assignment/one-page/C2.drawio)
+- [Database Diagram Overall](../assignment/one-page/Database%20Diagram.drawio)
+- [Business Flow Overall](../assignment/one-page/Business%20Flow.drawio)
 
-## Final diagram set
-1. `01-system-context.drawio` - C4 System Context; actors + system + optional Local AI only.
-2. `02-container-architecture.drawio` - C4 Container **Target Architecture**; Web, YARP Gateway, four REST domain services, Recommendation, Worker, six owned logical DBs, Event Streams and optional AI.
-3. `03-docker-deployment.drawio` - Current Local Docker Compose deployment.
-4. `04-api-component.drawio` - current API Component view; retained as current-runtime engineering detail until service split implementation.
-5. `05-recommendation-dynamic.drawio` - Target recommendation collaboration.
-6. `06-outbox-redis-dynamic.drawio` - Target per-service Outbox/Redis collaboration.
-7-9. PRN232 coverage/demo support views.
-10. `10-production-secure-deployment.drawio` - Production Target placement/security view.
-11. `11-cloud-docker-deployment.drawio` - Cloud Docker Target: IaaS VM, Docker Engine/Compose, private service DNS/network, SQL/Redis named volumes and persistent disk.
+Each has one editable Draw.io source and one-page PDF, centered top to bottom,
+orthogonal edges and detached arrow-label text. A strict geometry test
+checks label/node collisions, and a SQL-backed test verifies 50 physical
+tables and 20 within-owner FKs against the actual databases. In C1/C2 the six independent
+service/database owners are ADR-005 **target** boundaries; the existing Web
+continues to use transitional legacy routes and data until audited cutover.
 
-## Target C1 rules
-- Public HTTPS :443 -> Web/API Gateway edge.
-- Gateway internal :8080; Identity :8081; Catalog :8082; Planning :8083; Tracking :8084; Recommendation gRPC :8085; Worker ops :8086.
-- Redis :6379; SQL/TDS :1433; optional Local AI :11434.
-- Every business service owns exactly one logical DB.
-- No service connects directly to another service DB.
-- Event Streams always has visible producers and consumers.
-- C1 box copy stays minimal; route tables/event command details belong in docs/Dynamic views.
-
-## Export/QA
-Canonical editable source is draw.io XML. Export PNG/SVG after generation. Run project geometry lint plus vendored advanced draw.io QA, then inspect rendered PNG manually. A passing linter does not replace visual review.
+RabbitMQ is now an actual **opt-in, metadata-only audit event mirror**, not
+a planned, non-working icon. A real publisher/consumer runs in Worker Ops
+with a durable queue/exchange and SQL-backed deduplication, while Redis
+Streams remains the actual primary business transport. See
+[the RabbitMQ integration guide](RABBITMQ-INTEGRATION-20261112.md).

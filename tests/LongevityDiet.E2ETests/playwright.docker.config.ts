@@ -9,7 +9,13 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:5173',
-    channel: 'chrome',
+    // CI uses the runner's preinstalled Chrome when available, avoiding apt
+    // mirror outages. Local Windows continues to use installed Edge.
+    ...(process.env.CI
+      ? (process.env.PLAYWRIGHT_USE_SYSTEM_CHROME === '1'
+          ? { channel: 'chrome' }
+          : {})
+      : { channel: 'msedge' }),
     headless: true,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

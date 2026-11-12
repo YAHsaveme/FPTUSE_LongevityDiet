@@ -1,0 +1,523 @@
+{
+  "status": "C2_EXTENDED_SOURCE_BACKED",
+  "components": 10,
+  "tableCount": 32,
+  "actualFk": 9,
+  "logical": 16,
+  "event": 6,
+  "componentFlows": 31,
+  "tableReferences": 10,
+  "sourceToTableBridge": 1,
+  "totalConnectors": 73,
+  "ports": {
+    "api": 8080,
+    "grpc": 8081,
+    "redis": 6379,
+    "sql": 1433,
+    "web": 5173
+  },
+  "tableAccessLinks": [
+    [
+      "AuthController",
+      "Users",
+      "Identity user/profile"
+    ],
+    [
+      "ProfileController",
+      "UserProfiles",
+      "User profile"
+    ],
+    [
+      "ReminderNotificationsController",
+      "ReminderPreferences",
+      "Preference/notification"
+    ],
+    [
+      "MealPlansController",
+      "MealPlans",
+      "Saved meal plans"
+    ],
+    [
+      "MealLogsController",
+      "MealLogs",
+      "Meal logs"
+    ],
+    [
+      "EatingWindowController",
+      "EatingWindowSnapshots",
+      "Eating window"
+    ],
+    [
+      "RecommendationsController",
+      "UserFoodPreferences",
+      "Food preference selection"
+    ],
+    [
+      "FmdController",
+      "FmdSafetyAssessments",
+      "FMD safety assessment"
+    ],
+    [
+      "TrackingController",
+      "ActivityLogs",
+      "Activity log"
+    ],
+    [
+      "RecommendationController",
+      "ActivityGoals",
+      "Weekly activity goals"
+    ]
+  ],
+  "referenceTags": {
+    "UserFoodPreferences": "A01",
+    "UserProfiles": "A02",
+    "MealPlans": "A03",
+    "Users": "A04",
+    "ReminderPreferences": "A05",
+    "MealLogs": "A06",
+    "EatingWindowSnapshots": "A07",
+    "FmdSafetyAssessments": "A08",
+    "ActivityGoals": "A09",
+    "ActivityLogs": "A10"
+  },
+  "relations": [
+    {
+      "from": "web",
+      "to": "router",
+      "type": "component",
+      "label": "/api :8080"
+    },
+    {
+      "from": "router",
+      "to": "ctrl0",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl0",
+      "to": "service0",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service0",
+      "to": "repo0",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo0",
+      "to": "ref0",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl1",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl1",
+      "to": "service1",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service1",
+      "to": "repo1",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo1",
+      "to": "ref1",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl2",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl2",
+      "to": "service2",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service2",
+      "to": "repo2",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo2",
+      "to": "ref2",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl3",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl3",
+      "to": "service3",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service3",
+      "to": "repo3",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo3",
+      "to": "ref3",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl4",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl4",
+      "to": "service4",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service4",
+      "to": "repo4",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo4",
+      "to": "ref4",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl5",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl5",
+      "to": "service5",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service5",
+      "to": "repo5",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo5",
+      "to": "ref5",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl6",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl6",
+      "to": "service6",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service6",
+      "to": "repo6",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo6",
+      "to": "ref6",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl7",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl7",
+      "to": "service7",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service7",
+      "to": "repo7",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo7",
+      "to": "ref7",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl8",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl8",
+      "to": "service8",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service8",
+      "to": "repo8",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo8",
+      "to": "ref8",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "router",
+      "to": "ctrl9",
+      "type": "component",
+      "label": "HTTP"
+    },
+    {
+      "from": "ctrl9",
+      "to": "service9",
+      "type": "component",
+      "label": "Call"
+    },
+    {
+      "from": "service9",
+      "to": "repo9",
+      "type": "component",
+      "label": "Data"
+    },
+    {
+      "from": "repo9",
+      "to": "ref9",
+      "type": "access",
+      "label": "Ref"
+    },
+    {
+      "from": "table:Users",
+      "to": "table:UserProfiles",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:Users",
+      "to": "table:RefreshTokens",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:Users",
+      "to": "table:ReminderPreferences",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:Users",
+      "to": "table:UserNotifications",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:Users",
+      "to": "table:IdentityOutbox",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:Users",
+      "to": "table:MealLogs",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:Users",
+      "to": "table:FmdSafetyAssessments",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:Users",
+      "to": "table:ActivityGoals",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:UserProfiles",
+      "to": "table:UserDietaryPreferences",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:UserProfiles",
+      "to": "table:UserFoodPreferences",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:IdentityOutbox",
+      "to": "table:ReminderSchedules",
+      "type": "event",
+      "label": "EVENT: reminder"
+    },
+    {
+      "from": "table:IdentityOutbox",
+      "to": "table:WorkerProcessedEvents",
+      "type": "event",
+      "label": "EVENT: EventId"
+    },
+    {
+      "from": "table:UserDietaryPreferences",
+      "to": "table:MealPlans",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:MealPlans",
+      "to": "table:MealPlanDays",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:MealPlanDays",
+      "to": "table:PlannedMeals",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:PlannedMeals",
+      "to": "table:RecommendationFeedbacks",
+      "type": "logical",
+      "label": "APP: PlannedMealId"
+    },
+    {
+      "from": "table:PlannedMeals",
+      "to": "table:MealReplacementHistories",
+      "type": "logical",
+      "label": "APP: PlannedMealId"
+    },
+    {
+      "from": "table:MealLogs",
+      "to": "table:MealLogItems",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:MealLogs",
+      "to": "table:EatingWindowSnapshots",
+      "type": "logical",
+      "label": "APP: UserId + date"
+    },
+    {
+      "from": "table:FmdSafetyAssessments",
+      "to": "table:FmdEducationAcknowledgements",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:FmdSafetyAssessments",
+      "to": "table:FmdCycles",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:FmdCycles",
+      "to": "table:FmdCycleDays",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:ActivityLogs",
+      "to": "table:TrackingOutbox",
+      "type": "event",
+      "label": "EVENT: activity"
+    },
+    {
+      "from": "table:ActivityGoals",
+      "to": "table:ActivityLogs",
+      "type": "logical",
+      "label": "APP: UserId"
+    },
+    {
+      "from": "table:AdherenceScores",
+      "to": "table:ScoreDimensions",
+      "type": "sql",
+      "label": ""
+    },
+    {
+      "from": "table:AdherenceScores",
+      "to": "table:ScoreConfigurationVersions",
+      "type": "logical",
+      "label": "APP: Version"
+    },
+    {
+      "from": "table:TrackingScoreSignals",
+      "to": "table:AdherenceScores",
+      "type": "logical",
+      "label": "APP: UserId + date"
+    },
+    {
+      "from": "table:TrackingOutbox",
+      "to": "table:TrackingScoreSignals",
+      "type": "event",
+      "label": "EVENT: EventId"
+    },
+    {
+      "from": "table:ReminderSchedules",
+      "to": "table:ReminderDispatchRecords",
+      "type": "logical",
+      "label": "APP: UserId + category"
+    },
+    {
+      "from": "table:ReminderDispatchRecords",
+      "to": "table:WorkerOutbox",
+      "type": "event",
+      "label": "EVENT: notify"
+    },
+    {
+      "from": "table:WorkerOutbox",
+      "to": "table:IdentityInbox",
+      "type": "event",
+      "label": "EVENT: EventId"
+    },
+    {
+      "from": "ref3",
+      "to": "table:Users",
+      "type": "access",
+      "label": "REAL TABLE"
+    }
+  ]
+}

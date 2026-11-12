@@ -1,5 +1,9 @@
 # Longevity Diet Companion
 
+> **2026-11-12 — Architecture handover updated.** Exactly five official overall diagrams remain: C0, C1, C2, Database Diagram and Business Flow, with one editable Draw.io and one one-page PDF for each. The six owner databases describe ADR-005 target boundaries; Redis Streams is the primary broker and a real optional RabbitMQ publisher/consumer now mirrors safe domain-event metadata to SQL audit; legacy-data migration is not complete. See [the official handover](docs/assignment/one-page/README.md). Earlier 32/56-table diagram audits are historical and superseded.
+
+**Member 1 + Member 4 acceptance:** [Eight-task completion matrix and remaining live verification](docs/assignment/MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md). Admin Rule Governance now includes independent two-admin publication review, a paginated safety queue and read-only historical plan-impact counts.
+
 ## Project description
 
 PRN232 Final Assignment: distributed .NET application hỗ trợ người dùng xây dựng và theo dõi thói quen longevity diet/lifestyle theo hướng giải thích được, truy vết được rule/source và có distributed architecture rõ ràng.
@@ -73,24 +77,18 @@ PRN232_LongevityDiet/
 
 ## System architecture
 
-- `docs/assignment/README.md` - Assignment-facing documentation pack.
-- `docs/assignment/00-ASSIGNMENT-DOCUMENT.md` - submission entry point: Context -> Problems -> Solutions -> Actors/Features -> C0/C1 -> Technology -> Conceptual ERD -> Physical DB -> PRN232 coverage.
-- `docs/05-SYSTEM-ARCHITECTURE.md` - detailed engineering architecture.
-- `docs/architecture/README.md` - extended internal architecture diagram set.
-- `docs/architecture/02-container-architecture.drawio`
-- `docs/10-PRN232-TRACEABILITY.md`
+**Only five overall diagrams are canonical:** [C0](docs/assignment/one-page/C0.drawio),
+[C1](docs/assignment/one-page/C1.drawio),
+[C2](docs/assignment/one-page/C2.drawio),
+[Database Diagram](docs/assignment/one-page/Database%20Diagram.drawio),
+and [Business Flow](docs/assignment/one-page/Business%20Flow.drawio).
+All five are centered top-to-bottom, monochrome, with detached arrow captions,
+one native Draw.io and one single-page PDF each. See the
+[official five-diagram guide](docs/assignment/one-page/README.md).
+RabbitMQ is opt-in with real broker QA evidence; current business events
+continue through Redis Streams.
 
-The canonical diagram set covers:
-- System Context;
-- Container Architecture;
-- Docker Deployment;
-- API Component view;
-- Recommendation dynamic flow;
-- Transactional Outbox + Redis flow;
-- PRN232 requirement coverage;
-- deliverables/demo assessment;
-- end-to-end demo flow;
-- Production Secure Deployment.
+See the [assignment evidence](docs/assignment/00-ASSIGNMENT-DOCUMENT.md) and [traceability](docs/10-PRN232-TRACEABILITY.md).
 
 ## Current implementation status
 
@@ -99,7 +97,7 @@ The canonical diagram set covers:
 - research, scope, business/functional/non-functional requirements;
 - safety/privacy/AI guardrails;
 - PRN232 and book-to-software traceability;
-- 10 canonical architecture diagrams with geometry/export QA;
+- 5 official architecture and business diagrams with geometry/export QA;
 - .NET 9 solution with separate ASP.NET Core backend and React/TypeScript/Vite `.esproj` frontend;
 - Visual Studio multi-project startup profile for Web + API;
 - separate development ports: Web `5173`, API HTTPS `7110` / HTTP `5110`;
@@ -195,8 +193,10 @@ It creates a local ignored `.env` with generated development secrets when needed
 
 ## Build and test
 
+Build/cache folders (`bin`, `obj`, `node_modules`, and `dist`) are **generated files**, not source code. They may be safely removed to save disk space for this school project. Restore them with the commands below when building or running again. Never delete `src` code, EF migrations, `*.csproj`, `package-lock.json`, or any diagrams to achieve a similar cleanup.
+
 ```powershell
-cd D:\PRN232\PRN232_LongevityDiet
+cd D:\PRN232\FPTUSE_LongevityDiet
 dotnet restore
 dotnet build .\LongevityDiet.sln
 dotnet test .\LongevityDiet.sln --no-build
@@ -221,21 +221,52 @@ Against an already running Docker Compose full stack:
 npm run test:docker
 ```
 
-Current verified test baseline:
-- UnitTests: 8/8 pass.
-- IntegrationTests: 7/7 pass.
-- E2ETests: 1/1 pass on Chrome in native Visual Studio-style development.
-- Docker E2ETests: 1/1 pass against the fully containerized stack.
+**Current verification (11/11/2026, merged into develop PR #22):**
+- Current Runtime QA and GitHub PR quality gates **PASS**: 172/172 .NET tests (91 unit + 81 integration), 12/12 Web tests, lint/build PASS, 0 high/production npm vulnerabilities.
+- Full Docker QA across 6 containers and 3 SQL databases: JWT/REST/catalog/challenge/dashboard/FMD, 14-day / 42-meal planning, wellness, LDAS MealLog/EatingWindow, independent gRPC, Redis Streams, Worker scheduled notification and weekly-report result all exercised with synthetic accounts.
+- Playwright 10/10 browser E2E, Edge CDP responsive 6/6, historical four-diagram check superseded by five official Draw.io/PDF diagrams.
+- **Not 100% of the team's ADR-005 Target Architecture:** standalone YARP Gateway, 4 independent REST domain services and six service-owned DBs, public TLS :443, full target service communication matrix and reviewer/presentation sign-off are still missing. Do not call Target Architecture deployed or automatically merge into main.
+- [Four-member/official-PDF acceptance audit](docs/assignment/FOUR-MEMBER-PDF-100PCT-ACCEPTANCE-AUDIT-20261111.md).
+
+Historical verification (09/11/2026, earlier feature branch):
+- .NET solution build: **0 errors, 0 warnings**.
+- Unit tests: **66/66 pass**; integration tests: **70/70 pass** (including 3 new Rule Governance cases).
+- Frontend: **12/12 tests pass**, lint/build PASS.
+- Project-structure, C0/C1/C2/baseline ERD geometry, Compose static config, static release readiness, EF pending-model-change detection: PASS.
+- **Not reverified on this branch:** live Docker/SQL Server stack, fresh real SQL migration, E2E broker/gRPC demo, reviewer approval. The new `RuleAudits` table still requires updating the 32-table baseline ERD and PDF export.
+- Detailed official assignment audit: `docs/assignment/FINAL-ASSIGNMENT-COMPLIANCE-AUDIT-20261109.md`.
+
+Historical release baseline (2026-11-05; not the latest test status):
+- UnitTests: 51/51 pass.
+- IntegrationTests: 35/38 pass. The 3 failures are a pre-existing MealLog-create HTTP 500 baseline defect reproduced on clean `origin/develop` commit `474b475`; see `docs/operations/RELEASE-RUNBOOK.md`.
+- Member 2 Week 2 targeted integration tests: 5/5 pass.
+- Member 2 Week 3 targeted integration tests: 5/5 pass.
+- Frontend tests: 6/6 pass; lint/build PASS.
+- Docker E2E: 1/1 previously verified against the current Compose runtime; release CI reruns it on pushes to `main`.
 - Full .NET build: 0 warnings, 0 errors.
-- Docker Compose build/runtime smoke: PASS.
+- Docker Compose build/runtime, Redis Stream Worker smoke, backup verification and named-volume persistence: PASS.
+
+The complete current-runtime operations and release evidence is documented in `docs/operations/RELEASE-RUNBOOK.md`. ADR-005 Gateway/domain-service/TLS topology remains **Target Architecture** until those deployables and service-owned databases exist.
+
+## Optional target-architecture Gateway migration slice
+
+A separate **.NET 9 / YARP API Gateway** is now available without replacing the verified Current Runtime. With `docker-compose.gateway.yml`, Browser → Web/Nginx → Gateway → existing API is exercised in real Docker; the default Compose remains Browser → Web/Nginx → API. Gateway readiness checks the actual backend and intentionally returns HTTP 503 if it is unavailable. This does **not** yet implement four independent REST domain services, six service-owned databases or public TLS443.
+
+[Gateway setup, API routing, local E2E, outage recovery and remaining architecture gaps](docs/architecture/TARGET-GATEWAY-MIGRATION-20261111.md).
 
 ## Deployment instructions
 
+For the verified current demo runtime, follow `docs/operations/RELEASE-RUNBOOK.md`.
+
 ```powershell
 Copy-Item .env.example .env
+# Replace every CHANGE_ME value in .env before startup.
 docker compose up -d --build
 docker compose ps
+.\scripts\Test-ReleaseReadiness.ps1 -RequireRunningStack
 ```
+
+The checked-in Compose file binds published ports to `127.0.0.1` for local/demo safety. It is not the target public HTTPS :443 deployment.
 
 Core containers:
 - web;
@@ -244,6 +275,24 @@ Core containers:
 - worker;
 - sqlserver;
 - redis.
+
+## Independent Catalog & Rules Service — optional ADR-005 migration slice
+
+A distinct .NET 9 **Catalog Service** now owns its own **LongevityCatalogDb** (ten physical catalog tables plus EF migration history). It validates JWT independently and serves Foods, Recipes and Diet Rules through Docker port **127.0.0.1:18082**, protected by role-based authorization. It reuses the identical source-controlled seed data and catalog mapping without referencing another service's DbContext at runtime.
+
+This is an **opt-in migration slice**, not a cutover: default Web, Gateway, Planner and Admin Rule Governance still use the existing Current Runtime. Moving all admin writers, Planning read models, four REST domain services, domain Outbox ownership and TLS443 remains outstanding; no 100% ADR-005 claim. [Architecture, startup and remaining gaps](docs/architecture/TARGET-CATALOG-SERVICE-MIGRATION-20261111.md).
+
+To verify on isolated QA (synthetic accounts): `node scripts/Test-Catalog-Service-Http.mjs` and `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Live-Catalog-Service.ps1`.
+
+## Official PRN232 Final Assignment technical acceptance
+
+The original Final Assignment PDF (see the [seven-step demo mapped to its requirements](docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md)) asks for REST/JWT/CRUD/layers/search/filter/sort/pagination, background processing, **Redis or Kafka**, an independent gRPC service, Docker Compose or cloud, EF Core/SQL, migrations, API documentation, a six-section README and a seven-step demo. It does **not** require four independent domain REST services or six databases; those are the team's **additional ADR-005 targets** and remain separately tracked.
+
+- Official-PDF source/deliverables verification (works in Windows, Linux and GitHub CI): `node scripts/Validate-Prn232-Final-PDF.cjs`.
+- Isolated Windows Docker end-to-end full acceptance (creates only synthetic QA users and a JSON evidence report): `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Prn232-Final-Acceptance.ps1 -IncludeGatewayOutage -IncludeIndependentRedisSmoke`.
+- [Seven-step demonstration and explicit human review checklist](docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md).
+
+**Scope:** green automated QA proves technical criteria on the tested environment. It does not certify a lecturer-observed presentation, a 100/100 grade, clinical nutrition safety, or all ADR-005 Target Architecture tasks. `main` must not be merged on those unsupported claims.
 
 ## PRN232 mandatory mapping
 
@@ -272,3 +321,16 @@ The project distinguishes:
 4. project-defined software heuristics such as LDAS.
 
 See `docs/01-BOOK-RESEARCH.md` and `docs/11-BOOK-TO-SOFTWARE-TRACEABILITY.md`.
+
+
+## Architecture diagrams — PRN232 course-size views (2026-11-05)
+
+**Canonical assignment**: [four editable one-page diagrams and validation](docs/assignment/one-page/README.md).
+
+- [C0 System Context (Draw.io)](docs/assignment/one-page/C0.drawio) and [PDF](docs/assignment/one-page/C0.pdf)
+- [C1 Container (Draw.io)](docs/assignment/one-page/C1.drawio) and [PDF](docs/assignment/one-page/C1.pdf)
+- [C2 REST API Components (Draw.io)](docs/assignment/one-page/C2.drawio) and [PDF](docs/assignment/one-page/C2.pdf)
+- [Database Diagram (Draw.io)](docs/assignment/one-page/Database%20Diagram.drawio) and [one-page PDF](docs/assignment/one-page/Database%20Diagram.pdf)
+
+The complete Database Diagram shows all **32 mapped EF Core tables and 9 real foreign keys**, while C2 shows all **10 current API controller modules**. The independent ActivityCoach gRPC connection has an HTTP/2 integration test; full live Docker/SQL Server E2E is still unverified.
+To opt in *after provisioning and verifying* a Cloudflare Worker + D1, set secret environment variables `CloudflareSessions__Enabled=true`, `CloudflareSessions__BaseUrl=https://YOUR_PRIVATE_WORKER_HOST/` and `CloudflareSessions__ServiceBearer=<FROM_SECURE_SECRET_MANAGER>`; do **not** put credentials into Git or `appsettings.json`. See the migration guide before switching live sessions.
