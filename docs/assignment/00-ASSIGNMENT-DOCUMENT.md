@@ -44,7 +44,7 @@ The official handover uses one editable Draw.io and one one-page PDF per diagram
 C1/C2 show the ADR-005 target (six domain-owned SQL catalogs); the current legacy
 API and data migration remain transitional. The database view covers 49 target
 owner tables and only source-confirmed within-owner foreign keys. Redis Streams
-is implemented; RabbitMQ/AMQP is planned, not currently wired to a consumer.
+is implemented; RabbitMQ/AMQP now has an opt-in, QA-tested metadata-only event mirror publisher/consumer in Worker Ops. Redis Streams remains the primary business transport.
 ## Presentation notes — seven official demo topics
 
 1. System architecture: C0/C1/C2/ERD and the explicit **Current Runtime versus ADR-005 Target Architecture** distinction.

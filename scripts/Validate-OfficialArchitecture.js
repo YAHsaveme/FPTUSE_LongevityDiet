@@ -34,6 +34,20 @@ for(const name of names){
  const edges=[...xml.matchAll(/<mxCell\b[^>]*\bedge="1"[^>]*>/g)]
   .map(m=>m[0]);
  const ids=new Set(vertices.map(s=>(s.match(/\bid="([^"]+)"/)||[])[1]));
+ // Every drawn functional component MUST have a real directed connector.
+ // Text captions, titles, boundary panels and routing spines are annotations.
+ const connected=new Set();
+ for(const e of edges) {
+  connected.add((e.match(/\bsource="([^"]+)"/)||[])[1]);
+  connected.add((e.match(/\btarget="([^"]+)"/)||[])[1]);
+ }
+ for(const cell of vertices){
+  const id=(cell.match(/\bid="([^"]+)"/)||[])[1];
+  const freeText=/^(title-|label-|heading-|fk-|footer|bottom-rule)/.test(id);
+  const group=/^(panel-|box-)/.test(id);
+  check(freeText||group||connected.has(id),
+    name+' orphan functional node '+id);
+ }
  check(new Set([...ids]).size===vertices.length,'Duplicate node ids '+name);
  for(const e of edges){
   const source=(e.match(/\bsource="([^"]+)"/)||[])[1],
@@ -50,6 +64,10 @@ for(const name of names){
   .map(x=>x[0].toUpperCase());
  check(hexColors.every(x=>x==='#000000'||x==='#FFFFFF'),
    'Non-black/white style '+name);
+ check((xml.match(/edgeStyle=segmentEdgeStyle/g)||[]).length === edges.length,
+   name+' connectors must be square orthogonal segments');
+ check(edges.every(e=>/value=""/.test(e)),
+   name+' edge labels must be detached and positioned off arrow strokes');
  check(!xml.includes('edgeStyle=elbowEdgeStyle') &&
    !xml.includes('curved=1') &&
    !xml.includes('rounded=1;orthogonalLoop'),
@@ -63,19 +81,19 @@ for(const name of names){
 }
 for(const name of ['C1','C2','Business Flow']){
  const xml=diagrams[name]?.xml||'';
- check(xml.includes('RabbitMQ')&&xml.includes('PLANNED'),
-   name+' needs honest RabbitMQ planned classification');
- check(xml.includes('Redis Streams')||xml.includes('REDIS STREAMS'),
+ check(/RabbitMQ/i.test(xml) && /OPTIONAL/i.test(xml),
+   name+' must show optional, actually integrated RabbitMQ audit transport');
+ check(/REDIS STREAMS/i.test(xml),
    name+' must also show actually implemented Redis Streams');
 }
 for(const name of ['C0','Database Diagram'])
- check(!diagrams[name]?.xml.includes('RabbitMQ'),
+ check(!/RabbitMQ/i.test(diagrams[name]?.xml||''),
    name+' must not invent RabbitMQ within context or SQL schema');
 check((diagrams.C1?.xml.match(/id="db-(identity|catalog|planning|tracking|recommendation|worker)"/g)||[]).length===6,
   'C1 must show all six owned SQL databases');
 check((diagrams.C2?.xml.match(/id="panel-(id|cat|plan|track|rec|work)"/g)||[]).length===6,
   'C2 must show six bounded contexts');
-check((diagrams['Business Flow']?.xml.match(/id="fmd-(1|2|3)"/g)||[]).length===3,
+check((diagrams['Business Flow']?.xml.match(/id="edge-fmd-(1|2|3)"/g)||[]).length===3,
   'FMD must have one entry and separate yes/no branches');
 const modelFiles=[
  'src/LongevityDiet.Identity/IdentityDbContext.cs',
@@ -91,9 +109,21 @@ for(const file of modelFiles){
  const src=fs.readFileSync(path.join(root,file),'utf8');
  targetDbSets += [...src.matchAll(/public DbSet<([^>]+)>/g)].length;
 }
-check(targetDbSets===49,'DbContext schema changed; expected 49 target tables, found '+targetDbSets);
-check(tableCells===targetDbSets,
- 'Overall Database Diagram must list all target owned tables once: '+tableCells+' != '+targetDbSets);
+// EF Core creates one implicit many-to-many physical join table, despite no
+// public DbSet. Physical SQL inventory (6 target DBs) confirms 50 tables.
+const joinFile=fs.readFileSync(path.join(root,
+ 'src/LongevityDiet.Repositories/Catalog/Configurations/RuleSetVersionConfiguration.cs'),'utf8');
+const hasImplicitCatalogJoin=joinFile.includes('RuleSetVersionItem') &&
+ joinFile.includes('UsingEntity<Dictionary<string, object>>');
+check(hasImplicitCatalogJoin,'Missing implicit physical Catalog RuleSetVersionItems table.');
+check(targetDbSets===49,'Unexpected entity ownership DbSet count: '+targetDbSets);
+const physicalTableCount=targetDbSets+(hasImplicitCatalogJoin?1:0);
+check(physicalTableCount===50,'Unexpected target physical table count: '+physicalTableCount);
+check(tableCells===physicalTableCount,
+ 'ERD must list ALL physical tables including implicit EF join: '+tableCells+
+ ' != '+physicalTableCount);
+check(diagrams['Database Diagram']?.xml.includes('RuleSetVersionItems'),
+ 'ERD must show real RuleSetVersionItems SQL join table.');
 if(errors.length){
  console.error(errors.map(x=>'FAIL: '+x).join('\n'));
  process.exitCode=1;

@@ -1,23 +1,30 @@
-# Draw.io Quality Rules - Five Official Overall Views
+# Draw.io quality rules — five official top-down diagrams
 
-The official deliverables are C0, C1, C2, Database Diagram, and
-Business Flow. Exactly one Draw.io plus one single-page PDF per view,
-stored at `docs/assignment/one-page/`.
+Official views: C0 System Context, C1 Container, C2 Components,
+Database Diagram Overall, Business Flow Overall.
 
-Design requirements:
-- Strict black/white only; no decorations or color-coded node states.
-- Left-to-right business/request flow and top-to-bottom data ownership.
-- UML stick-figure actors for end users/administrator.
-- Native editable connectors, short explicit edge labels, square-corner
-  lines, consistent typography, no labels overlapping arrows.
-- Every service has its own database in target C1 and C2.
-- Database table groups must come from owned EF DbContexts; no invented
-  cross-database FK to Identity.
-- Redis Streams shown as ACTIVE; RabbitMQ AMQP:5672 is visibly
-  PLANNED / NOT DEPLOYED in C1, C2 and Business Flow.
-- Business Flow's FMD safety YES/NO branches must have correct semantics.
-- Render all five to PNG/PDF, inspect visually and validate one-page
-  PDFs using `scripts/Validate-OfficialArchitecture.js`.
+- Only one native Draw.io and one single-page PDF per view.
+- Black ink / white background; legible square-bordered components.
+- Human-shaped UML actors; no orphan functional components.
+- Reading direction: **top to bottom**, centered on paper, generous whitespace
+  between rows and multiple independent lanes.
+- Native orthogonal right-angle arrows. Avoid curved or diagonal connectors;
+  use routing/broker spines where many components share an upstream owner.
+- Labels are separate white text blocks ABOVE horizontal or BESIDE vertical
+  arrows, never touching or visually crossing the arrow itself.
+- C1: six service owners and their own databases; independent event rail.
+- C2: REST endpoint → application service → repository/DbContext per owner;
+  no direct cross-domain SQL/foreign-key dependencies.
+- Database Diagram: all 50 physical target-owned tables (including Catalog join table); links to database
+  ownership spines indicate membership, **not physical FKs**. Record local
+  FK relationships separately within the relevant owner group.
+- Business Flow: Admin rules connected to Catalog, member happy path,
+  guarded FMD YES/NO outcomes, Redis business Worker, optional RabbitMQ
+  metadata-only audit consumer and Worker SQL receipt.
+- Redis Streams is ACTIVE. RabbitMQ is implemented as an opt-in QA-verified
+  audit mirror, not as a replacement for Redis.
+- Render and visually inspect C0, C1, C2, ERD and Business Flow; verify
+  exactly five printable one-page PDFs.
 
-Regenerate with `scripts/Export-OverallDiagrams.ps1`.
-Old draft and FULL generators must not be restored.
+Regenerate: `scripts/Export-OverallDiagrams.ps1`.
+Validate: `node scripts/Validate-OfficialArchitecture.js`.

@@ -1,14 +1,15 @@
 # LongevityDiet documentation
 
-1. [Assignment requirements and guide](assignment/README.md)
-2. [Five official diagrams: C0, C1, C2, Database Diagram, Business Flow](assignment/one-page/README.md)
-3. [Runtime connectivity evidence and limitations](assignment/04-RUNTIME-CONNECTIVITY.md)
-4. [Architecture explanation and ADR notes](architecture/README.md)
-5. [Project status](PROJECT-STATUS.md) and [team task evidence](task/README.md)
+1. [Assignment guide](assignment/README.md)
+2. [Five official top-down diagrams: C0, C1, C2, Overall ERD, Business Flow](assignment/one-page/README.md)
+3. [RabbitMQ publisher/consumer implementation and QA](architecture/RABBITMQ-INTEGRATION-20261112.md)
+4. [Runtime connectivity evidence and limitations](assignment/04-RUNTIME-CONNECTIVITY.md)
+5. [ADR-005 architecture notes](architecture/README.md)
+6. [Project status](PROJECT-STATUS.md) and [team task evidence](task/README.md)
 
-The five official architecture/business views are one-page PDFs plus
-editable Draw.io files. The EF Core source and migrations under src/
-remain the source of truth for persisted schema. RabbitMQ appears only
-as PLANNED in C1, C2 and Business Flow; Redis Streams is implemented.
-Do not confuse the ADR-005 target six-database design with completed
-legacy-data migration or production cutover.
+The editable diagrams are monochrome, connected, centered top-to-bottom
+views. EF Core DbContexts and SQL migrations under src/ remain the
+physical schema source of truth. Redis Streams is the current primary
+business transport; RabbitMQ is an opt-in, QA-verified event audit
+publisher/consumer, not a completed replacement. Historical
+legacy-data migration and review are still required.

@@ -1,6 +1,6 @@
 # Longevity Diet Companion
 
-> **2026-11-12 — Architecture handover updated.** Exactly five official overall diagrams remain: C0, C1, C2, Database Diagram and Business Flow, with one editable Draw.io and one one-page PDF for each. The six owner databases describe ADR-005 target boundaries; Redis Streams is implemented, RabbitMQ is marked PLANNED, and legacy-data migration is not complete. See [the official handover](docs/assignment/one-page/README.md). Earlier 32/56-table diagram audits are historical and superseded.
+> **2026-11-12 — Architecture handover updated.** Exactly five official overall diagrams remain: C0, C1, C2, Database Diagram and Business Flow, with one editable Draw.io and one one-page PDF for each. The six owner databases describe ADR-005 target boundaries; Redis Streams is the primary broker and a real optional RabbitMQ publisher/consumer now mirrors safe domain-event metadata to SQL audit; legacy-data migration is not complete. See [the official handover](docs/assignment/one-page/README.md). Earlier 32/56-table diagram audits are historical and superseded.
 
 **Member 1 + Member 4 acceptance:** [Eight-task completion matrix and remaining live verification](docs/assignment/MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md). Admin Rule Governance now includes independent two-admin publication review, a paginated safety queue and read-only historical plan-impact counts.
 
@@ -77,7 +77,16 @@ PRN232_LongevityDiet/
 
 ## System architecture
 
-**Only five overall diagrams are canonical:** [C0](docs/assignment/one-page/C0.drawio), [C1](docs/assignment/one-page/C1.drawio), [C2](docs/assignment/one-page/C2.drawio), [Database Diagram](docs/assignment/one-page/Database%20Diagram.drawio), and [Business Flow](docs/assignment/one-page/Business%20Flow.drawio). One native Draw.io and one one-page PDF each; see [the official index](docs/assignment/one-page/README.md).
+**Only five overall diagrams are canonical:** [C0](docs/assignment/one-page/C0.drawio),
+[C1](docs/assignment/one-page/C1.drawio),
+[C2](docs/assignment/one-page/C2.drawio),
+[Database Diagram](docs/assignment/one-page/Database%20Diagram.drawio),
+and [Business Flow](docs/assignment/one-page/Business%20Flow.drawio).
+All five are centered top-to-bottom, monochrome, with detached arrow captions,
+one native Draw.io and one single-page PDF each. See the
+[official five-diagram guide](docs/assignment/one-page/README.md).
+RabbitMQ is opt-in with real broker QA evidence; current business events
+continue through Redis Streams.
 
 See the [assignment evidence](docs/assignment/00-ASSIGNMENT-DOCUMENT.md) and [traceability](docs/10-PRN232-TRACEABILITY.md).
 

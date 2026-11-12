@@ -27,6 +27,14 @@ builder.Services.AddDbContext<WorkerOpsDbContext>(o =>
     o.UseSqlServer(connection, sql => sql.EnableRetryOnFailure()));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHostedService<WorkerOwnedEventConsumer>();
+// Independent opt-in RabbitMQ mirror and SQL-owned consumer. Production
+// remains on Redis Streams unless an explicitly secured broker is configured.
+if (builder.Configuration.GetValue<bool>("RabbitMq:Enabled"))
+{
+    _ = RabbitMqDomainAudit.Factory(builder.Configuration, builder.Environment);
+    builder.Services.AddHostedService<RabbitMqRedisEventMirror>();
+    builder.Services.AddHostedService<RabbitMqOwnedAuditConsumer>();
+}
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

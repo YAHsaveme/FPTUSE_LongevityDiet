@@ -54,6 +54,7 @@ jobs:
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml config --quiet
+          docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
@@ -235,6 +236,12 @@ jobs:
       - name: Verify Worker event inbox, SQL dedupe, dead-letter, Admin JWT and Redis ACK
         run: node scripts/Test-Worker-Ops-Http.mjs
 
+      - name: Start optional RabbitMQ 4 and real Redis-to-Rabbit domain event mirror
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml up -d --build rabbitmq worker-ops
+
+      - name: Verify RabbitMQ publisher confirms, SQL ACK, replay dedupe and poison isolation
+        run: node scripts/Test-RabbitMq-Domain-Events.mjs
+
       - name: Stop transitional Worker and start WorkerDb-only reminder dispatcher
         shell: bash
         run: |
@@ -262,4 +269,4 @@ jobs:
 
       - name: Tear down release smoke
         if: always()
-        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml down -v --remove-orphans
+        run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml -f docker-compose.rabbitmq.yml down -v --remove-orphans

@@ -1,0 +1,34 @@
+# Optional, isolated RabbitMQ integration for ADR-005.
+# Compose with docker-compose.yml + docker-compose.worker-ops.yml.
+# Default password is ONLY for local synthetic QA and MUST be overridden
+# for any non-local deployment. No broker ports are published to the host.
+services:
+  rabbitmq:
+    image: rabbitmq:4.1-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-ldc-qa}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-qa-rabbit-only-not-production}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 8s
+      retries: 25
+      start_period: 20s
+    volumes:
+      - rabbitmq-qa-data:/var/lib/rabbitmq
+    networks: [ldc-network]
+
+  worker-ops:
+    environment:
+      RabbitMq__Enabled: "true"
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: "5672"
+      RabbitMq__UserName: ${RABBITMQ_USER:-ldc-qa}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-qa-rabbit-only-not-production}
+      RabbitMq__UseTls: "false"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  rabbitmq-qa-data:

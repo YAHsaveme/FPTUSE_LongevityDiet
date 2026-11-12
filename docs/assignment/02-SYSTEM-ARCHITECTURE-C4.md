@@ -1,43 +1,85 @@
-# LongevityDiet - 5 sơ đồ kiến trúc tổng thể chính thức
+# LongevityDiet — five official C4, database and business-flow views
 
-Tài liệu dùng duy nhất bộ sơ đồ tại [docs/assignment/one-page](one-page/README.md).
-Không còn bản FULL, bản 32 bảng hoặc các bản vẽ nháp song song.
+The only official native drawings and one-page PDF exports are in
+[one-page/README.md](one-page/README.md). Each is black and white, centered
+from the top of the page downward, with generous gaps between endpoints.
 
-| Sơ đồ | Draw.io chỉnh sửa | PDF một trang | Phạm vi |
+| View | Editable drawing | One-page PDF | Main question |
 |---|---|---|---|
-| C0 tổng thể | [C0](one-page/C0.drawio) | [PDF](one-page/C0.pdf) | Thành viên, quản trị viên và ranh giới LongevityDiet |
-| C1 tổng thể | [C1](one-page/C1.drawio) | [PDF](one-page/C1.pdf) | React/Nginx, YARP, 6 service độc lập, 6 database SQL, Redis và RabbitMQ dự kiến |
-| C2 tổng thể | [C2](one-page/C2.drawio) | [PDF](one-page/C2.pdf) | REST endpoint → application service → DbContext/Outbox |
-| Database Diagram tổng thể | [Database Diagram](one-page/Database%20Diagram.drawio) | [PDF](one-page/Database%20Diagram.pdf) | 49 bảng owner mục tiêu trong 6 database, quan hệ FK nội bộ theo source |
-| Business Flow | [Business Flow](one-page/Business%20Flow.drawio) | [PDF](one-page/Business%20Flow.pdf) | Luồng người dùng, an toàn FMD, xử lý bất đồng bộ, luồng quản trị |
+| C0 System Context | [Draw.io](one-page/C0.drawio) | [PDF](one-page/C0.pdf) | Who uses the system? |
+| C1 Containers | [Draw.io](one-page/C1.drawio) | [PDF](one-page/C1.pdf) | Which service, database, broker and protocol handles each request? |
+| C2 Components | [Draw.io](one-page/C2.drawio) | [PDF](one-page/C2.pdf) | What is the domain processing path inside each service? |
+| Database Diagram Overall | [Draw.io](one-page/Database%20Diagram.drawio) | [PDF](one-page/Database%20Diagram.pdf) | Which of the 50 physical tables belongs to which SQL catalog? |
+| Business Flow | [Draw.io](one-page/Business%20Flow.drawio) | [PDF](one-page/Business%20Flow.pdf) | How does a member request become a plan, tracking, notification and audit? |
 
-## Phạm vi triển khai
+## C0
 
-C1 và C2 mô tả mục tiêu kiến trúc ADR-005. Một số luồng của API và Web
-vẫn sử dụng backend/database legacy. Không được coi các sơ đồ mục tiêu là
-bằng chứng quá trình migration đã hoàn thành.
+Member uses LongevityDiet for registration, profiling, meal plans, activity
+logs, LDAS and progress. Admin publishes approved rule versions and reviews
+operations. Both actors connect explicitly to one system boundary.
 
-Redis Streams đang được dùng cho Outbox, consumers, reminder và background worker.
-RabbitMQ được bổ sung ở C1, C2 và Business Flow là một lựa chọn AMQP cho
-event queue/fanout về sau; hiện chưa có RabbitMQ publisher/consumer trong source.
-Các đường RabbitMQ được vẽ nét đứt, ghi rõ PLANNED / NOT DEPLOYED.
+## C1
 
-Database Diagram dựa trên 7 DbContext thực của 6 domain owners:
-Identity 7 bảng, Catalog 9 bảng, Planning 13 bảng, Tracking 10 bảng,
-Recommendation 4 bảng và Worker 6 bảng; tổng 49 bảng.
-Worker có hai DbContext chia cùng một database owner.
-Quan hệ UserId/DomainEvent xuyên miền không phải FK SQL. Chỉ những
-FK nội bộ khớp source code mới được vẽ bằng đường liền.
+From top to bottom: Member/Admin → React/Nginx → opt-in YARP API Gateway
+→ shared route spine → each of six independent target REST service owners
+→ its own SQL database. Database/outbox events attach to the right event
+spine; existing Redis Streams is the primary business transport and the
+optional RabbitMQ durable audit mirror sits beside Redis.
 
-## Kiểm thử
+Ports: Identity REST 8081; Catalog REST 8082; Planning REST 8083;
+Tracking REST 8084; Recommendation gRPC 8085 and REST 8087; Worker Ops
+REST 8086; SQL Server 1433; Redis TCP 6379; RabbitMQ AMQP 5672 (internal).
+Public Web and Gateway ports depend on deployment/overlay.
+
+## C2
+
+All service internal paths are drawn from top to bottom:
+HTTP Endpoint/Controller → Application/Domain rules → DbContext/
+Repository with its own SQL catalog and Outbox/event interfaces.
+In the diagram, six bounded-context panels are independent siblings,
+not a single chain of cross-domain SQL calls.
+RabbitMQ is an actual opt-in event audit integration, described in
+[the implementation guide](../architecture/RABBITMQ-INTEGRATION-20261112.md).
+
+## Database Diagram
+
+Six physically distinct target logical databases:
+Identity 7, Catalog 10 (9 DbSets + RuleSetVersionItems), Planning 13,
+Tracking 10, Recommendation 4 and Worker 6: **50 physical tables** in all,
+including the source-confirmed implicit EF Core many-to-many Catalog join.
+The Worker count includes two DbContexts sharing one Worker-owned SQL catalog.
+Every table connects to a vertical ownership spine, but those short
+connectors are **not** physical foreign keys; real within-owner FK
+relationships are written at the foot of each panel.
+No cross-service database FK is invented.
+
+## Business Flow
+
+Member registers with Identity, completes safety/allergen profile, reads
+Catalog's approved RuleVersion, generates a Planning meal plan, records
+Tracking/LDAS events, then the transaction/outbox delivers via Redis
+to Worker for scheduled reminders/progress. Admin authentication, approval
+and publication of rules connects into Catalog. FMD requests branch from
+Planning through a separate safety gate with two logically distinct
+YES/NO outcomes; the NO branch stops FMD only.
+
+With the RabbitMQ overlay enabled, metadata from the same owner events is
+mirrored into a durable RabbitMQ queue and stored as Worker-owned,
+deduplicated audit receipts. **RabbitMQ audit receipts are not the
+business reminder trigger**; Redis remains the current primary Worker path.
+
+## Scope honesty / limitations
+
+ADR-005 independent service/databases and target YARP Gateway are opt-in
+migration slices. The current Web still uses legacy API/SQL for portions
+of the application. Code, diagrams, automated tests and broker QA do not
+establish full historic data migration, clinical approval, public TLS/443,
+or production cutover readiness.
+
+## Commands
 
 ```powershell
-node scripts/Generate-OverallDiagrams.js
-powershell -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
-node scripts/Validate-OverallDiagrams.js
-node scripts/Validate-CourseLinks.js
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
+node scripts/Validate-OfficialArchitecture.js
+node scripts/Test-RabbitMq-Domain-Events.mjs
 ```
-
-Mỗi bản PDF là một trang, sơ đồ đen trắng và có file Draw.io chỉnh sửa.
-Bản backup những sơ đồ cũ nằm ngoài repo tại
-`D:\PRN232\_architecture_diagram_backup_before_cleanup_20261112.zip`.
