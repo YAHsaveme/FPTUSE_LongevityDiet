@@ -92,6 +92,15 @@ const create = await send(activities, { token: a.token, method: 'POST',
 check('TRACKING_ACTIVITY_CREATED', create.status === 201 &&
   create.data?.durationMinutes === 30 && typeof create.data?.id === 'string');
 const activityId = create.data.id;
+const ownedRead = await send(activities + '/' + activityId, { token: a.token });
+check('TRACKING_GET_ACTIVITY_OWNER_200', ownedRead.status === 200 &&
+  ownedRead.data?.id === activityId && ownedRead.data?.durationMinutes === 30);
+check('TRACKING_GET_ACTIVITY_OTHER_USER_404',
+  (await send(activities + '/' + activityId, { token: b.token })).status === 404);
+check('TRACKING_GET_ACTIVITY_ANONYMOUS_401',
+  (await send(activities + '/' + activityId)).status === 401);
+check('TRACKING_GET_ACTIVITY_UNKNOWN_ID_404',
+  (await send(activities + '/' + randomUUID(), { token: a.token })).status === 404);
 check('TRACKING_USER_A_LIST_HAS_ACTIVITY',
   (await send(activities, { token: a.token })).data?.items?.some?.(
     x => x.id === activityId));
@@ -162,6 +171,8 @@ check('TRACKING_OUTBOX_REDIS_DELIVERY', published);
 check('TRACKING_OWNER_SOFT_DELETE',
   (await send(activities + '/' + activityId, {
     method: 'DELETE', token: a.token })).status === 204);
+check('TRACKING_GET_SOFT_DELETED_ACTIVITY_404',
+  (await send(activities + '/' + activityId, { token: a.token })).status === 404);
 check('TRACKING_DELETE_IDEMPOTENT_NOT_FOUND',
   (await send(activities + '/' + activityId, {
     method: 'DELETE', token: a.token })).status === 404);
