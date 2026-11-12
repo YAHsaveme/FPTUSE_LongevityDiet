@@ -1,26 +1,42 @@
-# PRN232 — Sơ đồ C0 / C1 / C2 / Database Diagram (10/11/2026)
+# LongevityDiet — Five official diagrams (12/11/2026)
 
-Bốn sơ đồ chính trong thư mục này được xây dựng từ **mã nguồn đang triển khai**, không phải thiết kế dự kiến. Mỗi sơ đồ có bản `.drawio` chỉnh sửa được và PDF một trang; tất cả dùng đen trắng.
+This folder is the only handover location for architecture drawings.
+Exactly five official editable Draw.io files are provided, each paired with
+one single-page PDF. All drawings use black and white only, a consistent
+orthogonal connector style, high-level labels and UML stick-figure actors.
 
-| Sơ đồ | Nội dung |
-|---|---|
-| [C0.pdf](C0.pdf) / [C0.drawio](C0.drawio) | System Context: actor MEMBER, ADMIN và hệ thống |
-| [C1.pdf](C1.pdf) / [C1.drawio](C1.drawio) | Container: Web/Nginx, REST API, gRPC, Redis Streams, Worker và ba SQL catalogs, chiều liên lạc, cổng |
-| [C2.pdf](C2.pdf) / [C2.drawio](C2.drawio) | Component: **22 controller hiện có**, phân thành 4 nhóm, đầy đủ HTTP -> Controller -> Service -> Repository, các nhóm DB và các luồng Redis/gRPC/Worker |
-| [Database Diagram.pdf](Database%20Diagram.pdf) / [Database Diagram.drawio](Database%20Diagram.drawio) | **56 bảng vật lý** (45 main, 7 tracking, 4 worker), **23 khóa ngoại SQL**, **32 quan hệ ứng dụng tối thiểu** giúp toàn bộ đồ thị kết nối; các quan hệ APP được vẽ nét đứt, không nhầm với FK |
+| Diagram | Native source | PDF | Scope |
+|---|---|---|---|
+| C0 — System Context | [C0.drawio](C0.drawio) | [C0.pdf](C0.pdf) | Member, Admin, LongevityDiet boundary |
+| C1 — Container Architecture | [C1.drawio](C1.drawio) | [C1.pdf](C1.pdf) | Web, YARP, six service owners, six SQL DBs, Redis Streams and planned RabbitMQ |
+| C2 — Component Architecture | [C2.drawio](C2.drawio) | [C2.pdf](C2.pdf) | Endpoint, application service, owner DB/Outbox per domain |
+| Database Diagram — Overall | [Database Diagram.drawio](Database%20Diagram.drawio) | [Database Diagram.pdf](Database%20Diagram.pdf) | All 49 target-owner tables, six distinct catalogs, only source-confirmed within-catalog FKs |
+| Business Flow — Overall | [Business Flow.drawio](Business%20Flow.drawio) | [Business Flow.pdf](Business%20Flow.pdf) | Member, FMD safety, async event delivery and admin governance |
 
-## Phạm vi và bằng chứng kiểm tra
+## Important implementation distinction
 
-- `full-schema-manifest.json` liệt kê **đầy đủ 50 quan hệ APP nguồn-backed**. Trong bản ERD một trang chỉ chọn 32 quan hệ để không rối và giữ tất cả 56 bảng kết nối; 18 liên kết còn lại vẫn truy xuất được trong manifest.
-- `c2-current-manifest.json`: nguồn controller, nhóm và số mũi tên C2.
-- `full-schema-layout-geometry.json`: vị trí các bảng và đường đi trong ERD để kiểm tra bố cục.
-- Bản ERD `Database Diagram FULL.drawio/pdf` là bản sao đồng nội dung của hai file ERD chính ở trên.
-- Bản sơ đồ **32 bảng cũ** đã được lưu sang `../legacy-diagrams/` chỉ để đối chiếu lịch sử; không phải bản bàn giao hiện tại.
-- Test được thực hiện bằng: `node scripts/Validate-OverallDiagrams.js`, `node scripts/Validate-CompleteSchemaDiagram.js`, và `.\scripts\Export-OverallDiagrams.ps1`.
-- Kết quả xuất và kiểm tra SVG thực tế tại checkpoint: **C0, C1, C2, Database Diagram đều 0 đường cắt nhãn và 0 giao cắt connector**. PDF một trang, hình người UML actor, lối nối trực giao và giữ nguyên mã nguồn quan hệ.
+- Redis Streams TCP 6379: implemented and exercised in current Docker QA.
+- RabbitMQ AMQP TCP 5672: planned messaging option, not an implemented
+  producer/consumer. It is marked **PLANNED / NOT DEPLOYED** in C1, C2
+  and Business Flow; it is intentionally absent from the DB Diagram and C0.
+- The six domain databases are the ADR-005 target migration layout. Existing
+  production-style Web and some legacy API flows still use the legacy
+  database; the target Gateway is opt-in. Never mistake the target drawing
+  for verified production cutover.
+- Cross-domain UUID/event references are not physical SQL foreign keys.
+- C0, C1 and C2 are overall views, not separate diagrams for each service.
 
-## Ghi chú quan trọng
+## Regenerate and verify
 
-Sơ đồ là bằng chứng về **thiết kế/tĩnh**. Để chứng minh yêu cầu Final Assignment, vẫn cần chạy chứng minh thực tế Worker, Redis producer/consumer, gRPC, triển khai Docker + migration SQL, API có JWT và kịch bản end-to-end. Không đồng nhất việc pass sơ đồ với việc đã chạy toàn bộ hệ thống.
+```powershell
+Set-Location D:\PRN232\FPTUSE_LongevityDiet
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
+node scripts/Validate-OverallDiagrams.js
+node scripts/Validate-CourseLinks.js
+```
 
-Đọc chi tiết trong [báo cáo nghiệm thu](../WELLNESS-JOURNEY-FINAL-AUDIT-20261110.md).
+The previous FULL, 32-table, and experimental drawing variants were removed
+from Git. Their binary source files were backed up **outside** the repository
+before removal at
+`D:\PRN232\_architecture_diagram_backup_before_cleanup_20261112.zip`.
+They are no longer part of project submission.

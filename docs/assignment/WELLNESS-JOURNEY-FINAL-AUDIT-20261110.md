@@ -1,3 +1,5 @@
+> HISTORICAL AUDIT (10 November 2026): 32/56-table architecture assertions below were superseded. Only the five current official drawings in docs/assignment/one-page/README.md should be submitted. Dated audit retained as reference, not as another diagram.
+
 # LongevityDiet — báo cáo đối chiếu Final Assignment và lộ trình sức khỏe
 
 Ngày: 10/11/2026 (UTC+7). Nhánh: `feature/w3-t4-rule-governance-20261109`. Phạm vi: thành viên 1 + thành viên 4, dinh dưỡng mỗi ngày, theo dõi trước–trong–sau. **Chưa đủ chứng cứ để kết luận nghiệm thu 100%.**
@@ -39,7 +41,7 @@ Chạy từ thư mục dự án:
     npm --prefix src/LongevityDiet.Web run lint
     npm --prefix src/LongevityDiet.Web run build
     npm --prefix src/LongevityDiet.Web test
-    node scripts/Validate-CompleteSchemaDiagram.js
+    node scripts/Validate-OfficialArchitecture.js
     node scripts/Validate-OverallDiagrams.js
     .\scripts\Export-OverallDiagrams.ps1
     docker compose --env-file .env.example config --quiet

@@ -1,9 +1,22 @@
-# LongevityDiet — Overall Architecture (C0, C1, C2, Database Diagram)
+# LongevityDiet — Five official overall diagrams
 
-The whole implemented system is represented by exactly **four editable overall drawings**: [C0](one-page/C0.drawio), [C1](one-page/C1.drawio), [C2](one-page/C2.drawio), and [Database Diagram](one-page/Database%20Diagram.drawio). Each has a one-page PDF beside the Draw.io source.
+The architectural handover consists of exactly five system-wide drawings:
 
-These four views cover all real REST modules and dependencies, Docker Compose ports, three real SQL databases, 32 EF Core tables and nine genuine SQL foreign keys. See the [diagram index](one-page/README.md) for sources, PDFs and verification.
+- [C0 — System Context](one-page/C0.drawio)
+- [C1 — Container Architecture](one-page/C1.drawio)
+- [C2 — Component Architecture](one-page/C2.drawio)
+- [Database Diagram — Overall](one-page/Database%20Diagram.drawio)
+- [Business Flow — Overall](one-page/Business%20Flow.drawio)
 
-The detailed [data model](03-DATA-MODEL.md), [runtime test evidence](04-RUNTIME-CONNECTIVITY.md) and [assignment requirements](00-ASSIGNMENT-DOCUMENT.md) are supplementary text, not extra diagrams.
+Every drawing has one editable .drawio and one one-page .pdf in the
+[official one-page folder](one-page/README.md). No 32-table, FULL or
+other duplicate diagram is kept in the repository.
 
-The [52-table longitudinal nutrition target](05-LONGITUDINAL-NUTRITION-TARGET.md) is future research and must not be mistaken for code already deployed.
+C1 and C2 describe the six-service ADR-005 target, not a fully migrated
+production environment. The Database Diagram lists 49 target-owned
+tables across six SQL Server catalogs. Active Redis Streams and
+planned RabbitMQ/AMQP are clearly distinguished on the relevant diagrams.
+
+Source of truth for physical tables is the EF Core DbContext/migration
+files under src/. Existing business/data descriptions and historic
+dated audits are prose evidence, not additional official diagrams.

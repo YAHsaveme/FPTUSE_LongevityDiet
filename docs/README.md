@@ -1,17 +1,14 @@
-# LongevityDiet — PRN232 documentation
+# LongevityDiet documentation
 
-Start with the [PRN232 assignment](assignment/00-ASSIGNMENT-DOCUMENT.md).
-
-## Quick navigation
-
-1. [Assignment guide](assignment/README.md)
-2. [C0/C1/C2, DBML ERD and end-to-end sequences](assignment/one-page/README.md)
-3. [Live connectivity evidence and limitations](assignment/04-RUNTIME-CONNECTIVITY.md)
-4. [Docker and Redis supporting views](architecture/README.md)
+1. [Assignment requirements and guide](assignment/README.md)
+2. [Five official diagrams: C0, C1, C2, Database Diagram, Business Flow](assignment/one-page/README.md)
+3. [Runtime connectivity evidence and limitations](assignment/04-RUNTIME-CONNECTIVITY.md)
+4. [Architecture explanation and ADR notes](architecture/README.md)
 5. [Project status](PROJECT-STATUS.md) and [team task evidence](task/README.md)
-6. [API/gRPC/event contracts](07-API-GRPC-EVENTS.md)
-7. [Database notes](06-DATABASE-DESIGN.md) and [test/deployment plan](09-TEST-DEPLOY-DEMO.md)
 
-The simplified ERD is educational; EF Core migrations under src are the
-source of truth for the physical database. The complete runtime sequence
-is separate from C4 to avoid overloaded architecture diagrams.
+The five official architecture/business views are one-page PDFs plus
+editable Draw.io files. The EF Core source and migrations under src/
+remain the source of truth for persisted schema. RabbitMQ appears only
+as PLANNED in C1, C2 and Business Flow; Redis Streams is implemented.
+Do not confuse the ADR-005 target six-database design with completed
+legacy-data migration or production cutover.

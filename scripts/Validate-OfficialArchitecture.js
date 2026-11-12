@@ -1,0 +1,103 @@
+'use strict';
+/**
+ * The ONLY official source + exported diagram acceptance.
+ * Exactly 5 native editable diagrams and exactly 5 one-page PDFs.
+ * No obsolete 32/56-table duplicates, FULL copies, or detached connectors.
+ */
+const fs=require('fs'),path=require('path');
+const root=path.resolve(__dirname,'..');
+const dir=path.join(root,'docs','assignment','one-page');
+const names=['C0','C1','C2','Database Diagram','Business Flow'];
+const errors=[];
+function check(ok,message){if(!ok)errors.push(message)}
+const actual=fs.readdirSync(dir)
+ .filter(n=>/\.(drawio|pdf)$/i.test(n)).sort();
+const expected=names.flatMap(n=>[n+'.drawio',n+'.pdf']).sort();
+check(JSON.stringify(actual)===JSON.stringify(expected),
+  'Official folder must contain exactly 5 editable Draw.io + 5 PDF files: '+actual.join(', '));
+check(!fs.existsSync(path.join(root,'docs','assignment','legacy-diagrams')),
+  'Obsolete legacy-diagrams directory still exists');
+check(!fs.existsSync(path.join(root,'docs','assignment','nutrition-target-52-tables.dbml')),
+  'Old candidate ERD DBML still present as a second database diagram');
+let totalCells=0,tableCells=0;
+const diagrams={};
+for(const name of names){
+ const drawio=path.join(dir,name+'.drawio');
+ const pdf=path.join(dir,name+'.pdf');
+ if(!fs.existsSync(drawio)||!fs.existsSync(pdf)){check(false,'Missing '+name);continue}
+ const xml=fs.readFileSync(drawio,'utf8');
+ const bin=fs.readFileSync(pdf,'latin1');
+ check(xml.includes('<mxfile')&&xml.includes('<mxGraphModel'),
+   'Invalid diagrams.net container: '+name);
+ const vertices=[...xml.matchAll(/<mxCell\b[^>]*\bvertex="1"[^>]*>/g)]
+  .map(m=>m[0]);
+ const edges=[...xml.matchAll(/<mxCell\b[^>]*\bedge="1"[^>]*>/g)]
+  .map(m=>m[0]);
+ const ids=new Set(vertices.map(s=>(s.match(/\bid="([^"]+)"/)||[])[1]));
+ check(new Set([...ids]).size===vertices.length,'Duplicate node ids '+name);
+ for(const e of edges){
+  const source=(e.match(/\bsource="([^"]+)"/)||[])[1],
+   target=(e.match(/\btarget="([^"]+)"/)||[])[1];
+  check(ids.has(source)&&ids.has(target),
+    'Disconnected edge in '+name+': '+source+' -> '+target);
+ }
+ check((bin.match(/\/Type\s*\/Page\b/g)||[]).length===1,
+   'PDF must be exactly one page: '+name);
+ check(fs.statSync(pdf).size>3500,'Empty PDF '+name);
+ check(fs.statSync(pdf).mtimeMs>=fs.statSync(drawio).mtimeMs-5000,
+   'Stale PDF export compared with source: '+name);
+ const hexColors=[...xml.matchAll(/#[A-Fa-f0-9]{6}\b/g)]
+  .map(x=>x[0].toUpperCase());
+ check(hexColors.every(x=>x==='#000000'||x==='#FFFFFF'),
+   'Non-black/white style '+name);
+ check(!xml.includes('edgeStyle=elbowEdgeStyle') &&
+   !xml.includes('curved=1') &&
+   !xml.includes('rounded=1;orthogonalLoop'),
+   'Avoid bent or curved connectors '+name);
+ diagrams[name]={xml,vertices,edges};
+ totalCells+=vertices.length+edges.length;
+ if(name==='Database Diagram')
+  tableCells=vertices.filter(x=>/\bid="tbl-/.test(x)).length;
+ if(name==='C0')check(vertices.filter(x=>x.includes('shape=umlActor')).length===2,
+   'C0 should include exactly 2 real UML actors');
+}
+for(const name of ['C1','C2','Business Flow']){
+ const xml=diagrams[name]?.xml||'';
+ check(xml.includes('RabbitMQ')&&xml.includes('PLANNED'),
+   name+' needs honest RabbitMQ planned classification');
+ check(xml.includes('Redis Streams')||xml.includes('REDIS STREAMS'),
+   name+' must also show actually implemented Redis Streams');
+}
+for(const name of ['C0','Database Diagram'])
+ check(!diagrams[name]?.xml.includes('RabbitMQ'),
+   name+' must not invent RabbitMQ within context or SQL schema');
+check((diagrams.C1?.xml.match(/id="db-(identity|catalog|planning|tracking|recommendation|worker)"/g)||[]).length===6,
+  'C1 must show all six owned SQL databases');
+check((diagrams.C2?.xml.match(/id="panel-(id|cat|plan|track|rec|work)"/g)||[]).length===6,
+  'C2 must show six bounded contexts');
+check((diagrams['Business Flow']?.xml.match(/id="fmd-(1|2|3)"/g)||[]).length===3,
+  'FMD must have one entry and separate yes/no branches');
+const modelFiles=[
+ 'src/LongevityDiet.Identity/IdentityDbContext.cs',
+ 'src/LongevityDiet.Catalog/CatalogDbContext.cs',
+ 'src/LongevityDiet.Planning/PlanningDbContext.cs',
+ 'src/LongevityDiet.Tracking/TrackingDbContext.cs',
+ 'src/LongevityDiet.Recommendation.Grpc/Ownership/RecommendationDbContext.cs',
+ 'src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs',
+ 'src/LongevityDiet.Worker.Ops/WorkerOpsDbContext.cs',
+];
+let targetDbSets=0;
+for(const file of modelFiles){
+ const src=fs.readFileSync(path.join(root,file),'utf8');
+ targetDbSets += [...src.matchAll(/public DbSet<([^>]+)>/g)].length;
+}
+check(targetDbSets===49,'DbContext schema changed; expected 49 target tables, found '+targetDbSets);
+check(tableCells===targetDbSets,
+ 'Overall Database Diagram must list all target owned tables once: '+tableCells+' != '+targetDbSets);
+if(errors.length){
+ console.error(errors.map(x=>'FAIL: '+x).join('\n'));
+ process.exitCode=1;
+}else{
+ console.log('OFFICIAL_FIVE_ARCHITECTURE_QA=PASS diagrams='+names.length+
+  ' tables='+tableCells+' nativeCells='+totalCells+' pdfPages=5');
+}

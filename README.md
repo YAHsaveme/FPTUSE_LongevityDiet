@@ -1,6 +1,6 @@
-﻿# Longevity Diet Companion
+# Longevity Diet Companion
 
-> **2026-11-10 — Current scope and acceptance status.** The member 1/4 branch now contains reviewed-allergy screening, conservative audience grouping, 14-day rolling meal coverage, Baseline/During/FollowUp self-reported health check-ins, and conditional daily reminders. See [the current implementation and Final Assignment audit](docs/assignment/WELLNESS-JOURNEY-FINAL-AUDIT-20261110.md). **Automated tests passing does not establish medical safety or 100% final acceptance.** The current EF migration snapshots include **56 tables** (45 main + 7 tracking + 4 worker). All four [current C0/C1/C2/Database diagrams](docs/assignment/one-page/README.md) now use the current source, including **22 API controllers and the 56-table physical ERD**. Both Draw.io and one-page PDF exist. Rendered SVG validation passes with **zero label cuts or connector crossings** across all four. The old 32-table diagrams are archived under `docs/assignment/legacy-diagrams`. The 400-day daily rolling continuity test passes. **Production-equivalent Docker/SQL/Redis/gRPC/Worker demos, nutrition safety validation and clinical review remain open.**
+> **2026-11-12 — Architecture handover updated.** Exactly five official overall diagrams remain: C0, C1, C2, Database Diagram and Business Flow, with one editable Draw.io and one one-page PDF for each. The six owner databases describe ADR-005 target boundaries; Redis Streams is implemented, RabbitMQ is marked PLANNED, and legacy-data migration is not complete. See [the official handover](docs/assignment/one-page/README.md). Earlier 32/56-table diagram audits are historical and superseded.
 
 **Member 1 + Member 4 acceptance:** [Eight-task completion matrix and remaining live verification](docs/assignment/MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md). Admin Rule Governance now includes independent two-admin publication review, a paginated safety queue and read-only historical plan-impact counts.
 
@@ -77,7 +77,7 @@ PRN232_LongevityDiet/
 
 ## System architecture
 
-**Only four overall diagrams are canonical:** [C0](docs/assignment/one-page/C0.drawio), [C1](docs/assignment/one-page/C1.drawio), [C2](docs/assignment/one-page/C2.drawio), and [Database Diagram](docs/assignment/one-page/Database%20Diagram.drawio). All include one-page PDFs; see the [four-diagram index](docs/assignment/one-page/README.md). The full physical diagram shows 32 mapped EF Core tables and nine local SQL FKs. No separate teaching subset or redundant supplement is needed.
+**Only five overall diagrams are canonical:** [C0](docs/assignment/one-page/C0.drawio), [C1](docs/assignment/one-page/C1.drawio), [C2](docs/assignment/one-page/C2.drawio), [Database Diagram](docs/assignment/one-page/Database%20Diagram.drawio), and [Business Flow](docs/assignment/one-page/Business%20Flow.drawio). One native Draw.io and one one-page PDF each; see [the official index](docs/assignment/one-page/README.md).
 
 See the [assignment evidence](docs/assignment/00-ASSIGNMENT-DOCUMENT.md) and [traceability](docs/10-PRN232-TRACEABILITY.md).
 
@@ -88,7 +88,7 @@ See the [assignment evidence](docs/assignment/00-ASSIGNMENT-DOCUMENT.md) and [tr
 - research, scope, business/functional/non-functional requirements;
 - safety/privacy/AI guardrails;
 - PRN232 and book-to-software traceability;
-- 10 canonical architecture diagrams with geometry/export QA;
+- 5 official architecture and business diagrams with geometry/export QA;
 - .NET 9 solution with separate ASP.NET Core backend and React/TypeScript/Vite `.esproj` frontend;
 - Visual Studio multi-project startup profile for Web + API;
 - separate development ports: Web `5173`, API HTTPS `7110` / HTTP `5110`;
@@ -215,7 +215,7 @@ npm run test:docker
 **Current verification (11/11/2026, merged into develop PR #22):**
 - Current Runtime QA and GitHub PR quality gates **PASS**: 172/172 .NET tests (91 unit + 81 integration), 12/12 Web tests, lint/build PASS, 0 high/production npm vulnerabilities.
 - Full Docker QA across 6 containers and 3 SQL databases: JWT/REST/catalog/challenge/dashboard/FMD, 14-day / 42-meal planning, wellness, LDAS MealLog/EatingWindow, independent gRPC, Redis Streams, Worker scheduled notification and weekly-report result all exercised with synthetic accounts.
-- Playwright 10/10 browser E2E, Edge CDP responsive 6/6, canonical four one-page Draw.io/PDF diagrams PASS (56 physical tables).
+- Playwright 10/10 browser E2E, Edge CDP responsive 6/6, historical four-diagram check superseded by five official Draw.io/PDF diagrams.
 - **Not 100% of the team's ADR-005 Target Architecture:** standalone YARP Gateway, 4 independent REST domain services and six service-owned DBs, public TLS :443, full target service communication matrix and reviewer/presentation sign-off are still missing. Do not call Target Architecture deployed or automatically merge into main.
 - [Four-member/official-PDF acceptance audit](docs/assignment/FOUR-MEMBER-PDF-100PCT-ACCEPTANCE-AUDIT-20261111.md).
 

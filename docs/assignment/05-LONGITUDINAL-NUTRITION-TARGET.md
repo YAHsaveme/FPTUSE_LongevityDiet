@@ -71,12 +71,16 @@ The C2 target reuses the existing ASP.NET Core REST container at :8080, Nginx UI
 - NCI NIH ASA24 dietary records and multiple day recall methodology: https://epi.grants.cancer.gov/asa24/respondent/methodology.html
 - WHO digital health intervention taxonomy (self-monitoring, targeted prompts, consent): https://smart.who.int/base/CodeSystem-CDHIv2.html
 
-## H. Research sources, not additional current diagrams
+## H. Research proposal — not an additional official ERD
 
-The canonical architecture handover now consists only of [C0](one-page/C0.drawio), [C1](one-page/C1.drawio), [C2](one-page/C2.drawio) and [Database Diagram](one-page/Database%20Diagram.drawio).
-
-The normalized **52-table proposed nutrition database** remains available as a single [candidate DBML](nutrition-target-52-tables.dbml), together with the research and acceptance rules in this document. Earlier exploratory target Draw.io/PDF variants were removed to avoid confusing planned medical features with implemented code. No new nutrition target tables have been migrated.
-
+The proposed 52-table nutrition research model is a draft design,
+not a migrated database or second official architecture diagram.
+The five official diagrams are [C0](one-page/C0.drawio),
+[C1](one-page/C1.drawio), [C2](one-page/C2.drawio),
+[Database Diagram](one-page/Database%20Diagram.drawio) and
+[Business Flow](one-page/Business%20Flow.drawio).
+The earlier candidate DBML was removed to satisfy the single-source
+architecture submission. Research remains in this document.
 ## I. Rolling every-day plan and timeline invariants (design contract, not runtime)
 
 **Fixed mode** requires an inclusive StartLocalDate/EndLocalDate range. **Rolling mode** keeps EndLocalDate NULL; RollingHorizonDays is 1–90, with 7/14/30 as supported user choices. The proposed Scheduler/Worker must replenish missing **local calendar dates** before the horizon expires and recheck after every profile/allergy/condition change. A generation retry is idempotent by (ProgramVersionId, LocalDate). A day must have a nonempty safe menu; a gap or an incomplete/unverified menu must be reported as UNAVAILABLE, never filled with a guessed meal.
