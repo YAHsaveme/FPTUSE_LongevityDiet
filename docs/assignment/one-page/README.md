@@ -25,13 +25,16 @@ asynchronous processing. **Those six owners are the ADR-005 target**, not
 proof that the legacy Web/database migration has been completed.
 
 In the Database Diagram, short horizontal links to the central vertical
-spine mean **ownership by a database**, NOT physical FK relations. Confirmed
-local FK relationships are annotated at the foot of each owner group;
-cross-owner UUID/DomainEvent references never become SQL foreign keys.
+spine mean **ownership by a database**, NOT physical FK relations. All **20
+SQL-verified local foreign keys** are annotated at the foot of their owner
+panels (Identity 4, Catalog 8, Planning 6, Tracking 2). The 50 physical
+tables include Catalog's implicit many-to-many join table. Cross-owner
+UUID/DomainEvent references never become SQL foreign keys.
 
 The Business Flow keeps Admin (publishing RuleVersion) connected to
 Catalog; FMD requests branch from Planning through an eligibility gate;
-a failed FMD gate stops only FMD, not ordinary meal logging.
+a failed FMD gate stops only FMD, not ordinary meal logging; a
+successful FMD safety gate explicitly rejoins Tracking.
 
 ## Redis Streams and actual RabbitMQ integration
 
@@ -56,7 +59,10 @@ a failed FMD gate stops only FMD, not ordinary meal logging.
 Set-Location D:\PRN232\FPTUSE_LongevityDiet
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
 node scripts/Validate-OfficialArchitecture.js
+node scripts/Validate-OfficialDiagram-Geometry.js --strict
 node scripts/Validate-CourseLinks.js
+# Real six-database SQL reconciliation (isolated QA Docker services running):
+node scripts/Test-Physical-ERD-Sql.mjs
 ```
 
 QA RabbitMQ test (synthetic data only; requires isolated QA Docker Compose

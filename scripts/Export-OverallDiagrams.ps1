@@ -28,6 +28,8 @@ foreach($name in @('C0','C1','C2','Database Diagram','Business Flow')){
 }
 & node (Join-Path $Root 'scripts\Validate-OfficialArchitecture.js')
 if($LASTEXITCODE -ne 0){throw 'Five official diagrams failed structural QA'}
+& node (Join-Path $Root 'scripts\Validate-OfficialDiagram-Geometry.js') --strict
+if($LASTEXITCODE -ne 0){throw 'Five official diagrams have text/node geometry collisions'}
 & node (Join-Path $Root 'scripts\Validate-CourseLinks.js')
 if($LASTEXITCODE -ne 0){throw 'Course documentation links failed'}
 Write-Output 'FIVE_OFFICIAL_ARCHITECTURES=PASS'

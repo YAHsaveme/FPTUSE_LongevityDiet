@@ -51,7 +51,9 @@ The Worker count includes two DbContexts sharing one Worker-owned SQL catalog.
 Every table connects to a vertical ownership spine, but those short
 connectors are **not** physical foreign keys; real within-owner FK
 relationships are written at the foot of each panel.
-No cross-service database FK is invented.
+No cross-service database FK is invented. The displayed 20 local FK
+relationships are reconciled against live SQL Server via
+`scripts/Test-Physical-ERD-Sql.mjs`, not inferred from diagram annotations.
 
 ## Business Flow
 
@@ -61,7 +63,7 @@ Tracking/LDAS events, then the transaction/outbox delivers via Redis
 to Worker for scheduled reminders/progress. Admin authentication, approval
 and publication of rules connects into Catalog. FMD requests branch from
 Planning through a separate safety gate with two logically distinct
-YES/NO outcomes; the NO branch stops FMD only.
+YES/NO outcomes; YES rejoins Tracking, while NO stops FMD only.
 
 With the RabbitMQ overlay enabled, metadata from the same owner events is
 mirrored into a durable RabbitMQ queue and stored as Worker-owned,

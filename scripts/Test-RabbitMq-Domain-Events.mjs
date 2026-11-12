@@ -77,6 +77,8 @@ async function wait(label,test,maxMs=35000){
   'LongevityDiet.Worker.Ops','RabbitMqDomainAudit.cs'),'utf8');
  check('RABBIT_PAYLOAD_METADATA_ONLY',
   src.includes('JsonSerializer.Serialize(evt)') && !src.includes('Serialize(payload)'));
+ check('RABBIT_UNTRUSTED_BODY_LIMIT',
+  src.includes('delivery.Body.Length <= 4096'));
 
  // Optional destructive-to-QA-only broker outage/recovery rehearsal.
  // Never run --outage on a shared or production Docker project.

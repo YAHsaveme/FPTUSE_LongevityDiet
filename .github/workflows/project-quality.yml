@@ -34,6 +34,7 @@ jobs:
       - name: Validate five official C0 C1 C2 Database and Business Flow diagrams
         run: |
           node ./scripts/Validate-OverallDiagrams.js
+          node ./scripts/Validate-OfficialDiagram-Geometry.js --strict
           node ./scripts/Validate-CourseLinks.js
           node ./scripts/Validate-NutritionPlanContract.js
           node ./scripts/Validate-Prn232-Final-PDF.cjs
@@ -236,11 +237,14 @@ jobs:
       - name: Verify Worker event inbox, SQL dedupe, dead-letter, Admin JWT and Redis ACK
         run: node scripts/Test-Worker-Ops-Http.mjs
 
+      - name: Verify real SQL physical ERD (6 owners, 50 tables, 20 FKs)
+        run: node scripts/Test-Physical-ERD-Sql.mjs
+
       - name: Start optional RabbitMQ 4 and real Redis-to-Rabbit domain event mirror
         run: docker compose -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml up -d --build rabbitmq worker-ops
 
-      - name: Verify RabbitMQ publisher confirms, SQL ACK, replay dedupe and poison isolation
-        run: node scripts/Test-RabbitMq-Domain-Events.mjs
+      - name: Verify RabbitMQ confirms, SQL ACK, replay, quarantine and broker outage recovery
+        run: node scripts/Test-RabbitMq-Domain-Events.mjs --outage
 
       - name: Stop transitional Worker and start WorkerDb-only reminder dispatcher
         shell: bash

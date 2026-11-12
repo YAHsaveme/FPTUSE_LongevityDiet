@@ -62,7 +62,7 @@ class Diagram {
    const horizontal=Math.abs(bx-ax)>Math.abs(by-ay)*1.2;
    const lx=opts.labelX??(horizontal?(ax+bx)/2-150:Math.max(ax,bx)+42);
    const ly=opts.labelY??(horizontal?Math.min(ay,by)-55:(ay+by)/2-29);
-   this.note('label-'+id,opts.label,lx,ly,300,45,{font:opts.labelFont||21,align:'left'});
+   this.note('label-'+id,opts.label,lx,ly,opts.labelWidth||300,45,{font:opts.labelFont||21,align:'left'});
   }
  }
  title(code,heading,description){
@@ -117,38 +117,38 @@ const groups=[
   api:'Auth / Profile / JWT',logic:'Xác thực, phân quyền\nRefresh Token, hồ sơ',
   db:'LongevityIdentityDb',out:'IdentityOutbox',
   tables:['Users','UserProfiles','RefreshTokens','ReminderPreferences','UserNotifications','IdentityOutbox','IdentityInbox'],
-  fks:'Users → UserProfiles (1:1)\nUsers → RefreshTokens (1:N)'},
+  fks:'UserProfiles → Users\nRefreshTokens → Users\nReminderPreferences → Users\nUserNotifications → Users'},
  {id:'catalog',short:'Catalog',name:'CATALOG',port:'REST :8082',
   api:'Foods / Recipes / Rules',logic:'Quy tắc dinh dưỡng\nDuyệt và lưu phiên bản',
   db:'LongevityCatalogDb',out:'Rule Audits / Events',
   tables:['Recipes','RecipeIngredients','Allergens','RecipeAllergens','DietRules','RuleVersions','Foods','RuleSetVersions','RuleAudits','RuleSetVersionItems'],
-  fks:'Recipes / Foods → RecipeIngredients; Recipe / Allergen → RecipeAllergens\nDietRule → RuleVersion; RuleSet + RuleVersion → Items'},
+  fks:'RecipeIngredients → Recipes\nRecipeIngredients → Foods\nRecipeAllergens → Recipes\nRecipeAllergens → Allergens\nRuleVersions → DietRules\nRuleAudits → RuleVersions\nRuleSetVersionItems → RuleSetVersions\nRuleSetVersionItems → RuleVersions'},
  {id:'planning',short:'Planning',name:'PLANNING',port:'REST :8083',
   api:'Meal Plan / FMD / Challenge',logic:'Điều phối thực đơn\nCổng an toàn FMD',
   db:'LongevityPlanningDb',out:'PlanningOutbox',
   tables:['MealPlans','MealPlanDays','PlannedMeals','UserDietaryPreferences',
     'ChallengeTemplates','ChallengeDayTemplates','UserChallenges','UserChallengeDays',
     'FmdCycles','FmdCycleDays','FmdSafetyAssessments','FmdEducationAcknowledgements','PlanningOutbox'],
-  fks:'MealPlans → MealPlanDays → PlannedMeals\nChallenge / FMD → các ngày tương ứng'},
+  fks:'MealPlanDays → MealPlans\nPlannedMeals → MealPlanDays\nChallengeDayTemplates → ChallengeTemplates\nUserChallenges → ChallengeTemplates\nUserChallengeDays → UserChallenges\nFmdCycleDays → FmdCycles'},
  {id:'tracking',short:'Tracking',name:'TRACKING',port:'REST :8084',
   api:'Meal Logs / Activity / LDAS',logic:'Nhật ký, cửa sổ ăn\nChấm điểm LDAS',
   db:'LongevityTrackingDb',out:'TrackingOutbox',
   tables:['MealLogs','MealLogItems','AdherenceScores','ScoreDimensions',
     'ActivityLogs','ActivityGoals','EatingWindowSnapshots','TrackingScoreSignals',
     'ScoreConfigurationVersions','TrackingOutbox'],
-  fks:'MealLogs → MealLogItems\nAdherenceScores → ScoreDimensions'},
+  fks:'MealLogItems → MealLogs\nScoreDimensions → AdherenceScores'},
  {id:'recommendation',short:'Recommendation',name:'RECOMMENDATION',
   port:'REST :8087 / gRPC :8085',api:'Gợi ý món / Phản hồi',
   logic:'Lọc dị ứng (hard constraint)\nXếp hạng theo RuleVersion',
   db:'LongevityRecommendationDb',out:'RecommendationOutbox',
   tables:['RecommendationFeedbacks','UserFoodPreferences','RecommendationOutbox','RecommendationInbox'],
-  fks:'Khóa sự kiện và người dùng\nKhông có FK xuyên miền'},
+  fks:'Không có FK vật lý trong RecommendationDb\nID tham chiếu liên miền chỉ ở tầng ứng dụng'},
  {id:'worker',short:'Worker Ops',name:'WORKER / OPS',port:'REST :8086 + Worker',
   api:'Job / Event / Dead-letter',logic:'Nhắc lịch / Báo cáo\nConsumer, retry và audit',
   db:'LongevityWorkerDb',out:'WorkerOutbox / Inbox',
   tables:['ReminderSchedules','ReminderDispatchRecords','WorkerProcessedEvents','WorkerOutbox',
     'WorkerReceivedEvents','WorkerEventDeadLetters'],
-  fks:'EventId / Source là khóa xử lý trùng\nKhông có FK SQL liên miền'}
+  fks:'Không có FK vật lý trong WorkerDb\nSource + EventId: khóa chính kép chống trùng'}
 ];
 
 // C0: one coherent context with two human actors above system.
@@ -193,7 +193,7 @@ const groups=[
   const frac=(y+95-1600)/1910;
   d.edge('route-'+g.id,'route-spine','svc-'+g.id,{
    from:[1,frac],to:[0,0.5],label:g.short,
-   labelX:460,labelY:y+26,labelFont:20});
+   labelX:430,labelY:y+26,labelFont:20,labelWidth:200});
   d.edge('sql-'+g.id,'svc-'+g.id,'db-'+g.id,{
    from:[1,0.5],to:[0,0.5],label:'EF Core / SQL',
    labelX:1415,labelY:y+25,labelFont:21});
@@ -201,26 +201,27 @@ const groups=[
    from:[1,0.5],to:[0,(y+95-1610)/1900],
    dashed:true});
  }
- d.box('outbox','DOMAIN EVENTS / OUTBOX\nReliable publisher & metadata mirror',
+ d.box('outbox','SQL OUTBOX / DOMAIN EVENTS\nPublish event metadata to Redis Streams',
   1180,3630,840,155,{font:30});
  d.edge('events-outbox','event-spine','outbox',{from:[0.5,1],to:[1,0.5],
   points:[{x:2806,y:3695}],dashed:true,label:'Sự kiện đã commit',
   labelX:2100,labelY:3638});
  d.box('redis','REDIS STREAMS\nACTIVE — TCP 6379\nPrimary business event transport',
   460,3990,900,205,{font:31});
- d.box('rabbit','RABBITMQ — AMQP 5672\nOPTIONAL / QA VERIFIED\nMetadata-only event mirror',
+ d.box('rabbit','RABBITMQ — AMQP 5672\nOPTIONAL / QA VERIFIED\nAudit: Planning / Tracking / Catalog / Reco',
   1840,3990,900,205,{font:29,dashed:true});
  d.edge('outbox-redis','outbox','redis',{to:[0.5,0],dashed:true,
   label:'XADD / XREADGROUP',labelX:645,labelY:3850});
- d.edge('outbox-rabbit','outbox','rabbit',{to:[0.5,0],dashed:true,
-  label:'Mirror / Confirm',labelX:2160,labelY:3850});
+ d.edge('redis-rabbit','redis','rabbit',{
+  from:[1,0.5],to:[0,0.5],dashed:true,
+  label:'Audit mirror / broker confirms',labelX:1390,labelY:4005,labelWidth:410});
  d.box('consumer','WORKER OPS EVENT RECEIVER\nRedis ACK / Rabbit ACK sau SQL commit\nIdempotency — Retry — DLQ',
   1030,4380,1140,235,{font:30});
  d.edge('redis-consumer','redis','consumer',{to:[0.25,0],dashed:true,
   label:'Worker stream',labelX:910,labelY:4267});
  d.edge('rabbit-consumer','rabbit','consumer',{to:[0.75,0],dashed:true,
   label:'Rabbit queue',labelX:2230,labelY:4267});
- d.footer('Nét liền: HTTP, gRPC, SQL. Nét đứt: sự kiện. RabbitMQ chỉ bật bằng Docker overlay riêng; Redis vẫn là transport nghiệp vụ mặc định.');
+ d.footer('Nét liền: HTTP/gRPC/SQL. Nét đứt: events. Outbox → Redis → RabbitMQ audit (tùy chọn); Redis là vận chuyển nghiệp vụ mặc định.');
  d.save();
 }
 
@@ -261,12 +262,12 @@ const groups=[
   d.edge('domain-'+key,'endpoint-'+key,'service-'+key,{
    label:'Validate / business rules',labelX:2040,labelY:y+209});
   d.edge('persistence-'+key,'service-'+key,'repo-'+key,{
-   label:'Transaction / EF Core',labelX:2040,labelY:y+372});
+   label:'Transaction / EF Core',labelX:2040,labelY:y+372,labelWidth:185});
   d.edge('emit-'+key,'repo-'+key,'event-spine',{
    from:[1,0.5],to:[0,(y+466-1250)/3790],
-   dashed:true,label:g.id==='catalog'?'Domain event':'Outbox',labelX:2250,labelY:y+402});
+   dashed:true,label:g.id==='catalog'?'Domain event':'Outbox',labelX:2270,labelY:y+402,labelWidth:160});
  }
- d.box('queue-dispatch','RELIABLE EVENT DELIVERY\nPublisher Confirms — Replay — Inbox / DLQ',
+ d.box('queue-dispatch','OUTBOX EVENT DELIVERY\nRedis publish — Replay — Inbox / DLQ',
   990,5200,1110,185,{font:29});
  d.edge('event-dispatch','event-spine','queue-dispatch',{
   from:[0.5,1],to:[1,0.5],points:[{x:2806,y:5280}],
@@ -277,8 +278,9 @@ const groups=[
   1720,5500,1010,190,{font:29,dashed:true});
  d.edge('dispatch-redis','queue-dispatch','redis',{to:[0.5,0],
   dashed:true,label:'Primary',labelX:690,labelY:5395});
- d.edge('dispatch-rabbit','queue-dispatch','rabbit',{to:[0.5,0],
-  dashed:true,label:'Audit mirror',labelX:2120,labelY:5395});
+ d.edge('redis-rabbit','redis','rabbit',{
+  from:[1,0.5],to:[0,0.5],dashed:true,
+  label:'Audit mirror',labelX:1395,labelY:5517,labelWidth:300});
  d.footer('C2 là mô hình thành phần mục tiêu: Redis hoạt động, RabbitMQ hỗ trợ audit mirror khi bật. Một số API legacy chưa được cutover.');
  d.save();
 }
@@ -292,30 +294,30 @@ const groups=[
   '50 bảng vật lý trong 6 SQL database; đường nối tới spine là quan hệ sở hữu, không phải khóa ngoại.');
  for(let i=0;i<groups.length;i++){
   const g=groups[i],col=i%2,row=Math.floor(i/2);
-  const x=190+col*1400,y=410+row*1350,w=1270,h=1250;
+  const x=240+col*1400,y=410+row*1350,w=1270,h=1250;
   const key=g.id;
   d.box('panel-'+key,'',x,y,w,h,{panel:true});
   d.box('db-'+key,g.db+'\nOwner database — SQL :1433',
     x+280,y+68,710,116,{font:31,db:true});
-  const spineX=x+630,spineY=y+286,spineH=765;
+  const spineX=x+630,spineY=y+286,spineH=670;
   bus(d,'spine-'+key,spineX,spineY,spineH);
   d.edge('own-'+key,'db-'+key,'spine-'+key,{to:[0.5,0],
     label:'Owns tables',labelX:x+885,labelY:y+205,labelFont:19});
   for(let j=0;j<g.tables.length;j++){
    const isLeft=j%2===0,r=Math.floor(j/2),table=g.tables[j];
-   const ty=y+332+r*102,id='tbl-'+key+'-'+j;
+   const ty=y+332+r*89,id='tbl-'+key+'-'+j;
    const tx=x+(isLeft?35:735);
-   d.box(id,table,tx,ty,500,72,{font:table.length>23?19:23});
-   const frac=(ty+36-spineY)/spineH;
+   d.box(id,table,tx,ty,500,64,{font:table.length>23?19:23});
+   const frac=(ty+32-spineY)/spineH;
    if(isLeft)d.edge('table-'+key+'-'+j,'spine-'+key,id,{
     from:[0,frac],to:[1,0.5],arrow:false,line:1.7});
    else d.edge('table-'+key+'-'+j,'spine-'+key,id,{
     from:[1,frac],to:[0,0.5],arrow:false,line:1.7});
   }
-  d.note('fk-'+key,'Local FK: '+g.fks,
-   x+55,y+1090,w-110,110,{font:21});
+  d.note('fk-'+key,'FK VẬT LÝ (BẢNG CON → BẢNG CHA):\n'+g.fks,
+   x+55,y+984,w-110,242,{font:18});
  }
- d.footer('Bus và đường ngang biểu thị BẢNG THUỘC DATABASE, không phải FK. FK thực được ghi tại cuối từng miền; không tạo FK SQL xuyên service.');
+ d.footer('Đường vào bus = quyền sở hữu bảng; bảng liệt kê FK vật lý kiểm chứng bằng SQL bên dưới mỗi database. Không có FK SQL xuyên service.');
  d.save();
 }
 
@@ -355,7 +357,7 @@ const groups=[
  d.box('admin-rbac','ADMIN RBAC\nRole = Admin',2190,780,650,145,{font:28});
  d.box('admin-review','Duyệt Food / Recipe\nXuất bản RuleVersion',2190,1100,650,165,{font:27});
  d.edge('admin-rbac','admin','admin-rbac',{label:'Authorization',
-  labelX:1850,labelY:637});
+  labelX:2030,labelY:637,labelWidth:155});
  d.edge('admin-publish','admin-rbac','admin-review',{
   label:'Audit thay đổi',labelX:1815,labelY:960});
  d.edge('admin-catalog','admin-review','catalog',{
@@ -373,10 +375,15 @@ const groups=[
  d.edge('fmd-1','fmd-request','fmd-gate',{label:'Safety assessment',
   labelX:905,labelY:1930});
  d.edge('fmd-2','fmd-gate','fmd-yes',{label:'YES',
-  labelX:910,labelY:2275});
+  labelX:955,labelY:2275,labelWidth:105});
  d.edge('fmd-3','fmd-gate','fmd-no',{
   from:[0,1],to:[1,0],points:[{x:160,y:2300},{x:160,y:2560}],
-  label:'NO',labelX:170,labelY:2450});
+  label:'NO',labelX:170,labelY:2560,labelWidth:65});
+ // A successfully screened FMD cycle rejoins normal meal/activity tracking;
+ // the rejected FMD branch is terminal only for the FMD feature.
+ d.edge('fmd-accepted-to-tracking','fmd-yes','tracking',{
+  from:[1,0.35],to:[0,0.95],label:'FMD → Log',
+  labelX:954,labelY:2345,labelWidth:140,labelFont:18});
  // RabbitMQ is a real opt-in metadata audit mirror from Redis Streams.
  d.box('rabbit','RABBITMQ — AMQP :5672\nOPTIONAL — durable audit queue\nPublisher confirm / ACK',2150,3410,750,190,{font:27,dashed:true});
  d.edge('redis-rabbit','redis','rabbit',{from:[1,0.5],to:[0,0.5],
@@ -388,7 +395,7 @@ const groups=[
   labelX:1960,labelY:3655});
  d.edge('redis-worker','redis','worker',{
   dashed:true,label:'Primary event flow',
-  labelX:1980,labelY:3935});
+  labelX:1840,labelY:3935,labelWidth:270});
  d.box('audit-receipt','WORKER OWNED SQL\nWorkerReceivedEvents (audit receipt)',
   2150,4170,750,165,{font:25,db:true});
  d.edge('rabbit-audit-sql','rabbit-audit','audit-receipt',{

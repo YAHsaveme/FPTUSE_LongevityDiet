@@ -241,8 +241,10 @@ public sealed partial class RabbitMqOwnedAuditConsumer(
                 var consumer = new AsyncEventingBasicConsumer(channel);
                 consumer.ReceivedAsync += async (_, delivery) =>
                 {
-                    // RabbitMQ.Client 7: the body must be copied during callback.
-                    var bytes = delivery.Body.ToArray();
+                    // RabbitMQ.Client 7: copy only bounded metadata during callback.
+                    // Oversized untrusted messages go to safe DLQ without raw PII.
+                    var bytes = delivery.Body.Length <= 4096
+                        ? delivery.Body.ToArray() : Array.Empty<byte>();
                     try
                     {
                         RabbitMqDomainAudit.Envelope? evt = null;
