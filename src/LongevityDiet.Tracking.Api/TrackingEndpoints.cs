@@ -36,6 +36,14 @@ public static class TrackingEndpoints
             await WithUser(principal, async actor =>
                 Results.Ok(await service.ListAsync(actor, from, to, page, pageSize, ct))));
 
+        api.MapGet("/activities/{id:guid}", async (Guid id, ClaimsPrincipal principal,
+            TrackingService service, CancellationToken ct) =>
+            await WithUser(principal, async actor =>
+            {
+                var activity = await service.GetByIdAsync(actor, id, ct);
+                return activity is null ? Results.NotFound() : Results.Ok(activity);
+            }));
+
         api.MapGet("/activities/daily", async (ClaimsPrincipal principal,
             TrackingService service, DateOnly? date, CancellationToken ct) =>
             await WithUser(principal, async actor =>

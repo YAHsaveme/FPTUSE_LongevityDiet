@@ -110,6 +110,15 @@ public sealed class TrackingService(
         return true;
     }
 
+    /// <summary>Return a single non-deleted activity only to its authenticated owner.</summary>
+    public async Task<ActivityView?> GetByIdAsync(Guid userId, Guid id, CancellationToken ct)
+    {
+        await ReadZoneAsync(userId, ct);
+        var row = await db.Activities.AsNoTracking()
+            .SingleOrDefaultAsync(a => a.UserId == userId && a.Id == id && !a.IsDeleted, ct);
+        return row is null ? null : Project(row);
+    }
+
     public async Task<PageView<ActivityView>> ListAsync(
         Guid userId, DateTimeOffset? from, DateTimeOffset? to,
         int page, int pageSize, CancellationToken ct)
