@@ -10,7 +10,7 @@ Ngày: 13/11/2026. Phạm vi: **code + QA cô lập**, chưa triển khai produc
 | Email SMTP | SQL `UserNotifications.Pending` → durable RabbitMQ GUID queue → Identity-owned SMTP consumer → Mailpit | Đã kiểm thử QA 3/3 |
 | Gmail thực của khách hàng | SMTP provider với credentials, TLS 587, người dùng đồng ý; thư có thể được chuyển tới địa chỉ @gmail.com | **CHƯA BẬT**, chưa có provider credentials/domain/verification |
 | Trình duyệt khi tab mở | REST polling 30 giây + Notification API sau khi người dùng cấp quyền | Có, **không phải push chạy nền** |
-| Web Push khi đóng tab / Android FCM / iOS APNs | VAPID/FCM/APNs, service worker và subscription từng thiết bị | **CHƯA TRIỂN KHAI** |
+| Web Push khi đóng tab (trình duyệt) | Service Worker + VAPID + Redis per-device, opt-in | Code + simulated Service Worker QA PASS; **FCM thực chưa nghiệm thu**, mặc định OFF |
 
 **RabbitMQ không phải SMTP**: broker chỉ chuyển ID của thông báo. Identity API nắm
 địa chỉ người nhận, kiểm tra lại quyền nhận và kết nối SMTP. Hàng đợi
@@ -112,8 +112,12 @@ Quy trình triển khai yêu cầu:
 
 - **Chưa có** bằng chứng email đến Gmail thật, vì chưa kết nối tài khoản
   hoặc SMTP API của khách hàng; không được dùng từ “đã gửi Gmail”.
-- **Chưa có** background push qua Service Worker/Web Push/VAPID,
-  Firebase Cloud Messaging hay Apple Push Notification.
+- **Đã có code** background Web Push cho trình duyệt, nhưng chưa có
+  bằng chứng nhận push qua FCM/Apple provider thật vì Chrome/Edge QA
+  từ chối `PushManager.subscribe` dù quyền báo `granted`; cần
+  nghiệm thu thiết bị thật/HTTPS. Chưa hỗ trợ native Android FCM
+  hay iOS native APNs. Xem
+  `docs/operations/WEBPUSH_BACKGROUND_DELIVERY_20261113.md`.
 - **Chưa có** phê duyệt cutover ADR-005; vẫn 12 blocker dữ liệu/backup.
 - **Không** coi SMTP status `Sent` là đã đến hộp thư Gmail:
   `Sent` ở đây là **SMTP server accepted**, không phải delivered/read.

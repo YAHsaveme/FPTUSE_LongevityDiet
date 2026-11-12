@@ -42,6 +42,14 @@ const categoryFor = (id: Category) => labels[id] ?? 'Thông báo'
 const toInput = (value: string) => value.slice(0, 5)
 const toApi = (value: string) => value.length === 5 ? `${value}:00` : value
 
+function decodeVapidKey(value: string): ArrayBuffer {
+  const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(
+    Math.ceil(value.length / 4) * 4, '=')
+  const bytes = Uint8Array.from(atob(padded), ch => ch.charCodeAt(0))
+  if (bytes.length !== 65) throw new Error('Khóa Web Push không hợp lệ.')
+  return bytes.buffer
+}
+
 export function NotificationsPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
@@ -49,6 +57,8 @@ export function NotificationsPage() {
   const [draftOverride, setDraftOverride] = useState<Preference | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [browserNotificationsOn, setBrowserNotificationsOn] = useState(false)
+  const [backgroundPushOn, setBackgroundPushOn] = useState(false)
+  const [backgroundPushBusy, setBackgroundPushBusy] = useState(false)
   const seenNotifications = useRef<Set<string>>(new Set())
   const firstNotificationLoad = useRef(true)
   const preferences = useQuery({
@@ -56,6 +66,19 @@ export function NotificationsPage() {
     queryFn: async () => (await api.get<Preference>('/reminders/preferences')).data,
   })
   const draft = draftOverride ?? preferences.data ?? null
+  const pushConfig = useQuery({
+    queryKey: ['web-push-config'],
+    queryFn: async () => (await api.get<{ enabled: boolean, vapidPublicKey: string | null }>(
+      '/web-push/config')).data,
+    retry: false,
+  })
+  useEffect(() => {
+    if (!pushConfig.data?.enabled || !('serviceWorker' in navigator)) return
+    void navigator.serviceWorker.getRegistration('/sw.js')
+      .then(reg => reg?.pushManager.getSubscription())
+      .then(sub => setBackgroundPushOn(Boolean(sub)))
+      .catch(() => setBackgroundPushOn(false))
+  }, [pushConfig.data?.enabled])
 
   const schedule = useQuery({
     queryKey: ['reminder-preview'],
@@ -119,6 +142,75 @@ export function NotificationsPage() {
       }
     } catch {
       setFeedback('Không thể yêu cầu quyền thông báo trong trình duyệt này.')
+    }
+  }
+
+  async function enableBackgroundPush() {
+    if (!pushConfig.data?.enabled || !pushConfig.data.vapidPublicKey) {
+      setFeedback('Máy chủ chưa bật thông báo đẩy chạy nền.')
+      return
+    }
+    if (!preferences.data?.optedIn) {
+      setFeedback('Hãy bật và lưu Cho phép nhắc lịch trước khi đăng ký push.')
+      return
+    }
+    if (!window.isSecureContext || !('serviceWorker' in navigator) ||
+      !('PushManager' in window) || !('Notification' in window)) {
+      setFeedback('Web Push cần HTTPS (hoặc localhost) và trình duyệt hỗ trợ.')
+      return
+    }
+    setBackgroundPushBusy(true)
+    try {
+      // A real user gesture must request permission before async work.
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        setFeedback('Bạn chưa cấp quyền thông báo cho trình duyệt.')
+        return
+      }
+      const reg = await navigator.serviceWorker.register('/sw.js')
+      const existing = await reg.pushManager.getSubscription()
+      const sub = existing ?? await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: decodeVapidKey(pushConfig.data.vapidPublicKey),
+      })
+      try {
+        const keys = sub.toJSON().keys
+        if (!keys?.p256dh || !keys.auth)
+          throw new Error('Trình duyệt không cung cấp khóa đăng ký push.')
+        await api.post('/web-push/subscriptions', {
+          endpoint: sub.endpoint,
+          keys: { p256dh: keys.p256dh, auth: keys.auth },
+        })
+      } catch (error) {
+        if (!existing) await sub.unsubscribe()
+        throw error
+      }
+      setBackgroundPushOn(true)
+      setFeedback('Đã đăng ký Web Push chạy nền trên thiết bị này.')
+    } catch (error) {
+      setFeedback(getApiErrorMessage(error))
+    } finally {
+      setBackgroundPushBusy(false)
+    }
+  }
+
+  async function disableBackgroundPush() {
+    setBackgroundPushBusy(true)
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration('/sw.js')
+        const sub = await reg?.pushManager.getSubscription()
+        if (sub) {
+          await api.delete('/web-push/subscriptions', { data: { endpoint: sub.endpoint } })
+          await sub.unsubscribe()
+        }
+      }
+      setBackgroundPushOn(false)
+      setFeedback('Đã dừng Web Push chạy nền trên thiết bị này.')
+    } catch (error) {
+      setFeedback(getApiErrorMessage(error))
+    } finally {
+      setBackgroundPushBusy(false)
     }
   }
 
@@ -249,6 +341,19 @@ export function NotificationsPage() {
           <p className="tracking-note">Giờ hiển thị là thời điểm dự kiến; thông báo thực tế phụ thuộc vào Worker và Redis.</p>
         </section>
       </div>
+      <section className="tracking-panel">
+        <h2><Bell size={20} /> Thông báo đẩy Web Push chạy nền</h2>
+        <p className="tracking-note">Bạn có thể nhận lời nhắc khi đóng tab trên trình duyệt hỗ trợ. Chỉ đăng ký sau khi bạn bật nhắc lịch và cấp quyền; nội dung push không chứa dữ liệu sức khỏe.</p>
+        {pushConfig.isLoading ? <p>Đang kiểm tra khả năng Web Push...</p> :
+          pushConfig.isError ? <p role="alert">Không thể đọc cấu hình Web Push.</p> :
+          !pushConfig.data?.enabled ?
+            <p className="tracking-note">Chưa bật trên máy chủ: cần VAPID keys và đường truyền bảo mật do quản trị viên cấu hình.</p> :
+            <button type="button" disabled={backgroundPushBusy}
+              onClick={() => void (backgroundPushOn ? disableBackgroundPush() : enableBackgroundPush())}>
+              <Bell size={16} /> {backgroundPushBusy ? 'Đang xử lý...' :
+                backgroundPushOn ? 'Tắt push chạy nền trên thiết bị này' : 'Bật push chạy nền trên thiết bị này'}
+            </button>}
+      </section>
       <section className="tracking-panel">
         <div className="notification-heading">
           <h2><Bell size={20} /> Hộp thư <span>({unread.data?.count ?? 0} chưa đọc)</span></h2>

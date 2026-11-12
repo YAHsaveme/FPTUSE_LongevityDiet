@@ -57,6 +57,8 @@ jobs:
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.gateway.yml -f docker-compose.catalog.yml -f docker-compose.identity.yml -f docker-compose.planning.yml -f docker-compose.tracking-api.yml -f docker-compose.recommendation-owner.yml -f docker-compose.worker-ops.yml -f docker-compose.worker-owned.yml -f docker-compose.gateway-target.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml config --quiet
           docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml -f docker-compose.email-qa.yml config --quiet
+          # Validate the Web Push QA overlay schema without deploying or exposing VAPID secrets.
+          WEBPUSH_VAPID_PUBLIC_KEY=config-only-placeholder WEBPUSH_VAPID_PRIVATE_KEY=config-only-placeholder docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.webpush-qa.yml config --quiet
 
       - name: Restore .NET
         run: dotnet restore ./LongevityDiet.sln
