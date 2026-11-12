@@ -42,8 +42,31 @@ for (let i = 0; i < 60; i++) {
   await new Promise(resolve => setTimeout(resolve, 1000));
 }
 check('GATEWAY_TARGET_ALL_SIX_OWNERS_READY', healthy);
-check('GATEWAY_TARGET_CURRENT_API_READY',
-  (await request('/gateway/ready')).status === 200);
+
+// Docker Compose may recreate the legacy API when the optional target
+// sidecar is started after the SMTP/Worker overlays. Owner readiness does
+// not assert that the legacy API has finished its own SQL/startup recovery.
+// Probe both independently with a strict, bounded 60-second deadline
+// instead of treating a single transient 503 as a permanent release failure.
+let currentApiReady = false;
+let lastLegacyStatus = 'no-response';
+for (let i = 0; i < 60; i++) {
+  try {
+    const response = await request('/gateway/ready');
+    lastLegacyStatus = String(response.status);
+    if (response.status === 200) {
+      currentApiReady = true;
+      break;
+    }
+  } catch (error) {
+    lastLegacyStatus = error instanceof Error ? error.name : 'request-error';
+  }
+  await new Promise(resolve => setTimeout(resolve, 1000));
+}
+if (!currentApiReady)
+  console.error('Target Gateway current API did not recover; last readiness status=' +
+    lastLegacyStatus);
+check('GATEWAY_TARGET_CURRENT_API_READY', currentApiReady);
 check('GATEWAY_TARGET_HEALTH',
   (await request('/gateway/health')).status === 200);
 check('GATEWAY_TARGET_NO_OPEN_PROXY',
