@@ -13,7 +13,7 @@
 | PRN232 official static rubric | 22/22 PASS | `node scripts/Validate-Prn232-Final-PDF.cjs` |
 | Final local acceptance | **18/18 gate PASS**, trong Docker Compose QA `prn232-acceptance`; chạy cả gateway outage và Redis independent smoke | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-Prn232-Final-Acceptance.ps1 -IncludeGatewayOutage -IncludeIndependentRedisSmoke -EvidenceFile .local-backups/prn232-final-acceptance-20261112.json` |
 | .NET và frontend | 91 unit + 81 integration, 12 web tests, lint/build và npm production audit PASS | Có trong 18-gate acceptance |
-| Browser Playwright | 10/10 PASS, màn hình 320px/390px/1365px | `npm --prefix tests/LongevityDiet.E2ETests run test:docker` |
+| Browser Playwright | **12/12 PASS**: identity/onboarding, full member journey across catalog/recipes/meal planning/meal logs/LDAS/FMD safety/activity/challenge/report/reminder/logout, keyboard skip-navigation accessibility, and 320px/390px/1365px responsive cases | `npm --prefix tests/LongevityDiet.E2ETests run test:docker` |
 | 5 sơ đồ chính thức | 5 Draw.io + 5 PDF đơn trang, 0 lỗi hình học | `node scripts/Validate-OfficialArchitecture.js`; `node scripts/Validate-OfficialDiagram-Geometry.js --strict` |
 | ADR-005 six-owner Gateway | 27/27 PASS với JWT, routing, ownership và IDOR | `node scripts/Test-Target-Gateway-Http.mjs` (chỉ khi overlay target QA chạy) |
 | SQL vật lý 6 owner | 50/50 bảng và 20/20 FK nội bộ, đối chiếu trực tiếp SQL Server | `node scripts/Test-Physical-ERD-Sql.mjs` |
@@ -30,9 +30,9 @@
 - [x] **Message Broker:** Redis Streams producer XADD, consumer XREADGROUP và ACK, chống xử lý trùng. RabbitMQ chỉ là phần thưởng mở rộng tùy chọn.
 - [x] **gRPC:** REST → gRPC Recommendation container riêng, xử lý thành công qua HTTP/2.
 - [x] **Deployment:** Docker Compose localhost, EF migration 3 database của Current Runtime, Gateway health/503/recovery, thêm target sáu owner qua overlay QA.
-- [x] **End-to-End:** synthetic member → profile → allergy gate → meal plan → meal/activity logs → LDAS → Challenge/Dashboard → FMD high-risk block → weekly report; 10 Playwright tests.
+- [x] **End-to-End:** synthetic member → profile → allergy gate → meal plan → meal/activity logs → LDAS → Challenge/Dashboard → FMD high-risk block → weekly report; 12 Playwright tests.
 
-Các ô [x] là **bài demo tự động/QA đã tái hiện**, **không chứng minh giảng viên đã trực tiếp xem**. Kịch bản nói và lệnh tái hiện: `docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md`.
+Các ô [x] là **bài demo tự động/QA đã tái hiện**, **không chứng minh giảng viên đã trực tiếp xem**. Ngày 12/11 đã bổ sung `tests/LongevityDiet.E2ETests/specs/member-journey.spec.ts` chạy qua UI thật và API/SQL/Worker; gồm kiểm tra hard constraint dị ứng và FMD high-risk HTTP 422. Bài full journey và bài keyboard accessibility mới chạy thành công cùng 10 bài hiện có (**12/12**). Kịch bản nói và lệnh tái hiện: `docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md`.
 
 ## 3. Chưa có quyền tự xác nhận
 

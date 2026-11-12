@@ -85,7 +85,7 @@ function App() {
           Bản xem giao diện miễn phí phục vụ học tập. Chưa kết nối máy chủ API; không đăng ký tài khoản hoặc nhập dữ liệu cá nhân thật.
         </div>
       )}
-      <a className="skip-link" href="#main-content">Bá» qua Ä‘iá»u hÆ°á»›ng</a>
+      <a className="skip-link" href="#main-content">Bỏ qua điều hướng</a>
       <div id="main-content" tabIndex={-1}>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
