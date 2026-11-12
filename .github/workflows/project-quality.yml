@@ -31,7 +31,7 @@ jobs:
             src/LongevityDiet.Web/package-lock.json
             tests/LongevityDiet.E2ETests/package-lock.json
 
-      - name: Validate four overall C0 C1 C2 Database diagrams
+      - name: Validate five official C0 C1 C2 Database and Business Flow diagrams
         run: |
           node ./scripts/Validate-OverallDiagrams.js
           node ./scripts/Validate-CourseLinks.js
