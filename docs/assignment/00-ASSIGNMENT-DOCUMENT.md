@@ -42,9 +42,15 @@ documentation and presentation **10%**.
 
 The official handover uses one editable Draw.io and one one-page PDF per diagram.
 C1/C2 show the ADR-005 target (six domain-owned SQL catalogs); the current legacy
-API and data migration remain transitional. The database view covers 49 target
-owner tables and only source-confirmed within-owner foreign keys. Redis Streams
-is implemented; RabbitMQ/AMQP now has an opt-in, QA-tested metadata-only event mirror publisher/consumer in Worker Ops. Redis Streams remains the primary business transport.
+API and data migration remain transitional. The database view covers **50 physical tables in six target databases**:
+49 explicit EF Core DbSet tables plus the implicit Catalog many-to-many
+`RuleSetVersionItems` table. The diagram annotates **20 source-confirmed,
+within-owner SQL foreign keys**; cross-service IDs are not SQL FKs.
+Redis Streams is implemented and remains the primary business transport.
+RabbitMQ/AMQP is an **optional, QA-tested, metadata-only event-audit mirror**
+with a publisher and consumer in Worker Ops; it is not a substitute for the
+course-required Redis producer/consumer demonstration. The ADR-005 target
+must not be presented as a completed production migration.
 ## Presentation notes — seven official demo topics
 
 1. System architecture: C0/C1/C2/ERD and the explicit **Current Runtime versus ADR-005 Target Architecture** distinction.

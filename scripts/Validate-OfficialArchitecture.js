@@ -124,6 +124,23 @@ check(tableCells===physicalTableCount,
  ' != '+physicalTableCount);
 check(diagrams['Database Diagram']?.xml.includes('RuleSetVersionItems'),
  'ERD must show real RuleSetVersionItems SQL join table.');
+// The lecturer-facing handover must describe the same physical SQL inventory
+// and five official diagrams that this validator checks in source/PDF.
+const handover=fs.readFileSync(path.join(root,
+ 'docs/assignment/00-ASSIGNMENT-DOCUMENT.md'),'utf8');
+const demo=fs.readFileSync(path.join(root,
+ 'docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md'),'utf8');
+check(handover.includes('50 physical tables') &&
+ handover.includes('RuleSetVersionItems') && handover.includes('20 source-confirmed'),
+ 'Assignment handover must explain 50 physical tables, implicit EF join and 20 SQL FKs');
+check(demo.includes('**năm**') && demo.includes('Business Flow') &&
+ demo.includes('50 bảng vật lý / 20 SQL foreign keys'),
+ 'Official demo must present five diagrams with accurate 50-table/20-FK target ERD');
+check(demo.includes('Validate-OfficialArchitecture.js') &&
+ !demo.includes('node scripts/Validate-OverallDiagrams.js'),
+ 'Official demo must invoke current five-diagram validation, not a legacy diagram validator');
+check(demo.includes('RabbitMQ chỉ là audit mirror tùy chọn'),
+ 'Official demo must not misrepresent optional RabbitMQ as required course transport');
 if(errors.length){
  console.error(errors.map(x=>'FAIL: '+x).join('\n'));
  process.exitCode=1;

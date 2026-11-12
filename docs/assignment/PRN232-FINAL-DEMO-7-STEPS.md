@@ -1,6 +1,6 @@
 # PRN232 Final Assignment — trình bày và nghiệm thu đủ 7 bước
 
-**Phiên bản:** 11/11/2026. **Nguồn:** PDF PRN232 – Final Assignment, mục 2–7.
+**Phiên bản cập nhật:** 12/11/2026. **Nguồn:** PDF PRN232 – Final Assignment, mục 2–7; bộ năm sơ đồ chính thức; GitHub PR #39 và kết quả CI Docker QA.
 **Phạm vi:** QA only, dữ liệu/tài khoản giả, Docker Desktop localhost. Đây là quy trình chứng minh kỹ thuật **not a lecturer sign-off**. Giảng viên và reviewer của nhóm vẫn phải trực tiếp xem, chấm và phê duyệt. Dự án không đưa ra chẩn đoán hay điều trị y khoa.
 
 ## Chuẩn bị trước demo
@@ -13,17 +13,18 @@ Máy cần có Docker Desktop, .NET 9, Node 24. Đường dẫn repository: D:\P
     Invoke-WebRequest http://127.0.0.1:8080/ready -UseBasicParsing
     Invoke-WebRequest http://127.0.0.1:18080/gateway/ready -UseBasicParsing
 
-Kỳ vọng: SQL Server và Redis healthy, API và Gateway ready 200. Docker QA có sáu container Current Runtime, bảy container khi bật Gateway, hoặc tám container khi bật thêm Catalog Service thử nghiệm. Catalog dùng database riêng, chưa chuyển đường Web/Planning sang service mới.
+Kỳ vọng: SQL Server và Redis healthy, API/Gateway ready 200 khi các overlay tương ứng được bật. Số container thay đổi theo Compose overlay; không suy ra Current Runtime đã chuyển sang sáu database từ số container. Các target owner service/SQL DB, Worker Ops và RabbitMQ đều là **opt-in QA**; target public TLS/443 và dữ liệu production chưa cutover.
 
 ## 01. System architecture
 
-Mở các tệp PDF và Draw.io: docs/assignment/one-page/C0, C1, C2 và Database Diagram. Trình bày actors, REST/gRPC, database, Redis Streams, Worker; nói rõ **Current Runtime** và **Target ADR-005** là hai mức khác nhau. ERD xác nhận 56 bảng vật lý và 23 FK thực trong ba database hiện tại; Target bổ sung dịch vụ và database riêng vẫn chưa hoàn thiện.
+Mở **đúng năm** tệp PDF và Draw.io trong `docs/assignment/one-page/`: C0, C1, C2, Database Diagram và Business Flow. Trình bày actors, REST/gRPC, Gateway, databases, Redis Streams, Worker và nhánh RabbitMQ audit tùy chọn. Phải phân biệt **Current Runtime** (Compose gốc, ba SQL DB, dữ liệu legacy) với **Target ADR-005** (sáu service owner, sáu DB có thể chạy trên Compose overlay QA). ERD mới mô tả **50 bảng vật lý / 20 SQL foreign keys nội bộ trong sáu target database** (49 DbSet + một bảng join EF implicit); không dùng con số của ERD Current Runtime cũ để giải thích bản này. QA target service độc lập **không đồng nghĩa** Web/legacy đã cutover hay có public TLS/443.
 
-    node scripts/Validate-OverallDiagrams.js
+    node scripts/Validate-OfficialArchitecture.js
+    node scripts/Validate-OfficialDiagram-Geometry.js --strict
     node scripts/Validate-CourseLinks.js
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Validate-ProjectStructure.ps1
 
-Kỳ vọng: PASS. Không gọi sơ đồ kiến trúc mục tiêu là đã triển khai nếu không có container tương ứng.
+Kỳ vọng: cả năm Draw.io và năm PDF đơn trang đạt kiểm tra kết nối, căn chỉnh, tránh trùng chữ và thông số 50 bảng; giải thích đúng mức triển khai **target QA opt-in so với runtime mặc định**. Không gọi target là production/cutover hoàn tất.
 
 ## 02. REST API
 
@@ -55,7 +56,7 @@ PDF cho phép **Kafka hoặc Redis**. Dự án sử dụng **Redis Streams**, c�
     docker exec prn232-acceptance-redis-1 redis-cli XINFO GROUPS longevity:weekly-report-events
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Run-Member1RedisSmoke.ps1
 
-Kỳ vọng: PONG, có stream/consumer group, worker ACK và xử lý idempotent. Script smoke dùng Redis tạm + SQLite, không chạm dữ liệu người dùng.
+Kỳ vọng: PONG, có stream/consumer group, worker ACK và xử lý idempotent. Script smoke dùng Redis tạm + SQLite, không chạm dữ liệu người dùng. **Phần mở rộng tùy chọn (không thay bằng chứng Redis theo PDF):** khi bật `docker-compose.worker-ops.yml` + `docker-compose.rabbitmq.yml` trong Docker QA, chạy `node scripts/Test-RabbitMq-Domain-Events.mjs` để quan sát `Redis Streams → RabbitMQ audit → Worker SQL receipt → ACK`, idempotency và dead-letter; xem `docs/architecture/RABBITMQ-INTEGRATION-20261112.md`.
 
 ## 05. gRPC interaction
 
@@ -100,11 +101,11 @@ Kỳ vọng: Playwright đăng ký/onboard/logout qua browser đạt, tất cả
 | Docker/Cloud deployment | 10% | Compose/SQL/Redis/health/migrations |
 | Documentation and presentation | 10% | README/OpenAPI/source/7-step demo |
 
-CI xanh không chứng minh đã bảo vệ trước giảng viên hoặc đã được chấm 100/100. Target Gateway/4 REST services/6 domain DB/TLS443 là tiêu chuẩn nội bộ **cao hơn** PDF; hiện chưa được triển khai đầy đủ.
+CI xanh không chứng minh đã bảo vệ trước giảng viên hoặc đã được chấm 100/100. Target Gateway/4 domain REST services/6 domain DB/TLS443 là tiêu chuẩn nội bộ **cao hơn** PDF: sáu owner và đường Gateway đã có Compose overlay QA cùng CI runtime; **chưa có bằng chứng production cutover/public TLS443, được nhóm duyệt hoặc giảng viên xác nhận**. RabbitMQ chỉ là audit mirror tùy chọn, không bắt buộc trong PDF.
 
 ## Checklist người duyệt ký sau buổi demo
 
-- [ ] Đã trình bày đúng bốn sơ đồ C0/C1/C2/ERD và mô tả Current vs Target.
+- [ ] Đã trình bày đúng **năm** sơ đồ C0/C1/C2/ERD/Business Flow và giải thích Current Runtime vs Target QA vs production cutover.
 - [ ] Đã xem REST API, JWT, CRUD, lọc, sắp xếp và phân trang.
 - [ ] Đã xem tác vụ nền scheduled/asynchronous thực sự chạy.
 - [ ] Đã thấy Redis producer, consumer group và ACK.
