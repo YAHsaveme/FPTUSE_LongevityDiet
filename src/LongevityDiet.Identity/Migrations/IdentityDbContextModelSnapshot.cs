@@ -124,6 +124,11 @@ namespace LongevityDiet.Identity.Migrations
                     b.Property<TimeOnly>("ChallengeTime")
                         .HasColumnType("time");
 
+                    b.Property<bool>("EmailOptedIn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<bool>("MealLoggingEnabled")
                         .HasColumnType("bit");
 
@@ -235,6 +240,25 @@ namespace LongevityDiet.Identity.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<int>("EmailDeliveryAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmailDeliveryStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)")
+                        .HasDefaultValue("None");
+
+                    b.Property<DateTime?>("EmailLeaseUntilUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EmailQueuedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EmailSentAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("ReadAtUtc")
                         .HasColumnType("datetime2");
 
@@ -247,6 +271,8 @@ namespace LongevityDiet.Identity.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmailDeliveryStatus", "EmailQueuedAtUtc");
 
                     b.HasIndex("UserId", "CreatedAtUtc");
 

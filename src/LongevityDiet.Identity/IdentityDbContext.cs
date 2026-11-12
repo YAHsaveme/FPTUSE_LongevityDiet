@@ -48,6 +48,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         var reminders = modelBuilder.Entity<ReminderPreference>();
         reminders.ToTable("ReminderPreferences");
         reminders.HasKey(x => x.UserId);
+        reminders.Property(x => x.EmailOptedIn).HasDefaultValue(false);
         reminders.HasOne<User>().WithOne().HasForeignKey<ReminderPreference>(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -59,6 +60,8 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         notifications.Property(x => x.Body).HasMaxLength(500);
         notifications.Property(x => x.DeepLink).HasMaxLength(120);
         notifications.Property(x => x.DeduplicationKey).HasMaxLength(160);
+        notifications.Property(x => x.EmailDeliveryStatus).HasMaxLength(16).HasDefaultValue("None");
+        notifications.HasIndex(x => new { x.EmailDeliveryStatus, x.EmailQueuedAtUtc });
         notifications.HasIndex(x => new { x.UserId, x.CreatedAtUtc });
         notifications.HasIndex(x => new { x.UserId, x.DeduplicationKey }).IsUnique();
         notifications.HasOne<User>().WithMany().HasForeignKey(x => x.UserId)
