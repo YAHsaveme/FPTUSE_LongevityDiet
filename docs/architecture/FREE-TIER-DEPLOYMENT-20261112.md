@@ -15,8 +15,10 @@ and must never encourage visitors to use real credentials or personal health
 information. Changing the browser's API base URL does not magically make
 the legacy database or owner APIs publicly available.
 
-Frontend Vite code now supports a non-root deployment path using
-`BrowserRouter basename={import.meta.env.BASE_URL...}`.
+Frontend Vite code now supports a non-root deployment path using Vite's
+`BASE_URL`. In static preview mode only, it uses `HashRouter` for working
+shareable routes like `/#/login` (which respond with HTTP 200 on Pages),
+while the normal Docker app uses BrowserRouter and unchanged URLs.
 To rebuild the preview:
 
 ```powershell
