@@ -192,6 +192,13 @@ try
     builder.Services.AddTransient<LongevityDiet.API.Security.ReadinessCheck>();
     if (!builder.Environment.IsEnvironment("Testing"))
         builder.Services.AddHostedService<IdentityRedisBridge>();
+    // Delivery is strictly opt-in; no Gmail/SMTP traffic in the default runtime.
+    if (builder.Configuration.GetValue<bool>("EmailNotifications:Enabled"))
+    {
+        _ = EmailDeliveryConfiguration.Read(builder.Configuration, builder.Environment);
+        if (!builder.Environment.IsEnvironment("Testing"))
+            builder.Services.AddHostedService<RabbitEmailNotificationService>();
+    }
     builder.Services.AddScoped<IMealPlanRepository, MealPlanRepository>();
     builder.Services.AddScoped<IWellnessRepository, WellnessRepository>();
     builder.Services.AddScoped<IRecommendationRepository, RecommendationRepository>();

@@ -126,6 +126,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         var preferences = modelBuilder.Entity<ReminderPreference>();
         preferences.ToTable("ReminderPreferences");
         preferences.HasKey(p => p.UserId);
+        preferences.Property(p => p.EmailOptedIn).HasDefaultValue(false);
         preferences.HasOne<User>().WithOne()
             .HasForeignKey<ReminderPreference>(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -138,6 +139,8 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         notifications.Property(n => n.Body).HasMaxLength(500);
         notifications.Property(n => n.DeepLink).HasMaxLength(120);
         notifications.Property(n => n.DeduplicationKey).HasMaxLength(160);
+        notifications.Property(n => n.EmailDeliveryStatus).HasMaxLength(16).HasDefaultValue("None");
+        notifications.HasIndex(n => new { n.EmailDeliveryStatus, n.EmailQueuedAtUtc });
         notifications.HasIndex(n => new { n.UserId, n.CreatedAtUtc });
         notifications.HasIndex(n => new { n.UserId, n.DeduplicationKey }).IsUnique();
         notifications.HasOne<User>().WithMany()

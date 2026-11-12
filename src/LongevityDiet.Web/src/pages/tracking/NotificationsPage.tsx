@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Bell, CheckCheck, Clock3 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
@@ -15,10 +15,12 @@ type Notification = {
   deepLink: string
   createdAtUtc: string
   readAtUtc: string | null
+  emailDeliveryStatus?: 'None' | 'Pending' | 'Sending' | 'Sent' | 'Failed' | 'Skipped'
 }
 type Page<T> = { items: T[]; totalItems: number; page: number; pageSize: number; totalPages: number }
 type Preference = {
   optedIn: boolean
+  emailOptedIn: boolean
   mealLoggingEnabled: boolean
   activityEnabled: boolean
   challengeEnabled: boolean
@@ -46,6 +48,9 @@ export function NotificationsPage() {
   // React Query supplies server defaults; local state exists only after an edit.
   const [draftOverride, setDraftOverride] = useState<Preference | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [browserNotificationsOn, setBrowserNotificationsOn] = useState(false)
+  const seenNotifications = useRef<Set<string>>(new Set())
+  const firstNotificationLoad = useRef(true)
   const preferences = useQuery({
     queryKey: ['reminder-preferences'],
     queryFn: async () => (await api.get<Preference>('/reminders/preferences')).data,
@@ -60,11 +65,62 @@ export function NotificationsPage() {
     queryKey: ['notifications', page],
     queryFn: async () => (await api.get<Page<Notification>>('/notifications',
       { params: { page, pageSize: 10 } })).data,
+    refetchInterval: 30000,
   })
   const unread = useQuery({
     queryKey: ['notifications-unread'],
     queryFn: async () => (await api.get<{ count: number }>('/notifications/unread-count')).data,
+    refetchInterval: 30000,
   })
+
+  // Foreground browser alerts require an explicit user gesture/permission.
+  // This is NOT background Web Push: a closed tab cannot receive alerts.
+  useEffect(() => {
+    const rows = messages.data?.items
+    if (!rows) return
+    if (firstNotificationLoad.current) {
+      rows.forEach(n => seenNotifications.current.add(n.id))
+      firstNotificationLoad.current = false
+      return
+    }
+    if (!browserNotificationsOn) {
+      rows.forEach(n => seenNotifications.current.add(n.id))
+      return
+    }
+    if (typeof window === 'undefined' ||
+      !('Notification' in window) || Notification.permission !== 'granted') return
+    for (const row of rows) {
+      if (row.readAtUtc || seenNotifications.current.has(row.id)) continue
+      seenNotifications.current.add(row.id)
+      const alert = new Notification('LongevityDiet có lời nhắc mới', {
+        body: 'Mở ứng dụng để xem nội dung.',
+        tag: 'ldc-reminder-' + row.id,
+      })
+      alert.onclick = () => {
+        window.focus()
+        window.location.assign('/notifications')
+        alert.close()
+      }
+    }
+  }, [messages.data, browserNotificationsOn])
+
+  async function enableBrowserAlerts() {
+    if (!('Notification' in window)) {
+      setFeedback('Trình duyệt này không hỗ trợ thông báo hệ thống.')
+      return
+    }
+    try {
+      const permission = await Notification.requestPermission()
+      if (permission === 'granted') {
+        setBrowserNotificationsOn(true)
+        setFeedback('Đã bật thông báo khi trang đang mở. Đây chưa phải Web Push chạy nền.')
+      } else {
+        setFeedback('Trình duyệt chưa cho phép thông báo. Có thể thay đổi quyền trong cài đặt trang.')
+      }
+    } catch {
+      setFeedback('Không thể yêu cầu quyền thông báo trong trình duyệt này.')
+    }
+  }
 
   const refreshMessages = () => Promise.all([
     queryClient.invalidateQueries({ queryKey: ['notifications'] }),
@@ -135,6 +191,16 @@ export function NotificationsPage() {
                   onChange={e => setBoolean('optedIn', e.target.checked)} />
                 <span>Cho phép nhắc lịch</span>
               </label>
+              <label className="notification-toggle">
+                <input type="checkbox" checked={draft.emailOptedIn}
+                  disabled={!draft.optedIn}
+                  onChange={e => setBoolean('emailOptedIn', e.target.checked)} />
+                <span>Đồng ý nhận email nhắc lịch qua địa chỉ trong hồ sơ</span>
+              </label>
+              <p className="tracking-note">
+                Email là tùy chọn riêng, mặc định tắt. Chỉ gửi khi dịch vụ email được quản trị viên cấu hình;
+                bạn có thể tắt bất cứ lúc nào. Nội dung email không chứa thông tin sức khỏe nhạy cảm.
+              </p>
               <p className="tracking-note">Múi giờ hiện tại: {draft.timeZone}. Thay đổi ở trang Hồ sơ.</p>
               {([
                 ['mealLoggingEnabled', 'mealTime', 'Ghi bữa ăn'],
@@ -186,6 +252,10 @@ export function NotificationsPage() {
       <section className="tracking-panel">
         <div className="notification-heading">
           <h2><Bell size={20} /> Hộp thư <span>({unread.data?.count ?? 0} chưa đọc)</span></h2>
+          <button type="button" onClick={() => void enableBrowserAlerts()}
+            disabled={browserNotificationsOn}>
+            <Bell size={16} /> {browserNotificationsOn ? 'Đã bật thông báo tab' : 'Bật thông báo trình duyệt'}
+          </button>
           <button type="button" disabled={!unread.data?.count || markAll.isPending}
             onClick={() => markAll.mutate()}><CheckCheck size={16} /> Đọc tất cả</button>
         </div>
@@ -199,6 +269,12 @@ export function NotificationsPage() {
                   <strong>{message.title}{!message.readAtUtc ? ' • Chưa đọc' : ''}</strong>
                   <p>{message.body}</p>
                   <small>{new Date(message.createdAtUtc).toLocaleString('vi-VN')}</small>
+                  {message.emailDeliveryStatus === 'Sent' &&
+                    <small> • Đã chuyển qua SMTP (chưa xác minh hộp thư đích)</small>}
+                  {message.emailDeliveryStatus === 'Failed' &&
+                    <small> • Email chưa gửi được, vẫn có thể xem tại đây</small>}
+                  {(['Pending', 'Sending'] as const).includes(message.emailDeliveryStatus as 'Pending' | 'Sending') &&
+                    <small> • Email đang được xử lý</small>}
                   <Link to={message.deepLink} className="tracking-back">Mở trang liên quan</Link>
                 </div>
                 {!message.readAtUtc && <button type="button" aria-label="Đánh dấu đã đọc"
