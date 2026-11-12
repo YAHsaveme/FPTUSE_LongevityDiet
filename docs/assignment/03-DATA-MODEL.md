@@ -51,4 +51,4 @@ Bảng nào không có FK SQL nhưng có mã dùng chung hoặc tạo/nhận s�
 
 **Nguồn đối chiếu:** `src/LongevityDiet.Repositories/LongevityDietDbContext.cs`, `src/LongevityDiet.Tracking/TrackingDbContext.cs`, `src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs`. Danh sách và lý do của tất cả 31 kết nối được lưu trong [manifest](../../scripts/unified-erd-manifest.json). Cách thể hiện Crow's Foot tham khảo [Microsoft](https://support.microsoft.com/en-us/visio/create-a-diagram-with-crow-s-foot-database-notation), [draw.io](https://www.drawio.com/docs/diagram-types/entity-relationship-tables/) và [dbdiagram](https://docs.dbdiagram.io/relationships/).
 
-Bộ 52 bảng dinh dưỡng tương lai là **đề xuất**, không thuộc schema đang chạy: [đặc tả](05-LONGITUDINAL-NUTRITION-TARGET.md) và [DBML](nutrition-target-52-tables.dbml).
+Bộ 52 bảng dinh dưỡng tương lai là **đề xuất**, không thuộc schema đang chạy: [đặc tả](05-LONGITUDINAL-NUTRITION-TARGET.md).

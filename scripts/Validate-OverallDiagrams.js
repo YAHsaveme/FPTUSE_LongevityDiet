@@ -1,3 +1,3 @@
 'use strict';
-// Canonical current-implementation validator (not the archived 32-table validator).
-require('./Validate-CurrentOverallDiagrams.js');
+// Validate exactly C0, C1, C2, Database Diagram, Business Flow.
+require('./Validate-OfficialArchitecture.js');

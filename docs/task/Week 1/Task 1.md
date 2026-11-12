@@ -3,7 +3,7 @@
 **Owner:** Thành viên 1 (bạn)  
 **Reviewer:** Thành viên 3  
 **Branch:** `feature/w1-t1-auth-profile`  
-**Status:** Done
+**Status:** Current Runtime Done; ADR-005 migration In Progress (Identity REST :8081 + LongevityIdentityDb EF migrations + 31-case isolated SQL/JWT/refresh/profile/Redis Outbox QA PASS locally; user migration, profile-event consumers, Gateway cutover and reviewer pending).
 
 ## Architecture alignment (ADR-005)
 

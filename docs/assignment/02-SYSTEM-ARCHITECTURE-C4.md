@@ -1,68 +1,87 @@
-# C0, C1, C2 — kiến trúc LongevityDiet và bảng dữ liệu
+# LongevityDiet — five official C4, database and business-flow views
 
-Bộ sơ đồ chỉ dùng **đen–trắng**, được tạo từ source của nhánh `develop`. Để tránh nhầm cấp độ trừu tượng, **C0** là System Context, **C1** là Container Architecture, còn **C2 là bản mở rộng** kết hợp Component Architecture với bản đồ quan hệ database. C2 mở rộng này **không phải C2 thuần chuẩn C4**: tài liệu C4 chuẩn thường để từng bảng và FK trong ERD/code-level. Mục đích mở rộng là cho phép xem cùng lúc luồng controller/service và toàn bộ 32 bảng theo yêu cầu.
+The only official native drawings and one-page PDF exports are in
+[one-page/README.md](one-page/README.md). Each is black and white, centered
+from the top of the page downward, with generous gaps between endpoints.
 
-| Sơ đồ | Draw.io có thể sửa | PDF một trang | Phạm vi |
-| --- | --- | --- | --- |
-| C0 | [C0.drawio](one-page/C0.drawio) | [C0.pdf](one-page/C0.pdf) | Thành viên, quản trị viên, ranh giới hệ thống |
-| C1 | [C1.drawio](one-page/C1.drawio) | [C1.pdf](one-page/C1.pdf) | Các container, giao thức, cổng, 3 database |
-| **C2 mở rộng** | [C2.drawio](one-page/C2.drawio) | [C2.pdf](one-page/C2.pdf) | **10 luồng API + 32 bảng + 31 quan hệ giữa bảng** |
-| Database Diagram | [Database Diagram.drawio](one-page/Database%20Diagram.drawio) | [Database Diagram.pdf](one-page/Database%20Diagram.pdf) | ERD độc lập, chỉ tập trung vào cấu trúc database |
+| View | Editable drawing | One-page PDF | Main question |
+|---|---|---|---|
+| C0 System Context | [Draw.io](one-page/C0.drawio) | [PDF](one-page/C0.pdf) | Who uses the system? |
+| C1 Containers | [Draw.io](one-page/C1.drawio) | [PDF](one-page/C1.pdf) | Which service, database, broker and protocol handles each request? |
+| C2 Components | [Draw.io](one-page/C2.drawio) | [PDF](one-page/C2.pdf) | What is the domain processing path inside each service? |
+| Database Diagram Overall | [Draw.io](one-page/Database%20Diagram.drawio) | [PDF](one-page/Database%20Diagram.pdf) | Which of the 50 physical tables belongs to which SQL catalog? |
+| Business Flow | [Draw.io](one-page/Business%20Flow.drawio) | [PDF](one-page/Business%20Flow.pdf) | How does a member request become a plan, tracking, notification and audit? |
 
-**Bảng đối chiếu không bỏ sót:** [Kiểm tra liên thông C1/C2/Database Diagram, 10 cặp mã A01–A10 và 32 bảng](04-ARCHITECTURE-CONNECTIVITY-REGISTER.md).
+## C0
 
-## C2 — đọc từ trái sang phải
+Member uses LongevityDiet for registration, profiling, meal plans, activity
+logs, LDAS and progress. Admin publishes approved rule versions and reviews
+operations. Both actors connect explicitly to one system boundary.
 
-Ở phía trái, **Nginx / Web → REST API router → Controller → Service → Persistence → TABLE REFERENCE**. Mỗi hàng ghi **tên bảng được đối chiếu theo source**, không dừng lại ở một nhãn chung chung như “Database”. Mỗi tham chiếu ghi rõ database và cổng SQL **1433**.
+## C1
 
-Phía phải là **32 ô bảng EF Core thật**, gồm `LongevityDietDb` (21), `LongevityTrackingDb` (7) và `LongevityWorkerDb` (4). Mỗi bảng xuất hiện **một lần**. Để tránh 10 dây dài chạy xuyên qua ERD, các hàng API nối vào **10 ô tham chiếu bảng theo tên**; phần API và bản đồ bảng được nối bằng **một liên kết native đến bảng `Users`**. Mọi bảng ở phần ERD nằm trong cùng một mạng quan hệ. Các ô tham chiếu không phải bảng SQL mới và không được đếm vào tổng 32.
+From top to bottom: Member/Admin → React/Nginx → opt-in YARP API Gateway
+→ shared route spine → each of six independent target REST service owners
+→ its own SQL database. Database/outbox events attach to the right event
+spine; existing Redis Streams is the primary business transport and the
+optional RabbitMQ durable audit mirror sits beside Redis.
 
-| Loại kết nối giữa các bảng | Số lượng | Ký pháp |
-| --- | ---: | --- |
-| FK SQL thật | **9** | Nét liền, đầu Crow's Foot; bội số 1:1 hoặc 1:N |
-| APP / khóa nghiệp vụ | **16** | Nét đứt, không phải FK |
-| EVENT / Outbox–Inbox | **6** | Nét chấm, không phải FK |
-| **Tổng quan hệ bảng–bảng** | **31** | Kết nối trực tiếp giữa các bảng thực |
+Ports: Identity REST 8081; Catalog REST 8082; Planning REST 8083;
+Tracking REST 8084; Recommendation gRPC 8085 and REST 8087; Worker Ops
+REST 8086; SQL Server 1433; Redis TCP 6379; RabbitMQ AMQP 5672 (internal).
+Public Web and Gateway ports depend on deployment/overlay.
 
-**Tổng C2: 73 đường nối native**: 31 mũi tên luồng API, 10 đường repository → bảng tham chiếu, 1 đường nối khu vực API với bảng `Users`, 31 đường giữa các bảng. Các đường APP dựa trên cùng khóa/ngữ cảnh người dùng, **không có nghĩa rằng SQL Server đang kiểm soát tham chiếu**. Sơ đồ ưu tiên tên bảng và các trường PK/FK quan trọng; định nghĩa đầy đủ của cột nằm trong ba DbContext.
+## C2
 
-### Mười bảng đích được hiển thị theo các tuyến API
+All service internal paths are drawn from top to bottom:
+HTTP Endpoint/Controller → Application/Domain rules → DbContext/
+Repository with its own SQL catalog and Outbox/event interfaces.
+In the diagram, six bounded-context panels are independent siblings,
+not a single chain of cross-domain SQL calls.
+RabbitMQ is an actual opt-in event audit integration, described in
+[the implementation guide](../architecture/RABBITMQ-INTEGRATION-20261112.md).
 
-| Controller | Bảng tham chiếu trên C2 |
-| --- | --- |
-| `AuthController` | `Users` |
-| `ProfileController` | `UserProfiles` |
-| `ReminderNotificationsController` | `ReminderPreferences` |
-| `MealPlansController` | `MealPlans` |
-| `MealLogsController` | `MealLogs` |
-| `EatingWindowController` | `EatingWindowSnapshots` |
-| `RecommendationsController` | `UserFoodPreferences` |
-| `FmdController` | `FmdSafetyAssessments` |
-| `TrackingController` | `ActivityLogs` |
-| `RecommendationController` (activity) | `ActivityGoals` |
+## Database Diagram
 
-Các bảng tham chiếu liệt kê **điểm vào tiêu biểu**, không khẳng định mỗi service chỉ sử dụng một bảng. Các repository/service thực tế có thể sử dụng nhiều bảng.
+Six physically distinct target logical databases:
+Identity 7, Catalog 10 (9 DbSets + RuleSetVersionItems), Planning 13,
+Tracking 10, Recommendation 4 and Worker 6: **50 physical tables** in all,
+including the source-confirmed implicit EF Core many-to-many Catalog join.
+The Worker count includes two DbContexts sharing one Worker-owned SQL catalog.
+Every table connects to a vertical ownership spine, but those short
+connectors are **not** physical foreign keys; real within-owner FK
+relationships are written at the foot of each panel.
+No cross-service database FK is invented. The displayed 20 local FK
+relationships are reconciled against live SQL Server via
+`scripts/Test-Physical-ERD-Sql.mjs`, not inferred from diagram annotations.
 
-## C1 — hệ thống và cổng xác minh từ Docker Compose
+## Business Flow
 
-| Giao tiếp | Giao thức / cổng |
-| --- | --- |
-| Người dùng / Admin → Web | Host 5173 → Nginx HTTP 80 |
-| Web → REST API | Proxy `/api/` → `http://api:8080` |
-| REST API → Recommendation gRPC | HTTP/2, cổng 8081 |
-| REST API ↔ Redis ↔ Worker | Redis Streams, TCP 6379 |
-| REST API → `LongevityDietDb`, `LongevityTrackingDb` | SQL Server, TCP 1433 |
-| Worker → `LongevityWorkerDb` | SQL Server, TCP 1433 |
-| SQL Server từ máy host | 14330 → container 1433 |
+Member registers with Identity, completes safety/allergen profile, reads
+Catalog's approved RuleVersion, generates a Planning meal plan, records
+Tracking/LDAS events, then the transaction/outbox delivers via Redis
+to Worker for scheduled reminders/progress. Admin authentication, approval
+and publication of rules connects into Catalog. FMD requests branch from
+Planning through a separate safety gate with two logically distinct
+YES/NO outcomes; YES rejoins Tracking, while NO stops FMD only.
 
-**Recommendation gRPC** là dịch vụ stateless, chưa có database riêng trong Compose. **Worker** không mở cổng HTTP. Không được vẽ thêm FK/database không tồn tại để lấp khoảng trống trên sơ đồ.
+With the RabbitMQ overlay enabled, metadata from the same owner events is
+mirrored into a durable RabbitMQ queue and stored as Worker-owned,
+deduplicated audit receipts. **RabbitMQ audit receipts are not the
+business reminder trigger**; Redis remains the current primary Worker path.
 
-## Chứng cứ và kiểm thử
+## Scope honesty / limitations
 
-Mỗi lần xuất Draw.io và PDF kiểm tra đủ 10 controller, 32 bảng, 9 FK, 16 APP, 6 EVENT; kiểm tra số lượng mũi tên, đầu–cuối native, sự liên thông toàn bộ mạng, sắc độ đen–trắng, một trang PDF và giao cắt/cắt chữ trên SVG render.
+ADR-005 independent service/databases and target YARP Gateway are opt-in
+migration slices. The current Web still uses legacy API/SQL for portions
+of the application. Code, diagrams, automated tests and broker QA do not
+establish full historic data migration, clinical approval, public TLS/443,
+or production cutover readiness.
 
-Dữ liệu nguồn: `docker-compose.yml`, `src/LongevityDiet.API/Program.cs`, `src/LongevityDiet.API/Controllers`, `src/LongevityDiet.Repositories/LongevityDietDbContext.cs`, `src/LongevityDiet.Tracking/TrackingDbContext.cs` và `src/LongevityDiet.Worker/Reminders/ReminderWorkerDbContext.cs`. Các bản kê kiểm tra được: `scripts/c2-extended-manifest.json`, `scripts/unified-erd-manifest.json`.
+## Commands
 
-Tài liệu chuẩn: [C4 Component](https://c4model.com/diagrams/component), [C4 Code Diagram](https://c4model.com/diagrams/code), [draw.io ERD](https://www.drawio.com/docs/diagram-types/entity-relationship-tables/) và [Crow's Foot](https://www.drawio.com/docs/tutorials/crows-foot-notation/).
-
-**Giới hạn:** Các bảng dinh dưỡng mục tiêu 52 bảng là thiết kế tương lai, chưa triển khai trong 3 database hiện tại. Việc kiểm tra sơ đồ và build không thay cho chạy kiểm thử SQL Server Docker E2E.
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Export-OverallDiagrams.ps1
+node scripts/Validate-OfficialArchitecture.js
+node scripts/Test-RabbitMq-Domain-Events.mjs
+```

@@ -36,6 +36,11 @@ $requiredProjects = @(
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj',
     # Second opt-in ADR-005 slice: process+database isolated Catalog.
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj',
+    # Independent ADR-005 Identity & Profile owner on its own SQL database.
+    'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj',
+    'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj',
+    'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj',
+    'src\LongevityDiet.Worker.Ops\LongevityDiet.Worker.Ops.csproj',
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj',
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj',
     'src\LongevityDiet.Web\LongevityDiet.Web.esproj',
@@ -108,10 +113,14 @@ foreach ($project in $sourceProjectFiles) {
 $dependencyRules = @{
     'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj' = @()
     'src\LongevityDiet.Catalog\LongevityDiet.Catalog.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
+    'src\LongevityDiet.Identity\LongevityDiet.Identity.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
+    'src\LongevityDiet.Planning\LongevityDiet.Planning.csproj' = @('LongevityDiet.Domain')
+    'src\LongevityDiet.Tracking.Api\LongevityDiet.Tracking.Api.csproj' = @('LongevityDiet.Tracking')
+    'src\LongevityDiet.Worker.Ops\LongevityDiet.Worker.Ops.csproj' = @()
     'src\LongevityDiet.Domain\LongevityDiet.Domain.csproj' = @()
     'src\LongevityDiet.Repositories\LongevityDiet.Repositories.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.Services\LongevityDiet.Services.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories')
-    'src\LongevityDiet.Tracking\LongevityDiet.Tracking.csproj' = @()
+    'src\LongevityDiet.Tracking\LongevityDiet.Tracking.csproj' = @('LongevityDiet.Domain')
     'src\LongevityDiet.API\LongevityDiet.API.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services', 'LongevityDiet.Tracking')
     'src\LongevityDiet.Worker\LongevityDiet.Worker.csproj' = @('LongevityDiet.Domain', 'LongevityDiet.Repositories', 'LongevityDiet.Services')
     'src\LongevityDiet.Recommendation.Grpc\LongevityDiet.Recommendation.Grpc.csproj' = @('LongevityDiet.Domain')
@@ -153,6 +162,76 @@ $catalogCompose = Read-ProjectText 'docker-compose.catalog.yml'
 Assert-ProjectRule ($catalogCompose -match 'LongevityCatalogDb') 'Catalog Compose overlay must own LongevityCatalogDb.'
 Assert-ProjectRule ($catalogCompose -match '127\.0\.0\.1:') 'Optional catalog must bind only to localhost QA.'
 
+$identityDb = Read-ProjectText 'src\LongevityDiet.Identity\IdentityDbContext.cs'
+Assert-ProjectRule ($identityDb -match 'DbSet<User>') 'Identity owner must include a User DbSet.'
+Assert-ProjectRule ($identityDb -match 'DbSet<IdentityOutboxEvent>') 'Identity owner must include an Outbox.'
+Assert-ProjectRule ($identityDb -notmatch 'DbSet<MealPlan>|DbSet<Recipe>|DbSet<WorkerJob>|DbSet<ActivityLog>') 'Identity owner may not include foreign-domain tables.'
+$identityOverlay = Read-ProjectText 'docker-compose.identity.yml'
+Assert-ProjectRule ($identityOverlay -match 'LongevityIdentityDb') 'Identity Compose must own LongevityIdentityDb.'
+Assert-ProjectRule ($identityOverlay -match '127\.0\.0\.1:') 'Identity QA must bind only to localhost.'
+Assert-ProjectRule ($identityOverlay -notmatch 'ConnectionStrings__Default') 'Identity service must never connect to legacy default DB.'
+
+$planningDb = Read-ProjectText 'src\LongevityDiet.Planning\PlanningDbContext.cs'
+Assert-ProjectRule ($planningDb -match 'DbSet<MealPlan>') 'Planning owner must include MealPlans.'
+Assert-ProjectRule ($planningDb -match 'DbSet<ChallengeTemplate>') 'Planning owner must include ChallengeTemplates.'
+Assert-ProjectRule ($planningDb -match 'DbSet<PlanningOutboxEvent>') 'Planning owner must include an Outbox.'
+Assert-ProjectRule ($planningDb -notmatch 'DbSet<User>|DbSet<Food>|DbSet<MealLog>|DbSet<WorkerJob>|DbSet<WeeklyReport>') 'PlanningDbContext must not own foreign-domain tables.'
+$planningOverlay = Read-ProjectText 'docker-compose.planning.yml'
+Assert-ProjectRule ($planningOverlay -match 'LongevityPlanningDb') 'Planning Compose must own LongevityPlanningDb.'
+Assert-ProjectRule ($planningOverlay -match '127\.0\.0\.1:') 'Planning QA must bind only to localhost.'
+Assert-ProjectRule ($planningOverlay -notmatch 'ConnectionStrings__Default') 'Planning service must never connect to legacy default DB.'
+$planningProgram = Read-ProjectText 'src\LongevityDiet.Planning\Program.cs'
+Assert-ProjectRule ($planningProgram -match 'LongevityPlanningDb') 'Planning runtime must verify its SQL database name.'
+Assert-ProjectRule ($planningProgram -match 'AddJwtBearer') 'Planning routes must require JWT authentication.'
+$trackingDb = Read-ProjectText 'src\LongevityDiet.Tracking\TrackingDbContext.cs'
+Assert-ProjectRule ($trackingDb -match 'DbSet<ActivityLog>') 'Tracking must own ActivityLogs.'
+Assert-ProjectRule ($trackingDb -match 'DbSet<MealLog>') 'Tracking must own MealLogs.'
+Assert-ProjectRule ($trackingDb -match 'DbSet<EatingWindowSnapshot>') 'Tracking must own EatingWindowSnapshots.'
+Assert-ProjectRule ($trackingDb -match 'DbSet<TrackingOutboxEvent>') 'Tracking must own its transactional Outbox.'
+Assert-ProjectRule ($trackingDb -notmatch 'DbSet<User>|DbSet<Food>|DbSet<MealPlan>|DbSet<WorkerJob>|DbSet<WeeklyReport>') 'Tracking must not own Identity/Catalog/Planning/Worker domain tables.'
+$trackingOverlay = Read-ProjectText 'docker-compose.tracking-api.yml'
+Assert-ProjectRule ($trackingOverlay -match 'LongevityTrackingDb') 'Tracking Compose must own LongevityTrackingDb.'
+Assert-ProjectRule ($trackingOverlay -match '127\.0\.0\.1:') 'Tracking QA bind must be loopback only.'
+Assert-ProjectRule ($trackingOverlay -notmatch 'ConnectionStrings__Default') 'Tracking may not use the legacy default DB.'
+$trackingProgram = Read-ProjectText 'src\LongevityDiet.Tracking.Api\Program.cs'
+Assert-ProjectRule ($trackingProgram -match 'LongevityTrackingDb') 'Tracking must fail-closed on SQL DB name.'
+Assert-ProjectRule ($trackingProgram -match 'AddJwtBearer') 'Tracking must require JWT authentication.'
+$trackingIdentity = Read-ProjectText 'src\LongevityDiet.Tracking.Api\IdentityHttpTrackingUserContext.cs'
+Assert-ProjectRule ($trackingIdentity -match '/api/v1/profile') 'Tracking must verify a user via the Identity service API, not shared SQL.'
+
+$recommendationDb = Read-ProjectText 'src\LongevityDiet.Recommendation.Grpc\Ownership\RecommendationDbContext.cs'
+Assert-ProjectRule ($recommendationDb -match 'DbSet<RecommendationFeedback>') 'Recommendation owner must persist feedback.'
+Assert-ProjectRule ($recommendationDb -match 'DbSet<UserFoodPreference>') 'Recommendation owner must persist food preferences.'
+Assert-ProjectRule ($recommendationDb -match 'DbSet<RecommendationOutbox>') 'Recommendation owner must have a local Outbox.'
+Assert-ProjectRule ($recommendationDb -notmatch 'DbSet<User>|DbSet<MealPlan>|DbSet<MealLog>|DbSet<Food>|DbSet<WorkerJob>') 'Recommendation owner must not own foreign-domain tables.'
+$recommendationOverlay = Read-ProjectText 'docker-compose.recommendation-owner.yml'
+Assert-ProjectRule ($recommendationOverlay -match 'LongevityRecommendationDb') 'Recommendation Compose must use its owned SQL database.'
+Assert-ProjectRule ($recommendationOverlay -match '127\.0\.0\.1:') 'Recommendation QA ports must bind to loopback only.'
+Assert-ProjectRule ($recommendationOverlay -notmatch 'ConnectionStrings__Default') 'Recommendation cannot read the legacy default SQL database.'
+$recommendationProgram = Read-ProjectText 'src\LongevityDiet.Recommendation.Grpc\Program.cs'
+Assert-ProjectRule ($recommendationProgram -match 'LongevityRecommendationDb') 'Recommendation must fail closed on its SQL catalog name.'
+Assert-ProjectRule ($recommendationProgram -match 'AddJwtBearer') 'Recommendation state REST endpoints need JWT.'
+
+$workerOpsDb = Read-ProjectText 'src\LongevityDiet.Worker.Ops\WorkerOpsDbContext.cs'
+Assert-ProjectRule ($workerOpsDb -match 'DbSet<WorkerReceivedEvent>') 'Worker Ops must persist event receipts in WorkerDb.'
+Assert-ProjectRule ($workerOpsDb -match 'DbSet<WorkerRejectedEvent>') 'Worker Ops must persist dead-letter metadata.'
+Assert-ProjectRule ($workerOpsDb -notmatch 'DbSet<User>|DbSet<MealLog>|DbSet<MealPlan>|DbSet<Food>|DbSet<RecommendationFeedback>') 'Worker Ops must not own domain tables.'
+$workerOpsOverlay = Read-ProjectText 'docker-compose.worker-ops.yml'
+Assert-ProjectRule ($workerOpsOverlay -match 'LongevityWorkerDb') 'Worker Ops must use LongevityWorkerDb.'
+Assert-ProjectRule ($workerOpsOverlay -match '127\.0\.0\.1:') 'Worker Ops QA bind must be loopback only.'
+Assert-ProjectRule ($workerOpsOverlay -notmatch 'ConnectionStrings__Default') 'Worker Ops must not connect to the legacy main SQL database.'
+$workerOpsProgram = Read-ProjectText 'src\LongevityDiet.Worker.Ops\Program.cs'
+Assert-ProjectRule ($workerOpsProgram -match 'LongevityWorkerDb') 'Worker Ops must validate exact SQL catalog name.'
+Assert-ProjectRule ($workerOpsProgram -match 'RequireRole\("Admin"\)') 'Worker operations API must require Admin JWT.'
+$ownedWorkerProgram = Read-ProjectText 'src\LongevityDiet.Worker\Program.cs'
+Assert-ProjectRule ($ownedWorkerProgram -match 'Worker:OwnedOnly') 'Worker must support explicit owner-only mode.'
+Assert-ProjectRule ($ownedWorkerProgram -match 'if \(!ownedOnly\)') 'Legacy shared SQL registration must be absent in target-only mode.'
+$ownedWorkerOverlay = Read-ProjectText 'docker-compose.worker-owned.yml'
+Assert-ProjectRule ($ownedWorkerOverlay -match 'LongevityWorkerDb') 'Target reminder Worker must use its own DB.'
+Assert-ProjectRule ($ownedWorkerOverlay -match 'Worker__OwnedOnly') 'Target reminder Worker must opt into owner-only mode.'
+Assert-ProjectRule ($ownedWorkerOverlay -notmatch '(?m)^\s+ConnectionStrings__Default:') 'Target reminder Worker must not receive a legacy SQL connection.'
+
+
 $gatewayProject = Read-ProjectText 'src\LongevityDiet.Gateway\LongevityDiet.Gateway.csproj'
 Assert-ProjectRule ($gatewayProject -match 'Yarp\.ReverseProxy') 'Optional gateway must use the YARP package.'
 $gatewayConfig = Read-ProjectText 'src\LongevityDiet.Gateway\appsettings.json'
@@ -162,6 +241,48 @@ Assert-ProjectRule ($gatewayConfig -notmatch '"Path"\s*:\s*"\{\*\*catch-all\}"')
 $gatewayOverlay = Read-ProjectText 'docker-compose.gateway.yml'
 Assert-ProjectRule ($gatewayOverlay -match 'gateway:') 'Gateway Compose overlay must contain a separate gateway container.'
 Assert-ProjectRule ($gatewayOverlay -match 'API_UPSTREAM:\s*gateway:8080') 'Gateway Compose overlay must route Nginx through YARP.'
+$targetGatewayJson = Read-ProjectText 'src\LongevityDiet.Gateway\appsettings.Target.json'
+$targetGateway = $targetGatewayJson | ConvertFrom-Json
+Assert-ProjectRule ($targetGateway.Gateway.TargetRouting -eq $true) 'Target YARP config must explicitly opt in.'
+Assert-ProjectRule ($targetGateway.ReverseProxy.Routes.'current-api'.Order -ge 100) 'Target YARP legacy fallback must have low route priority.'
+foreach ($cluster in @('identity','catalog','planning','tracking','recommendation-rest','worker-ops')) {
+    Assert-ProjectRule ($null -ne $targetGateway.ReverseProxy.Clusters.$cluster) "Target Gateway missing own-service cluster $cluster"
+}
+foreach ($route in @('identity-auth-root','catalog-foods-root','planning-meal-plans-root',
+                   'tracking-meal-logs-root','recommendation-feedback-root','worker-admin-events-root')) {
+    Assert-ProjectRule ($null -ne $targetGateway.ReverseProxy.Routes.$route) "Target Gateway missing owner route $route"
+}
+$targetGatewayOverlay = Read-ProjectText 'docker-compose.gateway-target.yml'
+Assert-ProjectRule ($targetGatewayOverlay -match 'gateway-target:') 'Gateway target must be a separate service.'
+Assert-ProjectRule ($targetGatewayOverlay -match '127\.0\.0\.1:') 'Gateway target QA host bind must be localhost only.'
+Assert-ProjectRule ($targetGatewayOverlay -notmatch 'API_UPSTREAM:') 'Gateway target must not switch the current Web API upstream.'
+$targetGatewayProgram = Read-ProjectText 'src\LongevityDiet.Gateway\Program.cs'
+Assert-ProjectRule ($targetGatewayProgram -match 'Untrusted or missing target Gateway cluster') 'Gateway target cluster addresses must fail closed.'
+Assert-ProjectRule ($targetGatewayProgram -match '/gateway/target/ready') 'Gateway target needs independent readiness.'
+$cutoverAudit = Read-ProjectText 'scripts\Audit-ADR005-Cutover-Readiness.mjs'
+Assert-ProjectRule ($cutoverAudit -match 'isolated_qa_read_only') 'Cutover audit must identify its isolated QA-only scope.'
+Assert-ProjectRule ($cutoverAudit -match 'identity_level_migration_reconciliation_not_performed') 'Cutover cannot treat row-count matches as migration completeness.'
+Assert-ProjectRule ($cutoverAudit -match 'backupsVerified: false') 'Cutover audit must fail closed before verified backups.'
+Assert-ProjectRule ($cutoverAudit -match 'process.exitCode = 2') 'Cutover strict preflight must reject blocked migration.'
+$cutoverQaTest = Read-ProjectText 'scripts\Test-ADR005-Cutover-Readiness.mjs'
+Assert-ProjectRule ($cutoverQaTest -match 'CUTOVER_STRICT_FAILS_CLOSED') 'CI must verify the cutover guard rejects unsafe releases.'
+
+$rabbitCode = Read-ProjectText 'src\LongevityDiet.Worker.Ops\RabbitMqDomainAudit.cs'
+$rabbitProject = Read-ProjectText 'src\LongevityDiet.Worker.Ops\LongevityDiet.Worker.Ops.csproj'
+$rabbitCompose = Read-ProjectText 'docker-compose.rabbitmq.yml'
+$rabbitTest = Read-ProjectText 'scripts\Test-RabbitMq-Domain-Events.mjs'
+$workerOpsProgram = Read-ProjectText 'src\LongevityDiet.Worker.Ops\Program.cs'
+Assert-ProjectRule ($rabbitProject -match 'RabbitMQ.Client') 'RabbitMQ.Client library must be referenced by Worker Ops.'
+Assert-ProjectRule ($rabbitCode -match 'publisherConfirmationsEnabled: true') 'RabbitMQ producer must use broker confirms.'
+Assert-ProjectRule ($rabbitCode -match 'RabbitMqDomainAudit.DeadLetterQueue') 'RabbitMQ audit consumer needs durable DLQ handling.'
+Assert-ProjectRule ($rabbitCode -match 'BasicAckAsync') 'RabbitMQ consumer needs manual ACK after SQL persistence.'
+Assert-ProjectRule ($rabbitCode -match 'RabbitMqRedisEventMirror') 'RabbitMQ must mirror real owned domain events, not mock queue messages.'
+Assert-ProjectRule ($workerOpsProgram -match 'RabbitMq:Enabled') 'RabbitMQ must remain opt-in without changing default Redis worker.'
+Assert-ProjectRule ($rabbitCompose -match 'rabbitmq:4.1-alpine') 'RabbitMQ requires a pinned QA container image.'
+Assert-ProjectRule ($rabbitCompose -notmatch '(?m)^\s+ports:') 'Do not expose QA RabbitMQ AMQP/management ports publicly.'
+Assert-ProjectRule ($rabbitTest -match 'RABBITMQ_REAL_E2E=PASS') 'CI must assert real Redis to RabbitMQ to SQL event delivery.'
+Assert-ProjectRule ($rabbitTest -match 'RABBIT_DUPLICATE_REDELIVERY_DEDUPED') 'RabbitMQ must be tested for replay idempotency.'
+
 $webDocker = Read-ProjectText 'src\LongevityDiet.Web\Dockerfile'
 Assert-ProjectRule ($webDocker -match 'API_UPSTREAM=api:8080') 'Default Nginx route must preserve the direct API path.'
 Assert-ProjectRule ($webDocker -match 'default\.conf\.template') 'Nginx must support the opt-in upstream template.'

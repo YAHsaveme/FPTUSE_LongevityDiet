@@ -1,0 +1,19 @@
+# Opt-in actual reminder dispatcher with only WorkerDb and Redis.
+# No ConnectionStrings__Default in this process. The legacy worker remains
+# the default Compose service for backwards-compatible QA.
+services:
+  worker-owned:
+    build:
+      context: .
+      dockerfile: src/LongevityDiet.Worker/Dockerfile
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      Worker__OwnedOnly: "true"
+      ConnectionStrings__Worker: Server=sqlserver,1433;Database=LongevityWorkerDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True
+      Redis__ConnectionString: redis:6379
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [ldc-network]

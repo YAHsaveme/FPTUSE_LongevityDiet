@@ -30,20 +30,30 @@ System architecture/design **20%**; REST API **20%**; background job **10%**;
 message broker **15%**; gRPC **15%**; Docker/cloud **10%**;
 documentation and presentation **10%**.
 
-## Four canonical one-page diagrams
+## Five official overall architecture and business-flow diagrams
 
-- [C0 Context (Draw.io)](one-page/C0.drawio)
-- [C1 Containers (Draw.io)](one-page/C1.drawio)
-- [C2 REST API Components (Draw.io)](one-page/C2.drawio)
-- [Database Diagram (Draw.io)](one-page/Database%20Diagram.drawio)
+- [C0 — System Context](one-page/C0.drawio)
+- [C1 — Container Architecture](one-page/C1.drawio)
+- [C2 — Component Architecture](one-page/C2.drawio)
+- [Database Diagram — Overall](one-page/Database%20Diagram.drawio)
+- [Business Flow — Overall](one-page/Business%20Flow.drawio)
 
-[One-page PDFs, editing/QA instructions](one-page/README.md).
+[Single-page PDFs and diagram validation guide](one-page/README.md).
 
-The **canonical current** database diagram covers **56 actual EF migration-mapped tables** across three catalogs, with **23 SQL foreign keys** and **32 visible application associations** (50 source-backed associations are documented in `one-page/full-schema-manifest.json`). C2 documents all **22 current API controllers**. C0/C1/C2/ERD have native Draw.io and one-page PDF versions, with 0 connector crossings and 0 label cuts in SVG geometry QA. The original 32-table baseline drawings are archived in `legacy-diagrams/`. Diagram correctness does **not** replace a production Docker/SQL/Redis/gRPC/Worker smoke test, nor a dietitian review of recipe data.
-
+The official handover uses one editable Draw.io and one one-page PDF per diagram.
+C1/C2 show the ADR-005 target (six domain-owned SQL catalogs); the current legacy
+API and data migration remain transitional. The database view covers **50 physical tables in six target databases**:
+49 explicit EF Core DbSet tables plus the implicit Catalog many-to-many
+`RuleSetVersionItems` table. The diagram annotates **20 source-confirmed,
+within-owner SQL foreign keys**; cross-service IDs are not SQL FKs.
+Redis Streams is implemented and remains the primary business transport.
+RabbitMQ/AMQP is an **optional, QA-tested, metadata-only event-audit mirror**
+with a publisher and consumer in Worker Ops; it is not a substitute for the
+course-required Redis producer/consumer demonstration. The ADR-005 target
+must not be presented as a completed production migration.
 ## Presentation notes — seven official demo topics
 
-1. System architecture: C0/C1/C2/ERD and the explicit **Current Runtime versus ADR-005 Target Architecture** distinction.
+1. System architecture: all five official C0/C1/C2/ERD/Business Flow views; explicitly distinguish **Current Runtime**, opt-in **ADR-005 Target QA**, and planned public **HTTPS :443** (no production cutover).
 2. REST: JWT register/login, Food/Recipe queries, Challenge/Planner/Wellness APIs and ProblemDetails responses.
 3. Background job: scheduled reminder and persisted notification; generated weekly report.
 4. Message broker: Redis Streams XADD → XREADGROUP → XACK with verified Worker state/result; idempotent delivery.

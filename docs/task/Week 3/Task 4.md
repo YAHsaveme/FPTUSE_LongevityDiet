@@ -3,7 +3,7 @@
 **Owner:** Thành viên 4
 **Reviewer:** Thành viên 2
 **Branch:** `feature/w3-t4-rule-governance-audit`
-**Status:** In Progress (real SQL two-Admin rule lifecycle, audit, immutable publish verified; independent Catalog owner/reviewer pending)
+**Status:** In Progress (real SQL two-Admin rule lifecycle/audit/immutable publish verified in Current Runtime and now separately in Catalog owner DB with 59-case QA; missing cross-domain impact/event handoff, frontend cutover, reviewer approval)
 
 ## Architecture alignment (ADR-005)
 

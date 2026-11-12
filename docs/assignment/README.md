@@ -1,9 +1,25 @@
-# LongevityDiet — Overall Architecture (C0, C1, C2, Database Diagram)
+# LongevityDiet — official architecture submission
 
-The whole implemented system is represented by exactly **four editable overall drawings**: [C0](one-page/C0.drawio), [C1](one-page/C1.drawio), [C2](one-page/C2.drawio), and [Database Diagram](one-page/Database%20Diagram.drawio). Each has a one-page PDF beside the Draw.io source.
+The group has exactly five official system-wide, one-page views:
 
-These four views cover all real REST modules and dependencies, Docker Compose ports, three real SQL databases, 32 EF Core tables and nine genuine SQL foreign keys. See the [diagram index](one-page/README.md) for sources, PDFs and verification.
+- [C0 Context](one-page/C0.drawio)
+- [C1 Container Architecture](one-page/C1.drawio)
+- [C2 Component Architecture](one-page/C2.drawio)
+- [Database Diagram Overall](one-page/Database%20Diagram.drawio)
+- [Business Flow Overall](one-page/Business%20Flow.drawio)
 
-The detailed [data model](03-DATA-MODEL.md), [runtime test evidence](04-RUNTIME-CONNECTIVITY.md) and [assignment requirements](00-ASSIGNMENT-DOCUMENT.md) are supplementary text, not extra diagrams.
+Every diagram is editable in Draw.io, has one single-page PDF, uses
+top-to-bottom flow, native connected arrows and clean labels positioned
+apart from arrow strokes. No duplicate FULL/old drawing is present.
+See the [official diagram index](one-page/README.md) and
+[system architecture explanation](02-SYSTEM-ARCHITECTURE-C4.md).
 
-The [52-table longitudinal nutrition target](05-LONGITUDINAL-NUTRITION-TARGET.md) is future research and must not be mistaken for code already deployed.
+C1/C2 model six ADR-005 service owners and six SQL catalogs. The overall
+ERD represents 50 source-confirmed physical target owner tables, grouped by
+catalog ownership (not invented SQL foreign keys).
+
+Redis Streams remains the primary business event transport. RabbitMQ
+is implemented and QA-tested as an **optional metadata-only event audit
+mirror** with persistent durable queue and SQL-backed receipt dedupe.
+See the [RabbitMQ guide](../architecture/RABBITMQ-INTEGRATION-20261112.md).
+The target architecture is not yet an approved production migration.

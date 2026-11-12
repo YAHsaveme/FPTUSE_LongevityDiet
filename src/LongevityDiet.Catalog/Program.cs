@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using LongevityDiet.Catalog;
+using LongevityDiet.Domain.Catalog;
 using LongevityDiet.Domain.Catalog.Entities;
 using LongevityDiet.Repositories.Catalog.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -151,7 +152,8 @@ api.MapGet("/recipes", async (CatalogDbContext db, int page = 1, int pageSize = 
 });
 
 api.MapGet("/diet-rules", async (CatalogDbContext db, CancellationToken ct) =>
-    Results.Ok(await db.DietRules.AsNoTracking().Where(x => x.IsActive)
+    Results.Ok(await db.DietRules.AsNoTracking().Where(x => x.IsActive &&
+        x.Versions.Any(v => v.State == RuleVersionState.Published))
         .OrderBy(x => x.RuleKey)
         .Select(x => new { x.Id, x.RuleKey, x.Title, x.Description,
             x.Category, x.IsMedicalSensitive })
@@ -181,15 +183,48 @@ admin.MapPost("/foods", async (CatalogDbContext db, SaveFood input, Cancellation
     await db.SaveChangesAsync(ct);
     return Results.Created($"/api/v1/foods/{entity.Id}", new { entity.Id, entity.Name });
 });
+admin.MapPut("/foods/{id:guid}", async (Guid id, CatalogDbContext db, SaveFood input, CancellationToken ct) =>
+{
+    var name = input.Name?.Trim();
+    var category = input.Category?.Trim();
+    if (string.IsNullOrWhiteSpace(name) || name.Length > 180 ||
+        string.IsNullOrWhiteSpace(category) || category.Length > 80 ||
+        input.Calories is < 0 or > 100000 || input.ProteinG < 0 ||
+        input.CarbohydrateG < 0 || input.FatG < 0)
+        return Results.BadRequest(new { error = "invalid_food" });
+
+    var food = await db.Foods.FirstOrDefaultAsync(x => x.Id == id && x.IsActive, ct);
+    if (food is null) return Results.NotFound();
+
+    food.Name = name;
+    food.NormalizedName = name.ToUpperInvariant();
+    food.Category = category;
+    food.Calories = input.Calories;
+    food.ProteinG = input.ProteinG;
+    food.CarbohydrateG = input.CarbohydrateG;
+    food.FatG = input.FatG;
+    food.IsPlantBased = input.IsPlantBased;
+    food.UpdatedAt = DateTimeOffset.UtcNow;
+    await db.SaveChangesAsync(ct);
+    return Results.Ok(new { food.Id, food.Name, food.Category, food.Calories,
+        food.ProteinG, food.CarbohydrateG, food.FatG, food.IsPlantBased });
+});
+
 admin.MapDelete("/foods/{id:guid}", async (Guid id, CatalogDbContext db, CancellationToken ct) =>
 {
     var food = await db.Foods.FirstOrDefaultAsync(x => x.Id == id && x.IsActive, ct);
     if (food is null) return Results.NotFound();
+    // Do not silently invalidate an active recipe that still uses this ingredient.
+    if (await db.RecipeIngredients.AnyAsync(x => x.FoodId == id && x.Recipe.IsActive, ct))
+        return Results.Conflict(new { error = "food_used_by_active_recipe" });
     food.IsActive = false;
     food.UpdatedAt = DateTimeOffset.UtcNow;
     await db.SaveChangesAsync(ct);
     return Results.NoContent();
 });
+
+api.MapRecipeOwnerEndpoints(admin);
+api.MapRuleOwnerEndpoints(admin);
 
 app.Run();
 

@@ -1,3 +1,5 @@
+> HISTORICAL AUDIT (9 November 2026). The four-diagram/32-table statements below are superseded. Only the five current official diagrams in docs/assignment/one-page/README.md should be submitted.
+
 # PRN232 — Final Assignment Compliance Audit (09/11/2026)
 
 > Source of truth: the original user-provided **PRN232 - Final Assignment.pdf**, 3 pages, sections 2–7.

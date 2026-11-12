@@ -1,0 +1,23 @@
+# Opt-in target Gateway sidecar. Does NOT replace the current gateway or
+# reconfigure Web. localhost-only QA; never publish the sidecar as production.
+services:
+  gateway-target:
+    build:
+      context: .
+      dockerfile: src/LongevityDiet.Gateway/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Target
+      ASPNETCORE_URLS: http://+:8080
+      Gateway__TargetRouting: "true"
+      ReverseProxy__Clusters__current-api__Destinations__api__Address: http://api:8080/
+    ports:
+      - "127.0.0.1:${TARGET_GATEWAY_PORT:-18088}:8080"
+    depends_on:
+      - api
+      - identity
+      - catalog
+      - planning
+      - tracking-api
+      - recommendation-owner
+      - worker-ops
+    networks: [ldc-network]
