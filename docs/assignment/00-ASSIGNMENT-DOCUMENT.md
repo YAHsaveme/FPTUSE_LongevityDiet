@@ -53,7 +53,7 @@ course-required Redis producer/consumer demonstration. The ADR-005 target
 must not be presented as a completed production migration.
 ## Presentation notes — seven official demo topics
 
-1. System architecture: C0/C1/C2/ERD and the explicit **Current Runtime versus ADR-005 Target Architecture** distinction.
+1. System architecture: all five official C0/C1/C2/ERD/Business Flow views; explicitly distinguish **Current Runtime**, opt-in **ADR-005 Target QA**, and planned public **HTTPS :443** (no production cutover).
 2. REST: JWT register/login, Food/Recipe queries, Challenge/Planner/Wellness APIs and ProblemDetails responses.
 3. Background job: scheduled reminder and persisted notification; generated weekly report.
 4. Message broker: Redis Streams XADD → XREADGROUP → XACK with verified Worker state/result; idempotent delivery.

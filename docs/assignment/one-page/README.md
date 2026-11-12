@@ -22,7 +22,10 @@ are human UML stick figures and all drawings are black and white.
 In C1 and C2, the left routing spine distributes API calls to six independently
 owned domain REST APIs; the right event spine brings owner domain events to
 asynchronous processing. **Those six owners are the ADR-005 target**, not
-proof that the legacy Web/database migration has been completed.
+proof that the legacy Web/database migration has been completed. C1 marks
+planned **public HTTPS :443** for browser access separately from **internal
+Web HTTP :80** and **YARP HTTP :8080**; the public TLS ingress/cutover is
+**not** claimed as deployed.
 
 In the Database Diagram, short horizontal links to the central vertical
 spine mean **ownership by a database**, NOT physical FK relations. All **20

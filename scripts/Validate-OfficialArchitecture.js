@@ -89,6 +89,12 @@ for(const name of ['C1','C2','Business Flow']){
 for(const name of ['C0','Database Diagram'])
  check(!/RabbitMQ/i.test(diagrams[name]?.xml||''),
    name+' must not invent RabbitMQ within context or SQL schema');
+for(const name of ['C1','C2','Database Diagram'])
+ check(diagrams[name]?.xml.includes('ADR-005 TARGET QA'),
+  name+' must explicitly identify the opt-in Target QA rather than default runtime');
+check(diagrams.C1?.xml.includes('UI HTTPS :443 (TARGET)') &&
+ diagrams.C1?.xml.includes('REST HTTP / JWT nội bộ'),
+ 'C1 must distinguish planned public HTTPS :443 from actual internal HTTP :80/:8080');
 check((diagrams.C1?.xml.match(/id="db-(identity|catalog|planning|tracking|recommendation|worker)"/g)||[]).length===6,
   'C1 must show all six owned SQL databases');
 check((diagrams.C2?.xml.match(/id="panel-(id|cat|plan|track|rec|work)"/g)||[]).length===6,

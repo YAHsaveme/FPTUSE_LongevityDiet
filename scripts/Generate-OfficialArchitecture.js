@@ -169,14 +169,14 @@ const groups=[
 // of a service and its own SQL catalog; each outbox connects to the event spine.
 {
  const d=new Diagram('C1',3200,4920);
- d.title('C1','CONTAINER ARCHITECTURE','Một hệ thống, sáu service owner, sáu SQL database. Luồng tổng thể từ trên xuống.');
+ d.title('C1','CONTAINER ARCHITECTURE','ADR-005 TARGET QA (chưa production cutover). Public HTTPS :443 dự kiến; Web :80, YARP :8080 nội bộ.');
  d.actor('member','MEMBER',970,380,350,190);
  d.actor('admin','ADMIN',1870,380,350,190);
  d.box('web','WEB APP\nReact / Nginx  HTTP :80',1180,740,840,170,{font:35});
- d.edge('member-web','member','web',{to:[0.25,0],label:'UI',labelX:1120,labelY:640});
- d.edge('admin-web','admin','web',{to:[0.75,0],label:'UI',labelX:2080,labelY:640});
+ d.edge('member-web','member','web',{to:[0.25,0],label:'UI HTTPS :443 (TARGET)',labelX:800,labelY:640,labelWidth:315});
+ d.edge('admin-web','admin','web',{to:[0.75,0],label:'UI HTTPS :443 (TARGET)',labelX:2080,labelY:640,labelWidth:315});
  d.box('gateway','YARP API GATEWAY\n/api/v1 — JWT / HTTP :8080',1180,1030,840,170,{font:34});
- d.edge('web-gateway','web','gateway',{label:'REST HTTPS / JWT',labelX:2060,labelY:945});
+ d.edge('web-gateway','web','gateway',{label:'REST HTTP / JWT nội bộ',labelX:2060,labelY:945,labelWidth:400});
  d.box('router','SERVICE ROUTING\nTách miền và kiểm tra quyền',1190,1315,820,145,{font:31});
  d.edge('gateway-router','gateway','router',{label:'Route theo API',labelX:2070,labelY:1212});
  bus(d,'route-spine',390,1600,1910);
@@ -230,7 +230,7 @@ const groups=[
 // to an event rail. No functional component stands alone.
 {
  const d=new Diagram('C2',3100,6000);
- d.title('C2','COMPONENT ARCHITECTURE','Endpoint → Domain Service → Repository / SQL Outbox; sáu miền song song, không truy vấn chéo database.');
+ d.title('C2','COMPONENT ARCHITECTURE','ADR-005 TARGET QA: Endpoint → Service → Repository / SQL Outbox; sáu miền tách biệt. Public TLS :443 chưa cutover.');
  d.actor('member','MEMBER',1000,370,310,165);
  d.actor('admin','ADMIN',1800,370,310,165);
  d.box('web','REACT SPA  /  NGINX',1130,680,840,125,{font:33});
@@ -291,7 +291,7 @@ const groups=[
 {
  const d=new Diagram('Database Diagram',3150,4730);
  d.title('ERD','DATABASE DIAGRAM — 6 SQL DATABASES',
-  '50 bảng vật lý trong 6 SQL database; đường nối tới spine là quan hệ sở hữu, không phải khóa ngoại.');
+  'ADR-005 TARGET QA: 50 bảng vật lý trong 6 SQL database; đường tới spine là quan hệ sở hữu, không phải FK.');
  for(let i=0;i<groups.length;i++){
   const g=groups[i],col=i%2,row=Math.floor(i/2);
   const x=240+col*1400,y=410+row*1350,w=1270,h=1250;
