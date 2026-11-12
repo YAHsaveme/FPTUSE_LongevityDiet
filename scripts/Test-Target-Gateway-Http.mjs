@@ -86,6 +86,26 @@ const profile = await request('/api/v1/profile', { token: alice.token });
 check('GATEWAY_TARGET_IDENTITY_PROFILE',
   profile.status === 200 && profile.data?.userId === alice.userId);
 
+// One real ownership flow must remain safe when served through YARP.
+const createdActivity = await request('/api/v1/activities', {
+  token: alice.token, method: 'POST',
+  body: { kind: 1, startedAt: new Date().toISOString(),
+    durationMinutes: 25, note: 'Synthetic six-owner Gateway QA' },
+});
+check('GATEWAY_TARGET_TRACKING_ACTIVITY_CREATED',
+  createdActivity.status === 201 && typeof createdActivity.data?.id === 'string');
+const activityId = createdActivity.data.id;
+const ownerRead = await request('/api/v1/activities/' + activityId, { token: alice.token });
+check('GATEWAY_TARGET_TRACKING_OWNER_READ_BY_ID',
+  ownerRead.status === 200 && ownerRead.data?.id === activityId);
+check('GATEWAY_TARGET_TRACKING_OTHER_USER_IDOR_404',
+  (await request('/api/v1/activities/' + activityId, { token: bob.token })).status === 404);
+check('GATEWAY_TARGET_TRACKING_SOFT_DELETE',
+  (await request('/api/v1/activities/' + activityId,
+    { token: alice.token, method: 'DELETE' })).status === 204);
+check('GATEWAY_TARGET_TRACKING_DELETED_RECORD_INVISIBLE',
+  (await request('/api/v1/activities/' + activityId, { token: alice.token })).status === 404);
+
 const foods = await request('/api/v1/foods', { token: alice.token });
 check('GATEWAY_TARGET_CATALOG_FOODS',
   foods.status === 200 && foods.data !== null);

@@ -36,7 +36,9 @@ second parallel Tracking host or cross-database access.
 `node scripts/Test-Tracking-Writer-Http.mjs` now includes actual SQL/JWT E2E
 checks for owner 200, other-user 404, anonymous 401, unknown ID 404,
 and post-delete 404. Verified on the isolated Docker QA project:
-**63/63 cases PASS**, .NET Release build **0 warnings/errors**, and
+**63/63 cases PASS**; Target YARP Gateway 6-owner E2E **32/32 PASS**
+(including owner GET-by-ID, cross-user 404, soft delete and deleted 404);
+.NET Release build **0 warnings/errors**, and
 **172/172 .NET unit+integration tests** PASS.
 
 The legacy PR #27 should be treated as a superseded transition prototype;
