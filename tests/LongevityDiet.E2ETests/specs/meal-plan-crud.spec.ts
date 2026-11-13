@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 // An isolated QA account exercises the new React editor against the real
 // API, SQL Server and authentication system. Never point this at production.
 test('member can CRUD scheduled meals and archive a plan using the actual Web UI', async ({ page }) => {
+  test.setTimeout(120_000)
   const id = Date.now().toString()
   const email = `planner-crud-${id}@example.test`
   const password = 'Qa!PlannerMenu12345'
@@ -75,6 +76,13 @@ test('member can CRUD scheduled meals and archive a plan using the actual Web UI
   const afterDelete = await page.request.get('/api/v1/meal-plans/current', { headers })
   const reduced = await afterDelete.json() as typeof plan
   expect(reduced.days[0].meals).toHaveLength(3)
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(editor).toBeVisible()
+  const mobileWidth = await page.evaluate(() => ({
+    viewport: window.innerWidth, document: document.documentElement.scrollWidth,
+  }))
+  expect(mobileWidth.document).toBeLessThanOrEqual(mobileWidth.viewport + 1)
 
   await editor.getByRole('button', { name: 'Lưu trữ thực đơn' }).click()
   await editor.getByRole('button', { name: 'Xác nhận lưu trữ' }).click()
