@@ -262,6 +262,36 @@ public sealed class RecommendationService(
                 : enriched.AcceptedCandidates[0];
         }
 
+        // The book-grounded fish-frequency constraint also applies to the
+        // recommendation v2 swap endpoint, not only manual CRUD or generation.
+        if (selectedReplacement.ContainsFish)
+        {
+            var fishLimitReached = Enumerable.Range(0, 7).Any(offset =>
+            {
+                var start = targetDay.PlanDate.AddDays(-offset);
+                var end = start.AddDays(6);
+                return plan.Days
+                    .Where(day => day.PlanDate >= start && day.PlanDate <= end)
+                    .SelectMany(day => day.Meals)
+                    .Count(meal => meal.ContainsFish && meal.Id != targetMeal.Id) >= 3;
+            });
+            if (fishLimitReached)
+            {
+                if (!string.IsNullOrWhiteSpace(command.TargetCandidateCode))
+                    return ServiceResult.Failure<ReplacePlannedMealResultSummary>(
+                        "fish_frequency_limit",
+                        "Theo nguyên tắc ăn cá vừa phải, không thêm quá ba bữa cá trong bảy ngày.");
+                selectedReplacement = enriched.AcceptedCandidates.FirstOrDefault(candidate =>
+                    !candidate.ContainsFish &&
+                    !string.Equals(candidate.CandidateCode, targetMeal.CandidateCode,
+                        StringComparison.OrdinalIgnoreCase));
+                if (selectedReplacement is null)
+                    return ServiceResult.Failure<ReplacePlannedMealResultSummary>(
+                        "fish_frequency_limit",
+                        "Không có món thay thế không chứa cá phù hợp trong danh mục hiện tại.");
+            }
+        }
+
         var previousCode = targetMeal.CandidateCode;
         var previousTitle = targetMeal.Title;
         var previousScore = targetMeal.DeterministicScore;

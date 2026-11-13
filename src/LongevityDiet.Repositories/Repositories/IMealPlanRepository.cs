@@ -10,5 +10,7 @@ public interface IMealPlanRepository
     Task<UserDietaryPreference?> GetDietaryPreferenceAsync(Guid userId, CancellationToken cancellationToken = default);
     Task UpsertDietaryPreferenceAsync(UserDietaryPreference preference, CancellationToken cancellationToken = default);
     Task AddAsync(MealPlan mealPlan, CancellationToken cancellationToken = default);
+    Task AddPlannedMealAsync(PlannedMeal meal, CancellationToken cancellationToken = default);
+    void RemovePlannedMeal(PlannedMeal meal);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

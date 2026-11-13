@@ -190,6 +190,74 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
         Assert.Equal(0, summaryAfterDelete.EatingWindowMinutes);
     }
 
+    [Fact]
+    public async Task MealPlanEditor_AddUpdateDeleteArchiveAndOwnership_RespectSafetyAndManualArchive()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var owner = await CreateOnboardedUserClientAsync("crud-owner");
+        using var other = await CreateOnboardedUserClientAsync("crud-other");
+
+        var generated = await owner.PostAsJsonAsync("/api/v1/meal-plans/generate",
+            new GenerateMealPlanRequest(new DateOnly(2026, 11, 3), Days: 7));
+        Assert.Equal(HttpStatusCode.Created, generated.StatusCode);
+        var plan = (await generated.Content.ReadFromJsonAsync<MealPlanResponse>())!;
+        var day = plan.Days[0];
+        Assert.Equal(3, day.Meals.Count);
+
+        var addUri = $"/api/v1/meal-plans/{plan.Id}/days/{day.Id}/meals";
+        var snack = new SavePlannedMealRequest("SN-LOTUS-SEED-MUNG-04", "Snack", new TimeOnly(16, 15));
+        var add = await owner.PostAsJsonAsync(addUri, snack);
+        Assert.Equal(HttpStatusCode.Created, add.StatusCode);
+        var withSnack = (await add.Content.ReadFromJsonAsync<MealPlanResponse>())!;
+        Assert.Equal(4, withSnack.Days[0].Meals.Count);
+        var snackId = withSnack.Days[0].Meals.Single(x => x.SlotType == "Snack").Id;
+
+        // User cannot access a plan belonging to another user.
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await other.PutAsJsonAsync($"/api/v1/meal-plans/{plan.Id}/meals/{snackId}", snack)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await other.DeleteAsync($"/api/v1/meal-plans/{plan.Id}/meals/{snackId}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await other.DeleteAsync($"/api/v1/meal-plans/{plan.Id}")).StatusCode);
+
+        var edited = await owner.PutAsJsonAsync($"/api/v1/meal-plans/{plan.Id}/meals/{snackId}",
+            snack with { PlannedTime = new TimeOnly(15, 45) });
+        Assert.Equal(HttpStatusCode.OK, edited.StatusCode);
+        var updatedPlan = (await edited.Content.ReadFromJsonAsync<MealPlanResponse>())!;
+        Assert.Equal(new TimeOnly(15, 45),
+            updatedPlan.Days[0].Meals.Single(x => x.Id == snackId).PlannedTime);
+
+        // Refuse extra meals beyond the four-slot limit.
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await owner.PostAsJsonAsync(addUri, snack)).StatusCode);
+        // The member cannot place the last meal right at their bedtime.
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await owner.PutAsJsonAsync($"/api/v1/meal-plans/{plan.Id}/meals/{snackId}",
+                snack with { PlannedTime = new TimeOnly(22, 45) })).StatusCode);
+
+        // Refuse an inactive candidate even if a member submits its code directly.
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await owner.PutAsJsonAsync($"/api/v1/meal-plans/{plan.Id}/meals/{snackId}",
+                snack with { CandidateCode = "INACTIVE-SUGARY-PASTRY-99" })).StatusCode);
+
+        var deleted = await owner.DeleteAsync($"/api/v1/meal-plans/{plan.Id}/meals/{snackId}");
+        Assert.Equal(HttpStatusCode.OK, deleted.StatusCode);
+        Assert.Equal(3,
+            (await deleted.Content.ReadFromJsonAsync<MealPlanResponse>())!.Days[0].Meals.Count);
+
+        // Deleting one planned meal never erases another member's data and
+        // the historical plan is kept when the owner archives the schedule.
+        var archived = await owner.DeleteAsync($"/api/v1/meal-plans/{plan.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, archived.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await owner.GetAsync("/api/v1/meal-plans/current")).StatusCode);
+        var history = await owner.GetFromJsonAsync<IReadOnlyList<MealPlanResponse>>("/api/v1/meal-plans");
+        Assert.Contains(history!, x => x.Id == plan.Id && x.Status == "Archived");
+        // The rolling-plan background worker respects a manual archive.
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await owner.PostAsJsonAsync("/api/v1/meal-plans/ensure-current", new { })).StatusCode);
+    }
+
     private async Task<HttpClient> CreateOnboardedUserClientAsync(string prefix)
     {
         var client = _factory.CreateHttpsClient();
