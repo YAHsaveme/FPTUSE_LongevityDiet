@@ -26,10 +26,15 @@ metrics. Public landing figures are explicitly labelled **illustration**.
 | Coral warmth | `#BC6F43` | Editorial emphasis; not an error state |
 | Border | `rgba(26,67,51,.13)` | Gentle information separation |
 
-**Typography:** Cormorant Garamond for editorial hero/headings, Manrope
-for dense app content, numbers, forms and controls; both fonts already bundled
-locally. Avoid novel remote font requests. Minimum practical text size 11–12px
-for secondary metadata, 12–14px for controls, 14–16px for body.
+**Typography (v2, 13 Nov 2026):** Be Vietnam Pro (open source, OFL)
+for all Vietnamese text, brand, hero, dashboard, labels, numbers, forms and controls.
+It replaces the ornamental Cormorant Garamond + Manrope pairing after readability
+review. The typeface was designed with Vietnamese diacritics as a first-class
+concern. Bundle via local `@fontsource/be-vietnam-pro` imports (400/500/600/700/800),
+not third-party runtime Google Fonts requests. Body 16–17px, forms 16px, secondary
+content 14–15px, low-priority chips 12–13px, compact mobile nav 11–12px.
+Headings use 600–700 weight rather than tall italic display serif. Readable
+line-height and responsive reflow matter more than stylized large lettering.
 
 **Pattern:** editorial hero + high-contrast wellness metric preview,
 card-based activity/meal summaries, long-form progressive sections and
@@ -46,6 +51,12 @@ remain visibly labelled as examples.
   semantic `nav`, `aria-current` from React Router's NavLink.
 - Respect `prefers-reduced-motion` and avoid animation as a sole feedback cue.
 - No emoji as interface icons; Lucide icons already installed.
+- Typeface contrast goal: practical Vietnamese readability without the common
+  exaggerated editorial serif and microscopic dashboard metadata patterns.
+- W3C WCAG 2.2 text resizing 200% and text spacing guide:
+  https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html and
+  https://www.w3.org/WAI/WCAG22/Understanding/text-spacing.html.
+  Responsive visual checks are not a claim of formal WCAG certification.
 - Use warm backgrounds, limited ambient gradients, restrained shadows.
   Avoid low contrast pills, 8px text, large unreadable labels and
   hidden controls on mobile.
@@ -56,13 +67,15 @@ remain visibly labelled as examples.
 - `npm --prefix src/LongevityDiet.Web run build`
 - `npm --prefix src/LongevityDiet.Web run lint`
 - `npm --prefix src/LongevityDiet.Web run test`
-- Browser check 390px + 1440px for horizontal overflow, page errors,
-  typographic clipping and readability.
+- Browser check 320/390/768/1440px for horizontal overflow, page errors,
+  typographic clipping, font load and readability. Check at 200% zoom manually
+  before final accessibility sign-off.
 - For interactive data flows, use existing Docker QA and Playwright
   acceptance; a static preview is not proof of connected services.
 
 ## Scope of UI refresh
-The refreshed CSS affects landing, auth/profile, catalog, planner, progress,
-activity, notifications, reports and admin controls. The new dock is
+The refreshed CSS and later `typography-readable.css` affect landing,
+auth/profile, catalog, planner, progress, activity, notifications, reports
+and admin controls. The new dock is
 only rendered for users who completed onboarding and are in the app.
 No API, migration, broker or other .NET code was edited.

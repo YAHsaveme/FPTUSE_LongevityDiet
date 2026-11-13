@@ -409,7 +409,7 @@ body {
   scroll-margin-top: 110px;
 }
 .workspace-header-row h1 {
-  font-family: "Manrope", sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: clamp(26px,2.4vw,36px);
   letter-spacing: -.045em;
   font-weight: 800;
@@ -417,7 +417,7 @@ body {
   line-height: 1.23;
 }
 .workspace-section .section-heading h2 {
-  font-family: "Manrope", sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: clamp(24px,2.1vw,32px);
   font-weight: 800;
   letter-spacing: -.035em;

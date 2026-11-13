@@ -1,0 +1,283 @@
+/*
+ * Readable Vietnamese typography system (13 Nov 2026)
+ * Be Vietnam Pro: one consistent family, genuine Vietnamese glyph support.
+ * No serif display font, no tiny 8-11px application copy.
+ * Keep this file last after feature and UI refresh styles.
+ */
+:root {
+  --font-ui: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-ui);
+  font-size: 16px;
+}
+html { text-size-adjust: 100%; }
+body {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.65;
+}
+button, input, select, textarea { font-family: var(--font-ui); }
+:is(h1,h2,h3,h4) {
+  font-family: var(--font-ui);
+  font-style: normal;
+  letter-spacing: -.025em;
+  line-height: 1.3;
+}
+:is(p,li,label) { line-height: 1.68; }
+:is(small,time) { line-height: 1.5; }
+
+/* Brand and landing – calmer, confident Vietnamese instead of oversized italic serif */
+.brand-monogram {
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 21px;
+}
+.brand-copy strong,
+.auth-brand strong,
+.footer-brand strong { font-size: 18px; letter-spacing: -.02em; font-weight: 750; }
+.brand-copy small,
+.auth-brand small,
+.footer-brand small {
+  font-size: 12px;
+  letter-spacing: .01em;
+  text-transform: none;
+}
+.nav-links { font-size: 15px; }
+.account-button { font-size: 14px; }
+.hero-copy h1 {
+  max-width: 720px;
+  font-family: var(--font-ui);
+  font-size: clamp(39px, 4.15vw, 62px);
+  font-weight: 600;
+  letter-spacing: -.038em;
+  line-height: 1.24;
+}
+.hero-copy h1 em { font-style: normal; font-weight: 600; }
+.hero-description { max-width: 610px; font-size: 17px; line-height: 1.85; }
+.eyebrow, .micro-label {
+  font-size: 13px;
+  letter-spacing: .06em;
+  line-height: 1.6;
+}
+.hero-copy .eyebrow { font-size: 13px; letter-spacing: .055em; }
+.primary-button, .light-button, .auth-submit {
+  min-height: 50px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.secondary-link, .section-link { font-size: 15px; }
+.trust-row, .trust-row span { font-size: 13px; }
+.daily-card-head h2 {
+  font-family: var(--font-ui);
+  font-size: 25px;
+  line-height: 1.38;
+  font-weight: 700;
+}
+.daily-card .date-chip, .date-chip { font-size: 12px; letter-spacing: .02em; }
+.score-core strong { font-size: 45px; }
+.score-core span, .score-copy > span, .score-copy p {
+  font-size: 13px;
+  line-height: 1.65;
+}
+.score-copy strong { font-size: 23px; }
+.score-copy p { font-size: 14px; }
+.daily-metrics span { font-size: 13px; line-height: 1.5; }
+.daily-metrics strong { font-size: 18px; }
+.section-heading h2,
+.journey-copy h2,
+.insight-copy h2 {
+  font-family: var(--font-ui);
+  font-size: clamp(29px, 2.6vw, 39px);
+  letter-spacing: -.035em;
+  line-height: 1.35;
+  font-weight: 700;
+}
+.card-heading h3,
+.principles-grid h3 {
+  font-family: var(--font-ui);
+  font-size: 21px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+.meal-row { grid-template-columns: 58px 14px minmax(0, 1fr); }
+.meal-row time, .meal-row strong, .habit-copy strong, .habit-row b {
+  font-size: 15px;
+  line-height: 1.55;
+}
+.meal-row p, .habit-copy span { font-size: 14px; line-height: 1.7; }
+.habit-row { grid-template-columns: 40px minmax(0,1fr) auto; }
+.habit-row b { text-align: right; }
+.journey-copy p, .insight-copy p, .principles-grid p {
+  font-size: 16px;
+  line-height: 1.8;
+}
+.journey-number span, .journey-number small,
+.journey-meta { font-size: 13px; }
+.insight-copy a { font-size: 15px; }
+.insight-stat > span { font-size: 13px; letter-spacing: .03em; }
+.insight-stat strong { font-size: 34px; }
+.insight-stat small { font-size: 13px; }
+footer p { font-size: 13px; line-height: 1.7; }
+.footer-year { font-size: 12px; }
+
+/* Auth, profile and form controls: 16px input text improves reading and mobile zoom behavior */
+.auth-copy h1 { font-size: clamp(34px, 3.3vw, 48px); font-weight: 700; line-height: 1.28; }
+.auth-copy p, .auth-trust, .form-switch { font-size: 15px; line-height: 1.8; }
+.form-heading h2 { font-size: clamp(26px, 2.3vw, 34px); font-weight: 700; line-height: 1.35; }
+.form-heading > span { font-size: 13px; letter-spacing: .06em; }
+.auth-form .field > span,
+.auth-form .field-label, .field > span, .field-label,
+.auth-form label { font-size: 15px; }
+.auth-form input, .plain-input, .field-control,
+.admin-field input, .admin-field select, .admin-field textarea,
+.catalog-controls input, .catalog-controls select {
+  min-height: 48px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.auth-form .field small, .form-error, .form-success,
+.form-switch a { font-size: 14px; line-height: 1.7; }
+.auth-submit { font-size: 16px; }
+
+/* The private dashboard and meal planner */
+.workspace-header-row h1 { font-size: clamp(29px, 2.6vw, 37px); line-height: 1.35; letter-spacing: -.03em; }
+.workspace-section .section-heading h2 { font-size: clamp(24px,2.15vw,32px); line-height: 1.4; }
+.workspace-section .card-heading h3 { font-size: 21px; }
+.window-metric-box span, .window-metric-box small,
+.date-picker-pill, .status-ok, .status-warn {
+  font-size: 14px;
+  line-height: 1.55;
+}
+.window-metric-box strong { font-size: clamp(21px, 1.9vw, 27px); }
+.workspace-main .secondary-button,
+.workspace-main .small-button,
+.workspace-main .primary-button,
+.day-tabs button, .day-tabs a { min-height: 46px; font-size: 14px; }
+.workspace-main .plain-input { font-size: 16px; }
+.planned-meal-title { font-size: 18px; line-height: 1.5; }
+.planned-meal-desc, .meal-explanation,
+:where(.workspace-main) p,
+:where(.workspace-main) label { font-size: 15px; line-height: 1.72; }
+:where(.reason-chip,.reason-code-chip,.meta-badge,.slot-badge) {
+  font-size: 13px;
+  line-height: 1.55;
+}
+:where(.status-banner,.form-error,.form-success,.admin-message) { font-size: 14px; line-height: 1.7; }
+
+/* Catalog, nutrition values, sources and administration */
+.catalog-nav, .catalog-tabs button, .admin-tabs button { font-size: 14px; }
+.catalog-hero h1 { font-size: clamp(28px,2.75vw,39px); line-height: 1.32; }
+.catalog-hero p, .catalog-safety span { font-size: 16px; line-height: 1.75; }
+.catalog-safety strong { font-size: 16px; }
+.catalog-card h2, .rule-card h2 { font-size: 21px; font-weight: 700; line-height: 1.4; }
+.catalog-card p, .rule-card p, .recipe-detail-hero p {
+  font-size: 15px;
+  line-height: 1.75;
+}
+.catalog-card-head, .catalog-chip, .catalog-detail-link,
+.catalog-pagination, .catalog-state,
+.recipe-meta, .ingredient-list span, .ingredient-list strong,
+.macro-grid span, .allergen-list span, .allergen-panel p,
+.allergen-panel small, .rule-versions span,
+.rule-versions strong, .rule-versions a,
+.nutrition-row, .nutrition-row b, .flag-row span {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.catalog-card-head { flex-wrap: wrap; }
+.catalog-detail-link { font-weight: 700; }
+.recipe-panel h2 { font-size: 24px; }
+.recipe-energy strong { font-size: 40px; }
+.recipe-energy span, .recipe-energy small { font-size: 14px; }
+.admin-panel-heading h2 { font-size: 27px; }
+.admin-panel-heading small, .admin-item span,
+.admin-rule-select span, .admin-checks label,
+.admin-rule-select strong, .admin-item strong {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.admin-field > span { font-size: 15px; line-height: 1.6; }
+.admin-item-actions button, .admin-item-actions a,
+.rule-version-admin-list button, .admin-form-actions button {
+  min-height: 44px;
+  font-size: 14px;
+}
+.admin-message, .rule-version-admin-list span,
+.rule-version-admin-list strong,
+.rule-version-admin-list h3 { font-size: 14px; line-height: 1.65; }
+
+/* Activity tracking and notification settings */
+.tracking-header h1 { font-size: clamp(29px,3.2vw,43px); font-weight: 700; line-height: 1.35; }
+.tracking-header p { font-size: 16px; line-height: 1.8; }
+.tracking-back, .tracking-panel h3 { font-size: 15px; }
+.tracking-panel h2 { font-size: 22px; }
+.tracking-panel label { font-size: 15px; }
+.tracking-panel input, .tracking-panel select,
+.tracking-panel textarea { min-height: 46px; font-size: 16px; }
+.tracking-panel button:not(.tracking-history-item button) { font-size: 15px; min-height: 44px; }
+.tracking-feedback, .tracking-summary span,
+.tracking-summary small, .tracking-goal p,
+.tracking-score span, .tracking-dimensions span,
+.tracking-dimensions strong, .tracking-note,
+.tracking-history-item strong, .tracking-history-item span,
+.tracking-history-item small, .tracking-history-item b,
+.tracking-pagination, .notification-heading h2 span {
+  font-size: 14px;
+  line-height: 1.7;
+}
+.tracking-score strong { font-weight: 700; font-size: 39px; }
+.notification-toggle { font-size: 15px !important; }
+
+/* Bottom navigation: labels remain visible at compact widths */
+.quick-navigation a, .quick-navigation-more {
+  font-size: 12px;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+}
+.quick-navigation-overflow a { font-size: 15px; }
+.quick-navigation a span { white-space: normal; }
+.preview-banner { font-size: 13px; line-height: 1.65; }
+
+/* Natural responsive rhythm: never shrink primary copy to 11-12px */
+@media (max-width: 800px) {
+  .hero-copy h1 { font-size: clamp(35px, 6.1vw, 49px); line-height: 1.29; }
+  .hero-description { font-size: 16px; }
+  .journey-copy h2, .insight-copy h2 { font-size: clamp(28px, 4.8vw, 36px); }
+  .quick-navigation { width: min(760px, calc(100vw - 20px)); }
+  .quick-navigation > a, .quick-navigation-more { font-size: 11.5px; }
+}
+@media (max-width: 560px) {
+  .brand-copy strong { font-size: 17px; }
+  .hero-copy h1 {
+    font-size: clamp(33px, 8.8vw, 43px);
+    letter-spacing: -.047em;
+    line-height: 1.28;
+  }
+  .eyebrow, .micro-label, .hero-copy .eyebrow { font-size: 12.5px; }
+  .hero-description { font-size: 16px; }
+  .trust-row span { font-size: 13px; }
+  .daily-card-head h2 { font-size: 23px; }
+  .score-composition { grid-template-columns: 110px minmax(0,1fr); gap: 12px; }
+  .score-ring { width: 108px; height: 108px; }
+  .score-core strong { font-size: 33px; }
+  .score-copy strong { font-size: 19px; }
+  .score-copy p { font-size: 13px; }
+  .daily-metrics strong { font-size: 15px; }
+  .daily-metrics span { font-size: 12px; }
+  .section-heading h2, .journey-copy h2, .insight-copy h2 { font-size: 29px; line-height: 1.36; }
+  .card-heading h3, .principles-grid h3 { font-size: 20px; }
+  .meal-row { grid-template-columns: 50px 12px minmax(0,1fr); gap: 9px; }
+  .habit-row { grid-template-columns: 35px minmax(0,1fr); }
+  .habit-row b { grid-column: 2; text-align: left; }
+  .quick-navigation > a, .quick-navigation-more { font-size: 11px; line-height: 1.2; }
+  .quick-navigation { min-height: 76px; }
+  .quick-navigation > a, .quick-navigation-more { min-height: 62px; }
+  .mobile-section-navigation a { font-size: 15px; }
+  .preview-banner { font-size: 12px; }
+}
+@media (max-width: 360px) {
+  .hero-copy h1 { font-size: 32px; }
+  .score-composition { grid-template-columns: 1fr; justify-items: start; }
+  .score-copy { text-align: left; }
+  .daily-metrics { grid-template-columns: 1fr; gap: 12px; }
+  .daily-metrics div { border-right: 0; padding: 0; }
+}
