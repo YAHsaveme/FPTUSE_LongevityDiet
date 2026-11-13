@@ -239,26 +239,37 @@ public sealed class ReminderNotificationsApiTests : IClassFixture<IntegrationTes
         var enabled = await client.GetFromJsonAsync<ReminderPreferencesView>(
             "/api/v1/reminders/preferences");
         Assert.True(enabled!.EmailOptedIn);
-        var second = first with { EventId = Guid.NewGuid(), DeduplicationKey = "qa-email-2" };
+        var second = first with { EventId = Guid.NewGuid(), DeduplicationKey = "qa-unverified-2" };
         Assert.True(await service.PersistNotificationResultAsync(second, default));
+        Assert.Equal("None", (await db.Notifications.AsNoTracking()
+            .SingleAsync(x => x.DeduplicationKey == second.DeduplicationKey)).EmailDeliveryStatus);
+
+        // Proof of email ownership is independent from opt-in consent.
+        var account = await db.Users.SingleAsync(x => x.Id == userId);
+        Assert.Null(account.EmailVerifiedAtUtc);
+        account.EmailVerifiedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        var third = first with { EventId = Guid.NewGuid(), DeduplicationKey = "qa-verified-3" };
+        Assert.True(await service.PersistNotificationResultAsync(third, default));
         var pending = await db.Notifications.AsNoTracking()
-            .SingleAsync(x => x.DeduplicationKey == second.DeduplicationKey);
+            .SingleAsync(x => x.DeduplicationKey == third.DeduplicationKey);
         Assert.Equal("Pending", pending.EmailDeliveryStatus);
         Assert.Null(pending.EmailQueuedAtUtc);
         Assert.Equal(0, pending.EmailDeliveryAttempts);
-        Assert.False(await service.PersistNotificationResultAsync(second, default));
+        Assert.False(await service.PersistNotificationResultAsync(third, default));
 
         await service.UpdatePreferencesAsync(userId,
             pref with { EmailOptedIn = false }, default);
-        var third = first with { EventId = Guid.NewGuid(), DeduplicationKey = "qa-opted-out-3" };
-        Assert.True(await service.PersistNotificationResultAsync(third, default));
+        var fourth = first with { EventId = Guid.NewGuid(), DeduplicationKey = "qa-opted-out-4" };
+        Assert.True(await service.PersistNotificationResultAsync(fourth, default));
         Assert.Equal("None", (await db.Notifications.AsNoTracking()
-            .SingleAsync(x => x.DeduplicationKey == third.DeduplicationKey)).EmailDeliveryStatus);
+            .SingleAsync(x => x.DeduplicationKey == fourth.DeduplicationKey)).EmailDeliveryStatus);
 
         var messages = await client.GetFromJsonAsync<NotificationPage>("/api/v1/notifications");
-        Assert.Equal(3, messages!.Items.Count);
+        Assert.Equal(4, messages!.Items.Count);
         Assert.Contains(messages.Items, x => x.EmailDeliveryStatus == "Pending");
-        Assert.Equal(2, messages.Items.Count(x => x.EmailDeliveryStatus == "None"));
+        Assert.Equal(3, messages.Items.Count(x => x.EmailDeliveryStatus == "None"));
     }
 
     [Fact]

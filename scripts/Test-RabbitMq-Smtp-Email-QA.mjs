@@ -72,10 +72,12 @@ function state(notificationId) {
 try {
   query(`
     INSERT INTO dbo.Users
-      (Id, Email, NormalizedEmail, PasswordHash, DisplayName, Role, Status, CreatedAt, UpdatedAt)
+      (Id, Email, NormalizedEmail, PasswordHash, DisplayName, Role, Status,
+       EmailVerifiedAtUtc, CreatedAt, UpdatedAt)
     VALUES ('${id}', '${email}', '${email.toUpperCase()}',
       'synthetic-disabled-login-no-password', 'Synthetic Rabbit SMTP QA',
-      'Member', 'Active', SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET());
+      'Member', 'Active', SYSUTCDATETIME(),
+      SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET());
 
     INSERT INTO dbo.ReminderPreferences
       (UserId, OptedIn, EmailOptedIn, MealLoggingEnabled, ActivityEnabled,

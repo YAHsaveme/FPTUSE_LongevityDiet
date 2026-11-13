@@ -22,6 +22,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         users.HasKey(x => x.Id);
         users.Property(x => x.Email).HasMaxLength(320).IsRequired();
         users.Property(x => x.NormalizedEmail).HasMaxLength(320).IsRequired();
+        users.Property(x => x.EmailVerificationHash).HasMaxLength(64);
         users.HasIndex(x => x.NormalizedEmail).IsUnique();
         users.Property(x => x.PasswordHash).HasMaxLength(512).IsRequired();
         users.Property(x => x.DisplayName).HasMaxLength(120).IsRequired();

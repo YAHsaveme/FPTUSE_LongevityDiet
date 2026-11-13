@@ -87,6 +87,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const logout = useCallback(async () => {
+    // Never leave a previous account's push subscription on a shared device.
+    // Local unsubscribe happens even if server revoke is temporarily offline.
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.getRegistration('/sw.js')
+        const sub = await registration?.pushManager.getSubscription()
+        if (sub) {
+          try {
+            await api.delete('/web-push/subscriptions', { data: { endpoint: sub.endpoint } })
+          } finally {
+            await sub.unsubscribe()
+          }
+        }
+      } catch {
+        // Do not block logout due to notification transport or permissions.
+      }
+    }
     try {
       await api.post('/auth/revoke')
     } finally {

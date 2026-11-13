@@ -193,6 +193,10 @@ try
     if (!builder.Environment.IsEnvironment("Testing"))
         builder.Services.AddHostedService<IdentityRedisBridge>();
     builder.Services.AddSingleton<WebPushSubscriptionStore>();
+    builder.Services.AddScoped<EmailVerificationService>();
+    // Refuse to start an enabled OTP service with a missing signing key,
+    // unauthenticated SMTP or an incompatible email delivery configuration.
+    EmailVerificationService.EnsureConfigured(builder.Configuration, builder.Environment);
     // Real background Web Push is opt-in, separately from SMTP and in-app alerts.
     // VAPID private key is read from deployment secrets and never returned to UI.
     if (builder.Configuration.GetValue<bool>("WebPush:Enabled"))

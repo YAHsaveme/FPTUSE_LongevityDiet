@@ -24,20 +24,24 @@ Ngày: 13/11/2026. Phạm vi: **code + QA cô lập**, chưa triển khai produc
   `OptedIn` của nhắc lịch thông thường.
 - Người dùng bật/tắt trong giao diện `/notifications`; thay đổi được
   lưu ở database Identity, gắn Version và UpdatedAtUtc.
-- Chỉ **thông báo mới** khi email được bật mới có trạng thái
-  `EmailDeliveryStatus=Pending`. Các hàng lịch sử mặc định `None`,
+- Chỉ **thông báo mới** khi đã bật nhắc lịch, bật email **và email đã
+  xác minh OTP** mới có trạng thái `EmailDeliveryStatus=Pending`.
+  Các hàng lịch sử hoặc email chưa xác minh mặc định `None`,
   không được gửi hồi tố.
 - Khi xử lý, hệ thống **đọc lại** tài khoản Active, `OptedIn`,
-  `EmailOptedIn` và miền email cho phép. Thu hồi quyền trong lúc
-  xếp hàng → `Skipped`.
+  `EmailOptedIn`, `EmailVerifiedAtUtc` và miền email cho phép.
+  Thu hồi quyền trong lúc xếp hàng → `Skipped`.
 - Cơ chế lease SQL tránh hai worker cùng gửi; Rabbit publisher confirms,
   consumer ACK sau khi SMTP nhận/SQL cập nhật; retry tối đa 5 lần, DLQ.
   SMTP giao hàng theo **at-least-once**, không thể cam kết exactly-once
   nếu SMTP nhận thành công nhưng tiến trình chết trước khi ghi SQL.
 - Nội dung gửi email là lời nhắc chung + link HTTPS khi production;
   không đính kèm ghi nhận sức khỏe hay PII trong RabbitMQ.
-- Chưa có email verification/opt-out link qua email và quản lý bounce;
-  cần bổ sung và kiểm chứng trước khi bật gửi cho toàn bộ người dùng thật.
+- Đã có xác minh địa chỉ email bằng OTP 6 chữ số (15 phút, cooldown,
+  tối đa 5 lần nhập sai), cùng test SMTP Mailpit thật. Xem
+  `docs/operations/EMAIL_VERIFICATION_AND_PUSH_PRIVACY_20261113.md`.
+  Vẫn **chưa có** quản lý bounce/complaint và one-click unsubscribe qua
+  email; cần bổ sung/đánh giá trước khi mở cho khách hàng thật.
 
 ## 3. QA trên máy local, KHÔNG gửi Internet
 
@@ -46,12 +50,19 @@ Dùng file `docker-compose.email-qa.yml` **chỉ cho QA**. Mailpit nhận SMTP
 `http://127.0.0.1:18025`, `127.0.0.1:11025`.
 
 ```powershell
+# Secret ngẫu nhiên chỉ dùng trong QA; không ghi vào Git.
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+$bytes = New-Object byte[] 32
+$rng.GetBytes($bytes)
+$rng.Dispose()
+$env:EMAIL_VERIFICATION_QA_HASH_KEY = [Convert]::ToBase64String($bytes)
 Set-Location 'D:\PRN232\FPTUSE_LongevityDiet'
 docker compose -p prn232-acceptance --env-file .env `
   -f docker-compose.yml -f docker-compose.gateway.yml `
   -f docker-compose.worker-ops.yml -f docker-compose.rabbitmq.yml `
   -f docker-compose.email-qa.yml `
   up -d --build api worker-ops rabbitmq mailpit sqlserver redis
+node scripts/Test-Email-Verification-Otp-QA.mjs
 node scripts/Test-RabbitMq-Smtp-Email-QA.mjs
 ```
 
