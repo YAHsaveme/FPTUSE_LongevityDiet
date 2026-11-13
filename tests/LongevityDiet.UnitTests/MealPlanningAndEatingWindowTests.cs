@@ -62,6 +62,74 @@ public sealed class MealPlanningAndEatingWindowTests
     }
 
     [Fact]
+    public async Task LocalAiSelector_CannotInjectUnknownCandidates_AndIsClearlyOptional()
+    {
+        var userId = Guid.NewGuid();
+        var userRepo = CreateUserRepositoryWithOnboardedUser(userId);
+        var planRepo = new InMemoryMealPlanRepository();
+        var provider = new PlanningCatalogSnapshotProvider(userRepo, planRepo);
+        var service = new MealPlanningService(planRepo, provider,
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow),
+            new SafeFakeAiChoiceGenerator());
+
+        var command = new GenerateMealPlanCommand(
+            new DateOnly(2026, 11, 2), 7, UseAi: true);
+        var generated = await service.GeneratePlanAsync(userId, command);
+        Assert.True(generated.Succeeded);
+        Assert.Contains("AI đã hỗ trợ", generated.Value!.PlanExplanation);
+        Assert.All(generated.Value.Days.SelectMany(day => day.Meals),
+            meal => Assert.DoesNotContain("FABRICATED", meal.CandidateCode, StringComparison.OrdinalIgnoreCase));
+
+        var notConfiguredService = new MealPlanningService(
+            new InMemoryMealPlanRepository(), provider,
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
+        Assert.False(notConfiguredService.IsAiConfigured);
+        var refused = await notConfiguredService.GeneratePlanAsync(userId, command);
+        Assert.False(refused.Succeeded);
+        Assert.Equal("ai_not_configured", refused.ErrorCode);
+    }
+
+    private sealed class SafeFakeAiChoiceGenerator : IAiMealChoiceGenerator
+    {
+        public Task<IReadOnlyList<AiMealChoice>> SuggestAsync(
+            IReadOnlyList<AiMealChoiceOption> options, CancellationToken cancellationToken = default)
+        {
+            var first = options[0];
+            IReadOnlyList<AiMealChoice> choices =
+            [
+                new(first.Date, first.Slot, first.Candidates[^1].Code),
+                new(first.Date.AddDays(1), first.Slot, "FABRICATED-CURE-FOOD"),
+            ];
+            return Task.FromResult(choices);
+        }
+    }
+
+    [Fact]
+    public async Task GeneratePlan_LimitsFishToThreeMealsInAnySevenDayWindow()
+    {
+        var userId = Guid.NewGuid();
+        var users = CreateUserRepositoryWithOnboardedUser(userId, mealFrequency: 4);
+        var plans = new InMemoryMealPlanRepository();
+        var planner = new MealPlanningService(plans,
+            new PlanningCatalogSnapshotProvider(users, plans),
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
+
+        var generated = await planner.GeneratePlanAsync(userId,
+            new GenerateMealPlanCommand(new DateOnly(2026, 11, 2), 14,
+                DietaryPattern: "Pescatarian"));
+        Assert.True(generated.Succeeded, generated.ErrorMessage);
+        var days = generated.Value!.Days;
+
+        for (var index = 0; index < days.Count - 6; index++)
+        {
+            var fishMeals = days.Skip(index).Take(7)
+                .SelectMany(day => day.Meals)
+                .Count(meal => meal.ContainsFish);
+            Assert.InRange(fishMeals, 0, 3);
+        }
+    }
+
+    [Fact]
     public async Task GeneratePlan_EnforcesAllergyHardExclusion_NeverIncludesAllergenicCandidate()
     {
         var userId = Guid.NewGuid();
@@ -516,6 +584,10 @@ public sealed class MealPlanningAndEatingWindowTests
             Plans.Add(mealPlan);
             return Task.CompletedTask;
         }
+
+        public Task AddPlannedMealAsync(PlannedMeal meal, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public void RemovePlannedMeal(PlannedMeal meal) { }
 
         public Task SaveChangesAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }

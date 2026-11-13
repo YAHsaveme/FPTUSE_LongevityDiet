@@ -1,0 +1,33 @@
+.meal-editor{margin:24px 0;padding:clamp(22px,3.5vw,36px);border:1px solid #c6e0c6;background:linear-gradient(135deg,#f2fae8,#fffbeb);border-radius:25px}
+.meal-editor-head{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.meal-editor-head h4{font-size:clamp(23px,2.3vw,28px);margin:5px 0 8px;color:#154637;line-height:1.35}
+.meal-editor-head p{font-size:16px;line-height:1.7;max-width:710px;margin:0}
+.meal-editor-head .secondary-button{font-size:16px;min-height:49px;white-space:normal}
+.meal-editor-list{display:grid;gap:10px;margin-top:22px}
+.meal-editor-row{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;padding:16px;background:#fffdf6;border:1px solid #dce7d4;border-radius:15px}
+.meal-editor-row>div:first-child{display:grid;gap:4px;flex:1 1 240px;min-width:0}
+.meal-editor-row strong{font-size:17px;line-height:1.5;color:#173e31}
+.meal-editor-row span{font-size:14px;color:#496753}
+.meal-editor-row-actions{display:flex;flex-wrap:wrap;gap:8px}
+.meal-editor-row-actions button,.meal-editor-archive,.meal-editor-confirm button,.meal-editor-form-title button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;min-height:43px;font:700 15px 'Be Vietnam Pro',sans-serif;border-radius:12px;border:1px solid #c7dcca;background:white;color:#205940;cursor:pointer}
+.meal-editor-row-actions button:hover,.meal-editor-archive:hover{background:#e7f6e4}
+.meal-editor button.danger{color:#9b3530;border-color:#ead1cf;background:#fff5f1}
+.meal-editor button.danger:hover{background:#ffebe6}
+.meal-editor button:disabled{opacity:.48;cursor:not-allowed}
+.meal-editor-form{display:grid;gap:16px;margin:20px 0 0;padding:22px;border:1px solid #d9e3d2;border-radius:18px;background:#fffef8}
+.meal-editor-form-title{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.meal-editor-form-title strong{font-size:20px;color:#174c3b}
+.meal-editor-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.meal-editor-fields label{display:grid;gap:8px;min-width:0}
+.meal-editor-fields label span{font-size:15px;font-weight:750;color:#264e3b}
+.meal-editor-fields select,.meal-editor-fields input{min-width:0;width:100%;min-height:52px;padding:12px;border:1px solid #b9d3bd;border-radius:12px;color:#183a2d;background:white;font:500 16px 'Be Vietnam Pro',sans-serif}
+.meal-editor-fields select:focus-visible,.meal-editor-fields input:focus-visible{outline:3px solid #d1df9b}
+.meal-editor-food{grid-column:1/-1}
+.meal-editor-caution{font-size:14px;line-height:1.75;margin:0;color:#58634e}
+.meal-editor-actions .primary-button{font-size:16px;min-height:50px}
+.meal-editor-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #d6e3cc;margin-top:22px;padding-top:16px}
+.meal-editor-footer a{display:inline-flex;align-items:center;gap:8px;color:#16593e;font-size:15px;font-weight:700}
+.meal-editor-archive{color:#8b413c}
+.meal-editor-confirm{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.meal-editor-confirm span{font-size:14px;max-width:265px}
+@media(max-width:640px){.meal-editor{padding:20px 15px}.meal-editor-head .secondary-button{width:100%;justify-content:center}.meal-editor-row{align-items:flex-start}.meal-editor-row-actions{width:100%}.meal-editor-fields{grid-template-columns:1fr}.meal-editor-food{grid-column:auto}.meal-editor-form{padding:17px 14px}.meal-editor-row-actions button{flex:1}.meal-editor-footer{align-items:flex-start}.meal-editor-footer a{font-size:14px}}

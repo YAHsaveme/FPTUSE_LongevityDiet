@@ -1,12 +1,17 @@
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories.Repositories;
+using LongevityDiet.Repositories.Catalog.Queries;
+using LongevityDiet.Repositories.Catalog.Repositories;
 
 namespace LongevityDiet.Services.Planning;
 
 public sealed class PlanningCatalogSnapshotProvider(
     IUserRepository userRepository,
-    IMealPlanRepository mealPlanRepository) : IPlanningInputProvider
+    IMealPlanRepository mealPlanRepository,
+    IRecipeRepository? recipeRepository = null) : IPlanningInputProvider
 {
+    private static readonly string[] FishAllergen = ["fish"];
+
     private static readonly PlanningRuleSetSnapshot DefaultRuleSet = new(
         ContractVersion: "v1",
         RuleSetVersion: "LDC-RULES-2026.1",
@@ -584,9 +589,87 @@ public sealed class PlanningCatalogSnapshotProvider(
         CancellationToken cancellationToken = default) =>
         Task.FromResult(DefaultRuleSet);
 
-    public Task<IReadOnlyList<PlanningCandidateMealSnapshot>> GetCandidateMealsAsync(
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult(CandidateCatalog);
+    /// <summary>
+    /// Use the live, Admin-maintained recipe catalog alongside verified example candidates.
+    /// A newly created recipe is eligible only when active, ingredients/foods are active,
+    /// and essential nutrition fields are supplied. Nutrition values remain Admin-entered
+    /// data, not a claim of validation against the copyrighted book.
+    /// </summary>
+    public async Task<IReadOnlyList<PlanningCandidateMealSnapshot>> GetCandidateMealsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        if (recipeRepository is null)
+            return CandidateCatalog;
+
+        var candidates = CandidateCatalog.ToList();
+        const int pageSize = 100;
+        for (var pageNumber = 1; pageNumber <= 100; pageNumber++)
+        {
+            var page = await recipeRepository.QueryAsync(
+                new RecipeQuery(pageNumber, pageSize, null, null, null,
+                    null, null, null, null, true, RecipeSortField.Name, SortDirection.Asc),
+                cancellationToken);
+
+            foreach (var item in page.Items)
+            {
+                var recipe = await recipeRepository.FindByIdAsync(item.Id,
+                    includeInactive: false, cancellationToken: cancellationToken);
+                if (recipe is null || !recipe.IsActive ||
+                    recipe.CaloriesPerServing is <= 0 or > 3000 ||
+                    recipe.Ingredients.Count == 0 ||
+                    recipe.Ingredients.Any(i => i.Food is null || !i.Food.IsActive ||
+                        i.Amount <= 0 || string.IsNullOrWhiteSpace(i.Unit)))
+                    continue; // Incomplete/unverified nutrition cannot be used to auto-generate.
+
+                var ingredients = recipe.Ingredients.Select(i => i.Food).ToList();
+                var ingredientTokens = ingredients
+                    .Select(food => food.Name)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+                var foodTags = ingredients.SelectMany(food => SplitTokens(food.Tags));
+                var declaredAllergens = recipe.Allergens
+                    .Where(a => a.Allergen is { IsActive: true })
+                    .Select(a => a.Allergen.Code)
+                    .ToList();
+                // Any known allergen explicitly tagged on an ingredient is automatically
+                // carried into the candidate. Unknown ingredient tags are not certified safe.
+                var taggedAllergens = ingredientTokens.Concat(foodTags)
+                    .Where(AllergenVocabulary.IsKnown);
+                var containsFish = recipe.HasFish || ingredients.Any(i => i.IsFish);
+                var allergens = AllergenVocabulary.Expand(
+                    declaredAllergens.Concat(taggedAllergens).Concat(
+                        containsFish ? FishAllergen : Array.Empty<string>()))
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+
+                var category = recipe.Category ?? string.Empty;
+                var slots = category.Contains("breakfast", StringComparison.OrdinalIgnoreCase) ||
+                            category.Contains("bữa sáng", StringComparison.OrdinalIgnoreCase)
+                    ? new[] { MealSlotType.Breakfast }
+                    : category.Contains("snack", StringComparison.OrdinalIgnoreCase) ||
+                      category.Contains("ăn nhẹ", StringComparison.OrdinalIgnoreCase)
+                        ? new[] { MealSlotType.Snack }
+                        : new[] { MealSlotType.Lunch, MealSlotType.Dinner };
+
+                candidates.Add(new PlanningCandidateMealSnapshot(
+                    "catalog-v1", $"CAT-{recipe.Id:N}", recipe.Name, recipe.Description,
+                    category, recipe.Cuisine ?? "Unspecified", slots, 1m, "phần",
+                    (int)decimal.Round(recipe.CaloriesPerServing, 0),
+                    recipe.ProteinGPerServing, recipe.CarbohydrateGPerServing,
+                    recipe.FatGPerServing, recipe.SaturatedFatGPerServing ?? 0m,
+                    recipe.SugarGPerServing ?? 0m, recipe.FiberGPerServing ?? 0m,
+                    recipe.IsPlantForward && !containsFish && ingredients.All(i => i.IsPlantBased),
+                    recipe.HasLegume || ingredients.Any(i => i.IsLegume),
+                    recipe.HasWholeGrain || ingredients.Any(i => i.IsWholeGrain),
+                    containsFish, allergens, ingredientTokens, true));
+            }
+
+            if (pageNumber * pageSize >= page.TotalItems)
+                break;
+        }
+
+        return candidates;
+    }
 
     public static IReadOnlyList<string> SplitTokens(string? raw)
     {

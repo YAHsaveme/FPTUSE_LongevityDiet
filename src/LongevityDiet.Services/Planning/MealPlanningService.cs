@@ -10,8 +10,10 @@ public sealed class MealPlanningService(
     IMealPlanRepository mealPlanRepository,
     IPlanningInputProvider planningInputProvider,
     IWellnessRepository wellnessRepository,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IAiMealChoiceGenerator? aiGenerator = null)
 {
+    public bool IsAiConfigured => aiGenerator is not null;
     private static readonly HashSet<string> SupportedDietaryPatterns =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -183,6 +185,16 @@ public sealed class MealPlanningService(
         var now = timeProvider.GetUtcNow();
         var today = ResolveLocalDate(now, userContext.TimeZone);
         var active = await mealPlanRepository.GetActiveByUserAsync(userId, cancellationToken);
+        if (active is null)
+        {
+            // Respect an explicit member archive. Automated rolling coverage must not
+            // silently re-create a plan the member just removed from the workspace.
+            var history = await mealPlanRepository.ListByUserAsync(userId, cancellationToken);
+            if (history.Count > 0 && history[0].Status == MealPlanStatus.Archived)
+                return ServiceResult.Failure<MealPlanSummary>(
+                    "plan_archived_manual_start_required",
+                    "This plan was archived. Create a new plan when you are ready.");
+        }
         var restrictionsMatch = active is not null && PlanCoversUserConstraints(active, userContext);
         // A change in allergies or exclusions must invalidate yesterday's plan immediately.
         if (restrictionsMatch && active!.StartDate <= today && active.EndDate >= today.AddDays(4))
@@ -344,6 +356,14 @@ public sealed class MealPlanningService(
         var previousPlanId = currentActive?.Id;
 
         var startDate = command.StartDate ?? ResolveLocalDate(now, effectiveContext.TimeZone);
+        if (command.UseAi && aiGenerator is null)
+            return ServiceResult.Failure<MealPlanSummary>(
+                "ai_not_configured", "Mô hình AI chưa được cài đặt. Bạn có thể tạo thực đơn theo quy tắc đã kiểm chứng.");
+
+        var aiSelections = command.UseAi
+            ? await SelectSafeAiCandidatesAsync(effectiveContext, ruleSet, candidates, startDate,
+                command.Days, cancellationToken)
+            : [];
 
         var buildResult = BuildDeterministicPlan(
             effectiveContext,
@@ -354,13 +374,21 @@ public sealed class MealPlanningService(
             revisionNumber,
             previousPlanId,
             preservedDays: [],
-            now);
+            now,
+            aiSelections);
 
         if (!buildResult.Succeeded || buildResult.Value is null)
         {
             return ServiceResult.Failure<MealPlanSummary>(
                 buildResult.ErrorCode ?? "plan_generation_failed",
                 buildResult.ErrorMessage ?? "Could not generate meal plan.");
+        }
+
+        if (command.UseAi)
+        {
+            buildResult.Value.PlanExplanation += aiSelections.Count > 0
+                ? " AI đã hỗ trợ chọn mã món trong tập ứng viên an toàn; hệ thống kiểm tra lại và áp dụng giới hạn dinh dưỡng trước khi lưu."
+                : " AI không phản hồi hợp lệ; thực đơn được tạo bằng bộ quy tắc tất định, không giả nhận kết quả từ mô hình.";
         }
 
         if (currentActive is not null)
@@ -528,6 +556,17 @@ public sealed class MealPlanningService(
         var chosen = alternatives.Count > 0
             ? alternatives[(targetDay.DayNumber - 1 + nextRegenerationCount - 1) % alternatives.Count]
             : rankedSlotCandidates[0];
+        if (chosen.Candidate.ContainsFish && ExceedsWeeklyFishLimit(plan, targetDay.PlanDate, targetMeal.Id))
+        {
+            var nonFish = rankedSlotCandidates
+                .Where(x => !x.Candidate.ContainsFish &&
+                    !string.Equals(x.Candidate.CandidateCode, targetMeal.CandidateCode,
+                        StringComparison.OrdinalIgnoreCase)).ToList();
+            if (nonFish.Count == 0)
+                return ServiceResult.Failure<MealPlanSummary>(
+                    "fish_frequency_limit", "No non-fish alternative is available this week.");
+            chosen = nonFish[0];
+        }
 
         ApplyCandidateToPlannedMeal(targetMeal, chosen, ruleSet.RuleSetVersion, nextRegenerationCount, now);
         targetDay.TargetCaloriesKcal = targetDay.Meals.Sum(m => m.CaloriesKcal);
@@ -536,6 +575,250 @@ public sealed class MealPlanningService(
         await mealPlanRepository.SaveChangesAsync(cancellationToken);
 
         return ServiceResult.Success(ToSummary(plan));
+    }
+
+    // Full member CRUD for scheduled meals. This never writes a free-text AI meal:
+    // every selection comes from active, ingredient-complete catalog candidates
+    // that pass the same allergy and dietary checks as automatic generation.
+    public Task<ServiceResult<MealPlanSummary>> AddPlannedMealAsync(
+        Guid userId, Guid planId, Guid dayId, SavePlannedMealCommand command,
+        CancellationToken cancellationToken = default) =>
+        SavePlannedMealAsync(userId, planId, dayId, null, command, cancellationToken);
+
+    public Task<ServiceResult<MealPlanSummary>> UpdatePlannedMealAsync(
+        Guid userId, Guid planId, Guid plannedMealId, SavePlannedMealCommand command,
+        CancellationToken cancellationToken = default) =>
+        SavePlannedMealAsync(userId, planId, null, plannedMealId, command, cancellationToken);
+
+    private async Task<ServiceResult<MealPlanSummary>> SavePlannedMealAsync(
+        Guid userId, Guid planId, Guid? dayId, Guid? plannedMealId,
+        SavePlannedMealCommand command, CancellationToken cancellationToken)
+    {
+        var plan = await mealPlanRepository.GetByIdForUserAsync(planId, userId, cancellationToken);
+        if (plan is null)
+            return ServiceResult.Failure<MealPlanSummary>("meal_plan_not_found", "Meal plan was not found.");
+        if (plan.Status != MealPlanStatus.Active)
+            return ServiceResult.Failure<MealPlanSummary>("meal_plan_not_active", "Only an active meal plan can be edited.");
+
+        if (!Enum.TryParse<MealSlotType>(command.SlotType, true, out var slot) ||
+            !Enum.IsDefined(slot))
+            return ServiceResult.Failure<MealPlanSummary>("invalid_meal_slot", "Choose Breakfast, Lunch, Dinner, or Snack.");
+        if (string.IsNullOrWhiteSpace(command.CandidateCode) || command.CandidateCode.Length > 80)
+            return ServiceResult.Failure<MealPlanSummary>("invalid_candidate_code", "Choose a recipe from the catalog.");
+
+        MealPlanDay? day;
+        PlannedMeal? existingMeal = null;
+        if (plannedMealId is { } mealId)
+        {
+            day = plan.Days.FirstOrDefault(d => d.Meals.Any(m => m.Id == mealId));
+            existingMeal = day?.Meals.FirstOrDefault(m => m.Id == mealId);
+        }
+        else
+        {
+            day = plan.Days.FirstOrDefault(d => d.Id == dayId);
+        }
+        if (day is null || (plannedMealId is not null && existingMeal is null))
+            return ServiceResult.Failure<MealPlanSummary>("planned_meal_not_found", "The requested day or meal was not found.");
+        if (existingMeal is null && day.Meals.Count >= 4)
+            return ServiceResult.Failure<MealPlanSummary>("meal_day_full", "A day can contain at most four planned meals.");
+        if (slot != MealSlotType.Snack &&
+            day.Meals.Any(m => m.Id != existingMeal?.Id && m.SlotType == slot))
+            return ServiceResult.Failure<MealPlanSummary>("duplicate_meal_slot", "That day already has a meal in the selected slot.");
+
+        var context = await planningInputProvider.GetUserContextAsync(userId, cancellationToken);
+        if (context is null)
+            return ServiceResult.Failure<MealPlanSummary>("user_not_found", "User was not found.");
+        var safety = await VerifySafetyAsync(context, requireScreening: true, cancellationToken);
+        if (!safety.Succeeded)
+            return ServiceResult.Failure<MealPlanSummary>(
+                safety.ErrorCode ?? "meal_plan_safety", safety.ErrorMessage ?? "Safety screening is required.");
+        if (!PlanCoversUserConstraints(plan, context))
+            return ServiceResult.Failure<MealPlanSummary>(
+                "outdated_meal_plan_restrictions", "Dietary restrictions changed. Refresh the plan first.");
+
+        // Adult Longevity Diet guidance: confine eating to a 12-hour window
+        // and leave at least three hours between the last meal and bedtime.
+        var proposedTimes = day.Meals
+            .Where(meal => meal.Id != existingMeal?.Id)
+            .Select(meal => meal.PlannedTime.ToTimeSpan())
+            .Append(command.PlannedTime.ToTimeSpan())
+            .OrderBy(time => time)
+            .ToArray();
+        if (proposedTimes[^1] - proposedTimes[0] > TimeSpan.FromHours(12))
+            return ServiceResult.Failure<MealPlanSummary>(
+                "eating_window_limit", "All meals must fit within a twelve-hour eating window.");
+        var bedtime = (context.SleepTime ?? new TimeOnly(23, 0)).ToTimeSpan();
+        if (bedtime <= proposedTimes[^1])
+            bedtime += TimeSpan.FromDays(1);
+        if (bedtime - proposedTimes[^1] < TimeSpan.FromHours(3))
+            return ServiceResult.Failure<MealPlanSummary>(
+                "late_meal_restriction",
+                "The last planned meal should finish at least three hours before bedtime.");
+
+        var rules = await planningInputProvider.GetActiveRuleSetAsync(cancellationToken);
+        var candidates = await planningInputProvider.GetCandidateMealsAsync(cancellationToken);
+        var ranked = FilterAndRankCandidatesForSlot(candidates, context, rules, slot,
+            timeProvider.GetUtcNow().Year);
+        var selected = ranked.FirstOrDefault(x =>
+            string.Equals(x.Candidate.CandidateCode, command.CandidateCode.Trim(),
+                StringComparison.OrdinalIgnoreCase));
+        if (selected is null)
+            return ServiceResult.Failure<MealPlanSummary>("unsafe_or_missing_candidate",
+                "The selected recipe is unavailable or does not meet the allergy/dietary checks.");
+        if (selected.Candidate.ContainsFish &&
+            ExceedsWeeklyFishLimit(plan, day.PlanDate, existingMeal?.Id))
+            return ServiceResult.Failure<MealPlanSummary>("fish_frequency_limit",
+                "Limit fish meals to three in any seven-day period; select a plant-forward alternative.");
+
+        var now = timeProvider.GetUtcNow();
+        var target = existingMeal;
+        if (target is null)
+        {
+            target = new PlannedMeal
+            {
+                Id = Guid.NewGuid(),
+                MealPlanDayId = day.Id,
+                MealPlanId = plan.Id,
+                UserId = userId,
+                SlotOrder = day.Meals.Count == 0 ? 1 : day.Meals.Max(m => m.SlotOrder) + 1,
+            };
+            day.Meals.Add(target);
+            await mealPlanRepository.AddPlannedMealAsync(target, cancellationToken);
+        }
+        target.SlotType = slot;
+        target.PlannedTime = command.PlannedTime;
+        ApplyCandidateToPlannedMeal(target, selected, rules.RuleSetVersion,
+            (existingMeal?.RegenerationCount ?? 0) + (existingMeal is null ? 0 : 1), now);
+        day.TargetCaloriesKcal = day.Meals.Sum(m => m.CaloriesKcal);
+        plan.UpdatedAt = now;
+        await mealPlanRepository.SaveChangesAsync(cancellationToken);
+        return ServiceResult.Success(ToSummary(plan));
+    }
+
+    public async Task<ServiceResult<MealPlanSummary>> DeletePlannedMealAsync(
+        Guid userId, Guid planId, Guid plannedMealId,
+        CancellationToken cancellationToken = default)
+    {
+        var plan = await mealPlanRepository.GetByIdForUserAsync(planId, userId, cancellationToken);
+        if (plan is null)
+            return ServiceResult.Failure<MealPlanSummary>("meal_plan_not_found", "Meal plan was not found.");
+        if (plan.Status != MealPlanStatus.Active)
+            return ServiceResult.Failure<MealPlanSummary>("meal_plan_not_active", "Only active plans can be edited.");
+        var day = plan.Days.FirstOrDefault(d => d.Meals.Any(m => m.Id == plannedMealId));
+        var meal = day?.Meals.FirstOrDefault(m => m.Id == plannedMealId);
+        if (day is null || meal is null)
+            return ServiceResult.Failure<MealPlanSummary>("planned_meal_not_found", "Planned meal was not found.");
+        if (day.Meals.Count <= 1)
+            return ServiceResult.Failure<MealPlanSummary>("last_meal_required",
+                "Keep at least one meal in each day. Archive the entire plan if it is no longer needed.");
+
+        // This is a required EF relationship configured with Cascade; removing the
+        // child from its tracked parent's collection deletes the orphan on SaveChanges.
+        day.Meals.Remove(meal);
+        mealPlanRepository.RemovePlannedMeal(meal);
+        day.TargetCaloriesKcal = day.Meals.Sum(m => m.CaloriesKcal);
+        plan.UpdatedAt = timeProvider.GetUtcNow();
+        await mealPlanRepository.SaveChangesAsync(cancellationToken);
+        return ServiceResult.Success(ToSummary(plan));
+    }
+
+    public async Task<ServiceResult<bool>> ArchivePlanAsync(
+        Guid userId, Guid planId, CancellationToken cancellationToken = default)
+    {
+        var plan = await mealPlanRepository.GetByIdForUserAsync(planId, userId, cancellationToken);
+        if (plan is null)
+            return ServiceResult.Failure<bool>("meal_plan_not_found", "Meal plan was not found.");
+        if (plan.Status != MealPlanStatus.Active)
+            return ServiceResult.Failure<bool>("meal_plan_not_active", "Only an active plan can be archived.");
+        plan.Status = MealPlanStatus.Archived;
+        plan.UpdatedAt = timeProvider.GetUtcNow();
+        await mealPlanRepository.SaveChangesAsync(cancellationToken);
+        return ServiceResult.Success(true);
+    }
+
+    /// <summary>
+    /// Source: Fondazione Valter Longo, Longevity Diet for Adults,
+    /// https://www.fondazionevalterlongo.org/en/longevity-diet-for-adults/
+    /// Maximum three fish meals in every seven-day window. Historical user records
+    /// are never silently altered; this guard applies when adding/replacing meals.
+    /// </summary>
+    private static bool ExceedsWeeklyFishLimit(MealPlan plan, DateOnly targetDate, Guid? ignoredMealId)
+    {
+        for (var offset = 0; offset < 7; offset++)
+        {
+            var start = targetDate.AddDays(-offset);
+            var end = start.AddDays(6);
+            var fishCount = plan.Days
+                .Where(d => d.PlanDate >= start && d.PlanDate <= end)
+                .SelectMany(d => d.Meals)
+                .Count(m => m.ContainsFish && m.Id != ignoredMealId);
+            if (fishCount >= 3)
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// AI may suggest only already-filtered active candidate codes. The trusted
+    /// planner still verifies candidate membership and weekly fish limits.
+    /// On model outage/invalid JSON, generation falls back to deterministic mode.
+    /// </summary>
+    private async Task<IReadOnlyList<AiMealChoice>> SelectSafeAiCandidatesAsync(
+        PlanningUserContextSnapshot context,
+        PlanningRuleSetSnapshot rules,
+        IReadOnlyList<PlanningCandidateMealSnapshot> candidates,
+        DateOnly startDate,
+        int days,
+        CancellationToken cancellationToken)
+    {
+        if (aiGenerator is null)
+            return [];
+
+        var slots = ResolveMealSlots(context.PreferredMealFrequency,
+            context.WakeTime ?? new TimeOnly(6, 30),
+            context.SleepTime ?? new TimeOnly(22, 30));
+        var allowed = slots.ToDictionary(
+            x => x.SlotType,
+            x => FilterAndRankCandidatesForSlot(candidates, context, rules, x.SlotType,
+                timeProvider.GetUtcNow().Year)
+                .Take(12)
+                .Select(item => new AiAllowedCandidate(item.Candidate.CandidateCode,
+                    item.Candidate.Title,
+                    item.Candidate.HasLegumes, item.Candidate.HasWholeGrains,
+                    item.Candidate.ContainsFish))
+                .ToArray());
+        var choices = Enumerable.Range(0, days)
+            .SelectMany(index => slots.Select(slot =>
+                new AiMealChoiceOption(startDate.AddDays(index), slot.SlotType, allowed[slot.SlotType])))
+            .ToArray();
+
+        try
+        {
+            var requested = await aiGenerator.SuggestAsync(choices, cancellationToken);
+            var verified = new List<AiMealChoice>();
+            foreach (var suggestion in requested)
+            {
+                var source = choices.FirstOrDefault(x =>
+                    x.Date == suggestion.Date && x.Slot == suggestion.Slot);
+                if (source is null ||
+                    !source.Candidates.Any(c =>
+                        string.Equals(c.Code, suggestion.CandidateCode,
+                            StringComparison.OrdinalIgnoreCase)) ||
+                    verified.Any(x => x.Date == suggestion.Date && x.Slot == suggestion.Slot))
+                    continue;
+                verified.Add(suggestion);
+            }
+            return verified;
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            return [];
+        }
+        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Local model not present / bad response / temporary outage: no hallucinated menu.
+            return [];
+        }
     }
 
     private static ServiceResult<MealPlan> BuildDeterministicPlan(
@@ -547,7 +830,8 @@ public sealed class MealPlanningService(
         int revisionNumber,
         Guid? previousPlanId,
         IReadOnlyList<MealPlanDay> preservedDays,
-        DateTimeOffset now)
+        DateTimeOffset now,
+        IReadOnlyList<AiMealChoice>? aiSelections = null)
     {
         var slots = ResolveMealSlots(
             userContext.PreferredMealFrequency,
@@ -632,6 +916,31 @@ public sealed class MealPlanningService(
                 var slotPool = rankedBySlot[slotType];
                 var pickIndex = (planDate.DayNumber + rotationOffset + slotIndex) % slotPool.Count;
                 var selected = slotPool[pickIndex];
+                var aiSelectedCode = aiSelections?.FirstOrDefault(choice =>
+                    choice.Date == planDate && choice.Slot == slotType)?.CandidateCode;
+                if (!string.IsNullOrWhiteSpace(aiSelectedCode))
+                    selected = slotPool.FirstOrDefault(candidate =>
+                        string.Equals(candidate.Candidate.CandidateCode, aiSelectedCode,
+                            StringComparison.OrdinalIgnoreCase)) ?? selected;
+                if (selected.Candidate.ContainsFish)
+                {
+                    // Fondazione Valter Longo: at most 2–3 fish meals per week.
+                    // Do not generate a fourth fish meal in the preceding seven-day window.
+                    var recentFish = plan.Days
+                        .Where(d => d.PlanDate >= planDate.AddDays(-6))
+                        .SelectMany(d => d.Meals).Count(m => m.ContainsFish)
+                        + dayEntity.Meals.Count(m => m.ContainsFish);
+                    if (recentFish >= 3)
+                    {
+                        var plantAlternative = slotPool
+                            .Where(x => !x.Candidate.ContainsFish).ToList();
+                        if (plantAlternative.Count == 0)
+                            return ServiceResult.Failure<MealPlan>(
+                                "fish_frequency_limit",
+                                "No suitable plant-forward alternative is available for the weekly fish limit.");
+                        selected = plantAlternative[pickIndex % plantAlternative.Count];
+                    }
+                }
 
                 var plannedMeal = new PlannedMeal
                 {

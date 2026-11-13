@@ -221,6 +221,65 @@ public sealed class CatalogApiTests : IClassFixture<IntegrationTestWebApplicatio
     }
 
     [Fact]
+    public async Task AdminCreatedRecipe_AppearsAsMemberPlanCandidate_AndDeactivationRemovesIt()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var admin = _factory.CreateHttpsClient();
+        await AuthenticateAsAdminAsync(admin);
+
+        var foodResponse = await admin.PostAsJsonAsync("/api/v1/admin/foods",
+            CreateFoodRequest("Verified QA lentils"));
+        Assert.Equal(HttpStatusCode.Created, foodResponse.StatusCode);
+        using var foodJson = JsonDocument.Parse(await foodResponse.Content.ReadAsStringAsync());
+        var foodId = foodJson.RootElement.GetProperty("id").GetGuid();
+
+        var recipeResponse = await admin.PostAsJsonAsync("/api/v1/admin/recipes", new
+        {
+            Name = "QA plant-forward lentil bowl",
+            Description = "Verified test recipe with one explicit ingredient and entered nutrients",
+            Category = "Lunch",
+            Cuisine = "Vietnamese",
+            Tags = "plant-forward",
+            ServingCount = 1, PrepMinutes = 20,
+            CaloriesPerServing = 420m, ProteinGPerServing = 16m,
+            CarbohydrateGPerServing = 58m, FatGPerServing = 10m,
+            SaturatedFatGPerServing = 1m, SugarGPerServing = 3m,
+            FiberGPerServing = 11m,
+            IsPlantForward = true, HasLegume = true,
+            HasWholeGrain = false, HasFish = false,
+            Ingredients = new[] { new { FoodId = foodId, Amount = 120m, Unit = "g", IsOptional = false } },
+            AllergenIds = Array.Empty<Guid>(),
+        });
+        Assert.Equal(HttpStatusCode.Created, recipeResponse.StatusCode);
+        using var recipeJson = JsonDocument.Parse(await recipeResponse.Content.ReadAsStringAsync());
+        var recipeId = recipeJson.RootElement.GetProperty("id").GetGuid();
+        var candidateCode = $"CAT-{recipeId:N}";
+
+        // The same scoped catalog API is available to an ordinary signed-in user.
+        using var member = _factory.CreateHttpsClient();
+        var memberSession = await RegisterAsync(member);
+        member.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", memberSession.AccessToken);
+
+        var response = await member.GetAsync("/api/v1/meal-plans/candidates");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var candidatesJson = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var candidate = Assert.Single(candidatesJson.RootElement.EnumerateArray(),
+            item => item.GetProperty("candidateCode").GetString() == candidateCode);
+        Assert.Equal("QA plant-forward lentil bowl", candidate.GetProperty("title").GetString());
+        Assert.Equal(420, candidate.GetProperty("caloriesKcal").GetInt32());
+        Assert.Contains(candidate.GetProperty("supportedSlots").EnumerateArray(),
+            slot => slot.GetString() == "Lunch");
+
+        var deactivate = await admin.DeleteAsync($"/api/v1/admin/recipes/{recipeId}");
+        Assert.Equal(HttpStatusCode.NoContent, deactivate.StatusCode);
+        using var afterJson = JsonDocument.Parse(
+            await (await member.GetAsync("/api/v1/meal-plans/candidates")).Content.ReadAsStringAsync());
+        Assert.DoesNotContain(afterJson.RootElement.EnumerateArray(),
+            item => item.GetProperty("candidateCode").GetString() == candidateCode);
+    }
+
+    [Fact]
     public async Task RulePublish_PublishedVersionBecomesImmutable()
     {
         await _factory.ResetDatabaseAsync();

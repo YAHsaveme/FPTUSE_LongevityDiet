@@ -190,6 +190,16 @@ public sealed class MealPlansController(
         return Ok(ToResponse(result.Value));
     }
 
+    [HttpGet("ai-status")]
+    public IActionResult GetAiStatus() => Ok(new
+    {
+        enabled = mealPlanningService.IsAiConfigured,
+        provider = mealPlanningService.IsAiConfigured ? "LocalOllama" : "None",
+        description = mealPlanningService.IsAiConfigured
+            ? "AI đề xuất mã món từ danh mục đã lọc theo dị ứng, hệ thống xác thực lại trước khi lưu."
+            : "Mô hình AI chưa được cấu hình. Bạn vẫn có thể tạo thực đơn theo quy tắc nguồn chính thức."
+    });
+
     [HttpPost]
     [HttpPost("generate")]
     [ProducesResponseType<MealPlanResponse>(StatusCodes.Status201Created)]
@@ -214,7 +224,8 @@ public sealed class MealPlansController(
                 effectiveRequest.DietaryPattern,
                 effectiveRequest.Allergies,
                 effectiveRequest.ExcludedFoods,
-                effectiveRequest.PreferredCuisine),
+                effectiveRequest.PreferredCuisine,
+                effectiveRequest.UseAi),
             cancellationToken);
 
         if (!result.Succeeded || result.Value is null)
@@ -310,6 +321,59 @@ public sealed class MealPlansController(
             cancellationToken);
 
         return result.Succeeded ? Ok(result.Value) : this.ToProblem(result);
+    }
+
+    [HttpPost("{planId:guid}/days/{dayId:guid}/meals")]
+    [ProducesResponseType<MealPlanResponse>(StatusCodes.Status201Created)]
+    public async Task<ActionResult<MealPlanResponse>> AddMeal(
+        Guid planId, Guid dayId, SavePlannedMealRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await mealPlanningService.AddPlannedMealAsync(userId, planId, dayId,
+            new SavePlannedMealCommand(request.CandidateCode, request.SlotType, request.PlannedTime),
+            cancellationToken);
+        return result.Succeeded && result.Value is not null
+            ? CreatedAtAction(nameof(GetPlanById), new { planId }, ToResponse(result.Value))
+            : this.ToProblem(result);
+    }
+
+    [HttpPut("{planId:guid}/meals/{plannedMealId:guid}")]
+    [ProducesResponseType<MealPlanResponse>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<MealPlanResponse>> UpdateMeal(
+        Guid planId, Guid plannedMealId, SavePlannedMealRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await mealPlanningService.UpdatePlannedMealAsync(userId, planId, plannedMealId,
+            new SavePlannedMealCommand(request.CandidateCode, request.SlotType, request.PlannedTime),
+            cancellationToken);
+        return result.Succeeded && result.Value is not null
+            ? Ok(ToResponse(result.Value))
+            : this.ToProblem(result);
+    }
+
+    [HttpDelete("{planId:guid}/meals/{plannedMealId:guid}")]
+    [ProducesResponseType<MealPlanResponse>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<MealPlanResponse>> DeleteMeal(
+        Guid planId, Guid plannedMealId, CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await mealPlanningService.DeletePlannedMealAsync(
+            userId, planId, plannedMealId, cancellationToken);
+        return result.Succeeded && result.Value is not null
+            ? Ok(ToResponse(result.Value))
+            : this.ToProblem(result);
+    }
+
+    /// <summary>Soft-delete a meal plan; earlier revisions remain available in history.</summary>
+    [HttpDelete("{planId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> ArchivePlan(Guid planId, CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await mealPlanningService.ArchivePlanAsync(userId, planId, cancellationToken);
+        return result.Succeeded ? NoContent() : this.ToProblem(result);
     }
 
     [HttpGet("{planId:guid}/replacements")]

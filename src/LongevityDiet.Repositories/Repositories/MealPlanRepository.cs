@@ -84,6 +84,11 @@ public sealed class MealPlanRepository(LongevityDietDbContext dbContext) : IMeal
         await dbContext.MealPlans.AddAsync(mealPlan, cancellationToken);
     }
 
+    public async Task AddPlannedMealAsync(PlannedMeal meal, CancellationToken cancellationToken = default) =>
+        await dbContext.PlannedMeals.AddAsync(meal, cancellationToken);
+
+    public void RemovePlannedMeal(PlannedMeal meal) => dbContext.PlannedMeals.Remove(meal);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
