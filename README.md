@@ -4,6 +4,8 @@
 
 **PRN232 deployment choice (13 Nov 2026):** The original Final Assignment allows **Docker Desktop + Docker Compose OR public cloud**. This team uses local Docker Compose as the official graded deployment; **no public domain, DNS, HTTPS:443 or cloud account is required for the assignment**. See [Deployment scope — no domain](docs/assignment/PRN232-DOCKER-DEPLOYMENT-NO-DOMAIN.md). Production go-live and ADR-005 data cutover are separate, optional future work.
 
+**Wellness UI refresh (13 Nov 2026):** Design is guided by the [UI UX Pro Max skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), installed locally under `.agents/skills/ui-ux-pro-max/` and `.claude/skills/ui-ux-pro-max/`. [Project-specific design system](design-system/longevity-diet/MASTER.md) defines the Verdant palette, accessible responsive layout and route-aware member navigation. Frontend/CSS only; no API, authentication, database, RabbitMQ or Docker behavior changed.
+
 **Notification delivery hardening (13 Nov 2026):** [Mailbox OTP verification, Redis/RabbitMQ SMTP QA and Web Push logout/opt-out privacy](docs/operations/EMAIL_VERIFICATION_AND_PUSH_PRIVACY_20261113.md). Email and Web Push production transports remain **OFF by default**, real Gmail/device delivery is unverified, and ADR-005 data cutover is still blocked. These changes are source-only, not an announcement of customer production readiness.
 
 **Member 1 + Member 4 acceptance:** [Eight-task completion matrix and remaining live verification](docs/assignment/MEMBER1-MEMBER4-COMPLETION-CHECKLIST-20261110.md). Admin Rule Governance now includes independent two-admin publication review, a paginated safety queue and read-only historical plan-impact counts.

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'motion/react'
 import {
   Activity,
@@ -8,6 +9,8 @@ import {
   Clock3,
   Dumbbell,
   Leaf,
+  Menu,
+  X,
   ShieldCheck,
   UserRound,
   Utensils,
@@ -41,10 +44,13 @@ const principles = [
 ]
 export function HomePage() {
   const { user } = useAuth()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div className="site-shell">
-      <header className="topbar">
+      <header className="topbar" onKeyDown={(event) => {
+        if (event.key === 'Escape') setMobileMenuOpen(false)
+      }}>
         <Link className="brand" to="/" aria-label="Longevity home">
           <span className="brand-monogram">L</span>
           <span className="brand-copy">
@@ -60,14 +66,35 @@ export function HomePage() {
           <a href="#principles">Nguyên tắc</a>
         </nav>
         <div className="header-actions">
+          <button
+            type="button"
+            className="mobile-menu-button"
+            aria-label={mobileMenuOpen ? 'Đóng menu trang chủ' : 'Mở menu trang chủ'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-section-navigation"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? <X size={19} aria-hidden="true" /> : <Menu size={19} aria-hidden="true" />}
+          </button>
           <Link className="round-button" aria-label="Thông báo" to={user ? '/notifications' : '/login'}>
             <Bell size={17} strokeWidth={1.7} />
           </Link>
-          <Link className="account-button" to={user ? '/profile' : '/login'}>
+          <Link className="account-button" to={user ? '/profile' : '/login'} aria-label={user ? `Tài khoản ${user.displayName}` : 'Đăng nhập'}>
             <UserRound size={16} strokeWidth={1.7} />
             <span>{user ? user.displayName : 'Đăng nhập'}</span>
           </Link>
         </div>
+        <nav
+          id="mobile-section-navigation"
+          className="mobile-section-navigation"
+          aria-label="Điều hướng trang chủ trên điện thoại"
+          hidden={!mobileMenuOpen}
+        >
+          <a href="#today" onClick={() => setMobileMenuOpen(false)}>Hôm nay</a>
+          <a href="#plan" onClick={() => setMobileMenuOpen(false)}>Kế hoạch mẫu</a>
+          <a href="#journey" onClick={() => setMobileMenuOpen(false)}>Hành trình mẫu</a>
+          <a href="#principles" onClick={() => setMobileMenuOpen(false)}>Nguyên tắc</a>
+        </nav>
       </header>
 
       <main>
@@ -78,7 +105,7 @@ export function HomePage() {
               Một nhịp sống
               <em> dịu dàng hơn</em>
               <br />
-              cho một hành trình dài lâu.
+              cho một hành trình dài&nbsp;lâu.
             </h1>
             <p className="hero-description">
               Xây dựng thói quen ăn uống và vận động bền vững theo nhịp riêng của bạn,
@@ -88,7 +115,7 @@ export function HomePage() {
               {user && <Link className="primary-button" to="/activity">
                 Ghi hoạt động thực tế <ArrowRight size={16} />
               </Link>}
-              <Link className="primary-button" to="/app">
+              <Link className="primary-button" to={user ? '/app' : '/register'}>
                 {user ? 'Tiếp tục ngày hôm nay' : 'Bắt đầu hành trình'}
                 <ArrowRight size={16} strokeWidth={1.8} />
               </Link>
@@ -112,7 +139,7 @@ export function HomePage() {
                 <span className="micro-label">NHỊP ĐỘ HÔM NAY</span>
                 <h2>Đang đi đúng hướng</h2>
               </div>
-              <span className="date-chip">HÔM NAY</span>
+              <span className="date-chip">BẢN MINH HỌA</span>
             </div>
             <div className="score-composition">
               <div className="score-ring">
@@ -121,7 +148,7 @@ export function HomePage() {
               <div className="score-copy">
                 <span>Chỉ số tuân thủ</span>
                 <strong>Ổn định</strong>
-                <p>Dữ liệu minh họa; dữ liệu thật sẽ được nối ở Week 2.</p>
+                <p>Chỉ số minh họa. Đăng nhập để xem tiến độ của riêng bạn.</p>
               </div>
             </div>
             <div className="daily-divider" />
@@ -136,10 +163,10 @@ export function HomePage() {
         <motion.section className="overview-section" id="plan" {...reveal}>
           <div className="section-heading">
             <div>
-              <span className="eyebrow">TỔNG QUAN HÔM NAY</span>
+              <span className="eyebrow">XEM TRƯỚC · DỮ LIỆU MINH HỌA</span>
               <h2>Mọi thứ bạn cần, vừa đủ trong một nhịp nhìn.</h2>
             </div>
-            <Link className="section-link" to="/app">
+            <Link className="section-link" to={user ? '/app' : '/register'}>
               Xem khu vực ứng dụng <ArrowRight size={15} />
             </Link>
           </div>
@@ -180,10 +207,10 @@ export function HomePage() {
 
         <motion.section className="journey-section" id="journey" {...reveal}>
           <div className="journey-copy">
-            <span className="eyebrow eyebrow-light">HÀNH TRÌNH 14 NGÀY</span>
+            <span className="eyebrow eyebrow-light">HÀNH TRÌNH 14 NGÀY · MINH HỌA</span>
             <h2>Tạo một nhịp sống mà bạn thực sự muốn duy trì.</h2>
             <p>Mỗi ngày tập trung vào một lựa chọn nhỏ, có mục đích và phù hợp với nhịp sống của bạn.</p>
-            <Link className="light-button" to="/app">Tiếp tục hành trình <ArrowRight size={16} /></Link>
+            <Link className="light-button" to={user ? '/app' : '/register'}>{user ? 'Tiếp tục hành trình' : 'Tạo hành trình của bạn'} <ArrowRight size={16} /></Link>
           </div>
           <div className="journey-progress">
             <div className="journey-number"><span>Ngày</span><strong>06</strong><small>trên 14</small></div>
@@ -197,7 +224,7 @@ export function HomePage() {
         <motion.section className="insight-section" {...reveal}>
           <div className="insight-ornament" aria-hidden="true"><Leaf size={66} strokeWidth={0.8} /></div>
           <div className="insight-copy">
-            <span className="eyebrow">GỢI Ý RIÊNG CHO BẠN</span>
+            <span className="eyebrow">GỢI Ý THAM KHẢO · MINH HỌA</span>
             <h2>Một thay đổi nhỏ cho buổi tối nhẹ nhàng hơn.</h2>
             <p>Hãy thử hoàn thành bữa tối sớm hơn một chút để tạo khoảng nghỉ trước giờ ngủ.</p>
             <Link to={user ? '/profile' : '/register'}>
