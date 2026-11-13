@@ -25,6 +25,8 @@ import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
 import { FmdWorkspaceSection } from './FmdWorkspaceSection'
 import { WellnessJourneyPanel } from './WellnessJourneyPanel'
+import { MealPlanEditor } from './MealPlanEditor'
+import './meal-ai.css'
 
 export type PlannedMealDto = {
   id: string
@@ -380,6 +382,7 @@ export function PlannerWorkspacePage() {
   const [excludedFoodsTextDraft, setExcludedFoodsTextDraft] = useState<string | null>(null)
   const [plannerFeedback, setPlannerFeedback] = useState<string | null>(null)
   const [plannerError, setPlannerError] = useState<string | null>(null)
+  const [useLocalAi, setUseLocalAi] = useState(false)
 
   // Week 2 - Task 3 state: Recommendation v2 drawer + Food Preferences + Feedback
   const [inspectedMealId, setInspectedMealId] = useState<string | null>(null)
@@ -409,6 +412,12 @@ export function PlannerWorkspacePage() {
   const preferencesQuery = useQuery({
     queryKey: ['meal-plan-preferences'],
     queryFn: async () => (await api.get<DietaryPreferenceDto>('/meal-plans/preferences')).data,
+  })
+
+  const aiStatusQuery = useQuery({
+    queryKey: ['meal-plan-ai-status'],
+    queryFn: async () => (await api.get<{ enabled: boolean; provider: string; description: string }>('/meal-plans/ai-status')).data,
+    retry: false,
   })
 
   const candidatesQuery = useQuery({
@@ -515,6 +524,7 @@ export function PlannerWorkspacePage() {
         allergies: selectedAllergies,
         excludedFoods: parseExcludedList(),
         preferredCuisine: preferredCuisine || null,
+        useAi: useLocalAi && aiStatusQuery.data?.enabled === true,
       })
       return response.data
     },
@@ -970,7 +980,7 @@ export function PlannerWorkspacePage() {
           <div className="section-heading">
             <div>
               <span className="eyebrow">KẾ HOẠCH BỮA ĂN & GỢI Ý THAY THẾ (PLANNER + GRPC V2)</span>
-              <h2>Thực đơn 7 ngày cá nhân hóa theo nguyên tắc trường thọ.</h2>
+              <h2>Thực đơn theo nguyên tắc trường thọ, có nguồn và chỉnh sửa từng bữa.</h2>
             </div>
           </div>
 
@@ -1055,6 +1065,26 @@ export function PlannerWorkspacePage() {
                 {plannerFeedback}
               </p>
             )}
+
+            <div className="meal-ai-option surface-card">
+              <div>
+                <span className="micro-label">BỘ LẬP THỰC ĐƠN · MINH BẠCH</span>
+                <p>
+                  <strong>Chế độ quy tắc:</strong> sẵn dùng, chọn món từ danh mục theo
+                  nguyên tắc công khai của Valter Longo Foundation, kiểm tra dị ứng trước khi lưu.
+                </p>
+                <p>
+                  <strong>AI cục bộ:</strong> {aiStatusQuery.data?.description ??
+                    'Đang kiểm tra khả năng kết nối mô hình AI...'}
+                </p>
+              </div>
+              <label className="meal-ai-checkbox">
+                <input type="checkbox" checked={useLocalAi && aiStatusQuery.data?.enabled === true}
+                  disabled={!aiStatusQuery.data?.enabled}
+                  onChange={event => setUseLocalAi(event.target.checked)} />
+                <span>Dùng AI chọn món từ danh mục an toàn</span>
+              </label>
+            </div>
 
             <div className="planner-action-bar">
               <button
@@ -1155,6 +1185,20 @@ export function PlannerWorkspacePage() {
                       Tổng năng lượng dự kiến: <strong>{activeDay.totalPlannedCaloriesKcal} kcal</strong>
                     </span>
                   </div>
+
+                  <MealPlanEditor
+                    key={plan.id + ':' + activeDay.id}
+                    plan={plan}
+                    day={activeDay}
+                    candidates={candidatesQuery.data ?? []}
+                    onUpdated={(updated) => queryClient.setQueryData(['meal-plan-current'], updated)}
+                    onArchived={() => {
+                      queryClient.setQueryData(['meal-plan-current'], null)
+                      setPlannerFeedback('Đã lưu trữ thực đơn. Hãy tạo kế hoạch mới khi bạn cần.')
+                      setPlannerError(null)
+                      setInspectedMealId(null)
+                    }}
+                  />
 
                   <div className="planned-meals-grid">
                     {activeDay.meals.map((meal) => {

@@ -75,13 +75,20 @@ public sealed record GenerateMealPlanCommand(
     string? DietaryPattern = null,
     IReadOnlyList<string>? Allergies = null,
     IReadOnlyList<string>? ExcludedFoods = null,
-    string? PreferredCuisine = null);
+    string? PreferredCuisine = null,
+    bool UseAi = false);
 
 public sealed record RegenerateMealPlanCommand(
     DateOnly? FromDate = null);
 
 public sealed record RegeneratePlannedMealCommand(
     IReadOnlyList<string>? AdditionalExcludedCodes = null);
+
+/// <summary>Manual CRUD edits select only safe, existing catalog candidates.</summary>
+public sealed record SavePlannedMealCommand(
+    string CandidateCode,
+    string SlotType,
+    TimeOnly PlannedTime);
 
 public sealed record PlannedMealSummary(
     Guid Id,

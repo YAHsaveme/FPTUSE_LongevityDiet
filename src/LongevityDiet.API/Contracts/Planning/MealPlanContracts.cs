@@ -22,13 +22,20 @@ public sealed record GenerateMealPlanRequest(
     [MaxLength(64)] string? DietaryPattern = null,
     IReadOnlyList<string>? Allergies = null,
     IReadOnlyList<string>? ExcludedFoods = null,
-    [MaxLength(120)] string? PreferredCuisine = null);
+    [MaxLength(120)] string? PreferredCuisine = null,
+    bool UseAi = false);
 
 public sealed record RegenerateMealPlanRequest(
     DateOnly? FromDate = null);
 
 public sealed record RegeneratePlannedMealRequest(
     IReadOnlyList<string>? AdditionalExcludedCodes = null);
+
+/// <summary>Use an existing catalog candidate: never allow unchecked AI free-text recipes.</summary>
+public sealed record SavePlannedMealRequest(
+    [Required, MaxLength(80)] string CandidateCode,
+    [Required, MaxLength(24)] string SlotType,
+    TimeOnly PlannedTime);
 
 public sealed record CandidateMealResponse(
     string CandidateCode,

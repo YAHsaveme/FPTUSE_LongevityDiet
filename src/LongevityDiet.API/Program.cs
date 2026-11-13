@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Threading.RateLimiting;
 using System.Text;
+using LongevityDiet.API.AI;
 using LongevityDiet.API.Cloudflare;
 using LongevityDiet.API.Infrastructure;
 using LongevityDiet.API.OpenApi;
@@ -221,6 +222,21 @@ try
     builder.Services.AddScoped<IChallengeProgressRepository, ChallengeProgressRepository>();
     builder.Services.AddScoped<IWeeklyReportWorkerRepository, WeeklyReportWorkerRepository>();
     builder.Services.AddScoped<IPlanningInputProvider, PlanningCatalogSnapshotProvider>();
+    // Local, opt-in AI. Without an installed/configured model, the planner remains
+    // deterministic and the UI must never claim that an AI model generated it.
+    if (builder.Configuration.GetValue<bool>("MealPlanningAI:Enabled") &&
+        !string.IsNullOrWhiteSpace(builder.Configuration["MealPlanningAI:Model"]))
+    {
+        var baseUrl = builder.Configuration["MealPlanningAI:OllamaUrl"] ?? "http://127.0.0.1:11434/";
+        var uri = new Uri(baseUrl, UriKind.Absolute);
+        if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            throw new InvalidOperationException("MealPlanningAI:OllamaUrl must be HTTP(S).");
+        builder.Services.AddHttpClient<IAiMealChoiceGenerator, OllamaMealChoiceGenerator>(client =>
+        {
+            client.BaseAddress = uri;
+            client.Timeout = TimeSpan.FromSeconds(28);
+        });
+    }
     builder.Services.AddScoped<ITrackingUserScheduleProvider, TrackingUserScheduleProvider>();
     builder.Services.AddSingleton<IRecommendationEngineClient, GrpcRecommendationEngineClient>();
     builder.Services.AddScoped<SafeExplanationRewriter>();

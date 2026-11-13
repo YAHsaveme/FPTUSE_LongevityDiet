@@ -232,7 +232,7 @@ export function WellnessJourneyPanel({ todayIso }: { todayIso: string }) {
               onClick={() => screeningMutation.mutate()}>Lưu sàng lọc an toàn</button>
             {!overview.screeningComplete ? <p role="status">Cần xác nhận dị ứng trước khi hệ thống nối tiếp kế hoạch 14 ngày.</p> : null}
             {overview.requiresProfessionalReview ? (
-              <p role="alert"><strong>Cần chuyên gia đánh giá:</strong> hệ thống không tự thiết lập chế độ ăn hạn chế cho nhóm này.</p>
+              <p role="alert"><strong>Không tự động áp dụng chế độ ăn hạn chế:</strong> tính năng này được khóa vì thông tin sàng lọc có thể cần đánh giá y tế riêng. Bạn vẫn có thể quản lý nguyên liệu, món ăn và nhật ký hằng ngày.</p>
             ) : null}
           </div>
 
@@ -314,7 +314,7 @@ export function WellnessJourneyPanel({ todayIso }: { todayIso: string }) {
             ) : null}
             {overview.trend.repeatedLowWellbeing ? (
               <p role="alert">Bạn đã nhiều lần đánh giá sức khỏe ở mức rất thấp trong tuần.
-                Cân nhắc tạm dừng thay đổi ăn uống và trao đổi với chuyên gia y tế.</p>
+                Nên tạm dừng thay đổi chế độ ăn; nếu tình trạng kéo dài hoặc nặng lên, hãy liên hệ cơ sở y tế phù hợp.</p>
             ) : null}
             <ul>
               {recent.slice(0, 14).map((entry) => (
