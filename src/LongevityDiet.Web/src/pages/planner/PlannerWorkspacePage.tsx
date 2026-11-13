@@ -1074,9 +1074,16 @@ export function PlannerWorkspacePage() {
                   nguyên tắc công khai của Valter Longo Foundation, kiểm tra dị ứng trước khi lưu.
                 </p>
                 <p>
-                  <strong>AI cục bộ:</strong> {aiStatusQuery.data?.description ??
+                  <strong>{aiStatusQuery.data?.provider === 'Gemini' ? 'Gemini API' : aiStatusQuery.data?.provider === 'LocalOllama' ? 'Ollama cục bộ' : 'AI tùy chọn'}:</strong> {aiStatusQuery.data?.description ??
                     'Đang kiểm tra khả năng kết nối mô hình AI...'}
                 </p>
+                {aiStatusQuery.data?.provider === 'Gemini' && (
+                  <p className="meal-ai-privacy">
+                    Khi bật Gemini và tạo thực đơn, danh sách mã/tên món an toàn được gửi tới Google;
+                    không gửi hồ sơ sức khỏe. Dịch vụ có hạn mức và có thể phát sinh phí.
+                    Bạn vẫn có thể dùng chế độ quy tắc mà không gọi Gemini.
+                  </p>
+                )}
               </div>
               <label className="meal-ai-checkbox">
                 <input type="checkbox" checked={useLocalAi && aiStatusQuery.data?.enabled === true}

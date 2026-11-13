@@ -15,7 +15,8 @@ namespace LongevityDiet.API.Controllers;
 public sealed class MealPlansController(
     MealPlanningService mealPlanningService,
     RecommendationService recommendationService,
-    ICurrentUser currentUser) : ControllerBase
+    ICurrentUser currentUser,
+    IConfiguration configuration) : ControllerBase
 {
     [HttpGet("preferences")]
     [ProducesResponseType<DietaryPreferenceResponse>(StatusCodes.Status200OK)]
@@ -191,14 +192,24 @@ public sealed class MealPlansController(
     }
 
     [HttpGet("ai-status")]
-    public IActionResult GetAiStatus() => Ok(new
+    public IActionResult GetAiStatus()
     {
-        enabled = mealPlanningService.IsAiConfigured,
-        provider = mealPlanningService.IsAiConfigured ? "LocalOllama" : "None",
-        description = mealPlanningService.IsAiConfigured
-            ? "AI đề xuất mã món từ danh mục đã lọc theo dị ứng, hệ thống xác thực lại trước khi lưu."
-            : "Mô hình AI chưa được cấu hình. Bạn vẫn có thể tạo thực đơn theo quy tắc nguồn chính thức."
-    });
+        var enabled = mealPlanningService.IsAiConfigured;
+        var isOllama = string.Equals(configuration["MealPlanningAI:Provider"],
+            "Ollama", StringComparison.OrdinalIgnoreCase);
+        var provider = !enabled ? "None" : isOllama ? "LocalOllama" : "Gemini";
+        return Ok(new
+        {
+            enabled,
+            provider,
+            // Configuration does not prove provider reachability or quota.
+            description = !enabled
+                ? "Mô hình AI chưa được cấu hình. Bạn vẫn có thể tạo thực đơn bằng bộ quy tắc."
+                : isOllama
+                    ? "Ollama đã có cấu hình. Chỉ gọi mô hình khi bạn chọn dùng AI."
+                    : "Gemini đã có cấu hình API key. Chỉ gửi mã và tên món đã lọc khi bạn chọn dùng AI; kết quả phải qua kiểm tra an toàn."
+        });
+    }
 
     [HttpPost]
     [HttpPost("generate")]
