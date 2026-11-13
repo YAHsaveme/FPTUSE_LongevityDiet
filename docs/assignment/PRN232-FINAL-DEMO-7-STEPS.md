@@ -69,6 +69,9 @@ Kỳ vọng: REST_TO_GRPC_LIVE=PASS. Không tính lời gọi phương thức C#
 
 ## 06. Docker deployment
 
+**Scope quyết định 13/11/2026:** Đề gốc cho phép **Docker Desktop + Docker Compose HOẶC public cloud**. Nhóm đã chọn **Docker Compose localhost** để đáp ứng phần Deployment (10%). **Không yêu cầu domain, mua hosting, DNS công khai hay HTTPS:443** cho bài nộp và demo. Xem `docs/assignment/PRN232-DOCKER-DEPLOYMENT-NO-DOMAIN.md`.
+
+
 Hiển thị Dockerfile API, Worker, gRPC, Web và gateway tùy chọn; file docker-compose.yml, named volumes SQL Server/Redis và migration EF. PDF cho phép **Docker Desktop/Compose hoặc public Cloud**, không yêu cầu cả hai. Mở readiness endpoints và cho thấy các container kết nối.
 
     docker compose --env-file .env.example config --quiet

@@ -40,7 +40,7 @@ Các ô [x] là **bài demo tự động/QA đã tái hiện**, **không chứng
 - [ ] **Nhóm nghiệm thu 16 task** theo phân công thực tế và ký nhận; CI không thay thế chữ ký đó.
 - [ ] **Giảng viên xem demo và chấm điểm**. Không ghi 100/100 khi chưa có bảng điểm được xác nhận.
 - [ ] **Production cutover ADR-005:** cần đối soát định danh/quyền/refresh-token với legacy, chiến lược concurrent writes, backup khôi phục kiểm thử, dữ liệu migration, audit rollback, review bảo mật và phê duyệt owner. Bài kiểm tra cutover cố tình FAIL-CLOSED; tuyệt đối không bypass.
-- [ ] **Public HTTPS :443**: cần domain/DNS/ingress và TLS certificate hợp lệ do nhóm sở hữu; hiện target chỉ chạy localhost QA. Không coi chứng chỉ self-signed hoặc mở cổng máy local là production TLS.
+- **Không nằm trong rubric PRN232 — domain/public HTTPS:443**: File Final Assignment cho phép deploy **Docker Desktop + Docker Compose hoặc public cloud**. Nhóm chọn Compose trên localhost, **không cần domain/DNS/TLS công khai để nộp bài**. Nếu tương lai thực sự triển khai production thì phải đánh giá TLS và migration riêng. Xem `docs/assignment/PRN232-DOCKER-DEPLOYMENT-NO-DOMAIN.md`.
 - [ ] **Kiểm định dinh dưỡng / dữ liệu tham chiếu** nếu nhóm đặt tiêu chuẩn này; không có bằng chứng chuyên gia cấp chứng nhận. Đây không phải điều kiện bắt buộc trong PDF PRN232.
 
 ## 4. Quyết định sẵn sàng và trách nhiệm
