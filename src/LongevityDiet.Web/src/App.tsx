@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './auth/ProtectedRoute'
+import { QuickNavigation } from './components/QuickNavigation'
 
 const HomePage = lazy(() =>
   import('./pages/HomePage').then((module) => ({ default: module.HomePage })),
@@ -81,8 +82,9 @@ function App() {
   return (
     <>
       {import.meta.env.VITE_STATIC_PREVIEW === 'true' && (
-        <div role="status" style={{ padding: '0.85rem 1.25rem', background: '#fff2d8', color: '#513a1c', fontWeight: 600, textAlign: 'center' }}>
-          Bản xem giao diện miễn phí phục vụ học tập. Chưa kết nối máy chủ API; không đăng ký tài khoản hoặc nhập dữ liệu cá nhân thật.
+        <div role="status" className="preview-banner">
+          <strong>Bản xem trước giao diện</strong>
+          <span>Chưa kết nối API. Không đăng ký hoặc nhập dữ liệu cá nhân thật.</span>
         </div>
       )}
       <a className="skip-link" href="#main-content">Bỏ qua điều hướng</a>
@@ -194,6 +196,7 @@ function App() {
       </Routes>
     </Suspense>
   </div>
+  <QuickNavigation />
 </>
   )
 }
