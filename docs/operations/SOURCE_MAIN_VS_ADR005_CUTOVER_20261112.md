@@ -2,6 +2,8 @@
 
 ## Decision boundaries
 
+**Academic scope update (13 November 2026):** Per the original PRN232 Final Assignment, **Docker Desktop with Docker Compose is sufficient for the deployment requirement**; a public DNS domain, public TLS:443, cloud provider, and historical customer-data cutover are **not required** for the course demo. See `docs/assignment/PRN232-DOCKER-DEPLOYMENT-NO-DOMAIN.md`. The historical ADR-005 production NO-GO section below remains applicable **only if the team separately decides to publish the system for real users**; removing the academic domain task does not waive production safety checks.
+
 The project has TWO different decisions. A source-code integration to `main`
 must **not** be represented as a production-domain/data cutover or a 100/100
 grade. Current runtime and optional ADR-005 Target QA are different deployments.
