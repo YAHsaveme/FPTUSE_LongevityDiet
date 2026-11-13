@@ -35,6 +35,12 @@ type Preference = {
   timeZone: string
 }
 type Schedule = { category: Category; dueAtUtc: string; timeZone: string }
+type EmailVerificationStatus = {
+  enabled: boolean
+  verified: boolean
+  retryAfterSeconds: number
+  error: string | null
+}
 const labels: Record<Category, string> = {
   1: 'Ghi bữa ăn', 2: 'Vận động', 3: 'Thử thách', 4: 'Tổng kết tuần',
 }
@@ -59,6 +65,7 @@ export function NotificationsPage() {
   const [browserNotificationsOn, setBrowserNotificationsOn] = useState(false)
   const [backgroundPushOn, setBackgroundPushOn] = useState(false)
   const [backgroundPushBusy, setBackgroundPushBusy] = useState(false)
+  const [emailCode, setEmailCode] = useState('')
   const seenNotifications = useRef<Set<string>>(new Set())
   const firstNotificationLoad = useRef(true)
   const preferences = useQuery({
@@ -66,6 +73,30 @@ export function NotificationsPage() {
     queryFn: async () => (await api.get<Preference>('/reminders/preferences')).data,
   })
   const draft = draftOverride ?? preferences.data ?? null
+  const emailVerification = useQuery({
+    queryKey: ['email-verification-status'],
+    queryFn: async () => (await api.get<EmailVerificationStatus>(
+      '/email-verification/status')).data,
+  })
+  const sendEmailVerification = useMutation({
+    mutationFn: async () => api.post('/email-verification/request'),
+    onSuccess: async () => {
+      setFeedback('Mã xác minh đã được gửi. Hãy kiểm tra hộp thư của bạn.')
+      await queryClient.invalidateQueries({ queryKey: ['email-verification-status'] })
+    },
+    onError: (error) => setFeedback(getApiErrorMessage(error,
+      'Không thể gửi mã. Hãy kiểm tra thời gian chờ hoặc cấu hình email.')),
+  })
+  const confirmEmailVerification = useMutation({
+    mutationFn: async () => api.post('/email-verification/confirm', { code: emailCode }),
+    onSuccess: async () => {
+      setEmailCode('')
+      setFeedback('Địa chỉ email đã được xác minh. Bạn có thể nhận những lời nhắc mới nếu đã đồng ý.')
+      await queryClient.invalidateQueries({ queryKey: ['email-verification-status'] })
+    },
+    onError: (error) => setFeedback(getApiErrorMessage(error,
+      'Mã không hợp lệ, đã hết hạn hoặc số lần thử đã vượt giới hạn.')),
+  })
   const pushConfig = useQuery({
     queryKey: ['web-push-config'],
     queryFn: async () => (await api.get<{ enabled: boolean, vapidPublicKey: string | null }>(
@@ -290,9 +321,39 @@ export function NotificationsPage() {
                 <span>Đồng ý nhận email nhắc lịch qua địa chỉ trong hồ sơ</span>
               </label>
               <p className="tracking-note">
-                Email là tùy chọn riêng, mặc định tắt. Chỉ gửi khi dịch vụ email được quản trị viên cấu hình;
-                bạn có thể tắt bất cứ lúc nào. Nội dung email không chứa thông tin sức khỏe nhạy cảm.
+                Email là tùy chọn riêng, mặc định tắt. Chỉ gửi thông báo mới sau khi
+                bạn xác minh quyền sở hữu email và quản trị viên bật dịch vụ email;
+                bạn có thể tắt bất cứ lúc nào. Không gửi dữ liệu sức khỏe qua thư.
               </p>
+              {emailVerification.isLoading ?
+                <p className="tracking-note">Đang kiểm tra xác minh email...</p> :
+                emailVerification.isError ?
+                  <p role="alert">Không thể kiểm tra trạng thái xác minh email.</p> :
+                  emailVerification.data?.verified ?
+                    <p className="tracking-note">Email đã được xác minh.</p> :
+                    !emailVerification.data?.enabled ?
+                      <p className="tracking-note">Xác minh email chưa được cấu hình trên máy chủ. Email tự động sẽ không gửi tới địa chỉ chưa xác minh.</p> :
+                      <div className="notification-preference">
+                        <p className="tracking-note">Cần xác minh email trước khi nhận lời nhắc. Mã gồm 6 chữ số, hiệu lực 15 phút.</p>
+                        <button type="button" disabled={sendEmailVerification.isPending ||
+                          (emailVerification.data.retryAfterSeconds > 0)}
+                          onClick={() => sendEmailVerification.mutate()}>
+                          {sendEmailVerification.isPending ? 'Đang gửi mã...' :
+                            emailVerification.data.retryAfterSeconds > 0 ?
+                              `Gửi lại sau ${emailVerification.data.retryAfterSeconds}s` : 'Gửi mã xác minh email'}
+                        </button>
+                        <label className="notification-time">Mã xác minh
+                          <input type="text" inputMode="numeric" autoComplete="one-time-code"
+                            maxLength={6} pattern="[0-9]{6}" value={emailCode}
+                            onChange={e => setEmailCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))} />
+                        </label>
+                        <button type="button" disabled={emailCode.length !== 6 ||
+                          confirmEmailVerification.isPending}
+                          onClick={() => confirmEmailVerification.mutate()}>
+                          {confirmEmailVerification.isPending ? 'Đang kiểm tra mã...' : 'Xác minh email'}
+                        </button>
+                      </div>}
+
               <p className="tracking-note">Múi giờ hiện tại: {draft.timeZone}. Thay đổi ở trang Hồ sơ.</p>
               {([
                 ['mealLoggingEnabled', 'mealTime', 'Ghi bữa ăn'],

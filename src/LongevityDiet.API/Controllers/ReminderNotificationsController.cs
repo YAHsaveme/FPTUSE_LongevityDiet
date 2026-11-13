@@ -1,4 +1,5 @@
 using LongevityDiet.API.Security;
+using LongevityDiet.API.Reminders;
 using LongevityDiet.Services.Reminders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
@@ -10,10 +11,17 @@ namespace LongevityDiet.API.Controllers;
 [EnableRateLimiting("member-api")]
 [Authorize]
 [Route("api/v1")]
-public sealed class ReminderNotificationsController(
+public sealed partial class ReminderNotificationsController(
     ReminderService service,
-    ICurrentUser currentUser) : ControllerBase
+    ICurrentUser currentUser,
+    WebPushSubscriptionStore pushSubscriptions,
+    IConfiguration configuration,
+    ILogger<ReminderNotificationsController> logger) : ControllerBase
 {
+    [LoggerMessage(EventId = 5522, Level = LogLevel.Warning,
+        Message = "Web Push cleanup unavailable after reminder opt-out ({Type})")]
+    private static partial void LogPushCleanupFailed(ILogger logger, string type);
+
     [HttpGet("reminders/preferences")]
     public Task<IActionResult> GetPreferences(CancellationToken ct) =>
         Handle(async userId => Ok(await service.GetPreferencesAsync(userId, ct)));
@@ -21,7 +29,22 @@ public sealed class ReminderNotificationsController(
     [HttpPut("reminders/preferences")]
     public Task<IActionResult> SetPreferences(
         ReminderPreferencesInput request, CancellationToken ct) =>
-        Handle(async userId => Ok(await service.UpdatePreferencesAsync(userId, request, ct)));
+        Handle(async userId =>
+        {
+            var saved = await service.UpdatePreferencesAsync(userId, request, ct);
+            if (!saved.OptedIn && WebPushSubscriptionStore.Enabled(configuration))
+            {
+                try { await pushSubscriptions.RemoveAllAsync(userId); }
+                catch (Exception ex)
+                {
+                    // Database consent has already been disabled. The worker
+                    // checks it on every send, so an unavailable Redis cannot
+                    // reactivate delivery; cleanup retries on next opt-out.
+                    LogPushCleanupFailed(logger, ex.GetType().Name);
+                }
+            }
+            return Ok(saved);
+        });
 
     [HttpGet("reminders/preview")]
     public Task<IActionResult> Preview(CancellationToken ct) =>

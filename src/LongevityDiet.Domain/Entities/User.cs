@@ -5,6 +5,12 @@ public sealed class User
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Email { get; set; } = string.Empty;
     public string NormalizedEmail { get; set; } = string.Empty;
+    // Null for every legacy and newly registered address until OTP proof.
+    public DateTime? EmailVerifiedAtUtc { get; set; }
+    public string? EmailVerificationHash { get; set; }
+    public DateTime? EmailVerificationExpiresAtUtc { get; set; }
+    public DateTime? EmailVerificationLastSentAtUtc { get; set; }
+    public int EmailVerificationAttempts { get; set; }
     public string PasswordHash { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public UserRole Role { get; set; } = UserRole.Member;

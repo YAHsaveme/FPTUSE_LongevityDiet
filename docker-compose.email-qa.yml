@@ -14,6 +14,8 @@ services:
   api:
     environment:
       EmailNotifications__Enabled: "true"
+      EmailVerification__Enabled: "true"
+      EmailVerification__HashKeyBase64: ${EMAIL_VERIFICATION_QA_HASH_KEY:?generate_32_random_bytes_for_isolated_email_QA}
       EmailNotifications__SmtpHost: mailpit
       EmailNotifications__SmtpPort: "1025"
       EmailNotifications__SmtpTls: "false"

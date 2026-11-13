@@ -202,7 +202,7 @@ public sealed partial class RabbitEmailNotificationService(
         var pref = await db.ReminderPreferences.AsNoTracking()
             .SingleOrDefaultAsync(p => p.UserId == row.UserId, ct);
 
-        if (user is not { Status: AccountStatus.Active } ||
+        if (user is not { Status: AccountStatus.Active, EmailVerifiedAtUtc: not null } ||
             pref is not { OptedIn: true, EmailOptedIn: true } ||
             !options.CanSendTo(user.Email))
         {

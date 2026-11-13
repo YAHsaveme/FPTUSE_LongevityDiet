@@ -92,6 +92,16 @@ public sealed class WebPushSubscriptionStore(IConfiguration config, TimeProvider
         return true;
     }
 
+    // Clear all device capability URLs immediately on a global reminder opt-out.
+    public async Task RemoveAllAsync(Guid userId)
+    {
+        if (userId == Guid.Empty) return;
+        using var mux = await ConnectionMultiplexer.ConnectAsync(
+            config["Redis:ConnectionString"] ?? throw new InvalidOperationException(
+                "Web Push Redis is not configured."));
+        await mux.GetDatabase().KeyDeleteAsync(Key(userId));
+    }
+
     public async Task RemoveAsync(Guid userId, string endpoint)
     {
         if (userId == Guid.Empty || string.IsNullOrWhiteSpace(endpoint)) return;

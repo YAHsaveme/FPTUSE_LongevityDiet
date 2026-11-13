@@ -96,6 +96,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         user.HasKey(x => x.Id);
         user.Property(x => x.Email).HasMaxLength(320).IsRequired();
         user.Property(x => x.NormalizedEmail).HasMaxLength(320).IsRequired();
+        user.Property(x => x.EmailVerificationHash).HasMaxLength(64);
         user.HasIndex(x => x.NormalizedEmail).IsUnique();
         user.Property(x => x.PasswordHash).HasMaxLength(512).IsRequired();
         user.Property(x => x.DisplayName).HasMaxLength(120).IsRequired();
