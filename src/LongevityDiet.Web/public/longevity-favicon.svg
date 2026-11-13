@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">LongevityDiet — mầm sống xanh</title>
+  <defs>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#25805c"/>
+      <stop offset="1" stop-color="#103f34"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="17" fill="url(#green)"/>
+  <circle cx="51" cy="14" r="10" fill="#e2f4bc" opacity=".13"/>
+  <path d="M31 49V35" fill="none" stroke="#fff8e6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M30 36C20 37 13 30 13 18c11 0 20 6 17 18Z" fill="#d6f2b5"/>
+  <path d="M34 34C32 22 40 15 52 15c0 11-7 19-18 19Z" fill="#f8d985"/>
+  <path d="M21 50c6-2 14-2 22 0" fill="none" stroke="#f8d985" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
