@@ -79,3 +79,20 @@ auth/profile, catalog, planner, progress, activity, notifications, reports
 and admin controls. The new dock is
 only rendered for users who completed onboarding and are in the app.
 No API, migration, broker or other .NET code was edited.
+
+## Living Garden impact layer (13 November 2026)
+- The final loaded stylesheet is `src/LongevityDiet.Web/src/visual-impact.css`.
+  It overrides the earlier Verdant and readability layers without modifying
+  the app's data, authentication, routes or APIs.
+- Large-screen heading at 1440px: ~68px. Mobile 390px: ~40px.
+  Standard app body: 18px; leading description ~20–22px; CTA ~18px.
+  Compact secondary labels may be smaller where unavoidable.
+- Palette chapters: bright mint/honey (#dff0da / #fff5df), teal (#124e44),
+  cream (#fff4d9), lavender (#eeebff), peach (#fdf0ef), lemon (#e9f99c).
+  Text remains dark green on light surfaces or ivory on deep green.
+- Never imply hero score 82 or journey dates come from an account:
+  public marketing cards are examples, visibly marked as such.
+- Screenshot and code QA recorded in
+  `docs/assignment/PRN232_VISUAL_IMPACT_20261113.md`.
+- Avoid further one-off inline styles; add new project rules to the final
+  visual-impact layer and test both compact and wide layouts.

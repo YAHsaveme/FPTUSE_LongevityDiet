@@ -100,16 +100,15 @@ export function HomePage() {
       <main>
         <section className="hero-section" id="today">
           <motion.div className="hero-copy" {...reveal}>
-            <span className="eyebrow">SỐNG KHỎE MỖI NGÀY</span>
+            <span className="eyebrow">DINH DƯỠNG TỐT · THÓI QUEN BỀN VỮNG</span>
             <h1>
-              Một nhịp sống
-              <em> dịu dàng hơn</em>
+              Ăn uống tốt hơn.
               <br />
-              cho một hành trình dài&nbsp;lâu.
+              <em>Sống khỏe</em> mỗi ngày.
             </h1>
             <p className="hero-description">
-              Xây dựng thói quen ăn uống và vận động bền vững theo nhịp riêng của bạn,
-              với những gợi ý rõ ràng, vừa đủ và dễ duy trì mỗi ngày.
+              Lên kế hoạch bữa ăn, theo dõi vận động và nhìn thấy tiến bộ của bạn
+              trong một không gian rõ ràng, gần gũi và dễ sử dụng.
             </p>
             <div className="hero-actions">
               {user && <Link className="primary-button" to="/activity">
@@ -122,9 +121,9 @@ export function HomePage() {
               <a className="secondary-link" href="#journey">Xem hành trình mẫu</a>
             </div>
             <div className="trust-row">
-              <span><ShieldCheck size={15} /> Theo dõi có nguyên tắc</span>
-              <span><BookOpen size={15} /> Giải thích rõ ràng</span>
-              <span><Activity size={15} /> Tiến độ dễ hiểu</span>
+              <span><ShieldCheck size={18} /> Nguyên tắc có nguồn</span>
+              <span><BookOpen size={18} /> Gợi ý dễ hiểu</span>
+              <span><Activity size={18} /> Theo dõi mỗi ngày</span>
             </div>
           </motion.div>
 
@@ -164,7 +163,7 @@ export function HomePage() {
           <div className="section-heading">
             <div>
               <span className="eyebrow">XEM TRƯỚC · DỮ LIỆU MINH HỌA</span>
-              <h2>Mọi thứ bạn cần, vừa đủ trong một nhịp nhìn.</h2>
+              <h2>Bữa ăn, vận động và tiến độ — tất cả ở một nơi.</h2>
             </div>
             <Link className="section-link" to={user ? '/app' : '/register'}>
               Xem khu vực ứng dụng <ArrowRight size={15} />
@@ -208,7 +207,7 @@ export function HomePage() {
         <motion.section className="journey-section" id="journey" {...reveal}>
           <div className="journey-copy">
             <span className="eyebrow eyebrow-light">HÀNH TRÌNH 14 NGÀY · MINH HỌA</span>
-            <h2>Tạo một nhịp sống mà bạn thực sự muốn duy trì.</h2>
+            <h2>Thói quen tốt bắt đầu từ những ngày nhỏ.</h2>
             <p>Mỗi ngày tập trung vào một lựa chọn nhỏ, có mục đích và phù hợp với nhịp sống của bạn.</p>
             <Link className="light-button" to={user ? '/app' : '/register'}>{user ? 'Tiếp tục hành trình' : 'Tạo hành trình của bạn'} <ArrowRight size={16} /></Link>
           </div>
@@ -225,7 +224,7 @@ export function HomePage() {
           <div className="insight-ornament" aria-hidden="true"><Leaf size={66} strokeWidth={0.8} /></div>
           <div className="insight-copy">
             <span className="eyebrow">GỢI Ý THAM KHẢO · MINH HỌA</span>
-            <h2>Một thay đổi nhỏ cho buổi tối nhẹ nhàng hơn.</h2>
+            <h2>Những điều chỉnh nhỏ tạo nên khác biệt.</h2>
             <p>Hãy thử hoàn thành bữa tối sớm hơn một chút để tạo khoảng nghỉ trước giờ ngủ.</p>
             <Link to={user ? '/profile' : '/register'}>
               {user ? 'Điều chỉnh hồ sơ' : 'Thiết lập hồ sơ'} <ArrowRight size={15} />
@@ -243,7 +242,7 @@ export function HomePage() {
           <div className="section-heading">
             <div>
               <span className="eyebrow">NGUYÊN TẮC NỀN TẢNG</span>
-              <h2>Đủ rõ để hành động, đủ nhẹ để duy trì.</h2>
+              <h2>4 nguyên tắc để bắt đầu đơn giản.</h2>
             </div>
           </div>
           <div className="principles-grid">
