@@ -222,20 +222,40 @@ try
     builder.Services.AddScoped<IChallengeProgressRepository, ChallengeProgressRepository>();
     builder.Services.AddScoped<IWeeklyReportWorkerRepository, WeeklyReportWorkerRepository>();
     builder.Services.AddScoped<IPlanningInputProvider, PlanningCatalogSnapshotProvider>();
-    // Local, opt-in AI. Without an installed/configured model, the planner remains
-    // deterministic and the UI must never claim that an AI model generated it.
-    if (builder.Configuration.GetValue<bool>("MealPlanningAI:Enabled") &&
-        !string.IsNullOrWhiteSpace(builder.Configuration["MealPlanningAI:Model"]))
+    // AI is opt-in per plan. Server-side User Secrets / environment configuration
+    // must be present; no key, model or health record is exposed to the browser.
+    // Gemini is the default when configured; Ollama remains an optional local path.
+    if (builder.Configuration.GetValue<bool>("MealPlanningAI:Enabled"))
     {
-        var baseUrl = builder.Configuration["MealPlanningAI:OllamaUrl"] ?? "http://127.0.0.1:11434/";
-        var uri = new Uri(baseUrl, UriKind.Absolute);
-        if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
-            throw new InvalidOperationException("MealPlanningAI:OllamaUrl must be HTTP(S).");
-        builder.Services.AddHttpClient<IAiMealChoiceGenerator, OllamaMealChoiceGenerator>(client =>
+        var aiProvider = builder.Configuration["MealPlanningAI:Provider"] ?? "Gemini";
+        if (string.Equals(aiProvider, "Gemini", StringComparison.OrdinalIgnoreCase))
         {
-            client.BaseAddress = uri;
-            client.Timeout = TimeSpan.FromSeconds(28);
-        });
+            var hasKey = !string.IsNullOrWhiteSpace(builder.Configuration["Gemini:ApiKey"]);
+            if (hasKey)
+            {
+                builder.Services.AddHttpClient<IAiMealChoiceGenerator, GeminiMealChoiceGenerator>(
+                    client =>
+                    {
+                        client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
+                        client.Timeout = TimeSpan.FromSeconds(38);
+                    });
+            }
+        }
+        else if (string.Equals(aiProvider, "Ollama", StringComparison.OrdinalIgnoreCase) &&
+                 !string.IsNullOrWhiteSpace(builder.Configuration["MealPlanningAI:Model"]))
+        {
+            var baseUrl = builder.Configuration["MealPlanningAI:OllamaUrl"] ??
+                "http://127.0.0.1:11434/";
+            var uri = new Uri(baseUrl, UriKind.Absolute);
+            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+                throw new InvalidOperationException("MealPlanningAI:OllamaUrl must be HTTP(S).");
+            builder.Services.AddHttpClient<IAiMealChoiceGenerator, OllamaMealChoiceGenerator>(
+                client =>
+                {
+                    client.BaseAddress = uri;
+                    client.Timeout = TimeSpan.FromSeconds(28);
+                });
+        }
     }
     builder.Services.AddScoped<ITrackingUserScheduleProvider, TrackingUserScheduleProvider>();
     builder.Services.AddSingleton<IRecommendationEngineClient, GrpcRecommendationEngineClient>();
