@@ -62,4 +62,5 @@ AI is **not trained on, guaranteed to have read, or licensed to reproduce the fu
 - Unit tests: **93/93 PASS** with fake AI candidate generator, rejected hallucinated candidate, and 14-day rolling fish-frequency checks.
 - Integration tests: **105/105 PASS**, including CRUD and ownership, live Admin recipe propagation and deactivation, and an HTTP-stubbed Ollama JSON response constrained to allowlisted candidate codes.
 - Frontend tests: **20/20 PASS**.
+- New Playwright Docker browser E2E test: `tests/LongevityDiet.E2ETests/specs/meal-plan-crud.spec.ts`. It registers a synthetic account, completes safety screening, generates a seven-day plan, adds and edits a snack, verifies SQL/API readbacks, removes the snack, and archives the plan. **Pending its first full Docker run in GitHub CI.**
 - GitHub CI and Docker E2E of this new branch must be checked before merging. The QA statements above do not substitute for testing a real Ollama model.
