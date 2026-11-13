@@ -70,6 +70,8 @@ public sealed class ReminderService(
             pref.Version++;
         }
         pref.OptedIn = request.OptedIn;
+        // The user may request email reminders before confirming their address,
+        // but no outgoing email is queued until verification is successful.
         pref.EmailOptedIn = request.OptedIn && request.EmailOptedIn;
         pref.MealLoggingEnabled = request.MealLoggingEnabled;
         pref.ActivityEnabled = request.ActivityEnabled;
@@ -198,7 +200,9 @@ public sealed class ReminderService(
                     DeepLink = incoming.DeepLink,
                     DeduplicationKey = incoming.DeduplicationKey,
                     CreatedAtUtc = clock.GetUtcNow().UtcDateTime,
-                    EmailDeliveryStatus = pref is { EmailOptedIn: true } ? "Pending" : "None",
+                    // Unverified addresses must never enter the email queue.
+                    EmailDeliveryStatus = pref is { EmailOptedIn: true } &&
+                        user.EmailVerifiedAtUtc is not null ? "Pending" : "None",
                 });
             }
             db.IdentityInbox.Add(new IdentityInboxEvent
