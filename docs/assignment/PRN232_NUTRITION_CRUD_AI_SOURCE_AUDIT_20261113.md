@@ -1,5 +1,7 @@
 # PRN232 — Nutrition catalog, menu CRUD and source-grounded generation
 
+> Update 14/11/2026: the default optional AI provider has changed from Ollama to **Gemini API**. This document preserves the 13/11 Ollama audit for historical reference. See [PRN232_GEMINI_MEAL_AI_INTEGRATION_20261114.md](PRN232_GEMINI_MEAL_AI_INTEGRATION_20261114.md) for current settings and verified boundaries.
+
 **Implementation date:** 13–14 November 2026
 **Branch:** `feat/prn232-meal-catalog-planner-crud-20261113`
 **Scope:** Nutrition CRUD, meal planning, optional local AI, safety and traceability.
