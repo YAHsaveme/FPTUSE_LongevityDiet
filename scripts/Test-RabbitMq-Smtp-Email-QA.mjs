@@ -45,7 +45,12 @@ const dedup = 'synthetic-email-qa-' + marker;
 function query(statement) {
   return docker(['exec', '-i', sqlContainer, 'sh', '-lc',
     '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" ' +
-    '-C -W -h -1 -b -d LongevityDietDb'], 'SET NOCOUNT ON;\n' + statement + '\nGO\n');
+    '-C -W -h -1 -b -d LongevityDietDb'],
+    // Filtered indexes (including soft-delete indexes) require these DML session settings.
+    'SET ANSI_NULLS ON;\nSET ANSI_PADDING ON;\nSET ANSI_WARNINGS ON;\n' +
+    'SET ARITHABORT ON;\nSET CONCAT_NULL_YIELDS_NULL ON;\n' +
+    'SET QUOTED_IDENTIFIER ON;\nSET NUMERIC_ROUNDABORT OFF;\n' +
+    'SET NOCOUNT ON;\n' + statement + '\nGO\n');
 }
 const root = 'http://127.0.0.1:18025/api/v1/messages';
 async function received() {
