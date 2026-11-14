@@ -54,3 +54,8 @@
 - Verified **on local Docker SQL Server**: Planning container `/ready` HTTP 200 and unauthenticated meal plans HTTP 401; `LongevityPlanningDb.__EFMigrationsHistory` contains the new migration; both new columns and the filtered unique index exist.
 - Extended isolated Planning QA to assert at least three migrations plus the actual soft-delete columns and unique index. Existing 107 unit and 111 integration tests remain PASS.
 - Stopped the optional Planning test container after checks without deleting the SQL database, Redis, Docker volume or backup.
+### CI regression near Vietnam-local midnight
+- Run 43618753391: 107/107 unit PASS, integration 110/111, only `DailySummaryAndLatestScore_AreComputedFromStoredMemberEntries` failed expecting LDAS activity coverage 35 but received 0.
+- The test recorded `startedAt=UtcNow-5min`; around 00:00 in Asia/Ho_Chi_Minh the activity belongs to yesterday, while `/api/v1/ldas/latest` correctly scores **today** and has zero coverage.
+- Corrected the test to assert 35% coverage on the explicit **activity-local date** and then assert `/latest` returns 35% only if on that same local date, otherwise 0%. This preserves correct production behavior and prevents timezone-boundary flakiness without hardcoded current dates.
+- Local full Release run after change: 107/107 unit and 111/111 integration PASS.
