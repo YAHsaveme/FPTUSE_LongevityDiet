@@ -258,6 +258,56 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
             (await owner.PostAsJsonAsync("/api/v1/meal-plans/ensure-current", new { })).StatusCode);
     }
 
+    [Fact]
+    public async Task ConcurrentRollingAndManualGeneration_ArchiveLeavesNoCurrentPlan()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var member = await CreateOnboardedUserClientAsync("parallel-plans");
+        var reviewed = await member.PutAsJsonAsync("/api/v1/wellness/screening",
+            new { RiskFlags = Array.Empty<string>(), AllergiesReviewed = true,
+                Allergies = Array.Empty<string>() });
+        Assert.Equal(HttpStatusCode.OK, reviewed.StatusCode);
+
+        // Reproduce two real scoped HTTP requests racing on the same member:
+        // automatic 14-day coverage and explicit 7-day generation.
+        var rollingTask = member.PostAsync("/api/v1/meal-plans/ensure-current", null);
+        var manualTask = member.PostAsJsonAsync("/api/v1/meal-plans/generate",
+            new GenerateMealPlanRequest(null, Days: 7));
+        var responses = await Task.WhenAll(rollingTask, manualTask);
+        Assert.Equal(HttpStatusCode.OK, responses[0].StatusCode);
+        Assert.Equal(HttpStatusCode.Created, responses[1].StatusCode);
+
+        var currentResponse = await member.GetAsync("/api/v1/meal-plans/current");
+        Assert.Equal(HttpStatusCode.OK, currentResponse.StatusCode);
+        var current = await currentResponse.Content.ReadFromJsonAsync<MealPlanResponse>();
+        Assert.NotNull(current);
+
+        var before = await member.GetFromJsonAsync<IReadOnlyList<MealPlanResponse>>(
+            "/api/v1/meal-plans");
+        Assert.NotNull(before);
+        Assert.Single(before, plan => plan.Status == "Active");
+
+        var archive = await member.DeleteAsync($"/api/v1/meal-plans/{current.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, archive.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await member.GetAsync("/api/v1/meal-plans/current")).StatusCode);
+
+        var after = await member.GetFromJsonAsync<IReadOnlyList<MealPlanResponse>>(
+            "/api/v1/meal-plans");
+        Assert.NotNull(after);
+        Assert.DoesNotContain(after, plan => plan.Status == "Active");
+        Assert.Contains(after, plan => plan.Id == current.Id && plan.Status == "Archived");
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await member.PostAsync("/api/v1/meal-plans/ensure-current", null)).StatusCode);
+
+        // Explicit member action can start a new schedule after archiving.
+        var manualRestart = await member.PostAsJsonAsync(
+            "/api/v1/meal-plans/generate", new GenerateMealPlanRequest(null, Days: 7));
+        Assert.Equal(HttpStatusCode.Created, manualRestart.StatusCode);
+        Assert.Equal(HttpStatusCode.OK,
+            (await member.GetAsync("/api/v1/meal-plans/current")).StatusCode);
+    }
+
     private async Task<HttpClient> CreateOnboardedUserClientAsync(string prefix)
     {
         var client = _factory.CreateHttpsClient();
