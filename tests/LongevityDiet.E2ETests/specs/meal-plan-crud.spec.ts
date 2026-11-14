@@ -93,4 +93,12 @@ test('member can CRUD scheduled meals and archive a plan using the actual Web UI
   await expect(page.getByText('Đã lưu trữ thực đơn.', { exact: false })).toBeVisible()
   const archived = await page.request.get('/api/v1/meal-plans/current', { headers })
   expect(archived.status()).toBe(404)
+  const planHistory = await page.request.get('/api/v1/meal-plans', { headers })
+  expect(planHistory.status()).toBe(200)
+  const history = await planHistory.json() as { id: string, status: string }[]
+  expect(history.some(entry => entry.status === 'Active')).toBe(false)
+  expect(history.some(entry => entry.id === plan.id && entry.status === 'Archived')).toBe(true)
+  // A background 14-day ensure must respect a member's archive decision.
+  const autoRecreate = await page.request.post('/api/v1/meal-plans/ensure-current', { headers })
+  expect(autoRecreate.status()).toBe(400)
 })

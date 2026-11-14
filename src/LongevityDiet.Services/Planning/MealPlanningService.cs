@@ -173,6 +173,7 @@ public sealed class MealPlanningService(
     public async Task<ServiceResult<MealPlanSummary>> EnsureDailyCoverageAsync(
         Guid userId, CancellationToken cancellationToken = default)
     {
+        using var mutationLease = await MealPlanMutationGate.AcquireAsync(userId, cancellationToken);
         var userContext = await planningInputProvider.GetUserContextAsync(userId, cancellationToken);
         if (userContext is null)
             return ServiceResult.Failure<MealPlanSummary>("user_not_found", "User not found.");
@@ -282,6 +283,7 @@ public sealed class MealPlanningService(
         GenerateMealPlanCommand command,
         CancellationToken cancellationToken = default)
     {
+        using var mutationLease = await MealPlanMutationGate.AcquireAsync(userId, cancellationToken);
         if (command.Days is < 7 or > 14)
         {
             return ServiceResult.Failure<MealPlanSummary>(
@@ -409,6 +411,7 @@ public sealed class MealPlanningService(
         RegenerateMealPlanCommand command,
         CancellationToken cancellationToken = default)
     {
+        using var mutationLease = await MealPlanMutationGate.AcquireAsync(userId, cancellationToken);
         var existingPlan = await mealPlanRepository.GetByIdForUserAsync(planId, userId, cancellationToken);
         if (existingPlan is null)
         {
@@ -725,13 +728,26 @@ public sealed class MealPlanningService(
     public async Task<ServiceResult<bool>> ArchivePlanAsync(
         Guid userId, Guid planId, CancellationToken cancellationToken = default)
     {
+        using var mutationLease = await MealPlanMutationGate.AcquireAsync(userId, cancellationToken);
         var plan = await mealPlanRepository.GetByIdForUserAsync(planId, userId, cancellationToken);
         if (plan is null)
             return ServiceResult.Failure<bool>("meal_plan_not_found", "Meal plan was not found.");
         if (plan.Status != MealPlanStatus.Active)
             return ServiceResult.Failure<bool>("meal_plan_not_active", "Only an active plan can be archived.");
+        // Older builds could leave more than one Active row when rolling coverage
+        // and explicit generation raced. A member's archive command means that
+        // no plan should remain active; retain every row as archived history.
+        var activePlans = await mealPlanRepository.GetAllActiveByUserForUpdateAsync(userId, cancellationToken);
+        var archivedAt = timeProvider.GetUtcNow();
+        foreach (var active in activePlans)
+        {
+            active.Status = MealPlanStatus.Archived;
+            active.UpdatedAt = archivedAt;
+        }
+
+        // DbContext identity tracking may return a separate reference in tests.
         plan.Status = MealPlanStatus.Archived;
-        plan.UpdatedAt = timeProvider.GetUtcNow();
+        plan.UpdatedAt = archivedAt;
         await mealPlanRepository.SaveChangesAsync(cancellationToken);
         return ServiceResult.Success(true);
     }

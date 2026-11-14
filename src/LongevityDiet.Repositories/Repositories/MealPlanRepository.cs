@@ -21,6 +21,12 @@ public sealed class MealPlanRepository(LongevityDietDbContext dbContext) : IMeal
             .FirstOrDefault();
     }
 
+    public async Task<IReadOnlyList<MealPlan>> GetAllActiveByUserForUpdateAsync(
+        Guid userId, CancellationToken cancellationToken = default) =>
+        await dbContext.MealPlans
+            .Where(x => x.UserId == userId && x.Status == MealPlanStatus.Active)
+            .ToListAsync(cancellationToken);
+
     public async Task<MealPlan?> GetByIdForUserAsync(
         Guid planId,
         Guid userId,

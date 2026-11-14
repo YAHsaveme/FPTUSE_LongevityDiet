@@ -547,6 +547,96 @@ public sealed class MealPlanningAndEatingWindowTests
         Assert.InRange(planRepo.Plans.Count, 35, 45);
     }
 
+    [Fact]
+    public async Task ConcurrentRollingCoverageAndExplicitGeneration_NeverLeaveTwoActivePlans()
+    {
+        var userId = Guid.NewGuid();
+        var users = CreateUserRepositoryWithOnboardedUser(userId);
+        var plans = new InMemoryMealPlanRepository();
+        var provider = new FirstCandidateFetchBarrier(new PlanningCatalogSnapshotProvider(users, plans));
+        var wellness = new EmptyWellnessRepository();
+        var clock = new FixedTimeProvider(FixedNow);
+        // Different scoped services represent two concurrent HTTP requests
+        // for the same member: automatically rolling coverage and explicit creation.
+        var autoService = new MealPlanningService(plans, provider, wellness, clock);
+        var manualService = new MealPlanningService(plans, provider, wellness, clock);
+
+        var rolling = autoService.EnsureDailyCoverageAsync(userId);
+        await provider.WaitUntilFirstFetchAsync();
+        var manual = manualService.GeneratePlanAsync(
+            userId, new GenerateMealPlanCommand(new DateOnly(2026, 11, 1), Days: 7));
+        await Task.Delay(30);
+        provider.ReleaseFirstFetch();
+
+        var initial = await rolling.WaitAsync(TimeSpan.FromSeconds(15));
+        var generated = await manual.WaitAsync(TimeSpan.FromSeconds(15));
+        Assert.True(initial.Succeeded, initial.ErrorMessage);
+        Assert.True(generated.Succeeded, generated.ErrorMessage);
+        Assert.Single(plans.Plans, x => x.Status == MealPlanStatus.Active);
+        Assert.Single(plans.Plans, x => x.Status == MealPlanStatus.Superseded);
+
+        var active = Assert.Single(plans.Plans, x => x.Status == MealPlanStatus.Active);
+        var archived = await autoService.ArchivePlanAsync(userId, active.Id);
+        Assert.True(archived.Succeeded, archived.ErrorMessage);
+        Assert.DoesNotContain(plans.Plans, x => x.Status == MealPlanStatus.Active);
+        var nextRolling = await manualService.EnsureDailyCoverageAsync(userId);
+        Assert.False(nextRolling.Succeeded);
+        Assert.Equal("plan_archived_manual_start_required", nextRolling.ErrorCode);
+    }
+
+    [Fact]
+    public async Task ArchivePlan_ClosesPreExistingDuplicateActivePlans_WithoutDeletingHistory()
+    {
+        var userId = Guid.NewGuid();
+        var users = CreateUserRepositoryWithOnboardedUser(userId);
+        var plans = new InMemoryMealPlanRepository();
+        var first = new MealPlan { UserId = userId, RevisionNumber = 1, Status = MealPlanStatus.Active };
+        var second = new MealPlan { UserId = userId, RevisionNumber = 2, Status = MealPlanStatus.Active };
+        plans.Plans.Add(first);
+        plans.Plans.Add(second);
+        var service = new MealPlanningService(plans,
+            new PlanningCatalogSnapshotProvider(users, plans),
+            new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
+
+        var result = await service.ArchivePlanAsync(userId, second.Id);
+        Assert.True(result.Succeeded, result.ErrorMessage);
+        Assert.Equal(2, plans.Plans.Count);
+        Assert.All(plans.Plans, plan => Assert.Equal(MealPlanStatus.Archived, plan.Status));
+        var nextRolling = await service.EnsureDailyCoverageAsync(userId);
+        Assert.False(nextRolling.Succeeded);
+        Assert.Equal("plan_archived_manual_start_required", nextRolling.ErrorCode);
+    }
+
+    private sealed class FirstCandidateFetchBarrier(IPlanningInputProvider inner) : IPlanningInputProvider
+    {
+        private readonly TaskCompletionSource<bool> _entered =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource<bool> _resume =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private int _candidateCalls;
+
+        public Task<bool> WaitUntilFirstFetchAsync() =>
+            _entered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        public void ReleaseFirstFetch() => _resume.TrySetResult(true);
+
+        public Task<PlanningUserContextSnapshot?> GetUserContextAsync(
+            Guid userId, CancellationToken cancellationToken = default) =>
+            inner.GetUserContextAsync(userId, cancellationToken);
+        public Task<PlanningRuleSetSnapshot> GetActiveRuleSetAsync(
+            CancellationToken cancellationToken = default) =>
+            inner.GetActiveRuleSetAsync(cancellationToken);
+        public async Task<IReadOnlyList<PlanningCandidateMealSnapshot>> GetCandidateMealsAsync(
+            CancellationToken cancellationToken = default)
+        {
+            if (Interlocked.Increment(ref _candidateCalls) == 1)
+            {
+                _entered.TrySetResult(true);
+                await _resume.Task.WaitAsync(cancellationToken);
+            }
+            return await inner.GetCandidateMealsAsync(cancellationToken);
+        }
+    }
+
     private sealed class MutableTimeProvider(DateTimeOffset start) : TimeProvider
     {
         private DateTimeOffset _now = start;
@@ -619,6 +709,11 @@ public sealed class MealPlanningAndEatingWindowTests
                     .Where(x => x.UserId == userId && x.Status == MealPlanStatus.Active)
                     .OrderByDescending(x => x.RevisionNumber)
                     .FirstOrDefault());
+
+        public Task<IReadOnlyList<MealPlan>> GetAllActiveByUserForUpdateAsync(
+            Guid userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<MealPlan>>(
+                Plans.Where(x => x.UserId == userId && x.Status == MealPlanStatus.Active).ToList());
 
         public Task<MealPlan?> GetByIdForUserAsync(Guid planId, Guid userId, CancellationToken cancellationToken = default) =>
             Task.FromResult(Plans.FirstOrDefault(x => x.Id == planId && x.UserId == userId));
