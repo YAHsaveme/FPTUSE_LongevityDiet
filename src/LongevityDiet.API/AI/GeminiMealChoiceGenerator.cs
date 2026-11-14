@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Services.Planning;
+using Microsoft.Extensions.Logging;
 
 namespace LongevityDiet.API.AI;
 
@@ -10,11 +11,29 @@ namespace LongevityDiet.API.AI;
 /// food candidate codes/titles (no user identity, diagnosis or meal logs).
 /// All output is revalidated here and again by MealPlanningService.
 /// </summary>
-public sealed class GeminiMealChoiceGenerator(HttpClient client, IConfiguration configuration)
+public sealed class GeminiMealChoiceGenerator(HttpClient client, IConfiguration configuration,
+    ILogger<GeminiMealChoiceGenerator>? logger = null)
     : IAiMealChoiceGenerator
 {
     private const int MaxChoices = 64;
     private const int MaxResponseBytes = 128 * 1024;
+
+    // Precompiled, strictly metadata-only diagnostics; no key or prompt content.
+    private static readonly Action<ILogger, string, Exception?> TransportFailure =
+        LoggerMessage.Define<string>(LogLevel.Warning, new EventId(4101, "GeminiTransport"),
+            "GeminiDemo transport failure type {Type}");
+    private static readonly Action<ILogger, int, Exception?> UpstreamStatus =
+        LoggerMessage.Define<int>(LogLevel.Warning, new EventId(4102, "GeminiHttpStatus"),
+            "GeminiDemo upstream HTTP status {Status}");
+    private static readonly Action<ILogger, Exception?> NoCandidates =
+        LoggerMessage.Define(LogLevel.Warning, new EventId(4103, "GeminiNoCandidates"),
+            "GeminiDemo no candidates in upstream response");
+    private static readonly Action<ILogger, string, Exception?> FinishStatus =
+        LoggerMessage.Define<string>(LogLevel.Warning, new EventId(4104, "GeminiFinish"),
+            "GeminiDemo finish status {Reason}");
+    private static readonly Action<ILogger, int, int, Exception?> AcceptedChoices =
+        LoggerMessage.Define<int, int>(LogLevel.Information, new EventId(4105, "GeminiAccepted"),
+            "GeminiDemo candidates accepted {Accepted} of {Returned}");
 
     public async Task<IReadOnlyList<AiMealChoice>> SuggestAsync(
         IReadOnlyList<AiMealChoiceOption> allowedOptions,
@@ -125,8 +144,22 @@ public sealed class GeminiMealChoiceGenerator(HttpClient client, IConfiguration 
         request.Headers.TryAddWithoutValidation("x-goog-api-key", key);
         request.Content = JsonContent.Create(requestBody);
 
-        using var response = await client.SendAsync(request,
-            HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+        HttpResponseMessage upstream;
+        try
+        {
+            upstream = await client.SendAsync(request,
+                HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Deliberately log only exception type, never key, prompt or user data.
+            if (logger is not null) TransportFailure(logger, ex.GetType().Name, null);
+            throw;
+        }
+
+        using var response = upstream;
+        if (!response.IsSuccessStatusCode && logger is not null)
+            UpstreamStatus(logger, (int)response.StatusCode, null);
         response.EnsureSuccessStatusCode();
 
         if (response.Content.Headers.ContentLength is > MaxResponseBytes)
@@ -139,13 +172,19 @@ public sealed class GeminiMealChoiceGenerator(HttpClient client, IConfiguration 
         if (!envelope.RootElement.TryGetProperty("candidates", out var candidates) ||
             candidates.ValueKind != JsonValueKind.Array ||
             candidates.GetArrayLength() == 0)
+        {
+            if (logger is not null) NoCandidates(logger, null);
             return [];
+        }
 
         var first = candidates[0];
         if (first.TryGetProperty("finishReason", out var finish) &&
             finish.ValueKind == JsonValueKind.String &&
             !string.Equals(finish.GetString(), "STOP", StringComparison.OrdinalIgnoreCase))
+        {
+            if (logger is not null) FinishStatus(logger, finish.GetString() ?? "Unknown", null);
             return [];
+        }
 
         if (!first.TryGetProperty("content", out var content) ||
             !content.TryGetProperty("parts", out var parts) ||
@@ -191,6 +230,8 @@ public sealed class GeminiMealChoiceGenerator(HttpClient client, IConfiguration 
                 !accepted.Any(existing => existing.Date == date && existing.Slot == slot))
                 accepted.Add(new AiMealChoice(date, slot, code));
         }
+        if (logger is not null)
+            AcceptedChoices(logger, accepted.Count, choices.GetArrayLength(), null);
         return accepted;
     }
 }
