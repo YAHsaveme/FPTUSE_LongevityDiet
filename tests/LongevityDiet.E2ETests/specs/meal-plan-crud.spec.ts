@@ -34,8 +34,12 @@ test('member can CRUD scheduled meals and archive a plan using the actual Web UI
   expect(screened.status()).toBe(200)
 
   await page.goto('/planner')
-  await expect(page.getByText('Mô hình AI chưa được cấu hình.', { exact: false })).toBeVisible()
-  await expect(page.getByLabel('Dùng AI chọn món từ danh mục an toàn')).toBeDisabled()
+  // CRUD must work with or without an optional, user-configured Gemini key.
+  // Keep AI explicitly OFF so this test never calls the external provider.
+  const aiToggle = page.getByLabel('Dùng AI chọn món từ danh mục an toàn')
+  await expect(aiToggle).toBeVisible()
+  if (await aiToggle.isEnabled()) await aiToggle.uncheck()
+  await expect(aiToggle).not.toBeChecked()
   await page.getByRole('button', { name: /Tạo kế hoạch 7 ngày/ }).click()
   await expect(page.getByText(/Đã tạo kế hoạch 7 ngày/)).toBeVisible({ timeout: 20000 })
 

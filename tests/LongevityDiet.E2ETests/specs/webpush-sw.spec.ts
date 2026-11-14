@@ -8,11 +8,29 @@ test('service worker handles simulated background push without exposing health t
   const origin = 'http://localhost:5173'
   await context.grantPermissions(['notifications'], { origin })
   await page.goto('/')
-  await page.evaluate(async () => {
+  const notificationCapability = await page.evaluate(async () => {
     const registration = await navigator.serviceWorker.register('/sw.js')
     await navigator.serviceWorker.ready
-    if (!registration.active) throw new Error('Service worker did not activate')
+    if (registration.active?.state !== 'activated') {
+      throw new Error('Service worker did not activate')
+    }
+    // Some headless Linux CI browsers have no functioning native notification
+    // display backend. First check the browser platform itself, independently
+    // of the app's push handler, to avoid attributing that to application code.
+    const tag = 'longevity-qa-notification-capability'
+    try {
+      await registration.showNotification('QA capability probe', { tag })
+      const shown = await registration.getNotifications({ tag })
+      shown.forEach(item => item.close())
+      return { works: shown.length > 0, permission: Notification.permission }
+    } catch (error) {
+      return { works: false, permission: Notification.permission,
+        error: error instanceof Error ? error.name : 'unavailable' }
+    }
   })
+  test.skip(!notificationCapability.works,
+    'Browser notification backend unavailable; direct SW privacy unit tests run in npm test. ' +
+    'Permission: ' + notificationCapability.permission)
 
   const session = await context.newCDPSession(page)
   let registrations: Array<{ registrationId: string, scopeURL: string, isDeleted: boolean }> = []
