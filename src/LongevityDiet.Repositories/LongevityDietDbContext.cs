@@ -210,6 +210,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
 
         var plannedMeal = modelBuilder.Entity<PlannedMeal>();
         plannedMeal.ToTable("PlannedMeals");
+        plannedMeal.HasQueryFilter(x => !x.IsDeleted);
         plannedMeal.HasKey(x => x.Id);
         plannedMeal.Property(x => x.SlotType).HasConversion<string>().HasMaxLength(24);
         plannedMeal.Property(x => x.CandidateCode).HasMaxLength(80).IsRequired();
@@ -227,7 +228,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         plannedMeal.Property(x => x.DeterministicScore).HasPrecision(8, 2);
         plannedMeal.Property(x => x.ReasonCodesCsv).HasMaxLength(500).IsRequired();
         plannedMeal.Property(x => x.ExplanationSummary).HasMaxLength(1000).IsRequired();
-        plannedMeal.HasIndex(x => new { x.MealPlanDayId, x.SlotOrder }).IsUnique();
+        plannedMeal.HasIndex(x => new { x.MealPlanDayId, x.SlotOrder }).IsUnique().HasFilter("[IsDeleted] = 0");
         plannedMeal.HasIndex(x => new { x.UserId, x.MealPlanId });
     }
 
@@ -244,13 +245,14 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
 
         var checkIn = modelBuilder.Entity<WellnessCheckIn>();
         checkIn.ToTable("WellnessCheckIns");
+        checkIn.HasQueryFilter(x => !x.IsDeleted);
         checkIn.HasKey(x => x.Id);
         checkIn.Property(x => x.Phase).HasMaxLength(16).IsRequired();
         checkIn.Property(x => x.SymptomsCsv).HasMaxLength(500).IsRequired();
         checkIn.Property(x => x.BodyChangesCsv).HasMaxLength(500).IsRequired();
         checkIn.Property(x => x.WeightKg).HasPrecision(6, 2);
         checkIn.Property(x => x.Notes).HasMaxLength(500);
-        checkIn.HasIndex(x => new { x.UserId, x.LocalDate, x.Phase }).IsUnique();
+        checkIn.HasIndex(x => new { x.UserId, x.LocalDate, x.Phase }).IsUnique().HasFilter("[IsDeleted] = 0");
         checkIn.HasOne<User>().WithMany()
             .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
     }
@@ -331,6 +333,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
 
         var foodPreference = modelBuilder.Entity<UserFoodPreference>();
         foodPreference.ToTable("UserFoodPreferences");
+        foodPreference.HasQueryFilter(x => !x.IsDeleted);
         foodPreference.HasKey(x => x.Id);
         foodPreference.Property(x => x.FoodToken).HasMaxLength(120).IsRequired();
         foodPreference.Property(x => x.DisplayLabel).HasMaxLength(200).IsRequired();

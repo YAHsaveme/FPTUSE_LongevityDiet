@@ -55,6 +55,8 @@ public sealed class UserFoodPreference
     public string Source { get; set; } = "UserSetting";
     public string? Notes { get; set; }
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 }
 
 public enum FoodPreferenceKind

@@ -1,10 +1,39 @@
 import { describe, expect, it } from 'vitest'
+import quantityInventory from './bookAppendixQuantities.json'
 import {
   LONGO_BOOK, LONGO_BOOK_CHAPTERS, LONGO_BOOK_MICRONUTRIENTS,
   LONGO_BOOK_RULES, LONGO_BOOK_TWO_WEEK_MEALS,
 } from './bookReferenceData'
 
 describe('Nguồn chuẩn theo sách Valter Longo 2018', () => {
+  it('tách đủ 56 bữa / 14 ngày, gắn nguồn từng dữ kiện định lượng mà không công bố đã xác minh', () => {
+    expect(quantityInventory.metadata.status).toBe('unverified-machine-extraction')
+    expect(quantityInventory.meals).toHaveLength(56)
+    const reviewed = quantityInventory.meals.filter(m => m.verificationStatus === 'source-page-checked')
+    expect(reviewed).toHaveLength(2)
+    expect(reviewed.flatMap(m => m.facts)).toHaveLength(20)
+    expect(quantityInventory.meals.filter(m => m.verificationStatus === 'needs-human-review'))
+      .toHaveLength(54)
+    const dinner = reviewed.find(m => m.week === 2 && m.day === 4 && m.slot === 'dinner')
+    expect(dinner).toBeDefined()
+    expect(dinner!.facts[2]).toMatchObject({ labelVi: 'cà chua bi', amount: '150', unit: 'g' })
+    expect(dinner!.facts[3]).toMatchObject({ labelVi: 'tôm', amount: '60', unit: 'g' })
+    expect(quantityInventory.meals.reduce((total, meal) => total + meal.facts.length, 0))
+      .toBe(350)
+    for (const week of [1, 2]) {
+      for (let day = 1; day <= 7; day++) {
+        const slots = quantityInventory.meals.filter(meal => meal.week === week && meal.day === day)
+        expect(slots.map(meal => meal.slot).sort()).toEqual(
+          ['breakfast', 'dinner', 'lunch', 'snack'])
+        for (const meal of slots) {
+          expect(meal.sourcePages.every(page => page >= 215 && page <= 242)).toBe(true)
+          expect(meal.facts.every(fact => fact.pdfPage >= 215 && fact.pdfPage <= 242)).toBe(true)
+          expect(meal.facts.every(fact => fact.amount && fact.unit)).toBe(true)
+        }
+      }
+    }
+  })
+
   it('nhận diện đúng bản sách do người dùng cung cấp', () => {
     expect(LONGO_BOOK.pdfPages).toBe(306)
     expect(LONGO_BOOK.isbn).toBe('9780525534075')

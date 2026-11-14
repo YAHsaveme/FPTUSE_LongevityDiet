@@ -28,4 +28,6 @@ public sealed class WellnessCheckIn
     public decimal? WeightKg { get; set; }
     public string? Notes { get; set; }
     public DateTimeOffset RecordedAt { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 }

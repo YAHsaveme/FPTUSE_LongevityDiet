@@ -526,6 +526,11 @@ export function PlannerWorkspacePage() {
         excludedFoods: parseExcludedList(),
         preferredCuisine: preferredCuisine || null,
         useAi: useLocalAi && aiStatusQuery.data?.enabled === true,
+      }, {
+        // Gemini can legitimately take longer than the shared 10-second API
+        // timeout. Only explicitly requested AI generation gets this larger
+        // budget; normal REST requests keep their fail-fast behavior.
+        timeout: useLocalAi && aiStatusQuery.data?.enabled === true ? 50_000 : 10_000,
       })
       return response.data
     },

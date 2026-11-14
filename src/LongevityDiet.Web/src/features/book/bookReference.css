@@ -49,3 +49,21 @@
 .book-ref-footer a{color:#1d7442;font-size:13px;font-weight:800;text-decoration:underline}
 @media(max-width:850px){.book-ref-rules{grid-template-columns:repeat(2,minmax(0,1fr))}.book-ref-micronutrients{grid-template-columns:repeat(3,minmax(0,1fr))}.book-ref-chapters{grid-template-columns:1fr}}
 @media(max-width:550px){.book-ref-shell{padding:17px 13px 45px}.book-ref-top{padding:27px 19px;border-radius:19px}.book-ref-alert{padding:17px}.book-ref-rules,.book-ref-meal-grid{grid-template-columns:1fr}.book-ref-micronutrients{grid-template-columns:repeat(2,minmax(0,1fr))}.book-ref-day-card{padding:19px}.book-ref-chapters>div{grid-template-columns:80px 1fr;gap:7px}.book-ref-chapters small{grid-column:2}}
+
+.book-ref-quantity-details{margin-top:20px;border:1px solid #ccdecd;border-radius:15px;padding:16px 18px;background:#f7faf7}
+.book-ref-quantity-details summary{cursor:pointer;font-size:13px;font-weight:800;color:#286a48;line-height:1.55}
+.book-ref-quantity-details>.book-ref-intro{margin-top:14px;padding:12px 15px;background:#fff5e7;border-left:3px solid #c49440;border-radius:9px;color:#67552b}
+.book-ref-quantity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.book-ref-quantity-card{border:1px solid #e4eae4;background:white;border-radius:12px;padding:16px;min-width:0}
+.book-ref-quantity-card h4{margin:0 0 9px;font-size:13px;line-height:1.6}
+.book-ref-quantity-card>small{font-size:11px;color:#6f8b79}
+.book-ref-quantity-card ul{list-style:none;margin:10px 0 0;padding:0}
+.book-ref-quantity-card li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;border-top:1px solid #edf1ed;padding:9px 0;font-size:11px;line-height:1.45}
+.book-ref-quantity-card li span{flex:1;min-width:130px;color:#465d4e}
+.book-ref-quantity-card li strong{white-space:nowrap;color:#237046}
+.book-ref-quantity-card li small{font-size:10px;color:#758b7d}
+@media(max-width:650px){.book-ref-quantity-grid{grid-template-columns:1fr}.book-ref-quantity-details{padding:13px}}
+
+.book-ref-verified,.book-ref-unverified{margin:10px 0 0;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:700;line-height:1.5}
+.book-ref-verified{background:#e6f3e9;color:#215e3c}
+.book-ref-unverified{background:#fff2df;color:#76532a}
