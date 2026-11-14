@@ -9,11 +9,12 @@ test('service worker handles simulated background push without exposing health t
   await context.grantPermissions(['notifications'], { origin })
   await page.goto('/')
   const notificationCapability = await page.evaluate(async () => {
-    const registration = await navigator.serviceWorker.register('/sw.js')
-    await navigator.serviceWorker.ready
-    if (registration.active?.state !== 'activated') {
-      throw new Error('Service worker did not activate')
-    }
+    await navigator.serviceWorker.register('/sw.js')
+    // navigator.serviceWorker.ready resolves the ACTIVE registration. The
+    // object returned from register() can still reference the installing
+    // worker and is not a reliable activation probe on fast CI browsers.
+    const registration = await navigator.serviceWorker.ready
+    if (!registration.active) throw new Error('Service worker did not activate')
     // Some headless Linux CI browsers have no functioning native notification
     // display backend. First check the browser platform itself, independently
     // of the app's push handler, to avoid attributing that to application code.
