@@ -53,6 +53,13 @@ public sealed class GeminiMealChoiceGeneratorTests
         Assert.Contains("CAT-EXISTING", handler.Body);
         Assert.Contains("responseMimeType", handler.Body);
         Assert.Contains("application/json", handler.Body);
+        using var sentRequest = JsonDocument.Parse(handler.Body!);
+        var systemInstruction = sentRequest.RootElement
+            .GetProperty("systemInstruction").GetProperty("parts")[0]
+            .GetProperty("text").GetString() ?? "";
+        Assert.Contains("tiếng Việt", systemInstruction);
+        Assert.Contains("CHÍNH XÁC một mã", systemInstruction);
+        Assert.Contains("Không tự suy đoán số liệu dinh dưỡng", systemInstruction);
         Assert.DoesNotContain("unit-test-only-not-real", handler.Body);
         Assert.DoesNotContain("birthYear", handler.Body, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("diagnosis", handler.Body, StringComparison.OrdinalIgnoreCase);

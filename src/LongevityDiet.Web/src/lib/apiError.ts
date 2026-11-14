@@ -30,8 +30,20 @@ export function getApiErrorMessage(error: unknown, fallback = 'Đã có lỗi x�
     ? Object.values(data.errors).flat().find((value) => typeof value === 'string' && value.trim().length > 0)
     : undefined
 
-  return validationMessage ??
+  const sourceMessage = validationMessage ??
     (typeof data?.detail === 'string' && data.detail.trim() ? data.detail : undefined) ??
-    (typeof data?.title === 'string' && data.title.trim() ? data.title : undefined) ??
-    fallback
+    (typeof data?.title === 'string' && data.title.trim() ? data.title : undefined)
+
+  // API errors can come from English framework defaults or upstream services.
+  // Never show untranslated framework messages or raw exception content.
+  if (sourceMessage && /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(sourceMessage)) {
+    return sourceMessage
+  }
+  if (status === 400 || status === 422) {
+    return 'Dữ liệu hoặc điều kiện an toàn chưa hợp lệ. Hãy kiểm tra các trường đã nhập, dị ứng và các hướng dẫn trên màn hình.'
+  }
+  if (status === 409) {
+    return 'Dữ liệu đã thay đổi hoặc thao tác bị xung đột. Vui lòng làm mới trang rồi thử lại.'
+  }
+  return fallback
 }

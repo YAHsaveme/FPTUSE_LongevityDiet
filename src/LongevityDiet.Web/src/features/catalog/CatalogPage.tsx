@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { BookOpen, ChevronLeft, ChevronRight, Leaf, Search, ShieldCheck, Utensils } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/authState'
+import { viContent, viTokens } from '../../lib/viContent'
 import { getFoods, getRecipes, getRules } from './catalogApi'
 
 type CatalogTab = 'foods' | 'recipes' | 'rules'
@@ -103,7 +104,7 @@ export function CatalogPage() {
             <span className="eyebrow">DỮ LIỆU DINH DƯỠNG CÓ NGUỒN GỐC</span>
             <h1>Khám phá thực phẩm, công thức và các nguyên tắc đang được áp dụng.</h1>
             <p>
-              Nội dung được tải trực tiếp từ API. Dữ liệu đã ngừng hoạt động hoặc rule chưa xuất bản
+              Nội dung được tải trực tiếp từ API. Dữ liệu đã ngừng hoạt động hoặc quy tắc chưa xuất bản
               không hiển thị cho thành viên.
             </p>
           </div>
@@ -111,7 +112,7 @@ export function CatalogPage() {
             <ShieldCheck size={22} />
             <div>
               <strong>Minh bạch thay vì “AI tự quyết”</strong>
-              <span>Mỗi rule công khai nguồn và phiên bản được xuất bản.</span>
+              <span>Mỗi quy tắc đều công khai nguồn và phiên bản đã xuất bản.</span>
             </div>
           </div>
         </section>
@@ -146,16 +147,16 @@ export function CatalogPage() {
                   onChange={(event) => changeFilter(event.target.value)}
                 >
                   <option value="all">Tất cả</option>
-                  {tab === 'foods' && <option value="plant-based">Plant-based</option>}
-                  {tab === 'recipes' && <option value="plant-forward">Plant-forward</option>}
-                  <option value="legume">Có legume</option>
-                  <option value="whole-grain">Có whole grain</option>
-                  <option value="fish">Có fish</option>
+                  {tab === 'foods' && <option value="plant-based">Có nguồn gốc thực vật</option>}
+                  {tab === 'recipes' && <option value="plant-forward">Ưu tiên thực vật</option>}
+                  <option value="legume">Có các loại đậu</option>
+                  <option value="whole-grain">Có ngũ cốc nguyên hạt</option>
+                  <option value="fish">Có cá</option>
                 </select>
                 <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
                   <option value="name">Tên</option>
                   <option value="category">Danh mục</option>
-                  {tab === 'foods' && <option value="calories">Calories</option>}
+                  {tab === 'foods' && <option value="calories">Năng lượng</option>}
                   {tab === 'recipes' && <option value="prepMinutes">Thời gian chuẩn bị</option>}
                 </select>
                 <select value={sortDirection} onChange={(event) => setSortDirection(event.target.value)}>
@@ -176,21 +177,21 @@ export function CatalogPage() {
                 {foods.data?.items.map((food) => (
                   <article className="catalog-card" key={food.id}>
                     <div className="catalog-card-head">
-                      <span className="catalog-chip">{food.category}</span>
+                      <span className="catalog-chip">{viContent(food.category)}</span>
                       <span>{food.calories} kcal / {food.defaultServingAmount}{food.servingUnit}</span>
                     </div>
-                    <h2>{food.name}</h2>
-                    <p>{food.tags || 'Chưa có tag mô tả.'}</p>
+                    <h2>{viContent(food.name)}</h2>
+                    <p>{viTokens(food.tags) || 'Chưa có thẻ mô tả.'}</p>
                     <div className="nutrition-row">
-                      <span><b>{food.proteinG}g</b> Protein</span>
-                      <span><b>{food.fiberG ?? 0}g</b> Fiber</span>
-                      <span><b>{food.sugarG ?? 0}g</b> Sugar</span>
+                      <span><b>{food.proteinG}g</b> Chất đạm</span>
+                      <span><b>{food.fiberG ?? 0}g</b> Chất xơ</span>
+                      <span><b>{food.sugarG ?? 0}g</b> Đường</span>
                     </div>
                     <div className="flag-row">
-                      {food.isPlantBased && <span>Plant-based</span>}
-                      {food.isLegume && <span>Legume</span>}
-                      {food.isWholeGrain && <span>Whole grain</span>}
-                      {food.isFish && <span>Fish</span>}
+                      {food.isPlantBased && <span>Có nguồn gốc thực vật</span>}
+                      {food.isLegume && <span>Nhóm đậu</span>}
+                      {food.isWholeGrain && <span>Ngũ cốc nguyên hạt</span>}
+                      {food.isFish && <span>Có cá</span>}
                     </div>
                   </article>
                 ))}
@@ -213,11 +214,11 @@ export function CatalogPage() {
                 {recipes.data?.items.map((recipe) => (
                   <Link className="catalog-card recipe-card-link" to={`/catalog/recipes/${recipe.id}`} key={recipe.id}>
                     <div className="catalog-card-head">
-                      <span className="catalog-chip">{recipe.category}</span>
+                      <span className="catalog-chip">{viContent(recipe.category)}</span>
                       <span>{recipe.prepMinutes} phút</span>
                     </div>
-                    <h2>{recipe.name}</h2>
-                    <p>{recipe.cuisine || 'International'} · {recipe.servingCount} khẩu phần</p>
+                    <h2>{viContent(recipe.name)}</h2>
+                    <p>{viContent(recipe.cuisine || 'International')} · {recipe.servingCount} khẩu phần</p>
                     <div className="nutrition-row">
                       <span><b>{recipe.caloriesPerServing}</b> kcal</span>
                       <span><b>{recipe.hasLegume ? 'Có' : '—'}</b> Đậu</span>
@@ -245,15 +246,15 @@ export function CatalogPage() {
                 {rules.data?.map((rule) => (
                   <article className="rule-card" key={rule.id}>
                     <div>
-                      <span className="catalog-chip">{rule.category}</span>
-                      <h2>{rule.title}</h2>
-                      <p>{rule.description}</p>
+                      <span className="catalog-chip">{viContent(rule.category)}</span>
+                      <h2>{viContent(rule.title)}</h2>
+                      <p>{viContent(rule.description)}</p>
                     </div>
                     <div className="rule-versions">
                       {rule.versions.map((version) => (
                         <div key={version.id}>
-                          <span>v{version.versionNumber} · Published</span>
-                          <strong>{version.citation}</strong>
+                          <span>v{version.versionNumber} · Đã xuất bản</span>
+                          <strong>{viContent(version.citation)}</strong>
                           <a href={version.sourceUrl} target="_blank" rel="noreferrer">
                             Mở nguồn tham khảo ↗
                           </a>

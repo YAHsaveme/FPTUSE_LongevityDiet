@@ -304,7 +304,7 @@ export function FmdWorkspaceSection() {
       <div className="workspace-header-row">
         <div>
           <span className="eyebrow">GIÁO DỤC, SÀNG LỌC & THEO DÕI CHU KỲ</span>
-          <h2>Chu trình Fasting Mimicking Diet (FMD 5 ngày).</h2>
+          <h2>Chu trình dinh dưỡng mô phỏng nhịn ăn (FMD 5 ngày).</h2>
           <p className="section-subtitle">
             Mô phỏng trạng thái nhịn ăn có kiểm soát vi chất, tuân thủ nghiêm ngặt ranh giới an toàn
             y khoa và khuyến nghị của Viện Valter Longo.

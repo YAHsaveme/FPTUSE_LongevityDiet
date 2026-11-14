@@ -45,14 +45,20 @@ test('Docker Desktop: choose Gemini in browser and persist 7-day AI menu', async
   const saved = await page.request.get('/api/v1/meal-plans/current', { headers })
   expect(saved.status()).toBe(200)
   const plan = await saved.json() as {
-    id: string, days: { meals: { candidateCode: string, caloriesKcal: number }[] }[],
+    id: string, days: { meals: { candidateCode: string, caloriesKcal: number, explanationSummary: string }[] }[],
     planExplanation: string
   }
   expect(plan.id).toBeTruthy()
   expect(plan.days).toHaveLength(7)
   expect(plan.days.flatMap(day => day.meals)).toHaveLength(21)
+  expect(plan.planExplanation).toContain('Kế hoạch gợi ý 7 ngày')
   expect(plan.planExplanation).toContain('AI đã hỗ trợ')
+  expect(plan.planExplanation.length).toBeGreaterThan(350)
   expect(plan.days.every(day => day.meals.every(meal =>
-    meal.candidateCode.length > 0 && meal.caloriesKcal > 0))).toBeTruthy()
+    meal.candidateCode.length > 0 && meal.caloriesKcal > 0 &&
+    meal.explanationSummary.includes('Vì sao chọn món này') &&
+    meal.explanationSummary.includes('Khẩu phần tham khảo') &&
+    meal.explanationSummary.includes('năng lượng')))).toBeTruthy()
+  await expect(page.locator('.plan-explanation-text')).toContainText('Kế hoạch gợi ý 7 ngày')
   await expect(page.locator('section.meal-editor')).toBeVisible()
 })

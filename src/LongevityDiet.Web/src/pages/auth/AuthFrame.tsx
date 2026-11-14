@@ -17,7 +17,7 @@ export function AuthFrame({ eyebrow, title, description, children }: AuthFramePr
           <span className="brand-monogram">L</span>
           <span>
             <strong>Longevity</strong>
-            <small>Daily wellness companion</small>
+            <small>Đồng hành cùng sức khỏe mỗi ngày</small>
           </span>
         </Link>
 

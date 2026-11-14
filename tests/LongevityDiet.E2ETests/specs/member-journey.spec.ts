@@ -172,7 +172,9 @@ test('member can complete catalog, planning, activity, challenge, report and rem
       return report.status
     }, { timeout: 45000, intervals: [1000, 2000, 3000] }).toBe('Ready')
     await page.getByRole('button', { name: 'Làm mới' }).click()
-    await expect(page.getByText(/Generated:/)).toBeVisible()
+    await expect(page.getByText(/Ngày tạo:/)).toBeVisible()
+    await expect(page.locator('.window-main-card')).toContainText('Báo cáo tuần')
+    await expect(page.locator('.window-main-card')).toContainText('Khung giờ ăn')
   })
 
   await test.step('Save reminder preferences via Web and verify SQL API readback', async () => {

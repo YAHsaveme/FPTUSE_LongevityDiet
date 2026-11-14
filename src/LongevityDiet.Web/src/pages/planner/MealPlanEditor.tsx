@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Check, Clock3, Edit3, Plus, Trash2, X } from 'lucide-react'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
+import { viContent } from '../../lib/viContent'
 import type { CandidateMealDto, MealPlanDayDto, MealPlanDto, PlannedMealDto } from './PlannerWorkspacePage'
 import './meal-plan-editor.css'
 
@@ -133,7 +134,7 @@ export function MealPlanEditor({ plan, day, candidates, onUpdated, onArchived }:
         {day.meals.map(meal => (
           <div className="meal-editor-row" key={meal.id}>
             <div>
-              <strong>{meal.title}</strong>
+              <strong>{viContent(meal.title)}</strong>
               <span>{SLOT_NAMES[meal.slotType] ?? meal.slotType} · {meal.plannedTime.slice(0, 5)} · {meal.caloriesKcal} kcal</span>
             </div>
             <div className="meal-editor-row-actions">
@@ -190,7 +191,7 @@ export function MealPlanEditor({ plan, day, candidates, onUpdated, onArchived }:
                 <option value="">Chọn món (không tự tạo dữ liệu dinh dưỡng)</option>
                 {filteredCandidates.map(candidate => (
                   <option key={candidate.candidateCode} value={candidate.candidateCode}>
-                    {candidate.title} · {candidate.caloriesKcal} kcal
+                    {viContent(candidate.title)} · {candidate.caloriesKcal} kcal
                   </option>
                 ))}
               </select>
