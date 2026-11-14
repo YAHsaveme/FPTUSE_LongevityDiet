@@ -29,7 +29,7 @@ function sql(statement) {
   if (r.error || r.status !== 0) throw new Error('QA SQL failure: ' + r.stderr);
   return r.stdout.trim();
 }
-async function request(root, path, { token, method = 'GET', body } = {}) {
+async function request(root, path, { token, method = 'GET', body, timeoutMs = 15000 } = {}) {
   const r = await fetch(root + path, {
     method,
     headers: {
@@ -37,18 +37,47 @@ async function request(root, path, { token, method = 'GET', body } = {}) {
       ...(body ? { 'Content-Type': 'application/json' } : {}),
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   const txt = await r.text();
   let data;
   try { data = JSON.parse(txt); } catch { data = txt; }
   return { status: r.status, data };
 }
+// A fresh isolated SQL database must run EF migrations before ASP.NET begins
+// serving /ready. GitHub runners can be CPU/IO constrained after rebuilding
+// Gateway, Catalog and Identity. Use a bounded 90s warm-up, not a pass-through.
 let ready = false;
-for (let i = 0; i < 30; i++) {
-  try { if ((await request(planning, '/ready')).status === 200) { ready = true; break; } }
-  catch {}
+for (let i = 0; i < 90; i++) {
+  try {
+    if ((await request(planning, '/ready', { timeoutMs: 4000 })).status === 200) {
+      ready = true;
+      break;
+    }
+  } catch {
+    // Still migrating, or container not listening yet. Diagnose if time expires.
+  }
   await new Promise(resolve => setTimeout(resolve, 1000));
+}
+if (!ready) {
+  const list = spawnSync('docker', ['ps', '-a', '-q', '--filter',
+    'label=com.docker.compose.service=planning'], { encoding: 'utf8', timeout: 5000 });
+  const container = (list.stdout || '').trim().split(/\s+/)[0];
+  if (container) {
+    const state = spawnSync('docker', ['inspect', '--format',
+      '{{.State.Status}} exit={{.State.ExitCode}}', container],
+    { encoding: 'utf8', timeout: 5000 });
+    console.error('Planning container state:', (state.stdout || state.stderr).trim());
+    const logs = spawnSync('docker', ['logs', '--tail', '60', container],
+      { encoding: 'utf8', timeout: 5000 });
+    console.error('Planning startup diagnostics:',
+      (logs.stdout + logs.stderr)
+        .replace(/(Password=)[^;\s]+/gi, '$1[REDACTED]')
+        .replace(/(Bearer\s+)[A-Za-z0-9._-]+/gi, '$1[REDACTED]')
+        .slice(-12000));
+  } else {
+    console.error('Planning container not found in this isolated Docker project.');
+  }
 }
 check('PLANNING_OWNED_SQL_READY', ready);
 check('PLANNING_DB_MIGRATED', Number(sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
