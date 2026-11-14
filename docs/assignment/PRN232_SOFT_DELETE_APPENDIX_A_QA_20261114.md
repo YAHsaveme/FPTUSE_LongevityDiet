@@ -65,3 +65,8 @@
 - Isolated CI QA now checks the migration and 2 SQL columns, 204 on new? No: tests require an HTTP 200 reactivation, retained physical row after DELETE, and same record Id with no duplicate on reactivation; versioned event count increases to 5.
 - Local Docker: rebuilt Recommendation owner, returned `/ready` HTTP 200 and anonymous preferences HTTP 401, verified migration in __EFMigrationsHistory and 2 new columns in SQL Server. Stopped the optional container without removing its SQL database or any volumes.
 - This does **not** establish all application functions, recipes, book extracts or medical information are 100% accepted.
+### CI Mailpit synthetic QA fixture cleanup
+- Run 43621376129 passed email verification, SQL Pending -> RabbitMQ -> Mailpit delivery, post-queue opt-out suppression, and generic non-medical subject. Only the `finally` cleanup SQL command failed; the CI helper initially recorded stderr only, obscuring the SQL reason.
+- Synthetic fixture cleanup now deletes only its own notifications and reminder preference before its own disabled-login user, in an explicit XACT_ABORT transaction with short bounded retries. The cleanup still fails the test if it cannot complete. SQL/exec failures now include sanitized stdout as well as stderr for diagnosis.
+- Local SQL Server inspection confirmed `UserNotifications` and `ReminderPreferences` reference Users through CASCADE FKs, so the exact CI failure still needs diagnostic confirmation; we are not calling a hypothetical FK issue proven.
+- No real user records or production soft-delete policy are changed by the CI-only fixture cleanup.

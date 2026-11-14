@@ -16,9 +16,19 @@ function docker(args, input = '') {
   const result = spawnSync('docker', args, {
     encoding: 'utf8', input, timeout: 30000,
   });
-  if (result.error || result.status !== 0)
+  if (result.error || result.status !== 0) {
+    // sqlcmd writes SQL Server errors to stdout on some runners. Include
+    // redacted diagnostics to distinguish a constraint conflict from a
+    // transient Docker exec / SQL connection failure.
+    const detail = [result.error?.message, result.stdout, result.stderr]
+      .filter(Boolean).join('\n')
+      .replace(/(Password=)[^;\s]+/gi, '$1[REDACTED]')
+      .replace(/(Bearer\s+)[A-Za-z0-9._-]+/gi, '$1[REDACTED]')
+      .slice(-1600);
     throw Error('Isolated QA Docker command failed: ' +
-      args.slice(0, 3).join(' ') + ' (' + String(result.stderr).slice(0, 160) + ')');
+      args.slice(0, 3).join(' ') + ' exit=' + result.status +
+      ' diagnostic=' + detail);
+  }
   return result.stdout.trim();
 }
 function assertQa(label, container) {
@@ -109,6 +119,29 @@ try {
   console.log('PASS SMTP_SUBJECT_IS_GENERIC_NO_HEALTH_DATA');
   console.log('RABBITMQ_TO_MAILPIT_E2E=PASS (3/3), synthetic data only');
 } finally {
-  query(`DELETE FROM dbo.Users WHERE Id = '${id}'
-    AND Email = '${email}' AND PasswordHash = 'synthetic-disabled-login-no-password';`);
+  // Cleanup *only* the synthetic user created above. Delete dependent QA
+  // notifications and opt-in row before the fake user so the test exercises
+  // cleanup deterministically rather than relying on cascades during broker
+  // worker activity. Retry briefly on SQL startup/lock races, but fail
+  // explicitly if cleanup never succeeds.
+  let cleanupError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      query(`SET XACT_ABORT ON;
+        BEGIN TRANSACTION;
+        DELETE FROM dbo.UserNotifications WHERE UserId = '${id}'
+          AND DeduplicationKey LIKE '${dedup}-%';
+        DELETE FROM dbo.ReminderPreferences WHERE UserId = '${id}';
+        DELETE FROM dbo.Users WHERE Id = '${id}'
+          AND Email = '${email}'
+          AND PasswordHash = 'synthetic-disabled-login-no-password';
+        COMMIT TRANSACTION;`);
+      cleanupError = undefined;
+      break;
+    } catch (error) {
+      cleanupError = error;
+      if (attempt < 2) await pause(650);
+    }
+  }
+  if (cleanupError) throw cleanupError;
 }
