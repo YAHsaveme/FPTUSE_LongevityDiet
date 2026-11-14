@@ -59,3 +59,9 @@
 - The test recorded `startedAt=UtcNow-5min`; around 00:00 in Asia/Ho_Chi_Minh the activity belongs to yesterday, while `/api/v1/ldas/latest` correctly scores **today** and has zero coverage.
 - Corrected the test to assert 35% coverage on the explicit **activity-local date** and then assert `/latest` returns 35% only if on that same local date, otherwise 0%. This preserves correct production behavior and prevents timezone-boundary flakiness without hardcoded current dates.
 - Local full Release run after change: 107/107 unit and 111/111 integration PASS.
+### Recommendation owned DB migration and preference history
+- Run 43620029109 progressed through isolated Planning/Tracking and failed at `RECOMMENDATION_OWNER_SQL_READY` after the UserFoodPreference shared entity acquired soft-delete fields, but the independent RecommendationDbContext had no corresponding migration.
+- Added `20261115003000_SoftDeleteOwnedFoodPreferences` + snapshot mapping in `LongevityRecommendationDb`. Added a read filter excluding archived food preferences; changing the preference token to an existing archived key reactivates the **same Id** and clears deletion metadata. DELETE retains the row, records DeletedAt, and emits the existing versioned Outbox event.
+- Isolated CI QA now checks the migration and 2 SQL columns, 204 on new? No: tests require an HTTP 200 reactivation, retained physical row after DELETE, and same record Id with no duplicate on reactivation; versioned event count increases to 5.
+- Local Docker: rebuilt Recommendation owner, returned `/ready` HTTP 200 and anonymous preferences HTTP 401, verified migration in __EFMigrationsHistory and 2 new columns in SQL Server. Stopped the optional container without removing its SQL database or any volumes.
+- This does **not** establish all application functions, recipes, book extracts or medical information are 100% accepted.

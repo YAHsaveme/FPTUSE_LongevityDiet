@@ -30,6 +30,7 @@ public sealed class RecommendationDbContext(DbContextOptions<RecommendationDbCon
 
         var preference = modelBuilder.Entity<UserFoodPreference>();
         preference.ToTable("UserFoodPreferences");
+        preference.HasQueryFilter(x => !x.IsDeleted);
         preference.HasKey(x => x.Id);
         preference.Property(x => x.FoodToken).HasMaxLength(120).IsRequired();
         preference.Property(x => x.DisplayLabel).HasMaxLength(200).IsRequired();

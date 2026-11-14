@@ -96,7 +96,10 @@ public static class RecommendationOwnerEndpoints
                     !Enum.IsDefined(kind))
                     return Results.BadRequest(new { error = "invalid_food_preference" });
                 var key = foodToken.Trim().ToUpperInvariant();
-                var existing = await db.FoodPreferences.FirstOrDefaultAsync(
+                // The unique (UserId, FoodToken) key includes archived rows.
+                // Reactivate an existing preference instead of inserting a
+                // duplicate or discarding the member's previous history.
+                var existing = await db.FoodPreferences.IgnoreQueryFilters().FirstOrDefaultAsync(
                     x => x.UserId == userId && x.FoodToken == key, ct);
                 if (existing is null)
                 {
@@ -107,6 +110,8 @@ public static class RecommendationOwnerEndpoints
                     db.FoodPreferences.Add(existing);
                 }
                 var now = DateTimeOffset.UtcNow;
+                existing.IsDeleted = false;
+                existing.DeletedAt = null;
                 existing.DisplayLabel = input.DisplayLabel!.Trim();
                 existing.PreferenceKind = kind;
                 existing.Notes = string.IsNullOrWhiteSpace(input.Notes) ? null : input.Notes.Trim();
@@ -134,10 +139,13 @@ public static class RecommendationOwnerEndpoints
                 var entry = await db.FoodPreferences.FirstOrDefaultAsync(
                     x => x.UserId == userId && x.FoodToken == key, ct);
                 if (entry is null) return Results.NotFound();
-                db.FoodPreferences.Remove(entry);
+                var deletedAt = DateTimeOffset.UtcNow;
+                entry.IsDeleted = true;
+                entry.DeletedAt = deletedAt;
+                entry.UpdatedAt = deletedAt;
                 Queue(db, userId, "UserFoodPreferenceChanged.v1",
                     new { foodToken = key, operation = "deleted", schemaVersion = 1 },
-                    DateTimeOffset.UtcNow);
+                    deletedAt);
                 await db.SaveChangesAsync(ct);
                 return Results.NoContent();
             }));

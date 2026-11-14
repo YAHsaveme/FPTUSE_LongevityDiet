@@ -84,6 +84,9 @@ namespace LongevityDiet.Recommendation.Grpc.Ownership.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("DisplayLabel")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -93,6 +96,9 @@ namespace LongevityDiet.Recommendation.Grpc.Ownership.Migrations
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
