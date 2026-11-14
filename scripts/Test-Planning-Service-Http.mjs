@@ -81,7 +81,18 @@ if (!ready) {
 }
 check('PLANNING_OWNED_SQL_READY', ready);
 check('PLANNING_DB_MIGRATED', Number(sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
-  '[LongevityPlanningDb].[dbo].[__EFMigrationsHistory];').split(/\s+/).find(x => /^\d+$/.test(x))) >= 2);
+  '[LongevityPlanningDb].[dbo].[__EFMigrationsHistory];').split(/\s+/).find(x => /^\d+$/.test(x))) >= 3);
+const ownedDeletedColumns = sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
+  '[LongevityPlanningDb].sys.columns c JOIN [LongevityPlanningDb].sys.tables t ' +
+  'ON c.object_id=t.object_id WHERE t.name=N\'PlannedMeals\' ' +
+  'AND c.name IN (N\'IsDeleted\', N\'DeletedAt\');');
+check('PLANNING_SOFT_DELETE_COLUMNS', Number(ownedDeletedColumns) === 2);
+const filteredIndex = sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
+  '[LongevityPlanningDb].sys.indexes i JOIN [LongevityPlanningDb].sys.tables t ' +
+  'ON i.object_id=t.object_id WHERE t.name=N\'PlannedMeals\' ' +
+  'AND i.name=N\'IX_PlannedMeals_MealPlanDayId_SlotOrder\' ' +
+  'AND i.is_unique=1 AND i.filter_definition LIKE N\'%IsDeleted%\';');
+check('PLANNING_SOFT_DELETE_FILTERED_UNIQUE_INDEX', Number(filteredIndex) === 1);
 check('PLANNING_ANONYMOUS_401', (await request(planning, '/api/v1/meal-plans')).status === 401);
 const id = randomUUID().replaceAll('-', '');
 const password = 'QAPlanning!_9_' + id;

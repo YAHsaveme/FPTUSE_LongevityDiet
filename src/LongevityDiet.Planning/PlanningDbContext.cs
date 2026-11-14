@@ -56,6 +56,7 @@ public sealed class PlanningDbContext(DbContextOptions<PlanningDbContext> option
 
         var meals = modelBuilder.Entity<PlannedMeal>();
         meals.ToTable("PlannedMeals");
+        meals.HasQueryFilter(x => !x.IsDeleted);
         meals.HasKey(x => x.Id);
         meals.Property(x => x.SlotType).HasConversion<string>().HasMaxLength(24);
         meals.Property(x => x.CandidateCode).HasMaxLength(80).IsRequired();
@@ -73,7 +74,8 @@ public sealed class PlanningDbContext(DbContextOptions<PlanningDbContext> option
         meals.Property(x => x.DeterministicScore).HasPrecision(8, 2);
         meals.Property(x => x.ReasonCodesCsv).HasMaxLength(500).IsRequired();
         meals.Property(x => x.ExplanationSummary).HasMaxLength(1000).IsRequired();
-        meals.HasIndex(x => new { x.MealPlanDayId, x.SlotOrder }).IsUnique();
+        meals.HasIndex(x => new { x.MealPlanDayId, x.SlotOrder })
+            .IsUnique().HasFilter("[IsDeleted] = 0");
         meals.HasIndex(x => new { x.UserId, x.MealPlanId });
 
         var templates = modelBuilder.Entity<ChallengeTemplate>();

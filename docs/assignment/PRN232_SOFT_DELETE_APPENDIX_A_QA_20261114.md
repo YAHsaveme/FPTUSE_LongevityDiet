@@ -48,3 +48,9 @@
 - PR #66 run 43616399160: current runtime boot, Docker E2E and YARP E2E completed. The isolated Planning readiness test timed out at 30 seconds (`FAIL PLANNING_OWNED_SQL_READY`) on the CI runner; no evidence from that step proves a functional Planning CRUD defect.
 - Hardened the QA test to wait **at most 90 one-second retries** for the independent `LongevityPlanningDb` EF migration and `/ready`, with a per-request timeout of 4 seconds. A non-ready result still fails closed and now logs sanitized container state/startup diagnostics to locate real SQL errors.
 - This changes only the isolated QA harness. It does not alter clinical/diet logic, meal quantities, application DB schema or member data.
+### Root cause confirmed: ADR-005 isolated Planning has its own EF model
+- CI run 43617326173 diagnosed `PendingModelChangesWarning` from `PlanningDbContext`: the shared `PlannedMeal` domain entity gained `IsDeleted`/`DeletedAt`, but `LongevityPlanningDb` had no matching migration. Simply extending smoke timeouts cannot fix this.
+- Added independent migration `20261114235500_SoftDeleteOwnedPlannedMeals`, updated `PlanningDbContextModelSnapshot`, added EF query filter and filtered unique index.
+- Verified **on local Docker SQL Server**: Planning container `/ready` HTTP 200 and unauthenticated meal plans HTTP 401; `LongevityPlanningDb.__EFMigrationsHistory` contains the new migration; both new columns and the filtered unique index exist.
+- Extended isolated Planning QA to assert at least three migrations plus the actual soft-delete columns and unique index. Existing 107 unit and 111 integration tests remain PASS.
+- Stopped the optional Planning test container after checks without deleting the SQL database, Redis, Docker volume or backup.
