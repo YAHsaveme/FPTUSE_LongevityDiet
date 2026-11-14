@@ -312,7 +312,8 @@ public sealed class RecipeCatalogService(
             options.HasFish,
             !includeInactive,
             sortField,
-            direction));
+            direction,
+            includeInactive ? options.IsActive : true));
     }
 
     private static void ApplyIngredientsAndAllergens(Recipe recipe, SaveRecipeCommand command)

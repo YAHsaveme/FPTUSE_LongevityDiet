@@ -2,6 +2,7 @@ using LongevityDiet.API.Contracts.Tracking;
 using LongevityDiet.API.Errors;
 using LongevityDiet.API.Security;
 using LongevityDiet.Services.Tracking;
+using LongevityDiet.Services.Querying;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,6 +53,21 @@ public sealed class ChallengesController(ChallengeProgressService service, ICurr
         if (currentUser.UserId is not { } userId) return Unauthorized();
         var result = await service.ListHistoryAsync(userId, cancellationToken);
         return Ok(result.Value);
+    }
+
+    [HttpGet("history/page")]
+    public async Task<IActionResult> QueryHistory(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        [FromQuery] DateOnly? fromDate = null, [FromQuery] DateOnly? toDate = null,
+        [FromQuery] string? status = null, [FromQuery] string sortBy = "startDate",
+        [FromQuery] string sortDirection = "desc", CancellationToken cancellationToken = default)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await service.QueryHistoryAsync(userId,
+            new CollectionPageQuery(page, pageSize, search, fromDate, toDate,
+                status, sortBy, sortDirection), cancellationToken);
+        return result.Succeeded && result.Value is not null ? Ok(result.Value) : this.ToProblem(result);
     }
 
     [HttpPut("{challengeId:guid}/days/{dayNumber:int}")]

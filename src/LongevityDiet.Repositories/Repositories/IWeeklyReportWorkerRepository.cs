@@ -7,6 +7,7 @@ public interface IWeeklyReportWorkerRepository
     Task<WeeklyReport?> GetReportAsync(Guid reportId, Guid userId, CancellationToken cancellationToken = default);
     Task<WeeklyReport?> GetReportByWeekAsync(Guid userId, DateOnly weekStart, int version, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<WeeklyReport>> ListReportsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<PagedRepositoryItems<WeeklyReport>> QueryReportsAsync(Guid userId, HistoryPageQuery options, CancellationToken cancellationToken = default);
     Task AddReportAsync(WeeklyReport report, CancellationToken cancellationToken = default);
     Task<WorkerJob?> GetJobByKeyAsync(string key, CancellationToken cancellationToken = default);
     Task AddJobAsync(WorkerJob job, CancellationToken cancellationToken = default);

@@ -51,6 +51,11 @@ public sealed class TrackingService(
     TimeProvider clock,
     ITrackingDailySignalSource? ownerSignals = null)
 {
+    private static readonly HashSet<string> ActivitySortFields =
+        new(StringComparer.OrdinalIgnoreCase) { "startedAt", "durationMinutes", "kind" };
+    private static readonly HashSet<string> SortDirections =
+        new(StringComparer.OrdinalIgnoreCase) { "asc", "desc" };
+
     public async Task<ActivityView> CreateAsync(Guid userId, ActivityInput input, CancellationToken ct)
     {
         var zone = await ReadZoneAsync(userId, ct);
@@ -121,18 +126,43 @@ public sealed class TrackingService(
 
     public async Task<PageView<ActivityView>> ListAsync(
         Guid userId, DateTimeOffset? from, DateTimeOffset? to,
-        int page, int pageSize, CancellationToken ct)
+        int page, int pageSize, CancellationToken ct,
+        ActivityKind? kind = null, string? search = null,
+        string sortBy = "startedAt", string sortDirection = "desc")
     {
         await ReadZoneAsync(userId, ct);
         ValidatePage(page, pageSize);
         if (from is not null && to is not null && from > to)
             throw new TrackingInputException("invalid_date_range", "From must precede To.");
+        if (kind.HasValue && !Enum.IsDefined(kind.Value))
+            throw new TrackingInputException("invalid_kind", "Unsupported activity kind.");
+        if (search?.Length > 120)
+            throw new TrackingInputException("invalid_search", "Search cannot exceed 120 characters.");
+        if (!ActivitySortFields.Contains(sortBy))
+            throw new TrackingInputException("invalid_sort", "Unsupported activity sorting field.");
+        if (!SortDirections.Contains(sortDirection))
+            throw new TrackingInputException("invalid_sort_direction", "Sort direction must be asc or desc.");
         var query = db.Activities.AsNoTracking().Where(a => a.UserId == userId && !a.IsDeleted);
         if (from is not null) query = query.Where(a => a.StartedAtUtc >= from.Value.UtcDateTime);
         if (to is not null) query = query.Where(a => a.StartedAtUtc <= to.Value.UtcDateTime);
+        if (kind.HasValue) query = query.Where(a => a.Kind == kind.Value);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(a => a.Note != null && a.Note.Contains(term));
+        }
         var total = await query.CountAsync(ct);
-        var items = await query.OrderByDescending(a => a.StartedAtUtc).ThenBy(a => a.Id)
-            .Skip((page - 1) * pageSize).Take(pageSize)
+        var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+        var sorted = (sortBy.ToLowerInvariant(), descending) switch
+        {
+            ("durationminutes", false) => query.OrderBy(a => a.DurationMinutes).ThenBy(a => a.Id),
+            ("durationminutes", true) => query.OrderByDescending(a => a.DurationMinutes).ThenBy(a => a.Id),
+            ("kind", false) => query.OrderBy(a => a.Kind).ThenBy(a => a.Id),
+            ("kind", true) => query.OrderByDescending(a => a.Kind).ThenBy(a => a.Id),
+            ("startedat", false) => query.OrderBy(a => a.StartedAtUtc).ThenBy(a => a.Id),
+            _ => query.OrderByDescending(a => a.StartedAtUtc).ThenBy(a => a.Id),
+        };
+        var items = await sorted.Skip((page - 1) * pageSize).Take(pageSize)
             .Select(a => new ActivityView(a.Id, a.Kind, a.StartedAtUtc, a.DurationMinutes, a.Note))
             .ToListAsync(ct);
         return new PageView<ActivityView>(items, page, pageSize, total,

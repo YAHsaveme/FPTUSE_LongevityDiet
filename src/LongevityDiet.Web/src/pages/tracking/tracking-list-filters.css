@@ -1,0 +1,5 @@
+.tracking-list-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;align-items:end;margin:15px 0}
+.tracking-list-filters label{display:grid;gap:6px;color:#315641;font-size:13px;font-weight:650}
+.tracking-list-filters input,.tracking-list-filters select{width:100%;min-width:0;min-height:42px;padding:8px;border:1px solid #c6d9c7;border-radius:10px;background:#fff;color:#214632}
+.tracking-list-filters button{min-height:42px;padding:8px 12px;border:1px solid #bed5c0;border-radius:10px;background:#eff8ed;color:#24543d;cursor:pointer}
+@media(max-width:600px){.tracking-list-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Activity, ArrowLeft, CalendarDays, Save, Trash2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
 import '../tracking/tracking.css'
+import './tracking-list-filters.css'
 
 type ActivityLog = {
   id: string
@@ -60,6 +61,11 @@ export function ActivityTrackingPage() {
   // Server values are the defaults. Only user edits create a draft; no effect-driven state copy.
   const [goalDraft, setGoalDraft] = useState<Goal | null>(null)
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [historyKind, setHistoryKind] = useState('')
+  const [historySearch, setHistorySearch] = useState('')
+  const [historySort, setHistorySort] = useState('startedAt')
+  const [historyDirection, setHistoryDirection] = useState('desc')
   const [feedback, setFeedback] = useState<string | null>(null)
 
   const profile = useQuery({
@@ -69,11 +75,21 @@ export function ActivityTrackingPage() {
   const timeZone = profile.data?.timeZone ?? 'Asia/Ho_Chi_Minh'
   const localToday = useMemo(() => todayIn(timeZone), [timeZone])
   const activity = useQuery({
-    queryKey: ['activities', page],
+    queryKey: ['activities', page, pageSize, historyKind, historySearch, historySort, historyDirection],
     queryFn: async () => (await api.get<Page<ActivityLog>>('/activities', {
-      params: { page, pageSize: 10 },
+      params: {
+        page, pageSize, kind: historyKind || undefined, search: historySearch.trim() || undefined,
+        sortBy: historySort, sortDirection: historyDirection,
+      },
     })).data,
   })
+  useEffect(() => {
+    const pages = Math.max(1, activity.data?.totalPages ?? 1)
+    if (activity.data && page > pages) {
+      const handle = window.setTimeout(() => setPage(pages), 0)
+      return () => window.clearTimeout(handle)
+    }
+  }, [activity.data, page])
   const summary = useQuery({
     queryKey: ['activity-summary'],
     queryFn: async () => (await api.get<Summary>('/activities/summary')).data,
@@ -238,6 +254,32 @@ export function ActivityTrackingPage() {
       </section>
       <section className="tracking-panel">
         <h2>Lịch sử vận động</h2>
+        <div className="tracking-list-filters" aria-label="Lọc và sắp xếp hoạt động">
+          <label>Tìm ghi chú<input aria-label="Tìm ghi chú vận động" value={historySearch}
+            onChange={event => {setPage(1);setHistorySearch(event.target.value)}} /></label>
+          <label>Loại hoạt động<select aria-label="Lọc loại vận động" value={historyKind}
+            onChange={event => {setPage(1);setHistoryKind(event.target.value)}}>
+            <option value="">Tất cả</option>
+            {[1,2,3,4].map(id => <option key={id} value={id}>{kinds[id]}</option>)}
+          </select></label>
+          <label>Sắp xếp<select aria-label="Sắp xếp vận động" value={historySort}
+            onChange={event => {setPage(1);setHistorySort(event.target.value)}}>
+            <option value="startedAt">Thời điểm</option>
+            <option value="durationMinutes">Số phút</option><option value="kind">Loại</option>
+          </select></label>
+          <label>Thứ tự<select aria-label="Thứ tự vận động" value={historyDirection}
+            onChange={event => {setPage(1);setHistoryDirection(event.target.value)}}>
+            <option value="desc">Giảm dần</option><option value="asc">Tăng dần</option>
+          </select></label>
+          <label>Số dòng/trang<select aria-label="Số hoạt động mỗi trang" value={pageSize}
+            onChange={event => {setPage(1);setPageSize(Number(event.target.value))}}>
+            {[10,20,50,100].map(count => <option key={count} value={count}>{count}</option>)}
+          </select></label>
+          <button type="button" onClick={() => {
+            setPage(1);setPageSize(10);setHistoryKind('');setHistorySearch('');
+            setHistorySort('startedAt');setHistoryDirection('desc')
+          }}>Đặt lại</button>
+        </div>
         {activity.isLoading ? <p>Đang tải lịch sử...</p> :
           activity.isError ? <p role="alert">{getApiErrorMessage(activity.error)}</p> :
             activity.data?.items.length === 0 ? <p>Chưa ghi nhận hoạt động nào.</p> :
@@ -256,12 +298,16 @@ export function ActivityTrackingPage() {
                   </div>
                 ))}
               </div>}
+        {activity.data && <p role="status">Tổng cộng {activity.data.totalItems} hoạt động.</p>}
         {(activity.data?.totalPages ?? 0) > 1 &&
           <div className="tracking-pagination">
+            <button disabled={page <= 1} onClick={() => setPage(1)}>Đầu</button>
             <button disabled={page === 1} onClick={() => setPage(page - 1)}>Trước</button>
             <span>Trang {page} / {activity.data?.totalPages}</span>
             <button disabled={page >= (activity.data?.totalPages ?? 1)}
               onClick={() => setPage(page + 1)}>Sau</button>
+            <button disabled={page >= (activity.data?.totalPages ?? 1)}
+              onClick={() => setPage(activity.data?.totalPages ?? 1)}>Cuối</button>
           </div>}
       </section>
     </main>

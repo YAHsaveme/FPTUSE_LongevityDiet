@@ -145,6 +145,22 @@ public sealed class ReminderNotificationsApiTests : IClassFixture<IntegrationTes
 
         var list = await alice.GetFromJsonAsync<NotificationPage>("/api/v1/notifications");
         Assert.Single(list!.Items);
+        var filtered = await alice.GetFromJsonAsync<NotificationPage>(
+            "/api/v1/notifications?page=1&pageSize=1&category=2&isRead=false&search=Nh%E1%BA%AFc&sortBy=title&sortDirection=asc");
+        Assert.Single(filtered!.Items);
+        Assert.Equal(1, filtered.TotalItems);
+        Assert.Equal(1, filtered.TotalPages);
+        var noMatches = await alice.GetFromJsonAsync<NotificationPage>(
+            "/api/v1/notifications?category=3");
+        Assert.Empty(noMatches!.Items);
+        foreach (var path in new[]
+        {
+            "/api/v1/notifications?category=99",
+            "/api/v1/notifications?sortBy=unknown",
+            "/api/v1/notifications?sortDirection=invalid",
+            "/api/v1/notifications?pageSize=101"
+        })
+            Assert.Equal(HttpStatusCode.BadRequest, (await alice.GetAsync(path)).StatusCode);
         var item = list.Items[0];
         Assert.Equal("/activity", item.DeepLink);
         var otherList = await bob.GetFromJsonAsync<NotificationPage>("/api/v1/notifications");

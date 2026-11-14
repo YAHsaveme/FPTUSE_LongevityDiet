@@ -11,6 +11,47 @@ public sealed class WeeklyReportWorkerRepository(LongevityDietDbContext db) : IW
         db.WeeklyReports.AsNoTracking().Include(x => x.Metrics).FirstOrDefaultAsync(x => x.UserId == userId && x.WeekStart == weekStart && x.ReportVersion == version, cancellationToken);
     public async Task<IReadOnlyList<WeeklyReport>> ListReportsAsync(Guid userId, CancellationToken cancellationToken = default) =>
         await db.WeeklyReports.AsNoTracking().Include(x => x.Metrics).Where(x => x.UserId == userId).OrderByDescending(x => x.WeekStart).ToListAsync(cancellationToken);
+    public async Task<PagedRepositoryItems<WeeklyReport>> QueryReportsAsync(
+        Guid userId, HistoryPageQuery options, CancellationToken cancellationToken = default)
+    {
+        var query = db.WeeklyReports.AsNoTracking().Where(x => x.UserId == userId);
+        if (!string.IsNullOrWhiteSpace(options.Search))
+            query = query.Where(x => x.Summary.Contains(options.Search));
+        if (options.FromDate.HasValue)
+            query = query.Where(x => x.WeekStart >= options.FromDate.Value);
+        if (options.ToDate.HasValue)
+            query = query.Where(x => x.WeekStart <= options.ToDate.Value);
+        if (!string.IsNullOrWhiteSpace(options.Status) &&
+            Enum.TryParse<WeeklyReportStatus>(options.Status, true, out var status))
+            query = query.Where(x => x.Status == status);
+
+        var total = await query.CountAsync(cancellationToken);
+        if ((db.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true) &&
+            options.SortBy.Equals("generatedAt", StringComparison.OrdinalIgnoreCase))
+        {
+            var sqliteRows = await query.Include(x => x.Metrics).ToListAsync(cancellationToken);
+            var ordered = (options.Descending
+                ? sqliteRows.OrderByDescending(x => x.GeneratedAt)
+                : sqliteRows.OrderBy(x => x.GeneratedAt)).ThenBy(x => x.Id);
+            return new PagedRepositoryItems<WeeklyReport>(ordered
+                .Skip((options.Page - 1) * options.PageSize).Take(options.PageSize).ToList(), total);
+        }
+
+        var sorted = (options.SortBy.ToLowerInvariant(), options.Descending) switch
+        {
+            ("generatedat", false) => query.OrderBy(x => x.GeneratedAt).ThenBy(x => x.Id),
+            ("generatedat", true) => query.OrderByDescending(x => x.GeneratedAt).ThenBy(x => x.Id),
+            ("reportversion", false) => query.OrderBy(x => x.ReportVersion).ThenBy(x => x.Id),
+            ("reportversion", true) => query.OrderByDescending(x => x.ReportVersion).ThenBy(x => x.Id),
+            ("weekstart", false) => query.OrderBy(x => x.WeekStart).ThenBy(x => x.Id),
+            _ => query.OrderByDescending(x => x.WeekStart).ThenBy(x => x.Id),
+        };
+        var items = await sorted.Include(x => x.Metrics)
+            .Skip((options.Page - 1) * options.PageSize).Take(options.PageSize)
+            .ToListAsync(cancellationToken);
+        return new PagedRepositoryItems<WeeklyReport>(items, total);
+    }
+
     public Task AddReportAsync(WeeklyReport report, CancellationToken cancellationToken = default) => db.WeeklyReports.AddAsync(report, cancellationToken).AsTask();
     public Task<WorkerJob?> GetJobByKeyAsync(string key, CancellationToken cancellationToken = default) =>
         db.WorkerJobs.FirstOrDefaultAsync(x => x.IdempotencyKey == key, cancellationToken);

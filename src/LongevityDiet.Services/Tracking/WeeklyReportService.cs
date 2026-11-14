@@ -1,6 +1,7 @@
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories.Repositories;
 using LongevityDiet.Services.Identity;
+using LongevityDiet.Services.Querying;
 
 namespace LongevityDiet.Services.Tracking;
 
@@ -72,6 +73,28 @@ public sealed class WeeklyReportService(
     {
         var reports = await repository.ListReportsAsync(userId, cancellationToken);
         return ServiceResult.Success<IReadOnlyList<WeeklyReportSummary>>(reports.Select(ToSummary).ToList());
+    }
+
+    public async Task<ServiceResult<CollectionPage<WeeklyReportSummary>>> QueryReportsAsync(
+        Guid userId, CollectionPageQuery query, CancellationToken cancellationToken = default)
+    {
+        var validSort = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "weekStart", "generatedAt", "reportVersion" };
+        var validStatus = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "Pending", "Ready", "Failed" };
+        var invalid = query.Validate(validSort, validStatus);
+        if (invalid is not null)
+            return ServiceResult.Failure<CollectionPage<WeeklyReportSummary>>("invalid_query", invalid);
+
+        var results = await repository.QueryReportsAsync(
+            userId, new HistoryPageQuery(query.Page, query.PageSize,
+                string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim(),
+                query.FromDate, query.ToDate, query.Status, query.SortBy,
+                string.Equals(query.SortDirection, "desc", StringComparison.OrdinalIgnoreCase)),
+            cancellationToken);
+        var items = results.Items.Select(ToSummary).ToList();
+        return ServiceResult.Success(CollectionPageFactory.Create(
+            items, query.Page, query.PageSize, results.TotalItems));
     }
 
     public async Task<ServiceResult<WeeklyReportSummary>> GetAsync(Guid userId, Guid reportId, CancellationToken cancellationToken = default)

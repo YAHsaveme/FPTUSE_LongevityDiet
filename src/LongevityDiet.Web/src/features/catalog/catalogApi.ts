@@ -136,6 +136,7 @@ export type FoodQuery = {
   isFish?: boolean
   sortBy?: string
   sortDirection?: string
+  isActive?: boolean
 }
 
 export type RecipeQuery = {
@@ -150,6 +151,7 @@ export type RecipeQuery = {
   hasFish?: boolean
   sortBy?: string
   sortDirection?: string
+  isActive?: boolean
 }
 
 export type SaveFoodInput = Omit<Food, 'id' | 'isActive'>

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import './admin-pagination.css'
+import { useAdminCollection } from './useAdminCollection'
+import { AdminCollectionControls, AdminCollectionPagination } from './AdminCollectionControls'
 import { viContent } from '../../../lib/viContent'
 import type { ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -107,12 +109,11 @@ function FoodAdmin() {
   const queryClient = useQueryClient()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<SaveFoodInput>(emptyFood)
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
+  const listing = useAdminCollection('food')
   const [message, setMessage] = useState<string | null>(null)
   const foods = useQuery({
-    queryKey: ['admin', 'foods', page, search],
-    queryFn: () => getFoods({ page, pageSize: 20, search: search.trim() || undefined, sortBy: 'name' }, true),
+    queryKey: ['admin', 'foods', listing.options],
+    queryFn: () => getFoods(listing.options, true),
   })
   const save = useMutation({
     mutationFn: () => editingId ? updateFood(editingId, form) : createFood(form),
@@ -150,7 +151,7 @@ function FoodAdmin() {
     <div className="admin-grid">
       <section className="admin-list-panel">
         <PanelHeading title="Nguyên liệu / thực phẩm" note={String(foods.data?.totalItems ?? 0) + ' mục, bao gồm mục ngừng hoạt động'} />
-        <label className="admin-field"><span>Tìm nguyên liệu</span><input value={search} onChange={e => { setPage(1); setSearch(e.target.value) }} placeholder="Tìm bằng tên nguyên liệu..." /></label>
+        <AdminCollectionControls query={listing} kind="food" />
         {foods.isLoading && <AdminState>Đang tải thực phẩm...</AdminState>}
         {foods.isError && <AdminState error>Không thể tải thực phẩm.</AdminState>}
         <div className="admin-item-list">
@@ -164,13 +165,8 @@ function FoodAdmin() {
             </div>
           ))}
         </div>
-        {foods.data && foods.data.totalPages > 1 && (
-          <div className="admin-page-navigation" aria-label="Phân trang nguyên liệu">
-            <button type="button" disabled={page <= 1} onClick={() => setPage(v => v - 1)}>Trang trước</button>
-            <span>Trang {page}/{foods.data.totalPages}</span>
-            <button type="button" disabled={page >= foods.data.totalPages} onClick={() => setPage(v => v + 1)}>Trang sau</button>
-          </div>
-        )}
+        {foods.data && <AdminCollectionPagination query={listing} totalItems={foods.data.totalItems} totalPages={foods.data.totalPages} />}
+        {foods.data?.items.length === 0 && <p role="status">Không có dữ liệu phù hợp với bộ lọc hiện tại.</p>}
       </section>
       <section className="admin-form-panel">
         <PanelHeading title={editingId ? 'Cập nhật thực phẩm' : 'Thêm thực phẩm mới'} note="Giá trị dinh dưỡng theo một khẩu phần tiêu chuẩn" />
@@ -211,14 +207,13 @@ function RecipeAdmin() {
   const queryClient = useQueryClient()
   const [form, setForm] = useState<SaveRecipeInput>(emptyRecipe)
   const [editingRecipe, setEditingRecipe] = useState<RecipeDetail | null>(null)
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
+  const listing = useAdminCollection('recipe')
   const [ingredientSearch, setIngredientSearch] = useState('')
   const [message, setMessage] = useState<string | null>(null)
 
   const recipes = useQuery({
-    queryKey: ['admin', 'recipes', page, search],
-    queryFn: () => getRecipes({ page, pageSize: 20, search: search.trim() || undefined, sortBy: 'name' }, true),
+    queryKey: ['admin', 'recipes', listing.options],
+    queryFn: () => getRecipes(listing.options, true),
   })
   const foods = useQuery({
     queryKey: ['admin', 'recipe-food-options', ingredientSearch],
@@ -340,7 +335,7 @@ function RecipeAdmin() {
     <div className="admin-grid">
       <section className="admin-list-panel">
         <PanelHeading title="Công thức món ăn" note={String(recipes.data?.totalItems ?? 0) + ' mục'} />
-        <label className="admin-field"><span>Tìm món ăn</span><input value={search} onChange={e => { setPage(1); setSearch(e.target.value) }} placeholder="Tìm tên món ăn..." /></label>
+        <AdminCollectionControls query={listing} kind="recipe" />
         {recipes.isLoading && <AdminState>Đang tải công thức...</AdminState>}
         {recipes.isError && <AdminState error>Không thể tải công thức.</AdminState>}
         <div className="admin-item-list">
@@ -362,13 +357,8 @@ function RecipeAdmin() {
             </div>
           ))}
         </div>
-        {recipes.data && recipes.data.totalPages > 1 && (
-          <div className="admin-page-navigation" aria-label="Phân trang món ăn">
-            <button type="button" disabled={page <= 1} onClick={() => setPage(v => v - 1)}>Trang trước</button>
-            <span>Trang {page}/{recipes.data.totalPages}</span>
-            <button type="button" disabled={page >= recipes.data.totalPages} onClick={() => setPage(v => v + 1)}>Trang sau</button>
-          </div>
-        )}
+        {recipes.data && <AdminCollectionPagination query={listing} totalItems={recipes.data.totalItems} totalPages={recipes.data.totalPages} />}
+        {recipes.data?.items.length === 0 && <p role="status">Không có dữ liệu phù hợp với bộ lọc hiện tại.</p>}
       </section>
 
       <section className="admin-form-panel">

@@ -109,6 +109,22 @@ public sealed class CatalogApiTests : IClassFixture<IntegrationTestWebApplicatio
         var item = Assert.Single(adminListJson.RootElement.GetProperty("items").EnumerateArray());
         Assert.Equal(foodId, item.GetProperty("id").GetGuid());
         Assert.False(item.GetProperty("isActive").GetBoolean());
+
+        // Admin can intentionally inspect archived catalog rows, but the member cannot.
+        var inactive = await client.GetAsync("/api/v1/admin/foods?isActive=false");
+        Assert.Equal(HttpStatusCode.OK, inactive.StatusCode);
+        using (var json = JsonDocument.Parse(await inactive.Content.ReadAsStringAsync()))
+            Assert.Equal(foodId, Assert.Single(json.RootElement.GetProperty("items").EnumerateArray()).GetProperty("id").GetGuid());
+
+        var active = await client.GetAsync("/api/v1/admin/foods?isActive=true");
+        Assert.Equal(HttpStatusCode.OK, active.StatusCode);
+        using (var json = JsonDocument.Parse(await active.Content.ReadAsStringAsync()))
+            Assert.Empty(json.RootElement.GetProperty("items").EnumerateArray());
+
+        var memberCannotShowInactive = await client.GetAsync("/api/v1/foods?isActive=false");
+        Assert.Equal(HttpStatusCode.OK, memberCannotShowInactive.StatusCode);
+        using (var json = JsonDocument.Parse(await memberCannotShowInactive.Content.ReadAsStringAsync()))
+            Assert.Empty(json.RootElement.GetProperty("items").EnumerateArray());
     }
 
     [Fact]

@@ -17,6 +17,11 @@ public sealed class RecipeRepository(LongevityDietDbContext dbContext) : IRecipe
             source = source.Where(x => x.IsActive);
         }
 
+        if (query.IsActive.HasValue)
+        {
+            source = source.Where(x => x.IsActive == query.IsActive.Value);
+        }
+
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
             var normalized = query.Search.Trim().ToUpperInvariant();

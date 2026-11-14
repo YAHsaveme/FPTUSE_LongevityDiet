@@ -9,6 +9,7 @@ public interface IChallengeProgressRepository
     Task<UserChallenge?> GetActiveChallengeAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<UserChallenge?> GetChallengeAsync(Guid challengeId, Guid userId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<UserChallenge>> ListHistoryAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<PagedRepositoryItems<UserChallenge>> QueryHistoryAsync(Guid userId, HistoryPageQuery options, CancellationToken cancellationToken = default);
     Task AddChallengeAsync(UserChallenge challenge, CancellationToken cancellationToken = default);
     Task<DailyWellnessSummary?> GetDailySummaryAsync(Guid userId, DateOnly localDate, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<DailyWellnessSummary>> ListDailySummariesAsync(Guid userId, DateOnly fromDate, DateOnly toDate, CancellationToken cancellationToken = default);

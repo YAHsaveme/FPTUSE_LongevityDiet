@@ -2,6 +2,7 @@ using LongevityDiet.API.Contracts.Tracking;
 using LongevityDiet.API.Errors;
 using LongevityDiet.API.Security;
 using LongevityDiet.Services.Tracking;
+using LongevityDiet.Services.Querying;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,28 @@ public sealed class MealLogsController(
         }
 
         return Ok(result.Value.Select(ToResponse).ToList());
+    }
+
+    [HttpGet("page")]
+    public async Task<IActionResult> QueryPage(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        [FromQuery] DateOnly? fromDate = null, [FromQuery] DateOnly? toDate = null,
+        [FromQuery] string? slotType = null, [FromQuery] string sortBy = "eatenAt",
+        [FromQuery] string sortDirection = "desc", CancellationToken cancellationToken = default)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await mealTrackingService.QueryMealLogsAsync(userId,
+            new CollectionPageQuery(page, pageSize, search, fromDate, toDate,
+                null, sortBy, sortDirection, slotType), cancellationToken);
+        return result.Succeeded && result.Value is not null
+            ? Ok(new
+            {
+                result.Value.Page, result.Value.PageSize,
+                result.Value.TotalItems, result.Value.TotalPages,
+                Items = result.Value.Items.Select(ToResponse).ToList(),
+            })
+            : this.ToProblem(result);
     }
 
     [HttpPost]

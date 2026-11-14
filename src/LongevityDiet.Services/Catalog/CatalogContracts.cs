@@ -44,7 +44,8 @@ public sealed record FoodQueryOptions(
     bool? IsWholeGrain = null,
     bool? IsFish = null,
     string SortBy = "name",
-    string SortDirection = "asc");
+    string SortDirection = "asc",
+    bool? IsActive = null);
 
 public sealed record RecipeQueryOptions(
     int Page = 1,
@@ -57,7 +58,8 @@ public sealed record RecipeQueryOptions(
     bool? HasWholeGrain = null,
     bool? HasFish = null,
     string SortBy = "name",
-    string SortDirection = "asc");
+    string SortDirection = "asc",
+    bool? IsActive = null);
 
 public sealed record FoodDto(
     Guid Id,

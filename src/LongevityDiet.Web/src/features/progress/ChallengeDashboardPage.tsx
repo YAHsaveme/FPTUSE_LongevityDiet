@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, Flame, LineChart, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
+import { HistoryBrowser } from '../../components/HistoryBrowser'
 import { getApiErrorMessage } from '../../lib/apiError'
 import { viContent } from '../../lib/viContent'
 
@@ -122,6 +123,7 @@ export function ChallengeDashboardPage() {
             </>
           ) : null}
         </section>
+        <HistoryBrowser kind="challenge" />
       </main>
     </div>
   )

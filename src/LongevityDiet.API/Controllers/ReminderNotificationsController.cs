@@ -1,6 +1,7 @@
 using LongevityDiet.API.Security;
 using LongevityDiet.API.Reminders;
 using LongevityDiet.Services.Reminders;
+using LongevityDiet.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
@@ -51,8 +52,13 @@ public sealed partial class ReminderNotificationsController(
         Handle(async userId => Ok(await service.PreviewAsync(userId, ct)));
 
     [HttpGet("notifications")]
-    public Task<IActionResult> Notifications(int page = 1, int pageSize = 20, CancellationToken ct = default) =>
-        Handle(async userId => Ok(await service.ListAsync(userId, page, pageSize, ct)));
+    public Task<IActionResult> Notifications(
+        int page = 1, int pageSize = 20, ReminderCategory? category = null,
+        bool? isRead = null, string? search = null,
+        string sortBy = "createdAt", string sortDirection = "desc",
+        CancellationToken ct = default) =>
+        Handle(async userId => Ok(await service.ListFilteredAsync(
+            userId, page, pageSize, category, isRead, search, sortBy, sortDirection, ct)));
 
     [HttpGet("notifications/unread-count")]
     public Task<IActionResult> UnreadCount(CancellationToken ct) =>

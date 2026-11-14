@@ -3,6 +3,7 @@ using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories.Repositories;
 using LongevityDiet.Services.Identity;
 using LongevityDiet.Services.Wellness;
+using LongevityDiet.Services.Querying;
 
 namespace LongevityDiet.Services.Planning;
 
@@ -167,6 +168,25 @@ public sealed class MealPlanningService(
         var plans = await mealPlanRepository.ListByUserAsync(userId, cancellationToken);
         var summaries = plans.Select(ToSummary).ToList();
         return ServiceResult.Success<IReadOnlyList<MealPlanSummary>>(summaries);
+    }
+
+    public async Task<ServiceResult<CollectionPage<MealPlanSummary>>> QueryPlansAsync(
+        Guid userId, CollectionPageQuery query, CancellationToken cancellationToken = default)
+    {
+        var sorts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "startDate", "generatedAt", "revisionNumber" };
+        var statuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "Active", "Superseded", "Archived" };
+        var invalid = query.Validate(sorts, statuses);
+        if (invalid is not null)
+            return ServiceResult.Failure<CollectionPage<MealPlanSummary>>("invalid_query", invalid);
+        var page = await mealPlanRepository.QueryPlansAsync(userId,
+            new HistoryPageQuery(query.Page, query.PageSize,
+                string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim(),
+                query.FromDate, query.ToDate, query.Status, query.SortBy,
+                string.Equals(query.SortDirection, "desc", StringComparison.OrdinalIgnoreCase)), cancellationToken);
+        return ServiceResult.Success(CollectionPageFactory.Create(
+            page.Items.Select(ToSummary).ToList(), query.Page, query.PageSize, page.TotalItems));
     }
 
     /// <summary>Idempotent rolling 14-day coverage when the member opens the planner.</summary>

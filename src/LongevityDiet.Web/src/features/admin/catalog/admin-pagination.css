@@ -1,1 +1,9 @@
 .admin-page-navigation{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap;padding:17px 6px 6px}.admin-page-navigation button{min-height:43px;padding:9px 13px;border:1px solid #c7ddc7;border-radius:11px;background:#f2faed;color:#1a513c;font:700 15px 'Be Vietnam Pro',sans-serif;cursor:pointer}.admin-page-navigation button:disabled{opacity:.48;cursor:not-allowed}.admin-page-navigation span{font-size:15px;font-weight:700;color:#245743}.admin-list-panel>.admin-field{margin:13px 0 15px}.admin-list-panel>.admin-field input,.admin-form-panel>.admin-field input{width:100%;min-height:48px;padding:10px 12px;border-radius:12px;border:1px solid #c9dac7;background:#fffefa;color:#1c3c2c;font-size:16px}
+.admin-list-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin:14px 0;align-items:end}
+.admin-list-filters label{display:grid;gap:6px;color:#245743;font-weight:650;font-size:13px}
+.admin-list-filters input,.admin-list-filters select,.admin-page-navigation select{width:100%;min-height:42px;background:#fffefa;color:#1c3c2c;border:1px solid #c9dac7;border-radius:10px;padding:7px 9px;font:inherit}
+.admin-list-filters .admin-filter-reset{height:42px;border:1px solid #b9d5ba;border-radius:10px;background:#eff8eb;color:#245743;cursor:pointer}
+.admin-page-navigation>label{display:flex;align-items:center;gap:8px;font-size:13px;color:#245743}
+.admin-page-navigation select{width:auto;min-width:78px}.admin-page-buttons{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.admin-page-buttons button{min-width:39px}
+@media(max-width:680px){.admin-list-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
