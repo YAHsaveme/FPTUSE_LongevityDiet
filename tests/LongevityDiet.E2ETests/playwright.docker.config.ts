@@ -20,6 +20,8 @@ export default defineConfig({
     headless: true,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: process.env.PRN232_QA_CAPTURE_VIDEO === '1' ? 'on' : 'retain-on-failure',
+    // CI runners using preinstalled Chrome may lack Playwright ffmpeg; keep video opt-in.
+    // Local isolated QA can still enable full evidence with PRN232_QA_CAPTURE_VIDEO=1.
+    video: process.env.PRN232_QA_CAPTURE_VIDEO === '1' ? 'on' : 'off',
   },
 })
