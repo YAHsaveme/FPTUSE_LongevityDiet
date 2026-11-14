@@ -1,0 +1,18 @@
+# Optional Docker Desktop demo overlay. Never commit real API keys.
+# Start with: powershell -ExecutionPolicy Bypass -File .\scripts\Start-Gemini-Docker-Demo.ps1
+# The script temporarily passes GEMINI_API_KEY from ASP.NET Core User Secrets
+# to Docker Compose. Only the API container receives the key.
+services:
+  api:
+    environment:
+      Gemini__ApiKey: ${GEMINI_API_KEY:?Gemini key is missing; use Start-Gemini-Docker-Demo.ps1}
+      MealPlanningAI__Enabled: "true"
+      MealPlanningAI__Provider: Gemini
+
+# Demo-only volumes: deliberately separate from the project's existing
+# SQL and Redis data. Never run 'docker compose down -v' on real project data.
+volumes:
+  sql-data:
+    name: longevity-gemini-demo-sql-data
+  redis-data:
+    name: longevity-gemini-demo-redis-data
