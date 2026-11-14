@@ -66,6 +66,16 @@ services:
         condition: service_healthy
       recommendation-grpc:
         condition: service_started
+    # Do not mark the API ready until EF migrations/seed and dependencies work.
+    # /health is only a liveness probe and is intentionally insufficient here.
+    # ASP.NET runtime image has bash but not curl/wget: use a local HTTP probe
+    # without installing packages or exposing any credentials.
+    healthcheck:
+      test: ["CMD", "bash", "/app/docker-healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 35s
     networks: [ldc-network]
 
   worker:
@@ -77,6 +87,11 @@ services:
       ConnectionStrings__Default: Server=sqlserver,1433;Database=LongevityDietDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True
       Redis__ConnectionString: redis:6379
     depends_on:
+      # Worker runs legacy report queries on the API-owned database in the
+      # Docker Desktop demo. Wait for API migrations and seed to finish before
+      # the worker opens SQL connections (otherwise RCSI ALTER DATABASE blocks).
+      api:
+        condition: service_healthy
       sqlserver:
         condition: service_healthy
       redis:

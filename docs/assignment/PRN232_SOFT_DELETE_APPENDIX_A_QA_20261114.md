@@ -38,3 +38,9 @@
 5. **Nhiều API replicas:** khóa mutation trong process chỉ đúng demo một container; production cần đảm bảo uniqueness/transaction ở SQL và thử cạnh tranh giữa nhiều instances.
 
 **Kết luận tạm:** phần mềm và migration xóa mềm chính đã chạy/được kiểm thử. Bộ sách 350 dữ kiện chỉ là chứng cứ trích xuất, không chứng minh toàn bộ sách đã cấu trúc hóa hoặc AI đã book-exact. Chưa được phép ghi dự án đạt 100% nghiệm thu cuối.
+
+## E. CI runner cold-start sequencing (PR #66)
+- GitHub Actions run 43614701370: `validate` PASS; `current-runtime-release-smoke` FAIL at "Wait for current runtime" on a **fresh empty SQL volume**.
+- Root error (API): `ALTER DATABASE [LongevityDietDb] SET READ_COMMITTED_SNAPSHOT ON` exceeded 60-second SQL timeout while Worker was accessing the same database before EF migrations completed. Worker then temporarily queried a missing `WorkerHeartbeats` table; those are startup-order symptoms, not a soft-delete schema loss.
+- Fixed Docker Compose startup order: API probes true `/ready` (not `/health`) via `docker-healthcheck.sh`, Worker waits for `api: service_healthy`. Avoids opening the shared SQL database during initial EF migration and seed. No schema mutation or data purge was introduced by this repair.
+- Local verification: `docker compose config --quiet` PASS, and Bash readiness probe executed **inside** an existing ready API container returns 0. A fresh SQL volume must still pass GitHub smoke before merge.
