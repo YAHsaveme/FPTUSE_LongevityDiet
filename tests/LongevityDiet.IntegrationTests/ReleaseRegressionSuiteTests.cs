@@ -175,6 +175,10 @@ public sealed class ReleaseRegressionSuiteTests : IClassFixture<IntegrationTestW
             ["DIABETES_MEDICATION"] = false,
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
         var assessmentRes = await client.PostAsJsonAsync(
             "/api/v1/fmd/safety/assessment",
@@ -191,7 +195,7 @@ public sealed class ReleaseRegressionSuiteTests : IClassFixture<IntegrationTestW
         Assert.NotNull(cycle);
         Assert.Equal(5, cycle.Days.Count);
         Assert.Equal(1100, cycle.Days[0].TargetCaloriesKcal);
-        Assert.Equal(750, cycle.Days[1].TargetCaloriesKcal);
+        Assert.Equal(800, cycle.Days[1].TargetCaloriesKcal);
 
         // Log Day 1 check-in
         var logDayRes = await client.PostAsJsonAsync(

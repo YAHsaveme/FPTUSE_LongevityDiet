@@ -189,7 +189,8 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         mealPlan.Property(x => x.AppliedAllergiesCsv).HasMaxLength(1000).IsRequired();
         mealPlan.Property(x => x.AppliedExclusionsCsv).HasMaxLength(1000).IsRequired();
         mealPlan.Property(x => x.ReasonCodesCsv).HasMaxLength(500).IsRequired();
-        mealPlan.Property(x => x.PlanExplanation).HasMaxLength(1000).IsRequired();
+        // Long, source-attributed Vietnamese explanations must not be truncated in SQL Server.
+        mealPlan.Property(x => x.PlanExplanation).HasMaxLength(4000).IsRequired();
         mealPlan.HasIndex(x => new { x.UserId, x.Status, x.GeneratedAt });
         mealPlan.HasMany(x => x.Days)
             .WithOne(x => x.MealPlan)

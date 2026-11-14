@@ -14,50 +14,50 @@ public sealed class PlanningCatalogSnapshotProvider(
 
     private static readonly PlanningRuleSetSnapshot DefaultRuleSet = new(
         ContractVersion: "v1",
-        RuleSetVersion: "LDC-RULES-2026.1",
-        PublishedAt: new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero),
+        RuleSetVersion: "LDC-RULES-LONGO-2018.1",
+        PublishedAt: new DateTimeOffset(2026, 11, 14, 0, 0, 0, TimeSpan.Zero),
         Rules:
         [
             new PlanningDietRuleSnapshot(
                 "PLANT_FORWARD",
                 "Ưu tiên nền tảng thực vật, rau xanh và dầu lành mạnh",
-                "FoundationOfficial",
-                "https://www.fondazionevalterlongo.org/en/longevity-diet-for-adults/",
+                "UserProvidedBook",
+                "https://www.penguinrandomhouseretail.com/book/?isbn=9780525534075",
                 "FivePillars-EpidemiologyAndClinical",
                 25m),
             new PlanningDietRuleSnapshot(
                 "LEGUME_PROTEIN",
                 "Sử dụng các loại đậu và hạt làm nguồn đạm chính hằng ngày",
-                "FoundationOfficial",
-                "https://www.fondazionevalterlongo.org/en/longevity-diet-for-adults/",
+                "UserProvidedBook",
+                "https://www.penguinrandomhouseretail.com/book/?isbn=9780525534075",
                 "FivePillars-CentenarianAndClinical",
                 20m),
             new PlanningDietRuleSnapshot(
                 "COMPLEX_CARBS",
                 "Ưu tiên tinh bột phức hợp và ngũ cốc nguyên hạt giàu chất xơ",
-                "FoundationOfficial",
-                "https://www.fondazionevalterlongo.org/en/longevity-diet-for-adults/",
+                "UserProvidedBook",
+                "https://www.penguinrandomhouseretail.com/book/?isbn=9780525534075",
                 "FivePillars-BasicAndClinical",
                 15m),
             new PlanningDietRuleSnapshot(
                 "LOW_SUGAR_SATFAT",
                 "Hạn chế đường tinh luyện và chất béo bão hòa trong bữa ăn",
-                "FoundationOfficial",
-                "https://www.fondazionevalterlongo.org/en/longevity-diet-for-adults/",
+                "UserProvidedBook",
+                "https://www.penguinrandomhouseretail.com/book/?isbn=9780525534075",
                 "FivePillars-Epidemiology",
                 15m),
             new PlanningDietRuleSnapshot(
                 "MODERATE_FISH",
                 "Kết hợp cá giàu omega-3 ở mức vừa phải theo chế độ pescatarian",
-                "FoundationOfficial",
-                "https://www.fondazionevalterlongo.org/en/longevity-diet-for-adults/",
+                "UserProvidedBook",
+                "https://www.penguinrandomhouseretail.com/book/?isbn=9780525534075",
                 "FivePillars-CentenarianStudies",
                 10m),
             new PlanningDietRuleSnapshot(
                 "AGE_PROTEIN_FIT",
                 "Điều chỉnh lượng đạm vừa phải theo độ tuổi sinh học",
-                "FoundationOfficial",
-                "https://www.fondazionevalterlongo.org/en/longevity-diet-for-adults/",
+                "UserProvidedBook",
+                "https://www.penguinrandomhouseretail.com/book/?isbn=9780525534075",
                 "FivePillars-Juventology",
                 10m)
         ]);

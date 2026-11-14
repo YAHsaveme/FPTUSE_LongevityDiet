@@ -6,6 +6,7 @@ import { useAuth } from '../auth/authState'
 const memberLinks = [
   { to: '/app', label: 'Kế hoạch', Icon: LayoutDashboard },
   { to: '/catalog', label: 'Món ăn', Icon: BookOpen },
+  { to: '/book', label: 'Sách gốc', Icon: BookOpen },
   { to: '/activity', label: 'Hoạt động', Icon: Activity },
   { to: '/progress', label: 'Tiến độ', Icon: BarChart3 },
   { to: '/reports', label: 'Báo cáo', Icon: CalendarDays },
@@ -16,7 +17,7 @@ const memberLinks = [
 const primaryRoutes = new Set(['/app', '/catalog', '/activity', '/progress'])
 
 const isMemberLocation = (pathname: string) =>
-  ['/app', '/planner', '/catalog', '/activity', '/progress', '/reports', '/notifications', '/profile', '/admin/catalog']
+  ['/app', '/planner', '/catalog', '/book', '/activity', '/progress', '/reports', '/notifications', '/profile', '/admin/catalog']
     .some((path) => pathname === path || pathname.startsWith(path + '/'))
 
 /** Cross-feature navigation; does not modify business state or API calls. */

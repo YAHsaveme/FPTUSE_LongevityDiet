@@ -21,9 +21,9 @@ public sealed class FmdEducationAcknowledgement
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid UserId { get; set; }
-    public string EducationVersion { get; set; } = "FMD-EDU-2026.1";
+    public string EducationVersion { get; set; } = "FMD-EDU-LONGO-2018.1";
     public DateTimeOffset AcknowledgedAt { get; set; } = DateTimeOffset.UtcNow;
-    public string SourceCitation { get; set; } = "Valter Longo Foundation - Fasting Mimicking Diet Research & Safety Guidelines";
+    public string SourceCitation { get; set; } = "Longo (2018), The Longevity Diet, Chương 6, trang PDF 112–115";
     public bool DisclaimerAccepted { get; set; } = true;
 }
 
@@ -31,7 +31,7 @@ public sealed class FmdSafetyAssessment
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid UserId { get; set; }
-    public string AssessmentVersion { get; set; } = "FMD-SAFETY-2026.1";
+    public string AssessmentVersion { get; set; } = "FMD-SAFETY-LONGO-2018.1";
     public DateTimeOffset EvaluatedAt { get; set; } = DateTimeOffset.UtcNow;
     public FmdSafetyStatus ResultStatus { get; set; } = FmdSafetyStatus.AssessmentRequired;
     public bool HasHighRiskFlag { get; set; }

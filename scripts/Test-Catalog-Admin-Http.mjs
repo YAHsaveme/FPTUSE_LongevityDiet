@@ -52,10 +52,27 @@ async function register() {
   const id = randomUUID().replaceAll('-', '');
   const email = 'catalog-admin-qa-' + id + '@example.test';
   const password = 'QaCatalog!_A7_' + id;
-  const result = await request(gateway + '/api/v1/auth/register', {
-    method: 'POST', body: { email, password, displayName: 'Catalog synthetic Admin QA' },
-  });
-  check('SYNTHETIC_MEMBER_REGISTERED', result.status === 201 &&
+  // The preceding smoke test also registers a synthetic account on this same
+  // loopback IP. Keep production's anti-abuse limiter enabled and honor 429
+  // instead of interpreting a transient registration throttle as a product bug.
+  let result;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    result = await request(gateway + '/api/v1/auth/register', {
+      method: 'POST', body: { email, password, displayName: 'Catalog synthetic Admin QA' },
+    });
+    if (result.status !== 429 || attempt === 3) break;
+    const retryAfter = Number(result.headers.get('retry-after'));
+    const backoff = [15, 30, 60][attempt];
+    const delaySeconds = Number.isFinite(retryAfter) && retryAfter > 0
+      ? Math.min(70, Math.max(5, Math.ceil(retryAfter)))
+      : backoff;
+    console.log('Synthetic QA registration rate-limited (429); honoring retry window.');
+    await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+  }
+  if (result?.status !== 201) {
+    console.error('Synthetic QA registration status:', result?.status ?? 'no response');
+  }
+  check('SYNTHETIC_MEMBER_REGISTERED', result?.status === 201 &&
     typeof result.data?.accessToken === 'string');
   return { email, password, memberToken: result.data.accessToken };
 }
