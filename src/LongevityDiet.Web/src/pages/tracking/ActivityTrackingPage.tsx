@@ -298,7 +298,7 @@ export function ActivityTrackingPage() {
                   </div>
                 ))}
               </div>}
-        {activity.data && <p role="status">Tổng cộng {activity.data.totalItems} hoạt động.</p>}
+        {activity.data && <p aria-label="Số hoạt động trong lịch sử">Tổng cộng {activity.data.totalItems} hoạt động.</p>}
         {(activity.data?.totalPages ?? 0) > 1 &&
           <div className="tracking-pagination">
             <button disabled={page <= 1} onClick={() => setPage(1)}>Đầu</button>

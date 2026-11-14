@@ -503,7 +503,7 @@ export function NotificationsPage() {
               </div>
             ))}
           </div>}
-        {messages.data && <p role="status">Tổng cộng {messages.data.totalItems} thông báo.</p>}
+        {messages.data && <p aria-label="Số thông báo trong danh sách">Tổng cộng {messages.data.totalItems} thông báo.</p>}
         {(messages.data?.totalPages ?? 0) > 1 && <div className="tracking-pagination">
           <button disabled={page <= 1} onClick={() => setPage(1)}>Đầu</button>
           <button disabled={page === 1} onClick={() => setPage(page - 1)}>Trước</button>
