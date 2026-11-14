@@ -43,12 +43,13 @@ public sealed class FmdService(
         }
 
         var assessment = await fmdRepository.GetLatestAssessmentAsync(userId, cancellationToken);
-        if (assessment is null)
+        if (assessment is null || !string.Equals(assessment.AssessmentVersion,
+                FmdSafetyCatalog.CurrentSafetyVersion, StringComparison.Ordinal))
         {
             return ServiceResult.Success(new FmdSafetyStatusSummary(
                 CurrentStatus: FmdSafetyStatus.AssessmentRequired,
                 StatusTitle: "Cần thực hiện sàng lọc an toàn",
-                StatusMessage: "Bạn đã xem tài liệu giáo dục. Vui lòng hoàn thành bảng câu hỏi kiểm tra chống chỉ định y khoa.",
+                StatusMessage: "Hãy hoàn thành toàn bộ câu hỏi sàng lọc theo Chương 6 của sách Valter Longo (2018). Bảng hỏi cũ phải được làm lại khi phiên bản an toàn thay đổi.",
                 IsEligibleForTracking: false,
                 RequiresProfessionalReview: false,
                 LastAcknowledgedAt: ack.AcknowledgedAt,
@@ -61,9 +62,12 @@ public sealed class FmdService(
         var isEligible = assessment.ResultStatus == FmdSafetyStatus.EligibleForTracking;
         var requiresReview = assessment.ResultStatus == FmdSafetyStatus.ProfessionalReviewRequired;
 
-        var title = isEligible
-            ? "Đủ điều kiện theo dõi chu kỳ"
-            : "Yêu cầu có ý kiến bác sĩ (Bị chặn)";
+        var title = assessment.ResultStatus switch
+        {
+            FmdSafetyStatus.EligibleForTracking => "Đã trả lời đầy đủ bảng hỏi — chỉ được theo dõi, không phải chấp thuận y tế",
+            FmdSafetyStatus.AssessmentRequired => "Bảng hỏi chưa đầy đủ — chưa thể theo dõi",
+            _ => "Cần bác sĩ đánh giá — hệ thống chặn"
+        };
 
         return ServiceResult.Success(new FmdSafetyStatusSummary(
             CurrentStatus: assessment.ResultStatus,
@@ -177,7 +181,7 @@ public sealed class FmdService(
 
             return ServiceResult.Failure<FmdCycleSummary>(
                 "fmd_assessment_required",
-                "Bạn cần hoàn thành bảng sàng lọc an toàn FMD và đạt chuẩn trước khi bắt đầu chu kỳ.");
+                "Bạn cần trả lời đầy đủ bảng sàng lọc theo sách và tự cân nhắc tư vấn y tế; hệ thống chỉ cho phép ghi nhật ký, không xác nhận một phác đồ FMD là an toàn.");
         }
 
         var active = await fmdRepository.GetActiveCycleAsync(userId, cancellationToken);

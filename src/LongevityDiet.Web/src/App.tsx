@@ -33,6 +33,10 @@ const CatalogPage = lazy(() =>
   import('./features/catalog/CatalogPage').then((module) => ({ default: module.CatalogPage })),
 )
 
+const BookReferencePage = lazy(() =>
+  import('./features/book/BookReferencePage').then((module) => ({ default: module.BookReferencePage })),
+)
+
 const RecipeDetailPage = lazy(() =>
   import('./features/catalog/RecipeDetailPage').then((module) => ({ default: module.RecipeDetailPage })),
 )
@@ -94,6 +98,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/book" element={<BookReferencePage />} />
 
         <Route
           path="/onboarding"

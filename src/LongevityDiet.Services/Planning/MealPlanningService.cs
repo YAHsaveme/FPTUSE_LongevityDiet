@@ -1344,6 +1344,8 @@ public sealed class MealPlanningService(
             $"Thực phẩm cần loại trừ: {exclusions}. " +
             $"Món ăn được chọn từ danh mục hiện có theo bộ quy tắc phiên bản {ruleSet.RuleSetVersion}; " +
             "các điều kiện dị ứng và loại trừ được kiểm tra trước khi lưu. " +
+            "Nguyên tắc tham khảo: Valter Longo (2018), The Longevity Diet, Chương 4, trang PDF 89–90; " +
+            "các món trong danh mục do dự án duy trì không nhất thiết nằm trong thực đơn gốc Phụ lục A (trang PDF 212–242). " +
             "Cách sử dụng: xem từng ngày, kiểm tra thành phần và khẩu phần của từng món; " +
             "có thể thay đổi món trong phạm vi danh mục được phép và ghi lại bữa ăn thực tế. " +
             "Giới hạn: số liệu dinh dưỡng chỉ phục vụ tham khảo, chưa được xác minh đầy đủ cho " +
@@ -1380,7 +1382,8 @@ public sealed class MealPlanningService(
             $"tinh bột {candidate.CarbsGrams:0.##} g; chất béo {candidate.FatGrams:0.##} g; " +
             $"chất xơ {candidate.FiberGrams:0.##} g. " +
             $"Thành phần trong danh mục: {ingredients}. " +
-            $"Tham chiếu bộ quy tắc phiên bản {ruleSetVersion}; ứng viên đã qua bộ lọc dị ứng " +
+            $"Tham chiếu bộ quy tắc phiên bản {ruleSetVersion} và nguyên tắc trong The Longevity Diet (2018), Chương 4, trang PDF 89–90. " +
+            "Giá trị dinh dưỡng là dữ liệu danh mục, KHÔNG phải số đo từng món được chứng thực trong sách. Ứng viên đã qua bộ lọc dị ứng " +
             "và thực phẩm loại trừ được khai báo. Hãy kiểm tra thành phần thực tế " +
             "và nguy cơ tiếp xúc chéo trước khi dùng.";
     }

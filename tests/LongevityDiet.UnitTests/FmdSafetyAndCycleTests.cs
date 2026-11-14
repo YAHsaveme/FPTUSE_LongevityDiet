@@ -18,6 +18,10 @@ public sealed class FmdSafetyAndCycleTests
             ["DIABETES_MEDICATION"] = false,
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
 
         // Act
@@ -26,7 +30,7 @@ public sealed class FmdSafetyAndCycleTests
         // Assert
         Assert.Equal(FmdSafetyStatus.EligibleForTracking, status);
         Assert.Empty(triggeredCodes);
-        Assert.Contains("đủ điều kiện", message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("không phải xác nhận", message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Theory]
@@ -47,6 +51,10 @@ public sealed class FmdSafetyAndCycleTests
             ["DIABETES_MEDICATION"] = false,
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
         answers[riskCode] = true;
 
@@ -73,6 +81,10 @@ public sealed class FmdSafetyAndCycleTests
             ["DIABETES_MEDICATION"] = true,
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
 
         // Act
@@ -87,10 +99,10 @@ public sealed class FmdSafetyAndCycleTests
 
     [Theory]
     [InlineData(1, 1100)]
-    [InlineData(2, 750)]
-    [InlineData(3, 750)]
-    [InlineData(4, 750)]
-    [InlineData(5, 750)]
+    [InlineData(2, 800)]
+    [InlineData(3, 800)]
+    [InlineData(4, 800)]
+    [InlineData(5, 800)]
     public void FmdSafetyCatalog_ResolveTargetCaloriesForDay_MatchesValterLongoProtocols(int dayNumber, int expectedCalories)
     {
         // Act
@@ -101,10 +113,34 @@ public sealed class FmdSafetyAndCycleTests
     }
 
     [Fact]
-    public void FmdSafetyCatalog_ResolveTargetCaloriesForDay_OutOfRangeDays_DefaultsTo750()
+    public void FmdSafetyCatalog_ResolveTargetCaloriesForDay_RejectsDaysOutsideFiveDayProtocol()
     {
-        Assert.Equal(750, FmdSafetyCatalog.ResolveTargetCaloriesForDay(6));
-        Assert.Equal(750, FmdSafetyCatalog.ResolveTargetCaloriesForDay(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => FmdSafetyCatalog.ResolveTargetCaloriesForDay(6));
+        Assert.Throws<ArgumentOutOfRangeException>(() => FmdSafetyCatalog.ResolveTargetCaloriesForDay(0));
+    }
+
+    [Fact]
+    public void FmdSafetyCatalog_IncompleteQuestionnaire_NeverTreatsMissingAnswersAsNoRisk()
+    {
+        var answers = new Dictionary<string, bool> { ["PREGNANT_OR_BREASTFEEDING"] = false };
+        var (status, missing, message) = FmdSafetyCatalog.EvaluateScreening(answers);
+        Assert.Equal(FmdSafetyStatus.AssessmentRequired, status);
+        Assert.Contains("OTHER_MEDICATION", missing);
+        Assert.Contains("Chưa trả lời đầy đủ", message);
+    }
+
+    [Theory]
+    [InlineData("OTHER_MEDICATION")]
+    [InlineData("LOW_BLOOD_PRESSURE")]
+    [InlineData("ATHLETE_HEAVY_TRAINING")]
+    [InlineData("GLUCONEOGENESIS_DISORDER")]
+    public void FmdSafetyCatalog_NewBookContraindications_RequireReview(string riskCode)
+    {
+        var answers = FmdSafetyCatalog.ScreeningQuestions.ToDictionary(x => x.QuestionId, _ => false);
+        answers[riskCode] = true;
+        var (status, triggered, _) = FmdSafetyCatalog.EvaluateScreening(answers);
+        Assert.Equal(FmdSafetyStatus.ProfessionalReviewRequired, status);
+        Assert.Contains(riskCode, triggered);
     }
 
     [Fact]

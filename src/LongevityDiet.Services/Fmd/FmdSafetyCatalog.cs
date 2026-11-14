@@ -4,50 +4,50 @@ namespace LongevityDiet.Services.Fmd;
 
 public static class FmdSafetyCatalog
 {
-    public const string CurrentEducationVersion = "FMD-EDU-2026.1";
-    public const string CurrentSafetyVersion = "FMD-SAFETY-2026.1";
+    public const string CurrentEducationVersion = "FMD-EDU-LONGO-2018.1";
+    public const string CurrentSafetyVersion = "FMD-SAFETY-LONGO-2018.1";
 
     public static FmdEducationContent DefaultEducation { get; } = new(
         Version: CurrentEducationVersion,
         Title: "Chương trình Giả nhịn ăn (FMD - Fasting Mimicking Diet) & Giới hạn An toàn",
-        Summary: "FMD là quy trình dinh dưỡng mô phỏng trạng thái nhịn ăn trong 5 ngày liên tục do GS. Valter Longo và cộng sự phát triển, nhằm kích hoạt quá trình tái tạo tế bào (autophagy) và cân bằng trao đổi chất mà vẫn cung cấp vi chất thiết yếu.",
-        ScopeDisclaimer: "LƯU Ý QUAN TRỌNG: Ứng dụng này chỉ cung cấp kiến thức giáo dục và công cụ nhật ký hỗ trợ ghi nhận cá nhân; KHÔNG PHẢI là thiết bị y tế, KHÔNG đưa ra phác đồ điều trị bệnh hay đơn thuốc nhịn ăn. Bất kỳ người dùng nào có bệnh lý nền bắt buộc phải có chỉ định và giám sát trực tiếp từ bác sĩ chuyên khoa.",
+        Summary: "FMD là chế độ dinh dưỡng mô phỏng nhịn ăn trong 5 ngày do Valter Longo và cộng sự nghiên cứu. Các cơ chế tái tạo tế bào được đề cập trong sách vẫn cần được đánh giá theo bằng chứng và điều kiện cá nhân; ứng dụng không xác nhận hiệu quả chữa bệnh hay làm chậm lão hóa cho một người cụ thể.",
+        ScopeDisclaimer: "Theo The Longevity Diet (Valter Longo, 2018), Chương 6, trang PDF 112–115: FMD được khuyến nghị sử dụng công thức đã thử nghiệm lâm sàng và tốt nhất có chuyên gia y tế giám sát. Ứng dụng chỉ hỗ trợ đọc thông tin và theo dõi, KHÔNG PHẢI là thiết bị y tế, KHÔNG xác nhận đủ điều kiện y khoa, KHÔNG kê đơn, KHÔNG thay thế bác sĩ; người có bệnh lý hoặc đang dùng thuốc cần được bác sĩ đánh giá trước khi cân nhắc FMD. Tác giả sách không trực tiếp khám, tư vấn hay phê duyệt sản phẩm này.",
         KeyPrinciples:
         [
             "Chu kỳ 5 ngày có kiểm soát năng lượng và thành phần thực vật chủ đạo.",
             "Ngày 1: Khoảng 1100 kcal (chất béo lành mạnh từ quả hạch/dầu ô-liu và tinh bột phức hợp, lượng đạm thấp).",
-            "Ngày 2 đến Ngày 5: Khoảng 750 kcal/ngày, tối ưu hóa trạng thái tế bào.",
-            "Uống đủ 2 - 2.5 lít nước lọc mỗi ngày và tránh vận động cường độ cao.",
-            "Người dùng có thể DỪNG CHU KỲ BẤT KỲ LÚC NÀO nếu cảm thấy hoa mắt, chóng mặt hoặc không thoải mái."
+            "Ngày 2–5: sách mô tả khoảng 800 kcal/ngày, nhưng đây không phải thực đơn tự pha chế an toàn để tự thực hiện (Chương 6, trang PDF 115).",
+            "Uống nước và tránh hoạt động gắng sức theo cảnh báo của tác giả; không áp dụng định mức 2–2,5 lít cho mọi người nếu không có căn cứ cá nhân hóa.",
+            "Khi có triệu chứng bất thường, ngừng thử nghiệm và liên hệ nhân viên y tế; tuyệt đối không kết hợp FMD với insulin hoặc thuốc hạ đường huyết (Chương 6, trang PDF 113)."
         ],
         AbsoluteContraindications:
         [
             "Phụ nữ mang thai hoặc đang trong thời kỳ cho con bú.",
             "Trẻ em và thanh thiếu niên dưới 18 tuổi.",
             "Người nhẹ cân, chỉ số khối cơ thể BMI < 18.5 kg/m².",
-            "Người trên 70 tuổi có dấu hiệu suy nhược thể lực hoặc nguy cơ teo cơ.",
+            "Người trên 70 tuổi (chỉ cân nhắc ngoại lệ nếu đặc biệt khỏe và được bác sĩ chấp thuận), người suy nhược hoặc có nguy cơ mất cơ.",
             "Người có tiền sử rối loạn hành vi ăn uống (biếng ăn tâm thần, ăn ói...).",
             "Bệnh nhân đái tháo đường đang sử dụng insulin hoặc thuốc hạ đường huyết (nguy cơ hạ đường huyết nguy hiểm tính mạng).",
             "Bệnh nhân đang điều trị ung thư mà không có sự đồng thuận và theo dõi trực tiếp từ bác sĩ chuyên khoa ung bướu.",
-            "Bệnh nhân suy tim nặng, suy gan, suy thận mạn tính hoặc nhiễm trùng cấp tính."
+            "Người có bệnh gan/thận, bệnh mạn tính đáng kể, huyết áp thấp, đang dùng thuốc hoặc đang luyện tập gắng sức cần được bác sĩ đánh giá theo Chương 6."
         ],
         Citations:
         [
             new(
-                "Valter Longo Foundation - Adult Longevity Diet & FMD Safety",
-                "OfficialFoundation",
-                "https://www.fondazionevalterlongo.org/en/diabetes-obesity/",
-                "Hướng dẫn chính thức về giới hạn an toàn và đối tượng chống chỉ định FMD."),
+                "Valter Longo (2018), The Longevity Diet, Chương 6, trang PDF 112–115 (sách do người dùng cung cấp)",
+                "UserProvidedBook",
+                "",
+                "Nguồn gốc: bản tiếng Anh ISBN 9780525534075; tác giả Valter Longo, PhD. Phải đối chiếu chương và trang, không tuyên bố tác giả tham gia ứng dụng."),
             new(
-                "Fasting-mimicking diet and markers/risk factors for aging, diabetes, cancer, and CVD (2017)",
-                "PeerReviewedTrial",
-                "https://pubmed.ncbi.nlm.nih.gov/28202779/",
-                "Nghiên cứu lâm sàng ngẫu nhiên có đối chứng về chu kỳ FMD 5 ngày trên người."),
+                "Valter Longo (2018), The Longevity Diet, Chương 4, trang PDF 89–90",
+                "UserProvidedBook",
+                "",
+                "Tóm tắt chế độ ăn trường thọ; không dùng thay cho đánh giá nguy cơ FMD."),
             new(
-                "Fasting-mimicking diet cycles and biological aging markers (2024)",
-                "PeerReviewedTrial",
-                "https://pubmed.ncbi.nlm.nih.gov/38378685/",
-                "Phân tích về chu kỳ định kỳ và chỉ số chuyển hóa trong quần thể thử nghiệm.")
+                "Valter Longo (2018), The Longevity Diet, Phụ lục A, trang PDF 212–214",
+                "UserProvidedBook",
+                "",
+                "Thực đơn 14 ngày dành cho đối tượng tham chiếu; không phải đơn FMD hay khẩu phần chung cho mọi người.")
         ]);
 
     public static IReadOnlyList<FmdSafetyQuestionDto> ScreeningQuestions { get; } =
@@ -61,8 +61,8 @@ public static class FmdSafetyCatalog
         new(
             "AGE_OUT_OF_BOUNDS",
             "Độ tuổi & Thể trạng",
-            "Bạn có dưới 18 tuổi, hoặc trên 70 tuổi kèm dấu hiệu suy nhược thể lực/suy giảm khối cơ không?",
-            "Trẻ vị thành niên cần dinh dưỡng để phát triển; người cao tuổi suy nhược đối mặt nguy cơ mất cơ nghiêm trọng.",
+            "Bạn có dưới 18 tuổi, trên 70 tuổi, chưa xác minh được tuổi, hoặc có suy nhược thể lực/suy giảm khối cơ không?",
+            "Chương 6 (trang PDF 112) cảnh báo người dưới 18 tuổi, trên 70 tuổi (dù khỏe vẫn cần bác sĩ cho phép) và người suy nhược.",
             IsHighRiskIfTrue: true),
         new(
             "UNDERWEIGHT_BMI",
@@ -85,14 +85,38 @@ public static class FmdSafetyCatalog
         new(
             "ACTIVE_CHEMOTHERAPY_OR_CANCER",
             "Bệnh lý mạn tính",
-            "Bạn có đang trong quá trình điều trị ung thư, hóa trị hoặc xạ trị mà chưa có chỉ định văn bản từ bác sĩ ung bướu không?",
-            "Bệnh nhân ung thư chỉ được can thiệp FMD khi có sự giám sát y tế chặt chẽ tại bệnh viện.",
+            "Bạn có đang mắc ung thư, đang điều trị ung thư, hoặc có bệnh lý đáng kể cần bác sĩ chuyên khoa đánh giá không?",
+            "Tác giả yêu cầu có ý kiến bác sĩ chuyên khoa đối với bệnh nghiêm trọng; không dùng ứng dụng làm phác đồ điều trị (Chương 6, trang PDF 112–113).",
             IsHighRiskIfTrue: true),
         new(
             "ORGAN_FAILURE_OR_INFECTION",
             "Bệnh lý cơ quan",
-            "Bạn có tiền sử suy tim nặng, suy thận, suy gan hoặc đang bị nhiễm trùng cấp tính có sốt không?",
-            "Cơ thể đang suy kiệt cơ quan hoặc nhiễm trùng cấp cần chuyển hóa ổn định, không được tạo áp lực thâm hụt năng lượng.",
+            "Bạn có bệnh gan, bệnh thận, bệnh tim đáng kể hoặc nhiễm trùng cấp tính cần bác sĩ đánh giá không?",
+            "Bệnh gan/thận và các bệnh lý nghiêm trọng là nhóm cần tránh hoặc phải được bác sĩ đánh giá theo Chương 6, trang PDF 112–113.",
+            IsHighRiskIfTrue: true),
+        new(
+            "OTHER_MEDICATION",
+            "Thuốc đang sử dụng",
+            "Bạn có đang dùng thuốc điều trị nào khác, kể cả thuốc huyết áp, mà chưa được bác sĩ đánh giá tương tác với FMD không?",
+            "Chương 6, trang PDF 113 yêu cầu có ý kiến bác sĩ khi đang dùng thuốc; không chỉ riêng thuốc đái tháo đường.",
+            IsHighRiskIfTrue: true),
+        new(
+            "LOW_BLOOD_PRESSURE",
+            "Huyết áp",
+            "Bạn có huyết áp thấp hoặc đang uống thuốc điều trị tăng huyết áp không?",
+            "Chương 6, trang PDF 113 cảnh báo nguy cơ tụt huyết áp và yêu cầu bác sĩ chuyên môn đánh giá.",
+            IsHighRiskIfTrue: true),
+        new(
+            "ATHLETE_HEAVY_TRAINING",
+            "Hoạt động thể lực",
+            "Bạn đang thi đấu thể thao hoặc luyện tập cường độ cao trong khoảng thời gian dự định áp dụng FMD không?",
+            "Chương 6, trang PDF 113 cảnh báo nguy cơ ngất do nhu cầu chuyển hóa khi gắng sức.",
+            IsHighRiskIfTrue: true),
+        new(
+            "GLUCONEOGENESIS_DISORDER",
+            "Bệnh di truyền hiếm",
+            "Bạn có bệnh di truyền/rối loạn chuyển hóa được bác sĩ xác nhận ảnh hưởng đến quá trình tạo glucose không?",
+            "Chương 6, trang PDF 113 lưu ý những đột biến cản trở quá trình tân tạo đường.",
             IsHighRiskIfTrue: true)
     ];
 
@@ -117,10 +141,20 @@ public static class FmdSafetyCatalog
                 "Hệ thống phát hiện ít nhất một yếu tố rủi ro sức khỏe cao. Bạn BẮT BUỘC phải tham vấn bác sĩ chuyên khoa và KHÔNG ĐƯỢC tự ý thực hiện chu kỳ nhịn ăn FMD.");
         }
 
+        var missing = ScreeningQuestions.Where(q => !answers.ContainsKey(q.QuestionId))
+            .Select(q => q.QuestionId).ToList();
+        if (missing.Count > 0)
+        {
+            return (
+                FmdSafetyStatus.AssessmentRequired,
+                missing,
+                "Chưa trả lời đầy đủ các câu hỏi sàng lọc. Không thể tự động coi câu chưa trả lời là không có nguy cơ.");
+        }
+
         return (
             FmdSafetyStatus.EligibleForTracking,
             triggered,
-            "Bạn đã hoàn thành sàng lọc an toàn và đủ điều kiện sức khỏe ban đầu để kích hoạt chu kỳ theo dõi FMD 5 ngày.");
+            "Đã trả lời đủ bảng hỏi và không khai báo yếu tố cảnh báo trong danh sách. Đây chỉ là điều kiện ghi nhật ký trong ứng dụng, KHÔNG phải xác nhận đủ điều kiện thực hiện FMD hay giấy chấp thuận của bác sĩ.");
     }
 
     public static int ResolveTargetCaloriesForDay(int dayNumber)
@@ -128,7 +162,9 @@ public static class FmdSafetyCatalog
         return dayNumber switch
         {
             1 => 1100,
-            _ => 750
+            >= 2 and <= 5 => 800,
+            _ => throw new ArgumentOutOfRangeException(nameof(dayNumber),
+                "Chỉ có năm ngày FMD trong bảng tóm tắt của Chương 6, trang PDF 115.")
         };
     }
 }

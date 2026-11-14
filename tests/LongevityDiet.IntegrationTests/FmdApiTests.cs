@@ -30,7 +30,9 @@ public sealed class FmdApiTests : IClassFixture<IntegrationTestWebApplicationFac
         var questions = doc.RootElement.GetProperty("screeningQuestions");
 
         Assert.True(education.GetProperty("keyPrinciples").GetArrayLength() > 0);
-        Assert.True(questions.GetArrayLength() >= 7);
+        Assert.Equal(11, questions.GetArrayLength());
+        Assert.Equal("FMD-EDU-LONGO-2018.1", education.GetProperty("version").GetString());
+        Assert.Contains("800 kcal", string.Join(" ", education.GetProperty("keyPrinciples").EnumerateArray().Select(x => x.GetString())));
         Assert.Contains("KHÔNG PHẢI là thiết bị y tế", education.GetProperty("scopeDisclaimer").GetString());
     }
 
@@ -58,7 +60,22 @@ public sealed class FmdApiTests : IClassFixture<IntegrationTestWebApplicationFac
         Assert.NotNull(statusRes2);
         Assert.Equal(FmdSafetyStatus.AssessmentRequired, statusRes2.CurrentStatus);
 
-        // 4. Submit high-risk assessment (Diabetes medication) -> ProfessionalReviewRequired
+        // 4. Incomplete questionnaire must never become medically cleared / tracked.
+        var incomplete = await client.PostAsJsonAsync("/api/v1/fmd/safety/assessment",
+            new SubmitFmdAssessmentRequest(new Dictionary<string, bool>
+            {
+                ["PREGNANT_OR_BREASTFEEDING"] = false
+            }));
+        Assert.Equal(HttpStatusCode.OK, incomplete.StatusCode);
+        var incompleteStatus = await incomplete.Content.ReadFromJsonAsync<FmdSafetyStatusSummary>();
+        Assert.NotNull(incompleteStatus);
+        Assert.Equal(FmdSafetyStatus.AssessmentRequired, incompleteStatus.CurrentStatus);
+        Assert.False(incompleteStatus.IsEligibleForTracking);
+        Assert.Contains("LOW_BLOOD_PRESSURE", incompleteStatus.TriggeredRiskCodes);
+        var incompleteCycle = await client.PostAsJsonAsync("/api/v1/fmd/cycles", new StartFmdCycleRequest());
+        Assert.Equal(HttpStatusCode.BadRequest, incompleteCycle.StatusCode);
+
+        // 5. Submit high-risk assessment (Diabetes medication) -> ProfessionalReviewRequired
         var highRiskAnswers = new Dictionary<string, bool>
         {
             ["PREGNANT_OR_BREASTFEEDING"] = false,
@@ -68,6 +85,10 @@ public sealed class FmdApiTests : IClassFixture<IntegrationTestWebApplicationFac
             ["DIABETES_MEDICATION"] = true, // High risk!
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
 
         var highRiskRes = await client.PostAsJsonAsync(
@@ -96,6 +117,10 @@ public sealed class FmdApiTests : IClassFixture<IntegrationTestWebApplicationFac
             ["DIABETES_MEDICATION"] = false,
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
 
         var safeRes = await client.PostAsJsonAsync(
@@ -127,6 +152,10 @@ public sealed class FmdApiTests : IClassFixture<IntegrationTestWebApplicationFac
             ["DIABETES_MEDICATION"] = false,
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
         await client.PostAsJsonAsync("/api/v1/fmd/safety/assessment", new SubmitFmdAssessmentRequest(safeAnswers));
 
@@ -141,7 +170,7 @@ public sealed class FmdApiTests : IClassFixture<IntegrationTestWebApplicationFac
         Assert.Equal(FmdCycleStatus.Active.ToString(), cycle.Status);
         Assert.Equal(5, cycle.Days.Count);
         Assert.Equal(1100, cycle.Days[0].TargetCaloriesKcal);
-        Assert.Equal(750, cycle.Days[1].TargetCaloriesKcal);
+        Assert.Equal(800, cycle.Days[1].TargetCaloriesKcal);
 
         // Attempt duplicate active cycle -> 409 Conflict
         var dupCycleRes = await client.PostAsJsonAsync("/api/v1/fmd/cycles", new StartFmdCycleRequest());
@@ -207,6 +236,10 @@ public sealed class FmdApiTests : IClassFixture<IntegrationTestWebApplicationFac
             ["DIABETES_MEDICATION"] = false,
             ["ACTIVE_CHEMOTHERAPY_OR_CANCER"] = false,
             ["ORGAN_FAILURE_OR_INFECTION"] = false,
+            ["OTHER_MEDICATION"] = false,
+            ["LOW_BLOOD_PRESSURE"] = false,
+            ["ATHLETE_HEAVY_TRAINING"] = false,
+            ["GLUCONEOGENESIS_DISORDER"] = false,
         };
         await userAClient.PostAsJsonAsync("/api/v1/fmd/safety/assessment", new SubmitFmdAssessmentRequest(safeAnswers));
         var startCycleRes = await userAClient.PostAsJsonAsync("/api/v1/fmd/cycles", new StartFmdCycleRequest());

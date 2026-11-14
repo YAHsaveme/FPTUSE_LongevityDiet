@@ -90,9 +90,10 @@ export function CatalogPage() {
             <small>Catalog & rules</small>
           </span>
         </Link>
-        <nav className="catalog-nav" aria-label="Catalog navigation">
+        <nav className="catalog-nav" aria-label="Điều hướng danh mục">
           <Link to="/app">Hôm nay</Link>
           <Link className="active" to="/catalog">Danh mục</Link>
+          <Link to="/book">Sách gốc</Link>
           {user?.role === 'Admin' && <Link to="/admin/catalog">Quản trị</Link>}
           <Link to="/profile">Hồ sơ</Link>
         </nav>
@@ -104,8 +105,7 @@ export function CatalogPage() {
             <span className="eyebrow">DỮ LIỆU DINH DƯỠNG CÓ NGUỒN GỐC</span>
             <h1>Khám phá thực phẩm, công thức và các nguyên tắc đang được áp dụng.</h1>
             <p>
-              Nội dung được tải trực tiếp từ API. Dữ liệu đã ngừng hoạt động hoặc quy tắc chưa xuất bản
-              không hiển thị cho thành viên.
+              Nội dung lấy từ API gồm dữ liệu mẫu và dữ liệu do nhóm quản lý. Chỉ những nội dung được kiểm chứng theo trang sách mới được gọi là có nguồn gốc từ The Longevity Diet. Dữ liệu chưa xác minh không phải công thức gốc của tác giả.
             </p>
           </div>
           <div className="catalog-safety">
