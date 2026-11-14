@@ -31,16 +31,32 @@ check('CATALOG_OWN_DB_READINESS', ready.response.status === 200 &&
   ready.payload?.database === 'LongevityCatalogDb');
 const anon = await request(catalog + '/api/v1/foods');
 check('CATALOG_JWT_REQUIRED', anon.response.status === 401);
-const register = await request(identity + '/api/v1/auth/register', {
-  method: 'POST',
-  body: {
-    email: 'catalog-ci-' + suffix + '@example.test',
-    password: 'QaCatalog!_A7_' + suffix,
-    displayName: 'Catalog CI synthetic user',
-  },
-});
-const token = register.payload?.accessToken;
-check('JWT_REGISTER_VIA_GATEWAY', register.response.status === 201 &&
+// Docker CI runs browser registration scenarios before this Catalog smoke
+// test. Honor the real localhost auth limiter rather than disabling it.
+let register;
+for (let attempt = 0; attempt < 5; attempt++) {
+  register = await request(identity + '/api/v1/auth/register', {
+    method: 'POST',
+    body: {
+      email: 'catalog-ci-' + suffix + '@example.test',
+      password: 'QaCatalog!_A7_' + suffix,
+      displayName: 'Catalog CI synthetic user',
+    },
+  });
+  if (register.response.status !== 429 || attempt === 4) break;
+  const retryAfter = Number(register.response.headers.get('retry-after'));
+  const backoff = [15, 30, 60, 60][attempt];
+  const delaySeconds = Number.isFinite(retryAfter) && retryAfter > 0
+    ? Math.min(90, Math.max(5, Math.ceil(retryAfter)))
+    : backoff;
+  console.log('Synthetic Catalog registration was rate-limited (429); honoring retry window.');
+  await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+}
+if (register?.response.status !== 201) {
+  console.error('Synthetic Catalog registration status:', register?.response.status ?? 'unavailable');
+}
+const token = register?.payload?.accessToken;
+check('JWT_REGISTER_VIA_GATEWAY', register?.response.status === 201 &&
   typeof token === 'string' && token.length > 0);
 const foods = await request(catalog + '/api/v1/foods?page=1&pageSize=20', { token });
 check('CATALOG_OWNED_FOOD_SEED', foods.response.status === 200 &&
