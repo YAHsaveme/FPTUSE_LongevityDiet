@@ -43,8 +43,14 @@ public sealed class WeeklyReportService(
             Status = WeeklyReportStatus.Ready,
             TimeZone = schedule.TimeZone,
             Summary = loggedDays == 0
-                ? "Chưa có dữ liệu ghi nhận trong tuần này. Báo cáo không suy đoán dữ liệu còn thiếu."
-                : $"Bạn đã ghi nhận dữ liệu {loggedDays}/7 ngày; {completedChallengeDays} ngày challenge được hoàn thành.",
+                ? $"Báo cáo tuần {normalizedStart:dd/MM/yyyy} – {weekEnd:dd/MM/yyyy}: chưa có ngày nào ghi nhật ký bữa ăn. Hãy ghi lại các bữa đã dùng để theo dõi tiến độ; hệ thống không suy đoán số liệu còn thiếu."
+                : $"Báo cáo tuần {normalizedStart:dd/MM/yyyy} – {weekEnd:dd/MM/yyyy}: " +
+                  $"đã ghi nhật ký bữa ăn trong {loggedDays}/7 ngày; hoàn thành {completedChallengeDays} ngày thử thách, " +
+                  $"chuỗi liên tiếp gần nhất là {latestStreak} ngày. " +
+                  $"Khung giờ ăn có dữ liệu ở {observedWindowDays}/7 ngày, trong đó {targetWindowDays} ngày đạt mục tiêu. " +
+                  $"Năng lượng trung bình trên các ngày có ghi nhật ký là {decimal.Round(averageCalories, 1):0.#} kcal/ngày. " +
+                  "Các giá trị phản ánh dữ liệu bạn đã nhập, không thay cho đánh giá dinh dưỡng cá nhân; " +
+                  "cần thêm dữ liệu thực tế trước khi kết luận về xu hướng hoặc hiệu quả sức khỏe.",
             GeneratedAt = timeProvider.GetUtcNow(),
         };
 

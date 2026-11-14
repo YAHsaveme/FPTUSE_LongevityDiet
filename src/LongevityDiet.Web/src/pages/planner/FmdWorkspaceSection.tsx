@@ -185,7 +185,7 @@ export function FmdWorkspaceSection() {
           'Hệ thống ghi nhận yếu tố rủi ro. Bạn cần tham vấn chuyên môn y tế trước khi thực hiện FMD.',
         )
       } else {
-        setUiFeedback('Đánh giá hoàn tất: Bạn đủ điều kiện sức khỏe ban đầu để theo dõi chu kỳ.')
+        setUiFeedback('Đã trả lời đầy đủ bảng hỏi: hệ thống cho phép ghi nhật ký. Điều này không chứng minh FMD an toàn hay thay thế việc hỏi bác sĩ.')
       }
       queryClient.setQueryData(['fmd-safety-status'], data)
     },
@@ -290,6 +290,8 @@ export function FmdWorkspaceSection() {
   const history = cycleHistoryQuery.data ?? []
 
   const isEligible = safety?.isEligibleForTracking ?? false
+  const allQuestionsAnswered = questions.length > 0 && questions.every((q) =>
+    Object.prototype.hasOwnProperty.call(answers, q.questionId))
   const isHighRisk = safety?.requiresProfessionalReview ?? false
 
   const handleAnswerToggle = (questionId: string, val: boolean) => {
@@ -304,10 +306,10 @@ export function FmdWorkspaceSection() {
       <div className="workspace-header-row">
         <div>
           <span className="eyebrow">GIÁO DỤC, SÀNG LỌC & THEO DÕI CHU KỲ</span>
-          <h2>Chu trình Fasting Mimicking Diet (FMD 5 ngày).</h2>
+          <h2>Chu trình dinh dưỡng mô phỏng nhịn ăn (FMD 5 ngày).</h2>
           <p className="section-subtitle">
-            Mô phỏng trạng thái nhịn ăn có kiểm soát vi chất, tuân thủ nghiêm ngặt ranh giới an toàn
-            y khoa và khuyến nghị của Viện Valter Longo.
+            Mô phỏng trạng thái nhịn ăn có kiểm soát vi chất, chỉ dùng để tìm hiểu và ghi nhận; tham khảo The Longevity Diet của Valter Longo (2018),
+            Chương 6. <a href="/book">Xem trang sách gốc và thực đơn 14 ngày</a>. Tác giả không trực tiếp tư vấn hoặc phê duyệt ứng dụng.
           </p>
         </div>
       </div>
@@ -368,10 +370,10 @@ export function FmdWorkspaceSection() {
             </div>
             <div>
               <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#c53030', marginBottom: '8px' }}>
-                Đối tượng chống chỉ định tuyệt đối:
+                Nhóm cần tránh FMD hoặc phải có bác sĩ đánh giá:
               </h4>
               <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#742a2a', lineHeight: 1.6 }}>
-                {education?.absoluteContraindications.slice(0, 5).map((c, idx) => (
+                {education?.absoluteContraindications.map((c, idx) => (
                   <li key={idx}>{c}</li>
                 ))}
               </ul>
@@ -381,10 +383,10 @@ export function FmdWorkspaceSection() {
           {education?.citations && education.citations.length > 0 && (
             <div style={{ borderTop: '1px solid var(--line)', paddingTop: '14px', marginTop: '14px' }}>
               <h4 style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#718096', marginBottom: '8px' }}>
-                Tài liệu dẫn chứng y văn quốc tế:
+                Nguồn sách gốc và tài liệu nghiên cứu khác (phân biệt nguồn):
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {education.citations.map((cite, i) => (
+                {education.citations.map((cite, i) => cite.url ? (
                   <a
                     key={i}
                     href={cite.url}
@@ -406,6 +408,10 @@ export function FmdWorkspaceSection() {
                     <span>{cite.title}</span>
                     <ExternalLink size={12} />
                   </a>
+                ) : (
+                  <span key={i} style={{ fontSize: "12px", padding: "6px 12px", border: "1px solid var(--line)", borderRadius: "8px" }}>
+                    {cite.title} — {cite.evidenceSummary}
+                  </span>
                 ))}
               </div>
             </div>
@@ -442,7 +448,7 @@ export function FmdWorkspaceSection() {
             </h3>
             {isEligible && (
               <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#276749', background: '#c6f6d5', padding: '4px 10px', borderRadius: '999px', fontWeight: 700 }}>
-                <ShieldCheck size={14} /> Đủ điều kiện theo dõi
+                <ShieldCheck size={14} /> Đã hoàn thành bảng hỏi (không thay tư vấn y tế)
               </span>
             )}
             {isHighRisk && (
@@ -453,7 +459,7 @@ export function FmdWorkspaceSection() {
           </div>
 
           <p style={{ fontSize: '13px', color: '#4a5568', marginTop: 0, marginBottom: '16px' }}>
-            Vui lòng trả lời trung thực các câu hỏi dưới đây. Nếu có bất kỳ câu trả lời "CÓ", hệ thống sẽ lập tức chặn kích hoạt chu kỳ để bảo vệ sức khỏe của bạn.
+            Vui lòng trả lời đầy đủ từng câu. Câu chưa trả lời không được xem là “Không”. Nếu có yếu tố nguy cơ, hệ thống sẽ chặn tạo chu kỳ; nếu không có nguy cơ được khai báo, đây vẫn không phải giấy chấp thuận y khoa.
           </p>
 
           {/* HIGH RISK ALERT IF APPLICABLE */}
@@ -482,7 +488,7 @@ export function FmdWorkspaceSection() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
             {questions.map((q) => {
               const qId = q.questionId
-              const currentVal = answers[qId] ?? false
+              const currentVal = answers[qId]
               return (
                 <div
                   key={qId}
@@ -569,7 +575,7 @@ export function FmdWorkspaceSection() {
               type="button"
               className="primary-button"
               onClick={() => submitAssessmentMutation.mutate()}
-              disabled={submitAssessmentMutation.isPending}
+              disabled={submitAssessmentMutation.isPending || !allQuestionsAnswered}
               style={{ padding: '9px 20px', fontSize: '13.5px' }}
             >
               {submitAssessmentMutation.isPending ? 'Đang đánh giá...' : 'Gửi bảng sàng lọc an toàn'}
@@ -599,7 +605,7 @@ export function FmdWorkspaceSection() {
               </h4>
               <p style={{ margin: '0 auto 16px', fontSize: '13px', color: '#64748b', maxWidth: '440px' }}>
                 {isEligible
-                  ? 'Bạn đã đạt đầy đủ điều kiện an toàn y khoa. Bạn có thể bấm bên dưới để bắt đầu chu kỳ 5 ngày.'
+                  ? 'Bảng hỏi chưa phát hiện nguy cơ được khai báo. Chỉ dùng nút này để mở nhật ký theo dõi khi đã trao đổi với nhân viên y tế phù hợp; không phải chỉ định bắt đầu chế độ ăn hạn chế.'
                   : 'Bạn cần hoàn thành bảng sàng lọc an toàn ở mục trên và không có yếu tố rủi ro cao để bắt đầu chu kỳ.'}
               </p>
               <button

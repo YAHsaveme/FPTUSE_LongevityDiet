@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import './admin-pagination.css'
+import { viContent } from '../../../lib/viContent'
 import type { ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { BookOpen, Leaf, Plus, Save, Trash2, Utensils } from 'lucide-react'
@@ -70,7 +71,7 @@ export function AdminCatalogPage() {
       <header className="catalog-topbar">
         <Link className="brand" to="/catalog">
           <span className="brand-monogram">L</span>
-          <span className="brand-copy"><strong>Longevity</strong><small>Catalog administration</small></span>
+          <span className="brand-copy"><strong>Longevity</strong><small>Quản lý danh mục</small></span>
         </Link>
         <nav className="catalog-nav">
           <Link to="/app">Hôm nay</Link>
@@ -82,16 +83,16 @@ export function AdminCatalogPage() {
       <main className="catalog-main">
         <section className="catalog-hero admin-hero">
           <div>
-            <span className="eyebrow">ADMIN · CATALOG & RULES</span>
+            <span className="eyebrow">QUẢN TRỊ · DANH MỤC VÀ QUY TẮC</span>
             <h1>Quản lý dữ liệu thật, có phiên bản và có nguồn.</h1>
-            <p>Deactivate giữ lịch sử; rule version đã publish là immutable. Mọi mutation đi qua API → Services → Repository.</p>
+            <p>Ngừng sử dụng mục sẽ không xóa lịch sử. Phiên bản quy tắc đã xuất bản không được sửa đổi; tất cả thay đổi được xử lý và ghi nhận tại máy chủ.</p>
           </div>
         </section>
         <section className="catalog-workspace">
           <div className="catalog-tabs admin-tabs">
-            <button className={tab === 'foods' ? 'active' : ''} onClick={() => setTab('foods')}><Leaf size={15} /> Foods</button>
-            <button className={tab === 'recipes' ? 'active' : ''} onClick={() => setTab('recipes')}><Utensils size={15} /> Recipes</button>
-            <button className={tab === 'rules' ? 'active' : ''} onClick={() => setTab('rules')}><BookOpen size={15} /> Rules</button>
+            <button className={tab === 'foods' ? 'active' : ''} onClick={() => setTab('foods')}><Leaf size={15} /> Thực phẩm</button>
+            <button className={tab === 'recipes' ? 'active' : ''} onClick={() => setTab('recipes')}><Utensils size={15} /> Công thức</button>
+            <button className={tab === 'rules' ? 'active' : ''} onClick={() => setTab('rules')}><BookOpen size={15} /> Quy tắc</button>
           </div>
           {tab === 'foods' && <FoodAdmin />}
           {tab === 'recipes' && <RecipeAdmin />}
@@ -116,7 +117,7 @@ function FoodAdmin() {
   const save = useMutation({
     mutationFn: () => editingId ? updateFood(editingId, form) : createFood(form),
     onSuccess: () => {
-      setMessage(editingId ? 'Đã cập nhật food.' : 'Đã tạo food.')
+      setMessage(editingId ? 'Đã cập nhật thực phẩm.' : 'Đã thêm thực phẩm.')
       setEditingId(null)
       setForm(emptyFood)
       void queryClient.invalidateQueries({ queryKey: ['admin', 'foods'] })
@@ -127,7 +128,7 @@ function FoodAdmin() {
   const deactivate = useMutation({
     mutationFn: deactivateFood,
     onSuccess: () => {
-      setMessage('Đã deactivate food; lịch sử được giữ lại.')
+      setMessage('Đã ngừng sử dụng thực phẩm; lịch sử được giữ lại.')
       void queryClient.invalidateQueries({ queryKey: ['admin', 'foods'] })
       void queryClient.invalidateQueries({ queryKey: ['catalog', 'foods'] })
     },
@@ -148,17 +149,17 @@ function FoodAdmin() {
   return (
     <div className="admin-grid">
       <section className="admin-list-panel">
-        <PanelHeading title="Nguyên liệu / thực phẩm" note={String(foods.data?.totalItems ?? 0) + ' mục, gồm cả inactive'} />
+        <PanelHeading title="Nguyên liệu / thực phẩm" note={String(foods.data?.totalItems ?? 0) + ' mục, bao gồm mục ngừng hoạt động'} />
         <label className="admin-field"><span>Tìm nguyên liệu</span><input value={search} onChange={e => { setPage(1); setSearch(e.target.value) }} placeholder="Tìm bằng tên nguyên liệu..." /></label>
-        {foods.isLoading && <AdminState>Đang tải foods...</AdminState>}
-        {foods.isError && <AdminState error>Không thể tải foods.</AdminState>}
+        {foods.isLoading && <AdminState>Đang tải thực phẩm...</AdminState>}
+        {foods.isError && <AdminState error>Không thể tải thực phẩm.</AdminState>}
         <div className="admin-item-list">
           {foods.data?.items.map((food) => (
             <div className={food.isActive ? 'admin-item' : 'admin-item inactive'} key={food.id}>
-              <div><strong>{food.name}</strong><span>{food.category} · {food.calories} kcal · {food.isActive ? 'Active' : 'Inactive'}</span></div>
+              <div><strong>{viContent(food.name)}</strong><span>{viContent(food.category)} · {food.calories} kcal · {food.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span></div>
               <div className="admin-item-actions">
                 <button onClick={() => edit(food)}>Sửa</button>
-                {food.isActive && <button className="danger" onClick={() => deactivate.mutate(food.id)}><Trash2 size={13} /> Deactivate</button>}
+                {food.isActive && <button className="danger" onClick={() => deactivate.mutate(food.id)}><Trash2 size={13} /> Ngừng sử dụng</button>}
               </div>
             </div>
           ))}
@@ -172,26 +173,26 @@ function FoodAdmin() {
         )}
       </section>
       <section className="admin-form-panel">
-        <PanelHeading title={editingId ? 'Cập nhật food' : 'Tạo food mới'} note="Nutrition theo serving mặc định" />
+        <PanelHeading title={editingId ? 'Cập nhật thực phẩm' : 'Thêm thực phẩm mới'} note="Giá trị dinh dưỡng theo một khẩu phần tiêu chuẩn" />
         <div className="admin-form-grid">
           <TextField label="Tên" value={form.name} onChange={(name) => setForm({ ...form, name })} />
           <TextField label="Danh mục" value={form.category} onChange={(category) => setForm({ ...form, category })} />
-          <TextField label="Tags" value={form.tags ?? ''} onChange={(tags) => setForm({ ...form, tags })} />
-          <TextField label="Cuisine" value={form.cuisine ?? ''} onChange={(cuisine) => setForm({ ...form, cuisine })} />
-          <NumberField label="Serving" value={form.defaultServingAmount} onChange={(defaultServingAmount) => setForm({ ...form, defaultServingAmount })} />
+          <TextField label="Thẻ phân loại" value={form.tags ?? ''} onChange={(tags) => setForm({ ...form, tags })} />
+          <TextField label="Phong cách ẩm thực" value={form.cuisine ?? ''} onChange={(cuisine) => setForm({ ...form, cuisine })} />
+          <NumberField label="Khẩu phần tiêu chuẩn" value={form.defaultServingAmount} onChange={(defaultServingAmount) => setForm({ ...form, defaultServingAmount })} />
           <TextField label="Đơn vị" value={form.servingUnit} onChange={(servingUnit) => setForm({ ...form, servingUnit })} />
-          <NumberField label="Calories" value={form.calories} onChange={(calories) => setForm({ ...form, calories })} />
-          <NumberField label="Protein g" value={form.proteinG} onChange={(proteinG) => setForm({ ...form, proteinG })} />
-          <NumberField label="Carb g" value={form.carbohydrateG} onChange={(carbohydrateG) => setForm({ ...form, carbohydrateG })} />
-          <NumberField label="Fat g" value={form.fatG} onChange={(fatG) => setForm({ ...form, fatG })} />
-          <NumberField label="Saturated fat g" value={form.saturatedFatG ?? 0} onChange={(saturatedFatG) => setForm({ ...form, saturatedFatG })} />
-          <NumberField label="Sugar g" value={form.sugarG ?? 0} onChange={(sugarG) => setForm({ ...form, sugarG })} />
-          <NumberField label="Fiber g" value={form.fiberG ?? 0} onChange={(fiberG) => setForm({ ...form, fiberG })} />
+          <NumberField label="Năng lượng (kcal)" value={form.calories} onChange={(calories) => setForm({ ...form, calories })} />
+          <NumberField label="Chất đạm (g)" value={form.proteinG} onChange={(proteinG) => setForm({ ...form, proteinG })} />
+          <NumberField label="Tinh bột (g)" value={form.carbohydrateG} onChange={(carbohydrateG) => setForm({ ...form, carbohydrateG })} />
+          <NumberField label="Chất béo (g)" value={form.fatG} onChange={(fatG) => setForm({ ...form, fatG })} />
+          <NumberField label="Chất béo bão hòa (g)" value={form.saturatedFatG ?? 0} onChange={(saturatedFatG) => setForm({ ...form, saturatedFatG })} />
+          <NumberField label="Đường (g)" value={form.sugarG ?? 0} onChange={(sugarG) => setForm({ ...form, sugarG })} />
+          <NumberField label="Chất xơ (g)" value={form.fiberG ?? 0} onChange={(fiberG) => setForm({ ...form, fiberG })} />
         </div>
         <div className="admin-checks">
           {([
-            ['isPlantBased', 'Plant-based'], ['isLegume', 'Legume'],
-            ['isWholeGrain', 'Whole grain'], ['isFish', 'Fish'],
+            ['isPlantBased', 'Có nguồn gốc thực vật'], ['isLegume', 'Nhóm đậu'],
+            ['isWholeGrain', 'Ngũ cốc nguyên hạt'], ['isFish', 'Có cá'],
           ] as const).map(([key, label]) => (
             <label key={key}><input type="checkbox" checked={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.checked })} />{label}</label>
           ))}
@@ -199,7 +200,7 @@ function FoodAdmin() {
         {message && <p className="admin-message">{message}</p>}
         <div className="admin-form-actions">
           {editingId && <button onClick={() => { setEditingId(null); setForm(emptyFood); setMessage(null) }}>Hủy sửa</button>}
-          <button className="primary-admin-action" disabled={save.isPending} onClick={() => save.mutate()}><Save size={14} /> {editingId ? 'Lưu thay đổi' : 'Tạo food'}</button>
+          <button className="primary-admin-action" disabled={save.isPending} onClick={() => save.mutate()}><Save size={14} /> {editingId ? 'Lưu thay đổi' : 'Thêm thực phẩm'}</button>
         </div>
       </section>
     </div>
@@ -235,7 +236,7 @@ function RecipeAdmin() {
     onSuccess: () => {
       setForm(emptyRecipe)
       setEditingRecipe(null)
-      setMessage(editingRecipe ? 'Đã cập nhật recipe.' : 'Đã tạo recipe.')
+      setMessage(editingRecipe ? 'Đã cập nhật công thức.' : 'Đã thêm công thức.')
       void queryClient.invalidateQueries({ queryKey: ['admin', 'recipes'] })
       void queryClient.invalidateQueries({ queryKey: ['catalog', 'recipes'] })
     },
@@ -245,7 +246,7 @@ function RecipeAdmin() {
   const deactivate = useMutation({
     mutationFn: deactivateRecipe,
     onSuccess: () => {
-      setMessage('Đã deactivate recipe.')
+      setMessage('Đã ngừng sử dụng công thức.')
       void queryClient.invalidateQueries({ queryKey: ['admin', 'recipes'] })
       void queryClient.invalidateQueries({ queryKey: ['catalog', 'recipes'] })
     },
@@ -294,7 +295,7 @@ function RecipeAdmin() {
       (food) => !form.ingredients.some((ingredient) => ingredient.foodId === food.id),
     )
     if (!firstUnused) {
-      setMessage('Không còn food active nào để thêm vào recipe.')
+      setMessage('Không còn thực phẩm đang hoạt động để thêm vào công thức.')
       return
     }
 
@@ -340,21 +341,21 @@ function RecipeAdmin() {
       <section className="admin-list-panel">
         <PanelHeading title="Công thức món ăn" note={String(recipes.data?.totalItems ?? 0) + ' mục'} />
         <label className="admin-field"><span>Tìm món ăn</span><input value={search} onChange={e => { setPage(1); setSearch(e.target.value) }} placeholder="Tìm tên món ăn..." /></label>
-        {recipes.isLoading && <AdminState>Đang tải recipes...</AdminState>}
-        {recipes.isError && <AdminState error>Không thể tải recipes.</AdminState>}
+        {recipes.isLoading && <AdminState>Đang tải công thức...</AdminState>}
+        {recipes.isError && <AdminState error>Không thể tải công thức.</AdminState>}
         <div className="admin-item-list">
           {recipes.data?.items.map((recipe) => (
             <div className={recipe.isActive ? 'admin-item' : 'admin-item inactive'} key={recipe.id}>
               <div>
-                <strong>{recipe.name}</strong>
-                <span>{recipe.category} · {recipe.prepMinutes} phút · {recipe.isActive ? 'Active' : 'Inactive'}</span>
+                <strong>{viContent(recipe.name)}</strong>
+                <span>{viContent(recipe.category)} · {recipe.prepMinutes} phút · {recipe.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
               </div>
               <div className="admin-item-actions">
                 <Link to={'/catalog/recipes/' + recipe.id}>Xem</Link>
                 <button onClick={() => void beginEdit(recipe.id)}>Sửa</button>
                 {recipe.isActive && (
                   <button className="danger" onClick={() => deactivate.mutate(recipe.id)}>
-                    <Trash2 size={13} /> Deactivate
+                    <Trash2 size={13} /> Ngừng sử dụng
                   </button>
                 )}
               </div>
@@ -372,35 +373,35 @@ function RecipeAdmin() {
 
       <section className="admin-form-panel">
         <PanelHeading
-          title={editingRecipe ? 'Cập nhật recipe' : 'Tạo recipe'}
-          note="Nhập đầy đủ dữ liệu catalog; không dùng nutrition hoặc flags mặc định."
+          title={editingRecipe ? 'Cập nhật công thức' : 'Thêm công thức'}
+          note="Nhập đầy đủ dữ liệu danh mục; không tự áp dụng số liệu dinh dưỡng hay tiêu chí đánh dấu mặc định."
         />
         <div className="admin-form-grid">
           <TextField label="Tên" value={form.name} onChange={(name) => setForm({ ...form, name })} />
           <TextField label="Danh mục" value={form.category} onChange={(category) => setForm({ ...form, category })} />
-          <TextField label="Cuisine" value={form.cuisine ?? ''} onChange={(cuisine) => setForm({ ...form, cuisine })} />
-          <TextField label="Tags" value={form.tags ?? ''} onChange={(tags) => setForm({ ...form, tags })} />
+          <TextField label="Phong cách ẩm thực" value={form.cuisine ?? ''} onChange={(cuisine) => setForm({ ...form, cuisine })} />
+          <TextField label="Thẻ phân loại" value={form.tags ?? ''} onChange={(tags) => setForm({ ...form, tags })} />
           <label className="admin-field span-2">
             <span>Mô tả</span>
             <textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
           </label>
           <NumberField label="Khẩu phần" value={form.servingCount} onChange={(servingCount) => setForm({ ...form, servingCount })} />
-          <NumberField label="Prep minutes" value={form.prepMinutes} onChange={(prepMinutes) => setForm({ ...form, prepMinutes })} />
-          <NumberField label="Calories / serving" value={form.caloriesPerServing} onChange={(caloriesPerServing) => setForm({ ...form, caloriesPerServing })} />
-          <NumberField label="Protein g / serving" value={form.proteinGPerServing} onChange={(proteinGPerServing) => setForm({ ...form, proteinGPerServing })} />
-          <NumberField label="Carb g / serving" value={form.carbohydrateGPerServing} onChange={(carbohydrateGPerServing) => setForm({ ...form, carbohydrateGPerServing })} />
-          <NumberField label="Fat g / serving" value={form.fatGPerServing} onChange={(fatGPerServing) => setForm({ ...form, fatGPerServing })} />
-          <NumberField label="Saturated fat g" value={form.saturatedFatGPerServing ?? 0} onChange={(saturatedFatGPerServing) => setForm({ ...form, saturatedFatGPerServing })} />
-          <NumberField label="Sugar g" value={form.sugarGPerServing ?? 0} onChange={(sugarGPerServing) => setForm({ ...form, sugarGPerServing })} />
-          <NumberField label="Fiber g" value={form.fiberGPerServing ?? 0} onChange={(fiberGPerServing) => setForm({ ...form, fiberGPerServing })} />
+          <NumberField label="Thời gian chuẩn bị (phút)" value={form.prepMinutes} onChange={(prepMinutes) => setForm({ ...form, prepMinutes })} />
+          <NumberField label="Năng lượng mỗi khẩu phần (kcal)" value={form.caloriesPerServing} onChange={(caloriesPerServing) => setForm({ ...form, caloriesPerServing })} />
+          <NumberField label="Chất đạm mỗi khẩu phần (g)" value={form.proteinGPerServing} onChange={(proteinGPerServing) => setForm({ ...form, proteinGPerServing })} />
+          <NumberField label="Tinh bột mỗi khẩu phần (g)" value={form.carbohydrateGPerServing} onChange={(carbohydrateGPerServing) => setForm({ ...form, carbohydrateGPerServing })} />
+          <NumberField label="Chất béo mỗi khẩu phần (g)" value={form.fatGPerServing} onChange={(fatGPerServing) => setForm({ ...form, fatGPerServing })} />
+          <NumberField label="Chất béo bão hòa (g)" value={form.saturatedFatGPerServing ?? 0} onChange={(saturatedFatGPerServing) => setForm({ ...form, saturatedFatGPerServing })} />
+          <NumberField label="Đường (g)" value={form.sugarGPerServing ?? 0} onChange={(sugarGPerServing) => setForm({ ...form, sugarGPerServing })} />
+          <NumberField label="Chất xơ (g)" value={form.fiberGPerServing ?? 0} onChange={(fiberGPerServing) => setForm({ ...form, fiberGPerServing })} />
         </div>
 
         <div className="admin-checks">
           {([
-            ['isPlantForward', 'Plant-forward'],
-            ['hasLegume', 'Có legume'],
-            ['hasWholeGrain', 'Có whole grain'],
-            ['hasFish', 'Có fish'],
+            ['isPlantForward', 'Ưu tiên thực vật'],
+            ['hasLegume', 'Có các loại đậu'],
+            ['hasWholeGrain', 'Có ngũ cốc nguyên hạt'],
+            ['hasFish', 'Có cá'],
           ] as const).map(([key, label]) => (
             <label key={key}>
               <input
@@ -420,7 +421,7 @@ function RecipeAdmin() {
           {form.ingredients.map((ingredient, index) => (
             <div className="ingredient-admin-row" key={String(index) + ingredient.foodId}>
               <label className="admin-field">
-                <span>Food</span>
+                <span>Thực phẩm</span>
                 <select
                   value={ingredient.foodId}
                   onChange={(event) => updateIngredient(index, { foodId: event.target.value })}
@@ -439,20 +440,20 @@ function RecipeAdmin() {
                           currentIndex !== index && current.foodId === food.id,
                       )}
                     >
-                      {food.name}
+                      {viContent(food.name)}
                     </option>
                   ))}
                 </select>
               </label>
-              <NumberField label="Amount" value={ingredient.amount} onChange={(amount) => updateIngredient(index, { amount })} />
-              <TextField label="Unit" value={ingredient.unit} onChange={(unit) => updateIngredient(index, { unit })} />
+              <NumberField label="Định lượng" value={ingredient.amount} onChange={(amount) => updateIngredient(index, { amount })} />
+              <TextField label="Đơn vị" value={ingredient.unit} onChange={(unit) => updateIngredient(index, { unit })} />
               <label className="ingredient-optional">
                 <input
                   type="checkbox"
                   checked={ingredient.isOptional}
                   onChange={(event) => updateIngredient(index, { isOptional: event.target.checked })}
                 />
-                Optional
+                Tùy chọn
               </label>
               <button className="ingredient-remove" onClick={() => removeIngredient(index)} type="button">
                 <Trash2 size={13} /> Xóa
@@ -461,13 +462,13 @@ function RecipeAdmin() {
           ))}
         </div>
         <button className="inline-admin-action" type="button" onClick={addIngredient} disabled={activeFoods.length === 0}>
-          <Plus size={13} /> Thêm ingredient
+          <Plus size={13} /> Thêm nguyên liệu
         </button>
 
         <div className="admin-form-divider" />
-        <PanelHeading title="Allergens" note="Chọn từ allergen catalog active." />
-        {allergens.isLoading && <AdminState>Đang tải allergens...</AdminState>}
-        {allergens.isError && <AdminState error>Không thể tải allergens.</AdminState>}
+        <PanelHeading title="Các chất gây dị ứng" note="Chọn từ danh mục chất gây dị ứng đang hoạt động." />
+        {allergens.isLoading && <AdminState>Đang tải chất gây dị ứng...</AdminState>}
+        {allergens.isError && <AdminState error>Không thể tải chất gây dị ứng.</AdminState>}
         <div className="admin-checks">
           {allergens.data?.map((allergen) => (
             <label key={allergen.id}>
@@ -476,7 +477,7 @@ function RecipeAdmin() {
                 checked={form.allergenIds.includes(allergen.id)}
                 onChange={() => toggleAllergen(allergen.id)}
               />
-              {allergen.code} · {allergen.name}
+              {viContent(allergen.name)}
             </label>
           ))}
         </div>
@@ -506,7 +507,7 @@ function RecipeAdmin() {
             }
             onClick={() => save.mutate()}
           >
-            <Save size={14} /> {editingRecipe ? 'Lưu recipe' : 'Tạo recipe'}
+            <Save size={14} /> {editingRecipe ? 'Lưu công thức' : 'Thêm công thức'}
           </button>
         </div>
       </section>
@@ -540,7 +541,7 @@ function RuleAdmin() {
     mutationFn: () => createRule({ ruleKey, title, description, category, isMedicalSensitive }),
     onSuccess: (rule) => {
       setRuleKey(''); setTitle(''); setDescription(''); setIsMedicalSensitive(false); setSelectedRuleId(rule.id)
-      setMessage('Đã tạo rule. Hãy tạo version có provenance trước khi publish.')
+      setMessage('Đã tạo quy tắc. Hãy bổ sung phiên bản có nguồn minh bạch trước khi xuất bản.')
       void queryClient.invalidateQueries({ queryKey: ['admin', 'rules'] })
     },
     onError: (error) => setMessage(getApiErrorMessage(error)),
@@ -550,7 +551,7 @@ function RuleAdmin() {
       parametersJson, sourceUrl, sourceType, citation, evidenceLevel, effectiveAt: null,
     }),
     onSuccess: () => {
-      setMessage('Đã tạo draft version.')
+      setMessage('Đã tạo phiên bản nháp.')
       void queryClient.invalidateQueries({ queryKey: ['admin', 'rules'] })
     },
     onError: (error) => setMessage(getApiErrorMessage(error)),
@@ -560,52 +561,52 @@ function RuleAdmin() {
   return (
     <div className="admin-grid rules-admin-grid">
       <section className="admin-list-panel">
-        <PanelHeading title="Rules & versions" note={String(rules.data?.length ?? 0) + ' rules'} />
-        <section className="surface-card" style={{ padding: '1rem', marginBlock: '.8rem' }} aria-label="Safety rule review queue">
-          <h3>Safety review queue</h3>
+        <PanelHeading title="Quy tắc và phiên bản" note={String(rules.data?.length ?? 0) + ' quy tắc'} />
+        <section className="surface-card" style={{ padding: '1rem', marginBlock: '.8rem' }} aria-label="Danh sách quy tắc chờ rà soát an toàn">
+          <h3>Danh sách chờ duyệt về an toàn</h3>
           <label>
             <input type="checkbox" checked={medicalQueueOnly}
               onChange={(event) => { setMedicalQueueOnly(event.target.checked); setQueuePage(1) }} />
-            {' '}Only medically sensitive rules
+            {' '}Chỉ các quy tắc nhạy cảm về y khoa
           </label>
-          {reviewQueue.isLoading && <p>Loading review queue...</p>}
+          {reviewQueue.isLoading && <p>Đang tải danh sách chờ duyệt...</p>}
           {reviewQueue.isError && <p role="alert">{getApiErrorMessage(reviewQueue.error)}</p>}
-          {reviewQueue.data?.items.length === 0 && <p>No rules awaiting review.</p>}
+          {reviewQueue.data?.items.length === 0 && <p>Không có quy tắc nào đang chờ duyệt.</p>}
           {reviewQueue.data?.items.map((item) => (
             <div key={item.ruleVersionId} style={{ marginBlock: '.6rem' }}>
               <button type="button" onClick={() => setSelectedRuleId(item.dietRuleId)}>
-                {item.ruleKey} v{item.versionNumber} — {item.ruleTitle}
+                {item.ruleKey} v{item.versionNumber} — {viContent(item.ruleTitle)}
               </button>
-              <p>Evidence level: {item.evidenceLevel}
-                {item.isMedicalSensitive ? ' · Medical sensitivity review required' : ''}
+              <p>Mức độ bằng chứng: {item.evidenceLevel}
+                {item.isMedicalSensitive ? ' · Cần rà soát an toàn y khoa' : ''}
               </p>
             </div>
           ))}
           {(reviewQueue.data?.totalPages ?? 0) > 1 && (
             <div className="admin-form-actions">
               <button type="button" disabled={queuePage <= 1}
-                onClick={() => setQueuePage((page) => page - 1)}>Previous</button>
-              <span>Page {queuePage} / {reviewQueue.data?.totalPages}</span>
+                onClick={() => setQueuePage((page) => page - 1)}>Trước</button>
+              <span>Trang {queuePage} / {reviewQueue.data?.totalPages}</span>
               <button type="button" disabled={queuePage >= (reviewQueue.data?.totalPages ?? 0)}
-                onClick={() => setQueuePage((page) => page + 1)}>Next</button>
+                onClick={() => setQueuePage((page) => page + 1)}>Sau</button>
             </div>
           )}
         </section>
-        {rules.isLoading && <AdminState>Đang tải rules...</AdminState>}
+        {rules.isLoading && <AdminState>Đang tải quy tắc...</AdminState>}
         <div className="admin-item-list">
           {rules.data?.map((rule) => (
             <button className={'admin-rule-select ' + (selectedRule?.id === rule.id ? 'selected' : '')} onClick={() => setSelectedRuleId(rule.id)} key={rule.id}>
-              <strong>{rule.title}</strong><span>{rule.ruleKey} · {rule.versions.length} versions</span>
+              <strong>{viContent(rule.title)}</strong><span>{rule.ruleKey} · {rule.versions.length} phiên bản</span>
             </button>
           ))}
         </div>
         {selectedRule && (
           <div className="rule-version-admin-list">
-            <h3>{selectedRule.title}</h3>
+            <h3>{viContent(selectedRule.title)}</h3>
             {selectedRule.versions.map((version) => (
               <div key={version.id}>
-                <span>v{version.versionNumber} · {({ 1: 'Draft', 2: 'Published', 3: 'Retired', 4: 'In review' } as Record<number, string>)[version.state]}</span>
-                <strong>{version.citation || 'Chưa có citation'}</strong>
+                <span>v{version.versionNumber} · {({ 1: 'Bản nháp', 2: 'Đã xuất bản', 3: 'Ngừng áp dụng', 4: 'Đang duyệt' } as Record<number, string>)[version.state]}</span>
+                <strong>{viContent(version.citation) || 'Chưa có nguồn trích dẫn'}</strong>
                 <RuleGovernance version={version} />
               </div>
             ))}
@@ -613,44 +614,44 @@ function RuleAdmin() {
         )}
       </section>
       <section className="admin-form-panel">
-        <PanelHeading title="Tạo rule" note="Stable RuleKey, mô tả và category bắt buộc" />
+        <PanelHeading title="Tạo quy tắc" note="Mã quy tắc, mô tả và danh mục là bắt buộc" />
         <div className="admin-form-grid">
-          <TextField label="RuleKey" value={ruleKey} onChange={setRuleKey} />
-          <TextField label="Category" value={category} onChange={setCategory} />
+          <TextField label="Mã quy tắc" value={ruleKey} onChange={setRuleKey} />
+          <TextField label="Danh mục" value={category} onChange={setCategory} />
           <TextField label="Tiêu đề" value={title} onChange={setTitle} className="span-2" />
           <label className="admin-field span-2"><span>Mô tả</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label>
           <label className="ingredient-optional span-2">
             <input type="checkbox" checked={isMedicalSensitive} onChange={(event) => setIsMedicalSensitive(event.target.checked)} />
-            Rule này nhạy cảm về y khoa
+            Quy tắc này nhạy cảm về y khoa
           </label>
         </div>
-        <div className="admin-form-actions"><button className="primary-admin-action" disabled={addRule.isPending || !ruleKey.trim() || !title.trim() || !description.trim()} onClick={() => addRule.mutate()}><Plus size={14} /> Tạo rule</button></div>
+        <div className="admin-form-actions"><button className="primary-admin-action" disabled={addRule.isPending || !ruleKey.trim() || !title.trim() || !description.trim()} onClick={() => addRule.mutate()}><Plus size={14} /> Tạo quy tắc</button></div>
         <div className="admin-form-divider" />
-        <PanelHeading title="Tạo draft version" note={selectedRule ? 'Cho ' + selectedRule.ruleKey : 'Chọn một rule trước'} />
+        <PanelHeading title="Tạo phiên bản nháp" note={selectedRule ? 'Cho ' + selectedRule.ruleKey : 'Hãy chọn một quy tắc trước'} />
         <div className="admin-form-grid">
-          <TextField label="Source URL" value={sourceUrl} onChange={setSourceUrl} className="span-2" />
-          <TextField label="Citation" value={citation} onChange={setCitation} className="span-2" />
+          <TextField label="Đường dẫn nguồn (URL)" value={sourceUrl} onChange={setSourceUrl} className="span-2" />
+          <TextField label="Trích dẫn nguồn" value={citation} onChange={setCitation} className="span-2" />
           <label className="admin-field">
-            <span>Source type</span>
+            <span>Loại nguồn</span>
             <select value={sourceType} onChange={(event) => setSourceType(Number(event.target.value))}>
-              <option value={1}>Book</option>
-              <option value={2}>Official guidance</option>
-              <option value={3}>Peer-reviewed</option>
-              <option value={4}>Team-defined</option>
+              <option value={1}>Sách</option>
+              <option value={2}>Hướng dẫn chính thức</option>
+              <option value={3}>Nghiên cứu đã bình duyệt</option>
+              <option value={4}>Nhóm xây dựng</option>
             </select>
           </label>
           <label className="admin-field">
-            <span>Evidence level</span>
+            <span>Mức độ bằng chứng</span>
             <select value={evidenceLevel} onChange={(event) => setEvidenceLevel(Number(event.target.value))}>
-              <option value={1}>Low</option>
-              <option value={2}>Moderate</option>
-              <option value={3}>High</option>
+              <option value={1}>Thấp</option>
+              <option value={2}>Trung bình</option>
+              <option value={3}>Cao</option>
             </select>
           </label>
-          <label className="admin-field span-2"><span>Parameters JSON</span><textarea value={parametersJson} onChange={(event) => setParametersJson(event.target.value)} /></label>
+          <label className="admin-field span-2"><span>Tham số kỹ thuật (JSON)</span><textarea value={parametersJson} onChange={(event) => setParametersJson(event.target.value)} /></label>
         </div>
         {message && <p className="admin-message">{message}</p>}
-        <div className="admin-form-actions"><button className="primary-admin-action" disabled={addVersion.isPending || !selectedRule || !sourceUrl.trim() || !citation.trim()} onClick={() => addVersion.mutate()}><Plus size={14} /> Tạo draft version</button></div>
+        <div className="admin-form-actions"><button className="primary-admin-action" disabled={addVersion.isPending || !selectedRule || !sourceUrl.trim() || !citation.trim()} onClick={() => addVersion.mutate()}><Plus size={14} /> Tạo phiên bản nháp</button></div>
       </section>
     </div>
   )
@@ -681,62 +682,62 @@ function RuleGovernance({ version }: { version: RuleVersion }) {
       void queryClient.invalidateQueries({ queryKey: ['catalog', 'rules'] })
     },
   })
-  return <section aria-label={`Governance for version ${version.versionNumber}`}>
-    <p>Source type: {version.sourceType}  |  Evidence: {version.evidenceLevel}</p>
-    <a href={version.sourceUrl} target="_blank" rel="noreferrer">Source</a>
-    <details><summary>Review parameters and provenance</summary>
+  return <section aria-label={`Quản lý phiên bản ${version.versionNumber}`}>
+    <p>Loại nguồn: {version.sourceType}  |  Bằng chứng: {version.evidenceLevel}</p>
+    <a href={version.sourceUrl} target="_blank" rel="noreferrer">Mở nguồn</a>
+    <details><summary>Xem tham số và nguồn gốc</summary>
       <p>{version.citation}</p><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{version.parametersJson}</pre>
-      <p>Effective: {version.effectiveAt ?? 'On publication'}  |  Published: {version.publishedAt ?? 'Not published'}</p>
+      <p>Có hiệu lực: {version.effectiveAt ?? 'Khi xuất bản'}  |  Xuất bản: {version.publishedAt ?? 'Chưa xuất bản'}</p>
     </details>
-    {version.state === 1 && <button disabled={transition.isPending} onClick={() => transition.mutate('review')}>Submit for review</button>}
+    {version.state === 1 && <button disabled={transition.isPending} onClick={() => transition.mutate('review')}>Gửi yêu cầu duyệt</button>}
     {version.state === 4 && <>
-      <button disabled={transition.isPending} onClick={() => transition.mutate('rejection')}>Return to draft</button>
-      <button disabled={transition.isPending} onClick={() => transition.mutate('publication')}>Approve and publish</button>
-      <small>Independent review required: a different administrator must approve this submission.</small>
+      <button disabled={transition.isPending} onClick={() => transition.mutate('rejection')}>Trả về bản nháp</button>
+      <button disabled={transition.isPending} onClick={() => transition.mutate('publication')}>Duyệt và xuất bản</button>
+      <small>Cần duyệt độc lập: quản trị viên khác phải phê duyệt phiên bản này.</small>
     </>}
-    {version.state === 2 && <button disabled={transition.isPending} onClick={() => transition.mutate('retirement')}>Retire version</button>}
-    {version.state === 3 && <p>Retired. Historical references are retained.</p>}
+    {version.state === 2 && <button disabled={transition.isPending} onClick={() => transition.mutate('retirement')}>Ngừng sử dụng phiên bản</button>}
+    {version.state === 3 && <p>Phiên bản đã ngừng sử dụng. Các tham chiếu trong lịch sử được giữ lại.</p>}
     {transition.isError && <p role="alert">{getApiErrorMessage(transition.error)}</p>}
     <button type="button" aria-expanded={showImpact}
-      onClick={() => setShowImpact(!showImpact)}>Affected plans / version impact</button>
+      onClick={() => setShowImpact(!showImpact)}>Xem ảnh hưởng tới thực đơn và phiên bản</button>
     {showImpact && <div aria-live="polite">
-      {impact.isLoading && <p>Checking rule-set references...</p>}
+      {impact.isLoading && <p>Đang kiểm tra các tham chiếu bộ quy tắc...</p>}
       {impact.isError && <p role="alert">{getApiErrorMessage(impact.error)}</p>}
       {impact.data && <>
-        <p>Referenced by {impact.data.referencingRuleSets} rule sets,
-          {impact.data.totalHistoricalPlans} historical plans,
-          {impact.data.currentActivePlans} active plans.</p>
+        <p>Được tham chiếu bởi {impact.data.referencingRuleSets} bộ quy tắc,
+          {impact.data.totalHistoricalPlans} thực đơn lịch sử,
+          {impact.data.currentActivePlans} thực đơn đang hoạt động.</p>
         <ul>
           {impact.data.ruleSets.map((item) => <li key={item.ruleSetVersion}>
-            {item.ruleSetVersion} · {item.isActiveRuleSet ? 'Active rule set' : 'Historical rule set'}
-            {' '}· {item.totalPlans} plans · {item.distinctUsers} distinct members
+            {item.ruleSetVersion} · {item.isActiveRuleSet ? 'Bộ quy tắc đang hoạt động' : 'Bộ quy tắc lưu trữ'}
+            {' '}· {item.totalPlans} thực đơn · {item.distinctUsers} thành viên khác nhau
           </li>)}
-          {impact.data.ruleSets.length === 0 && <li>No mapped rule-set references.</li>}
+          {impact.data.ruleSets.length === 0 && <li>Chưa có bộ quy tắc tham chiếu.</li>}
         </ul>
-        <small>Counts only; member identities and health records are not exposed.</small>
+        <small>Chỉ hiển thị số lượng; không tiết lộ danh tính thành viên hoặc hồ sơ sức khỏe.</small>
       </>}
     </div>}
-    <button aria-expanded={showHistory} onClick={() => setShowHistory(!showHistory)}>Audit history</button>
+    <button aria-expanded={showHistory} onClick={() => setShowHistory(!showHistory)}>Lịch sử kiểm tra và thay đổi</button>
     {showHistory && <div aria-live="polite">
-      <label>Filter audit action <select value={actionFilter} onChange={event => { setActionFilter(event.target.value); setPage(1) }}>
-        <option value="">All actions</option>
-        {['Created', 'Edited', 'Submitted', 'Rejected', 'Published', 'Retired'].map(action => <option key={action}>{action}</option>)}
+      <label>Lọc loại thay đổi <select value={actionFilter} onChange={event => { setActionFilter(event.target.value); setPage(1) }}>
+        <option value="">Tất cả thay đổi</option>
+        {['Created', 'Edited', 'Submitted', 'Rejected', 'Published', 'Retired'].map(action => <option key={action} value={action}>{viContent(action)}</option>)}
       </select></label>
-      {history.isLoading && <p>Loading history...</p>}
+      {history.isLoading && <p>Đang tải lịch sử...</p>}
       {history.isError && <p role="alert">{getApiErrorMessage(history.error)}</p>}
-      {history.data?.items.length === 0 && <p>No audit entries on this page. Existing seeded versions have no retroactive audit.</p>}
+      {history.data?.items.length === 0 && <p>Không có bản ghi kiểm tra ở trang này. Các phiên bản tạo trước đây không có nhật ký truy hồi.</p>}
       {history.data?.items.map(entry => <p key={entry.id}>
-        v{entry.versionNumber}  |  {entry.action}  |  {new Date(entry.occurredAt).toLocaleString()}  |  Actor {entry.actorId}<br />{entry.details}
+        v{entry.versionNumber}  |  {viContent(entry.action)}  |  {new Date(entry.occurredAt).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}  |  Người thao tác: {entry.actorId}<br />{entry.details}
       </p>)}
-      <button disabled={page === 1 || history.isFetching} onClick={() => setPage(page - 1)}>Previous history page</button>
-      <span> Page {page}  |  {history.data?.totalItems ?? 0} entries </span>
-      <button disabled={history.isFetching || page >= (history.data?.totalPages ?? 0)} onClick={() => setPage(page + 1)}>Next history page</button>
+      <button disabled={page === 1 || history.isFetching} onClick={() => setPage(page - 1)}>Trang lịch sử trước</button>
+      <span> Page {page}  |  {history.data?.totalItems ?? 0} bản ghi </span>
+      <button disabled={history.isFetching || page >= (history.data?.totalPages ?? 0)} onClick={() => setPage(page + 1)}>Trang lịch sử sau</button>
     </div>}
   </section>
 }
 
 function PanelHeading({ title, note }: { title: string; note: string }) {
-  return <div className="admin-panel-heading"><div><span className="micro-label">CATALOG ADMIN</span><h2>{title}</h2></div><small>{note}</small></div>
+  return <div className="admin-panel-heading"><div><span className="micro-label">QUẢN LÝ DANH MỤC</span><h2>{title}</h2></div><small>{note}</small></div>
 }
 
 function AdminState({ children, error = false }: { children: ReactNode; error?: boolean }) {

@@ -1052,8 +1052,8 @@ namespace LongevityDiet.Repositories.Migrations
 
                     b.Property<string>("PlanExplanation")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<Guid?>("PreviousPlanId")
                         .HasColumnType("uniqueidentifier");

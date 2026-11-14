@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/authState'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
+import { viContent, viTokens, viReason, viLegacyPlanExplanation } from '../../lib/viContent'
 import { FmdWorkspaceSection } from './FmdWorkspaceSection'
 import { WellnessJourneyPanel } from './WellnessJourneyPanel'
 import { MealPlanEditor } from './MealPlanEditor'
@@ -860,14 +861,14 @@ export function PlannerWorkspacePage() {
           <span className="brand-monogram">L</span>
           <span className="brand-copy">
             <strong>Longevity</strong>
-            <small>Daily wellness companion</small>
+            <small>Đồng hành cùng sức khỏe mỗi ngày</small>
           </span>
         </Link>
 
         <nav className="nav-links" aria-label="Điều hướng ứng dụng">
           <a className="active" href="#eating-window">Khung giờ ăn</a>
           <a href="#meal-planner">Thực đơn 7 ngày</a>
-          <a href="#recommendation-v2">Gợi ý & Đổi món v2</a>
+          <a href="#recommendation-v2">Gợi ý và đổi món</a>
           <a href="#meal-logger">Nhật ký bữa ăn</a>
           <a href="#fmd-tracker">Chu kỳ FMD 5 ngày</a>
           <Link to="/progress">Thử thách & tiến độ</Link>
@@ -1004,9 +1005,9 @@ export function PlannerWorkspacePage() {
                   value={dietaryPattern}
                   onChange={(e) => setDietaryPattern(e.target.value)}
                 >
-                  <option value="PlantForward">Chủ đạo thực vật (Plant-Forward)</option>
+                  <option value="PlantForward">Chủ đạo thực vật</option>
                   <option value="Pescatarian">Thực vật kết hợp cá (Pescatarian)</option>
-                  <option value="StrictlyPlantBased">Thuần thực vật (Strictly Plant-Based)</option>
+                  <option value="StrictlyPlantBased">Hoàn toàn từ thực vật</option>
                 </select>
               </label>
 
@@ -1025,7 +1026,7 @@ export function PlannerWorkspacePage() {
               </label>
 
               <label className="field">
-                <span>Thực phẩm / nguyên liệu muốn loại trừ (phân cách bằng dấu phẩy)</span>
+                <span>Thực phẩm hoặc nguyên liệu muốn loại trừ (cách nhau bằng dấu phẩy)</span>
                 <input
                   aria-label="Thực phẩm loại trừ"
                   className="plain-input"
@@ -1142,19 +1143,19 @@ export function PlannerWorkspacePage() {
                     PHIÊN BẢN #{plan.revisionNumber} • {plan.ruleSetVersion} • {plan.startDate} →{' '}
                     {plan.endDate}
                   </span>
-                  <p className="plan-explanation-text">{plan.planExplanation}</p>
+                  <p className="plan-explanation-text">{viLegacyPlanExplanation(plan)}</p>
                 </div>
                 <div className="plan-meta-tags">
-                  <span className="meta-badge">{plan.dietaryPattern}</span>
+                  <span className="meta-badge">{viContent(plan.dietaryPattern)}</span>
                   <span className="meta-badge">{plan.mealsPerDay} bữa/ngày</span>
                   {plan.appliedAllergies.length > 0 && (
                     <span className="meta-badge warn-badge">
-                      Loại dị ứng: {plan.appliedAllergies.join(', ')}
+                      Loại dị ứng: {viTokens(plan.appliedAllergies.join(', '))}
                     </span>
                   )}
                   {plan.appliedExclusions.length > 0 && (
                     <span className="meta-badge">
-                      Loại trừ: {plan.appliedExclusions.join(', ')}
+                      Loại trừ: {viTokens(plan.appliedExclusions.join(', '))}
                     </span>
                   )}
                 </div>
@@ -1226,8 +1227,8 @@ export function PlannerWorkspacePage() {
                             </span>
                           </div>
 
-                          <h4 className="planned-meal-title">{meal.title}</h4>
-                          <p className="planned-meal-desc">{meal.description}</p>
+                          <h4 className="planned-meal-title">{viContent(meal.title)}</h4>
+                          <p className="planned-meal-desc">{viContent(meal.description)}</p>
 
                           <div className="macro-strip">
                             <span>
@@ -1253,19 +1254,19 @@ export function PlannerWorkspacePage() {
                                 <Leaf size={12} /> Thực vật
                               </span>
                             )}
-                            {meal.hasLegumes && <span className="reason-chip">Đậu & Hạt</span>}
+                            {meal.hasLegumes && <span className="reason-chip">Các loại đậu và hạt</span>}
                             {meal.hasWholeGrains && (
                               <span className="reason-chip">Ngũ cốc nguyên hạt</span>
                             )}
-                            {meal.containsFish && <span className="reason-chip">Cá Omega-3</span>}
+                            {meal.containsFish && <span className="reason-chip">Có cá</span>}
                             {meal.reasonCodes.map((code) => (
                               <span key={code} className="reason-code-chip">
-                                {code}
+                                {viReason(code)}
                               </span>
                             ))}
                           </div>
 
-                          <p className="meal-explanation">{meal.explanationSummary}</p>
+                          <p className="meal-explanation">{viContent(meal.explanationSummary)}</p>
 
                           {/* FEEDBACK & WHY THIS RECOMMENDATION ROW */}
                           <div className="meal-feedback-strip">
@@ -1618,7 +1619,7 @@ export function PlannerWorkspacePage() {
                   <History size={18} strokeWidth={1.6} />
                 </span>
                 <div>
-                  <span className="micro-label">KIỂM TOÁN LỊCH SỬ ĐỔI MÓN (AUDIT TRAIL)</span>
+                  <span className="micro-label">LỊCH SỬ THAY ĐỔI MÓN ĂN</span>
                   <h3>Lịch sử thay thế bữa ăn trong thực đơn</h3>
                 </div>
               </div>

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
+import { displayAllergens, parseAllergenInput } from '../../lib/allergenNames'
+import { viContent } from '../../lib/viContent'
 
 type WellnessCheckIn = {
   id: string
@@ -101,11 +103,12 @@ export function WellnessJourneyPanel({ todayIso }: { todayIso: string }) {
   })
   const overview = overviewQuery.data
   const currentDraft = screenDraft ?? {
-    allergiesText: overview?.allergies.join(', ') ?? '',
+    allergiesText: displayAllergens(overview?.allergies ?? []),
     riskFlags: overview?.riskFlags.filter((x) => x !== 'none') ?? [],
     reviewed: overview?.screeningComplete ?? false,
   }
   const { allergiesText, riskFlags, reviewed } = currentDraft
+  const allergensParsed = parseAllergenInput(allergiesText)
   const setAllergiesText = (value: string) => setScreenDraft({ ...currentDraft, allergiesText: value })
   const setRiskFlags = (value: string[]) => setScreenDraft({ ...currentDraft, riskFlags: value })
   const setReviewed = (value: boolean) => setScreenDraft({ ...currentDraft, reviewed: value })
@@ -114,7 +117,7 @@ export function WellnessJourneyPanel({ todayIso }: { todayIso: string }) {
     mutationFn: async () =>
       (
         await api.put<WellnessOverview>('/wellness/screening', {
-          allergies: allergiesText.split(/[,;\n]/).map((x) => x.trim()).filter(Boolean),
+          allergies: allergensParsed.codes,
           riskFlags,
           allergiesReviewed: reviewed,
         })
@@ -197,20 +200,21 @@ export function WellnessJourneyPanel({ todayIso }: { todayIso: string }) {
         <>
           <div className="surface-card" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
             <h3>1. Kiểm tra nhóm đối tượng và dị ứng trước khi lên thực đơn</h3>
-            <p>Nhóm hiện tại: <strong>{overview.segment}</strong>. {overview.guidance}</p>
+            <p>Nhóm hiện tại: <strong>{viContent(overview.segment)}</strong>. {viContent(overview.guidance)}</p>
             <label className="field">
               <span>Dị ứng thực phẩm (ngăn cách bằng dấu phẩy; để trống nếu đã xác nhận không có)</span>
               <input className="plain-input" value={allergiesText} onChange={(e) => setAllergiesText(e.target.value)}
-                placeholder="Ví dụ: peanut, shellfish, soy, milk, egg, fish, wheat, sesame" />
+                placeholder="Ví dụ: đậu phộng, tôm, sữa, trứng, đậu nành" />
             </label>
-            <p>Chọn nhanh nhóm dị ứng thường gặp (vẫn có thể nhập tên khác ở trên):</p>
+            <p>Chọn nhóm dị ứng có trong danh sách. Tên chưa được hệ thống nhận diện sẽ phải được làm rõ trước khi tạo thực đơn tự động.</p>
+            {allergensParsed.unknown.length > 0 && <p role="alert">Chưa nhận diện được: {allergensParsed.unknown.join(", ")}. Vui lòng chọn nhóm dị ứng phù hợp ở dưới hoặc trao đổi với nhân viên y tế trước khi sử dụng thực đơn tự động.</p>}
             <div style={{ display: 'grid', gap: '.45rem', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
               {allergenPresets.map(([code, label]) => {
-                const selected = allergiesText.split(/[,;\n]/).map((x) => x.trim())
+                const selected = allergensParsed.codes
                 return (
                   <label key={code}>
                     <input type="checkbox" checked={selected.includes(code)}
-                      onChange={() => toggle(code, selected.filter(Boolean), (next) => setAllergiesText(next.join(', ')))} />
+                      onChange={() => toggle(code, selected, (next) => setAllergiesText([displayAllergens(next), ...allergensParsed.unknown].filter(Boolean).join(', ')))} />
                     {' '}{label}
                   </label>
                 )
@@ -228,7 +232,7 @@ export function WellnessJourneyPanel({ todayIso }: { todayIso: string }) {
               {' '}Tôi đã rà soát cả dị ứng và các tình trạng sức khỏe ở trên;
               nếu không chọn mục nào nghĩa là tôi không biết mình có tình trạng đó.
             </label>
-            <button className="primary-button" type="button" disabled={screeningMutation.isPending}
+            <button className="primary-button" type="button" disabled={screeningMutation.isPending || allergensParsed.unknown.length > 0}
               onClick={() => screeningMutation.mutate()}>Lưu sàng lọc an toàn</button>
             {!overview.screeningComplete ? <p role="status">Cần xác nhận dị ứng trước khi hệ thống nối tiếp kế hoạch 14 ngày.</p> : null}
             {overview.requiresProfessionalReview ? (
@@ -319,9 +323,9 @@ export function WellnessJourneyPanel({ todayIso }: { todayIso: string }) {
             <ul>
               {recent.slice(0, 14).map((entry) => (
                 <li key={entry.id}>
-                  <strong>{entry.localDate}</strong> ({entry.phase}) — Năng lượng {entry.energy}/5,
+                  <strong>{entry.localDate}</strong> ({viContent(entry.phase)}) — Năng lượng {entry.energy}/5,
                   tinh thần {entry.mood}/5, tiêu hóa {entry.digestion}/5, ngủ {entry.sleepQuality}/5
-                  {entry.symptoms.length ? '; triệu chứng: ' + entry.symptoms.join(', ') : ''}
+                  {entry.symptoms.length ? '; triệu chứng: ' + entry.symptoms.map(viContent).join(', ') : ''}
                   {entry.urgentHelpRecommended ? ' — CẦN HỖ TRỢ Y TẾ' : ''}
                 </li>
               ))}

@@ -44,6 +44,16 @@ public sealed class MealPlanningAndEatingWindowTests
         Assert.True(second.Succeeded);
         Assert.Equal(7, first.Value!.Days.Count);
         Assert.Equal(7, second.Value!.Days.Count);
+        Assert.StartsWith("Kế hoạch gợi ý 7 ngày", first.Value.PlanExplanation);
+        Assert.Contains("Dị ứng đã khai báo", first.Value.PlanExplanation);
+        Assert.Contains("đậu phộng", first.Value.PlanExplanation);
+        Assert.Contains("đậu phụ", first.Value.PlanExplanation);
+        Assert.DoesNotContain("A 7-day", first.Value.PlanExplanation);
+        var firstMealExplanation = first.Value.Days[0].Meals[0].ExplanationSummary;
+        Assert.Contains("Vì sao chọn món này", firstMealExplanation);
+        Assert.Contains("năng lượng", firstMealExplanation);
+        Assert.Contains("Khẩu phần tham khảo", firstMealExplanation);
+        Assert.Contains("Thành phần trong danh mục", firstMealExplanation);
 
         for (var d = 0; d < 7; d++)
         {
@@ -57,6 +67,56 @@ public sealed class MealPlanningAndEatingWindowTests
                 Assert.Equal(day1.Meals[m].CandidateCode, day2.Meals[m].CandidateCode);
                 Assert.Equal(day1.Meals[m].DeterministicScore, day2.Meals[m].DeterministicScore);
                 Assert.Equal(day1.Meals[m].ReasonCodes, day2.Meals[m].ReasonCodes);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData("PlantForward", "")]
+    [InlineData("PlantForward", "peanut")]
+    [InlineData("PlantForward", "shellfish")]
+    [InlineData("Pescatarian", "")]
+    [InlineData("Pescatarian", "peanut,shellfish")]
+    [InlineData("StrictlyPlantBased", "")]
+    [InlineData("StrictlyPlantBased", "peanut")]
+    public async Task GeneratedVietnameseExplanation_HasConcreteNutritionAndRespectsAllergenFilters(
+        string dietaryPattern, string allergiesCsv)
+    {
+        var allergies = allergiesCsv.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var userId = Guid.NewGuid();
+        var users = CreateUserRepositoryWithOnboardedUser(userId, mealFrequency: 3);
+        var plans = new InMemoryMealPlanRepository();
+        var planner = new MealPlanningService(
+            plans,
+            new PlanningCatalogSnapshotProvider(users, plans),
+            new EmptyWellnessRepository(allergiesCsv),
+            new FixedTimeProvider(FixedNow));
+
+        var generated = await planner.GeneratePlanAsync(userId,
+            new GenerateMealPlanCommand(new DateOnly(2026, 11, 2), 7,
+                DietaryPattern: dietaryPattern, Allergies: allergies));
+
+        Assert.True(generated.Succeeded, generated.ErrorMessage);
+        var plan = generated.Value!;
+        Assert.Equal(7, plan.Days.Count);
+        Assert.Contains("Kế hoạch gợi ý", plan.PlanExplanation);
+        Assert.Contains("Dị ứng đã khai báo", plan.PlanExplanation);
+        Assert.DoesNotContain("A 7-day", plan.PlanExplanation);
+        foreach (var meal in plan.Days.SelectMany(day => day.Meals))
+        {
+            Assert.Contains("Vì sao chọn món này", meal.ExplanationSummary);
+            Assert.Contains("Khẩu phần tham khảo", meal.ExplanationSummary);
+            Assert.Contains("năng lượng", meal.ExplanationSummary);
+            Assert.Contains("đạm", meal.ExplanationSummary);
+            Assert.Contains("chất xơ", meal.ExplanationSummary);
+            Assert.Contains("Thành phần trong danh mục", meal.ExplanationSummary);
+            Assert.Contains("nguy cơ tiếp xúc chéo", meal.ExplanationSummary);
+            foreach (var forbidden in allergies)
+                Assert.DoesNotContain(forbidden, meal.Allergens, StringComparer.OrdinalIgnoreCase);
+            if (dietaryPattern == "StrictlyPlantBased")
+            {
+                Assert.True(meal.IsPlantBased);
+                Assert.False(meal.ContainsFish);
             }
         }
     }

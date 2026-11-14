@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, ArrowLeft, Clock3, Leaf, Utensils } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { getRecipe } from './catalogApi'
+import { viContent } from '../../lib/viContent'
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -31,7 +32,7 @@ export function RecipeDetailPage() {
       <header className="catalog-topbar">
         <Link className="brand" to="/catalog">
           <span className="brand-monogram">L</span>
-          <span className="brand-copy"><strong>Longevity</strong><small>Recipe detail</small></span>
+          <span className="brand-copy"><strong>Longevity</strong><small>Chi tiết công thức</small></span>
         </Link>
         <Link className="profile-back" to="/catalog"><ArrowLeft size={15} /> Danh mục</Link>
       </header>
@@ -39,13 +40,13 @@ export function RecipeDetailPage() {
       <main className="recipe-detail-main">
         <section className="recipe-detail-hero">
           <div>
-            <span className="catalog-chip">{item.category}</span>
-            <h1>{item.name}</h1>
-            <p>{item.description}</p>
+            <span className="catalog-chip">{viContent(item.category)}</span>
+            <h1>{viContent(item.name)}</h1>
+            <p>{viContent(item.description)}</p>
             <div className="recipe-meta">
               <span><Clock3 size={15} /> {item.prepMinutes} phút</span>
               <span><Utensils size={15} /> {item.servingCount} khẩu phần</span>
-              {item.isPlantForward && <span><Leaf size={15} /> Plant-forward</span>}
+              {item.isPlantForward && <span><Leaf size={15} /> Ưu tiên thực vật</span>}
             </div>
           </div>
           <div className="recipe-energy">
@@ -62,7 +63,7 @@ export function RecipeDetailPage() {
             <div className="ingredient-list">
               {item.ingredients.map((ingredient) => (
                 <div key={ingredient.foodId}>
-                  <strong>{ingredient.foodName}</strong>
+                  <strong>{viContent(ingredient.foodName)}</strong>
                   <span>{ingredient.amount} {ingredient.unit}{ingredient.isOptional ? ' · tùy chọn' : ''}</span>
                 </div>
               ))}
@@ -73,12 +74,12 @@ export function RecipeDetailPage() {
             <span className="micro-label">DINH DƯỠNG</span>
             <h2>Thông tin mỗi khẩu phần</h2>
             <div className="macro-grid">
-              <div><strong>{item.proteinGPerServing}g</strong><span>Protein</span></div>
-              <div><strong>{item.carbohydrateGPerServing}g</strong><span>Carb</span></div>
-              <div><strong>{item.fatGPerServing}g</strong><span>Fat</span></div>
-              <div><strong>{item.fiberGPerServing ?? 0}g</strong><span>Fiber</span></div>
-              <div><strong>{item.sugarGPerServing ?? 0}g</strong><span>Sugar</span></div>
-              <div><strong>{item.saturatedFatGPerServing ?? 0}g</strong><span>Saturated fat</span></div>
+              <div><strong>{item.proteinGPerServing}g</strong><span>Chất đạm</span></div>
+              <div><strong>{item.carbohydrateGPerServing}g</strong><span>Tinh bột</span></div>
+              <div><strong>{item.fatGPerServing}g</strong><span>Chất béo</span></div>
+              <div><strong>{item.fiberGPerServing ?? 0}g</strong><span>Chất xơ</span></div>
+              <div><strong>{item.sugarGPerServing ?? 0}g</strong><span>Đường</span></div>
+              <div><strong>{item.saturatedFatGPerServing ?? 0}g</strong><span>Chất béo bão hòa</span></div>
             </div>
           </article>
 
@@ -88,14 +89,14 @@ export function RecipeDetailPage() {
             {item.allergens.length > 0 ? (
               <div className="allergen-list">
                 {item.allergens.map((allergen) => (
-                  <span key={allergen.id}><AlertTriangle size={14} /> {allergen.name}</span>
+                  <span key={allergen.id}><AlertTriangle size={14} /> {viContent(allergen.name)}</span>
                 ))}
               </div>
             ) : (
-              <p>Không có allergen nào được gắn cho công thức này trong catalog.</p>
+              <p>Chưa có chất gây dị ứng nào được đánh dấu cho công thức này trong danh mục.</p>
             )}
             <small>
-              Thông tin catalog hỗ trợ lựa chọn thực phẩm nhưng không thay thế hướng dẫn y khoa cá nhân.
+              Thông tin danh mục hỗ trợ lựa chọn thực phẩm nhưng không thay thế hướng dẫn y khoa cá nhân.
             </small>
           </article>
         </section>

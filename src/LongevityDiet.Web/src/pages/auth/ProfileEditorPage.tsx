@@ -164,7 +164,7 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
           <span className="brand-monogram">L</span>
           <span className="brand-copy">
             <strong>Longevity</strong>
-            <small>Daily wellness companion</small>
+            <small>Đồng hành cùng sức khỏe mỗi ngày</small>
           </span>
         </Link>
 

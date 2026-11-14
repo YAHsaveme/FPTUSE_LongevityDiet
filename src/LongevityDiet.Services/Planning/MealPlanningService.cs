@@ -1298,20 +1298,59 @@ public sealed class MealPlanningService(
         return new TimeOnly((targetMinutes % 1440) / 60, targetMinutes % 60);
     }
 
+    // Presentation-only translations: never change the canonical allergen/food
+    // tokens used by the backend safety gates or the persisted data.
+    private static string VietnameseFoodName(string value) => value.Trim().ToLowerInvariant() switch
+    {
+        "peanut" => "đậu phộng",
+        "shellfish" => "tôm, cua và động vật có vỏ",
+        "fish" => "cá",
+        "milk" => "sữa",
+        "egg" => "trứng",
+        "soy" => "đậu nành",
+        "wheat" => "lúa mì",
+        "tree-nut" or "tree nuts" => "các loại hạt cây",
+        "sesame" => "mè, vừng",
+        "tofu" => "đậu phụ",
+        "salmon" => "cá hồi",
+        "mushroom" => "nấm",
+        "cooked lentils" => "đậu lăng nấu chín",
+        "cooked brown rice" => "gạo lứt nấu chín",
+        "cooked salmon" => "cá hồi nấu chín",
+        "steamed broccoli" => "bông cải xanh hấp",
+        _ => value
+    };
+
     private static string BuildPlanExplanation(
         PlanningUserContextSnapshot context,
         PlanningRuleSetSnapshot ruleSet,
         int daysCount)
     {
+        var dietaryPattern = context.DietaryPattern switch
+        {
+            "PlantForward" => "ưu tiên thực vật, kết hợp nhóm thực phẩm phù hợp",
+            "Pescatarian" => "chủ đạo thực vật, có thể kết hợp cá",
+            "StrictlyPlantBased" => "hoàn toàn từ thực vật",
+            _ => "theo lựa chọn đã lưu trong hồ sơ"
+        };
         var allergyDescription = context.Allergies.Count > 0
-            ? string.Join(", ", context.Allergies)
-            : "none declared";
+            ? string.Join(", ", context.Allergies.Select(VietnameseFoodName))
+            : "không có mục nào được khai báo";
         var exclusions = context.ExcludedFoods.Count > 0
-            ? string.Join(", ", context.ExcludedFoods)
-            : "none declared";
-        return string.Create(
-            CultureInfo.InvariantCulture,
-            $"A {daysCount}-day meal idea schedule based on educational rule set {ruleSet.RuleSetVersion}; dietary pattern: {context.DietaryPattern}; meals per day: {context.PreferredMealFrequency}. Declared allergens: {allergyDescription}; exclusions: {exclusions}. Illustrative recipe values are not validated for individual energy, protein, micronutrient or cross-contact needs. Consult a qualified dietitian when appropriate. This is not clinical guidance or a prediction of lifespan.");
+            ? string.Join(", ", context.ExcludedFoods.Select(VietnameseFoodName))
+            : "không có mục nào được khai báo";
+        return $"Kế hoạch gợi ý {daysCount} ngày, dự kiến {context.PreferredMealFrequency} bữa mỗi ngày. " +
+            $"Chế độ ăn: {dietaryPattern}. Dị ứng đã khai báo: {allergyDescription}. " +
+            $"Thực phẩm cần loại trừ: {exclusions}. " +
+            $"Món ăn được chọn từ danh mục hiện có theo bộ quy tắc phiên bản {ruleSet.RuleSetVersion}; " +
+            "các điều kiện dị ứng và loại trừ được kiểm tra trước khi lưu. " +
+            "Nguyên tắc tham khảo: Valter Longo (2018), The Longevity Diet, Chương 4, trang PDF 89–90; " +
+            "các món trong danh mục do dự án duy trì không nhất thiết nằm trong thực đơn gốc Phụ lục A (trang PDF 212–242). " +
+            "Cách sử dụng: xem từng ngày, kiểm tra thành phần và khẩu phần của từng món; " +
+            "có thể thay đổi món trong phạm vi danh mục được phép và ghi lại bữa ăn thực tế. " +
+            "Giới hạn: số liệu dinh dưỡng chỉ phục vụ tham khảo, chưa được xác minh đầy đủ cho " +
+            "nhu cầu cá nhân, nguy cơ tiếp xúc chéo hoặc tình trạng bệnh. " +
+            "Không phải phác đồ điều trị và không dự đoán tuổi thọ.";
     }
 
     private static string BuildMealExplanation(
@@ -1321,37 +1360,32 @@ public sealed class MealPlanningService(
     {
         var highlights = new List<string>();
         if (reasonCodes.Contains("PLANT_FORWARD", StringComparer.OrdinalIgnoreCase))
-        {
-            highlights.Add("nền tảng thực vật");
-        }
-
+            highlights.Add("có thành phần chủ đạo từ thực vật");
         if (reasonCodes.Contains("LEGUME_PROTEIN", StringComparer.OrdinalIgnoreCase))
-        {
-            highlights.Add("giàu đạm từ các loại đậu");
-        }
-
+            highlights.Add("có các loại đậu");
         if (reasonCodes.Contains("COMPLEX_CARBS", StringComparer.OrdinalIgnoreCase))
-        {
-            highlights.Add("ngũ cốc nguyên hạt nhiều chất xơ");
-        }
-
+            highlights.Add("có ngũ cốc nguyên hạt");
         if (reasonCodes.Contains("MODERATE_FISH", StringComparer.OrdinalIgnoreCase))
-        {
-            highlights.Add("bổ sung cá giàu omega-3");
-        }
-
+            highlights.Add("có cá, được tính trong giới hạn tần suất");
         if (reasonCodes.Contains("LOW_SUGAR_SATFAT", StringComparer.OrdinalIgnoreCase))
-        {
-            highlights.Add("ít đường tinh luyện và chất béo bão hòa");
-        }
+            highlights.Add("được ưu tiên theo tiêu chí đường và chất béo bão hòa");
 
-        var highlightText = highlights.Count > 0
-            ? string.Join(", ", highlights)
-            : "cân bằng dinh dưỡng hằng ngày";
-
-        return string.Create(
-            CultureInfo.InvariantCulture,
-            $"Chọn {candidate.Title} vì đáp ứng {highlightText} theo bộ quy tắc {ruleSetVersion} (an toàn với toàn bộ ràng buộc dị ứng/loại trừ).");
+        var why = highlights.Count > 0
+            ? string.Join("; ", highlights)
+            : "phù hợp với các điều kiện lựa chọn món trong danh mục";
+        var ingredients = candidate.Ingredients.Count > 0
+            ? string.Join(", ", candidate.Ingredients.Take(5).Select(VietnameseFoodName))
+            : "chưa có danh sách thành phần chi tiết";
+        return $"Vì sao chọn món này: {why}. " +
+            $"Khẩu phần tham khảo: {candidate.ServingSize:0.##} {candidate.ServingUnit}; " +
+            $"năng lượng {candidate.CaloriesKcal} kcal; đạm {candidate.ProteinGrams:0.##} g; " +
+            $"tinh bột {candidate.CarbsGrams:0.##} g; chất béo {candidate.FatGrams:0.##} g; " +
+            $"chất xơ {candidate.FiberGrams:0.##} g. " +
+            $"Thành phần trong danh mục: {ingredients}. " +
+            $"Tham chiếu bộ quy tắc phiên bản {ruleSetVersion} và nguyên tắc trong The Longevity Diet (2018), Chương 4, trang PDF 89–90. " +
+            "Giá trị dinh dưỡng là dữ liệu danh mục, KHÔNG phải số đo từng món được chứng thực trong sách. Ứng viên đã qua bộ lọc dị ứng " +
+            "và thực phẩm loại trừ được khai báo. Hãy kiểm tra thành phần thực tế " +
+            "và nguy cơ tiếp xúc chéo trước khi dùng.";
     }
 
     private static MealPlanSummary ToSummary(MealPlan plan)
