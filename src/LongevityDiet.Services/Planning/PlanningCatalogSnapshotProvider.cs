@@ -598,7 +598,7 @@ public sealed class PlanningCatalogSnapshotProvider(
             return DefaultRuleSet; // Explicit test fixture only. Not a runtime fallback.
 
         if (ruleCatalogRepository is null)
-            throw new InvalidOperationException("Planner requires an active, persisted RuleSet repository.");
+            throw new PlanningCatalogUnavailableException("planning_rules_unavailable", "Chưa có kho quy tắc cho Planner. Quản trị viên cần kiểm tra cấu hình.");
 
         var current = await ruleCatalogRepository.GetActiveRuleSetAsync(cancellationToken);
         if (current is null)
@@ -608,15 +608,15 @@ public sealed class PlanningCatalogSnapshotProvider(
             if (string.Equals(configuration?["Planning:EnableDemoRuleSetFallback"], "true",
                     StringComparison.OrdinalIgnoreCase))
                 return DefaultRuleSet;
-            throw new InvalidOperationException(
-                "No active published RuleSet exists. Review and publish one before generating plans.");
+            throw new PlanningCatalogUnavailableException("planning_rules_unavailable",
+                "Chưa có RuleSet được công bố và kích hoạt. Quản trị viên cần kích hoạt bộ quy tắc hợp lệ trước khi tạo thực đơn.");
         }
         if (!current.IsActive || current.PublishedAt is null)
-            throw new InvalidOperationException("The selected RuleSet is not published.");
+            throw new PlanningCatalogUnavailableException("planning_rules_invalid", "RuleSet đang kích hoạt chưa được công bố hợp lệ. Vui lòng liên hệ quản trị viên.");
 
         var now = DateTimeOffset.UtcNow;
         if (current.PublishedAt > now || current.EffectiveAt > now)
-            throw new InvalidOperationException("RuleSet is not yet effective.");
+            throw new PlanningCatalogUnavailableException("planning_rules_not_effective", "RuleSet đang chọn chưa tới ngày có hiệu lực. Vui lòng liên hệ quản trị viên.");
 
         var rules = new List<PlanningDietRuleSnapshot>();
         foreach (var version in current.RuleVersions.OrderBy(v => v.DietRule.RuleKey))
@@ -627,16 +627,16 @@ public sealed class PlanningCatalogSnapshotProvider(
                 version.EffectiveAt > now)
                 continue;
 
-            using var parameters = JsonDocument.Parse(version.ParametersJson);
+            using var parameters = ParsePublishedRuleParameters(version.ParametersJson);
             if (parameters.RootElement.ValueKind != JsonValueKind.Object)
-                throw new InvalidOperationException("Published rule parameters must be an object.");
+                throw new PlanningCatalogUnavailableException("planning_rules_invalid", "Tham số RuleSet đã công bố không hợp lệ. Vui lòng liên hệ quản trị viên.");
 
             decimal weight = 0m; // Legacy JSON keys are NOT fabricated into new numeric weights.
             if (parameters.RootElement.TryGetProperty("baseWeight", out var jsonWeight))
             {
                 if (jsonWeight.ValueKind != JsonValueKind.Number ||
                     !jsonWeight.TryGetDecimal(out weight) || weight < 0 || weight > 100)
-                    throw new InvalidOperationException("Published rule baseWeight must be a number from 0 to 100.");
+                    throw new PlanningCatalogUnavailableException("planning_rules_invalid", "Trọng số RuleSet đã công bố không hợp lệ. Vui lòng liên hệ quản trị viên.");
             }
 
             var key = version.DietRule.RuleKey switch
@@ -650,9 +650,22 @@ public sealed class PlanningCatalogSnapshotProvider(
                 version.SourceUrl, version.EvidenceLevel.ToString(), weight));
         }
         if (rules.Count == 0)
-            throw new InvalidOperationException("The active RuleSet has no effective, published rules.");
+            throw new PlanningCatalogUnavailableException("planning_rules_invalid", "Bộ quy tắc hiện tại không có quy tắc đủ điều kiện để tạo thực đơn.");
         return new PlanningRuleSetSnapshot("v1", current.VersionLabel,
             current.PublishedAt.Value, rules);
+    }
+
+    private static JsonDocument ParsePublishedRuleParameters(string parametersJson)
+    {
+        try
+        {
+            return JsonDocument.Parse(parametersJson);
+        }
+        catch (JsonException)
+        {
+            throw new PlanningCatalogUnavailableException("planning_rules_invalid",
+                "Tham số của quy tắc đã công bố không thể đọc được. Vui lòng liên hệ quản trị viên.");
+        }
     }
 
     /// <summary>
@@ -740,6 +753,10 @@ public sealed class PlanningCatalogSnapshotProvider(
                 break;
         }
 
+        // An empty live catalog must never be concealed by invented demo dishes.
+        if (!demoEnabled && candidates.Count == 0)
+            throw new PlanningCatalogUnavailableException("planning_catalog_empty",
+                "Danh mục chưa có công thức đủ dữ liệu để lập thực đơn. Quản trị viên cần bổ sung công thức, nguyên liệu và dinh dưỡng hợp lệ.");
         return candidates;
     }
 

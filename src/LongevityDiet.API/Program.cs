@@ -5,6 +5,7 @@ using System.Text;
 using LongevityDiet.API.AI;
 using LongevityDiet.API.Cloudflare;
 using LongevityDiet.API.Infrastructure;
+using LongevityDiet.API.Errors;
 using LongevityDiet.API.OpenApi;
 using LongevityDiet.API.Recommendation;
 using LongevityDiet.API.Security;
@@ -71,6 +72,7 @@ try
         options.CustomizeProblemDetails = context =>
             context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
     });
+    builder.Services.AddExceptionHandler<PlanningCatalogExceptionHandler>();
     builder.Services.AddHealthChecks()
         .AddCheck<LongevityDiet.API.Security.ReadinessCheck>("dependencies",
             tags: readinessTags);
