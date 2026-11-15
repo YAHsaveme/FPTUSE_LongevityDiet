@@ -7,6 +7,7 @@ test('member can complete catalog, planning, activity, challenge, report and rem
   const email = `journey-${id}@example.test`
   const password = 'Qa!Journey123456'
   const displayName = 'Journey QA Member'
+  let registrationAccessToken: string | null = null
 
   await test.step('Register and complete onboarding in the browser', async () => {
     await page.goto('/register')
@@ -15,7 +16,14 @@ test('member can complete catalog, planning, activity, challenge, report and rem
     await page.locator('input[name="email"]').fill(email)
     await page.locator('input[name="password"]').fill(password)
     await page.locator('input[name="confirmPassword"]').fill(password)
+    // Capture the SAME browser-issued session. A second API login through
+    // page.request would overwrite the browser's refresh cookie.
+    const registerResponse = page.waitForResponse(r =>
+      r.request().method() === 'POST' && r.url().includes('/api/v1/auth/register'))
     await page.getByRole('button', { name: 'Tạo tài khoản' }).click()
+    const registered = await registerResponse
+    expect(registered.status()).toBe(201)
+    registrationAccessToken = (await registered.json() as { accessToken: string }).accessToken
     await expect(page).toHaveURL(/\/onboarding$/)
     await page.locator('input[name="birthYear"]').fill('1997')
     await page.locator('input[name="wakeTime"]').fill('06:30')
@@ -28,12 +36,8 @@ test('member can complete catalog, planning, activity, challenge, report and rem
 
   // For the allergy safety gate, use the same real API behind the Web/Gateway;
   // auth credentials remain synthetic and are never printed in test output.
-  const login = await page.request.post('/api/v1/auth/login', {
-    data: { email, password },
-  })
-  expect(login.status()).toBe(200)
-  const session = await login.json() as { accessToken: string }
-  const headers = { Authorization: `Bearer ${session.accessToken}` }
+  expect(registrationAccessToken).toBeTruthy()
+  const headers = { Authorization: `Bearer ${registrationAccessToken}` }
   const screening = await page.request.put('/api/v1/wellness/screening', {
     headers,
     data: { riskFlags: [], allergiesReviewed: true, allergies: ['peanut'] },
@@ -201,7 +205,14 @@ test('member can complete catalog, planning, activity, challenge, report and rem
   })
 
   await test.step('Protected routes and final logout', async () => {
+    // A full page reload must restore the authenticated session via the real
+    // refresh cookie. Assert the response explicitly so a 401/429/5xx cannot
+    // be mistaken for a missing logout button or a router regression.
+    const refreshAfterReload = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === '/api/v1/auth/refresh', { timeout: 15000 })
     await page.goto('/profile')
+    const refreshResponse = await refreshAfterReload
+    expect(refreshResponse.status(), 'Session refresh after navigating to /profile').toBe(200)
     await expect(page).toHaveURL(/\/profile$/)
     // Sign-out remains visible even if the underlying profile GET fails or stalls.
     await expect(page.getByRole('button', { name: 'Đăng xuất' })).toBeVisible()
