@@ -25,3 +25,6 @@
 - Only synthetic QA data and isolated Docker volumes may be used for E2E tests. No user account, Gemini API key or live health information should enter this validation.
 
 **Outcome:** Structural source-token audit completed, 42 missing labels resolved, 13 non-ingredient restrictions correctly typed. **Not 100% source-edited**: 54 meals still need recipe-level human/editorial review, and this result is not a clinical endorsement.
+
+### CI / portability note
+The default Windows development machine does not currently have the `python` command installed. The independent per-meal SHA witness test runs using existing Node/Vitest dependencies without Python; the optional PyMuPDF verifier is provided for an environment where the **user-owned PDF** is locally available. The source file is not uploaded to GitHub. GitHub Actions for this repository only trigger PR checks against `main` or `develop`, so this stacked series targets `main` for CI while retaining the prerequisite order #66 → #67 → #68 for reviewer coordination.
