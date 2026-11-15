@@ -130,6 +130,7 @@ public static class CatalogSeed
                 ],
             };
 
+            recipe.Revisions.Add(RecipeCompositionHistory.Capture(recipe, "Seeded", DateTimeOffset.UtcNow));
             await dbContext.Recipes.AddAsync(recipe, cancellationToken);
         }
 
@@ -194,6 +195,7 @@ public static class CatalogSeed
                 ],
             };
 
+            recipe.Revisions.Add(RecipeCompositionHistory.Capture(recipe, "Seeded", DateTimeOffset.UtcNow));
             await dbContext.Recipes.AddAsync(recipe, cancellationToken);
         }
 
