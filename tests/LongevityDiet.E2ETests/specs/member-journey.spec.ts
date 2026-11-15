@@ -182,7 +182,15 @@ test('member can complete catalog, planning, activity, challenge, report and rem
   })
 
   await test.step('Save reminder preferences via Web and verify SQL API readback', async () => {
-    await page.goto('/notifications')
+    // Follow the real in-app navigation from Reports instead of repeatedly
+    // reloading the document and rotating the refresh cookie. The final
+    // /profile step below separately tests a full authenticated page reload.
+    const quickNav = page.getByRole('navigation', { name: 'Điều hướng nhanh' })
+    await expect(quickNav).toBeVisible()
+    await quickNav.getByRole('button', { name: 'Mở các trang khác' }).click()
+    await quickNav.getByRole('group', { name: 'Các trang khác' })
+      .getByRole('link', { name: 'Thông báo' }).click()
+    await expect(page).toHaveURL(/\/notifications$/)
     await expect(page.getByRole('heading', { name: 'Giữ nhịp theo cách bạn chọn' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Bật thông báo trình duyệt/ })).toBeVisible()
     const emailConsent = page.getByLabel(/Đồng ý nhận email nhắc lịch/)
