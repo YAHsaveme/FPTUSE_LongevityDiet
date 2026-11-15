@@ -202,6 +202,9 @@ test('member can complete catalog, planning, activity, challenge, report and rem
 
   await test.step('Protected routes and final logout', async () => {
     await page.goto('/profile')
+    await expect(page).toHaveURL(/\/profile$/)
+    // Sign-out remains visible even if the underlying profile GET fails or stalls.
+    await expect(page.getByRole('button', { name: 'Đăng xuất' })).toBeVisible()
     await page.getByRole('button', { name: 'Đăng xuất' }).click()
     await expect(page).toHaveURL(/\/login$/)
     await page.goto('/reports')

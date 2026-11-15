@@ -135,18 +135,31 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
     navigate('/login', { replace: true })
   }
 
+  // Logout must remain reachable when /profile is slow or unavailable.
+  // A failed profile query must not trap a signed-in member in an error view.
+  const logoutButton = !onboarding && (
+    <button className="profile-logout" type="button" onClick={handleLogout}>
+      <LogOut size={16} />
+      Đăng xuất
+    </button>
+  )
+
   if (profileQuery.isLoading) {
     return (
-      <div className="auth-loading" role="status">
-        <span />
-        <p>Đang tải hồ sơ...</p>
-      </div>
+      <main className="profile-page">
+        <header className="profile-topbar">{logoutButton}</header>
+        <div className="auth-loading" role="status">
+          <span />
+          <p>Đang tải hồ sơ...</p>
+        </div>
+      </main>
     )
   }
 
   if (profileQuery.isError) {
     return (
       <main className="profile-page">
+        <header className="profile-topbar">{logoutButton}</header>
         <section className="profile-card compact-message">
           <span className="eyebrow">KHÔNG THỂ TẢI HỒ SƠ</span>
           <h1>Phiên làm việc cần được làm mới.</h1>
@@ -168,12 +181,7 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
           </span>
         </Link>
 
-        {!onboarding && (
-          <button className="profile-logout" type="button" onClick={handleLogout}>
-            <LogOut size={16} />
-            Đăng xuất
-          </button>
-        )}
+        {logoutButton}
       </header>
 
       <section className="profile-layout">
