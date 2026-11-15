@@ -133,6 +133,16 @@ jobs:
       - name: Build and start current Compose runtime
         run: docker compose up -d --build
 
+      # The failing compose-up step otherwise skips the readiness step that
+      # gathers logs. Capture ephemeral CI startup errors before QA cleanup.
+      - name: Diagnose isolated Compose startup failures
+        if: failure()
+        shell: bash
+        run: |
+          docker compose ps || true
+          docker compose logs --no-color --tail 150 api sqlserver 2>&1 | \
+            sed -E 's/((Password|Pwd|SIGNING_KEY)=)[^;[:space:]]+/\1[REDACTED]/Ig' || true
+
       - name: Wait for current runtime
         shell: bash
         run: |
@@ -240,7 +250,7 @@ jobs:
       - name: Verify Worker event inbox, SQL dedupe, dead-letter, Admin JWT and Redis ACK
         run: node scripts/Test-Worker-Ops-Http.mjs
 
-      - name: Verify real SQL physical ERD (6 owners, 50 tables, 20 FKs)
+      - name: Verify real SQL physical ERD (6 owners, 51 tables, 21 FKs)
         run: node scripts/Test-Physical-ERD-Sql.mjs
 
       - name: Start optional RabbitMQ 4 and real Redis-to-Rabbit domain event mirror

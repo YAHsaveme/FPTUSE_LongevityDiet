@@ -297,11 +297,21 @@ namespace LongevityDiet.Catalog.Migrations
                     b.Property<Guid>("AllergenId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.HasKey("RecipeId", "AllergenId");
 
                     b.HasIndex("AllergenId");
 
+                    b.HasIndex("RecipeId", "IsDeleted");
+
                     b.ToTable("RecipeAllergens", "catalog");
+
+                    b.HasQueryFilter((Dictionary<string, object> x) => !EF.Property<bool>(x, "IsDeleted"));
                 });
 
             modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RecipeIngredient", b =>
@@ -319,6 +329,12 @@ namespace LongevityDiet.Catalog.Migrations
                     b.Property<bool>("IsOptional")
                         .HasColumnType("bit");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(40)
@@ -328,7 +344,41 @@ namespace LongevityDiet.Catalog.Migrations
 
                     b.HasIndex("FoodId");
 
+                    b.HasIndex("RecipeId", "IsDeleted");
+
                     b.ToTable("RecipeIngredients", "catalog");
+
+                    b.HasQueryFilter((Dictionary<string, object> x) => !EF.Property<bool>(x, "IsDeleted"));
+                });
+
+
+            modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RecipeCompositionRevision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ActorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangeType")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+                    b.HasIndex("RecipeId", "RecordedAt");
+                    b.ToTable("RecipeCompositionRevisions", "catalog");
                 });
 
             modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RuleAudit", b =>
@@ -516,6 +566,18 @@ namespace LongevityDiet.Catalog.Migrations
                     b.Navigation("Recipe");
                 });
 
+
+            modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RecipeCompositionRevision", b =>
+                {
+                    b.HasOne("LongevityDiet.Domain.Catalog.Entities.Recipe", "Recipe")
+                        .WithMany("Revisions")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
+                });
+
             modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RuleAudit", b =>
                 {
                     b.HasOne("LongevityDiet.Domain.Catalog.Entities.RuleVersion", null)
@@ -571,6 +633,8 @@ namespace LongevityDiet.Catalog.Migrations
                     b.Navigation("Allergens");
 
                     b.Navigation("Ingredients");
+
+                    b.Navigation("Revisions");
                 });
 #pragma warning restore 612, 618
         }

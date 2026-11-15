@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using LongevityDiet.API.Contracts.Catalog;
 using LongevityDiet.API.Errors;
 using LongevityDiet.API.Security;
@@ -33,6 +34,16 @@ public sealed class AdminRecipesController(RecipeCatalogService recipes) : Contr
         return result.Succeeded && result.Value is not null ? Ok(result.Value) : this.ToProblem(result);
     }
 
+    [HttpGet("{id:guid}/history")]
+    [ProducesResponseType<PagedResult<RecipeCompositionRevisionDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResult<RecipeCompositionRevisionDto>>> History(
+        Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await recipes.GetHistoryAsync(id, page, pageSize, cancellationToken);
+        return result.Succeeded && result.Value is not null ? Ok(result.Value) : this.ToProblem(result);
+    }
+
     [HttpPost]
     [ProducesResponseType<RecipeDetailDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -40,7 +51,7 @@ public sealed class AdminRecipesController(RecipeCatalogService recipes) : Contr
         SaveRecipeRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await recipes.CreateAsync(ToCommand(request), cancellationToken);
+        var result = await recipes.CreateAsync(ToCommand(request), GetActorId(), cancellationToken);
         if (!result.Succeeded || result.Value is null)
         {
             return this.ToProblem(result);
@@ -58,7 +69,7 @@ public sealed class AdminRecipesController(RecipeCatalogService recipes) : Contr
         SaveRecipeRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await recipes.UpdateAsync(id, ToCommand(request), cancellationToken);
+        var result = await recipes.UpdateAsync(id, ToCommand(request), GetActorId(), cancellationToken);
         return result.Succeeded && result.Value is not null ? Ok(result.Value) : this.ToProblem(result);
     }
 
@@ -67,9 +78,13 @@ public sealed class AdminRecipesController(RecipeCatalogService recipes) : Contr
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Deactivate(Guid id, CancellationToken cancellationToken)
     {
-        var result = await recipes.DeactivateAsync(id, cancellationToken);
+        var result = await recipes.DeactivateAsync(id, GetActorId(), cancellationToken);
         return result.Succeeded ? NoContent() : this.ToProblem(result);
     }
+
+    private Guid? GetActorId() =>
+        Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value,
+            out var userId) ? userId : null;
 
     private static SaveRecipeCommand ToCommand(SaveRecipeRequest request) =>
         new(

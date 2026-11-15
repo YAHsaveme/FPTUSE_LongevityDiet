@@ -10,6 +10,7 @@ public interface IRecipeRepository
     Task<IReadOnlyList<Food>> FindFoodsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Allergen>> GetActiveAllergensAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Allergen>> FindAllergensAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default);
+    Task<RepositoryPage<RecipeCompositionRevision>> GetRevisionPageAsync(Guid recipeId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task AddAsync(Recipe recipe, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

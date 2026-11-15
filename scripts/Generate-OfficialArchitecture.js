@@ -126,8 +126,8 @@ const groups=[
  {id:'catalog',short:'Catalog',name:'CATALOG',port:'REST :8082',
   api:'Foods / Recipes / Rules',logic:'Quy tắc dinh dưỡng\nDuyệt và lưu phiên bản',
   db:'LongevityCatalogDb',out:'Rule Audits / Events',
-  tables:['Recipes','RecipeIngredients','Allergens','RecipeAllergens','DietRules','RuleVersions','Foods','RuleSetVersions','RuleAudits','RuleSetVersionItems'],
-  fks:'RecipeIngredients → Recipes\nRecipeIngredients → Foods\nRecipeAllergens → Recipes\nRecipeAllergens → Allergens\nRuleVersions → DietRules\nRuleAudits → RuleVersions\nRuleSetVersionItems → RuleSetVersions\nRuleSetVersionItems → RuleVersions'},
+  tables:['Recipes','RecipeIngredients','Allergens','RecipeAllergens','RecipeCompositionRevisions','DietRules','RuleVersions','Foods','RuleSetVersions','RuleAudits','RuleSetVersionItems'],
+  fks:'RecipeIngredients → Recipes\nRecipeIngredients → Foods\nRecipeAllergens → Recipes\nRecipeAllergens → Allergens\nRuleVersions → DietRules\nRuleAudits → RuleVersions\nRuleSetVersionItems → RuleSetVersions\nRuleSetVersionItems → RuleVersions\nRecipeCompositionRevisions → Recipes'},
  {id:'planning',short:'Planning',name:'PLANNING',port:'REST :8083',
   api:'Meal Plan / FMD / Challenge',logic:'Điều phối thực đơn\nCổng an toàn FMD',
   db:'LongevityPlanningDb',out:'PlanningOutbox',
@@ -296,7 +296,7 @@ const groups=[
 {
  const d=new Diagram('Database Diagram',3150,4730);
  d.title('ERD','DATABASE DIAGRAM — 6 SQL DATABASES',
-  'ADR-005 TARGET QA: 50 bảng vật lý trong 6 SQL database; đường tới spine là quan hệ sở hữu, không phải FK.');
+  'ADR-005 TARGET QA: 51 bảng vật lý trong 6 SQL database; đường tới spine là quan hệ sở hữu, không phải FK.');
  for(let i=0;i<groups.length;i++){
   const g=groups[i],col=i%2,row=Math.floor(i/2);
   const x=240+col*1400,y=410+row*1350,w=1270,h=1250;
@@ -323,11 +323,11 @@ const groups=[
   }
   // Actual verified child -> parent foreign keys, as native Draw.io edges.
   // Vertical waypoints stay in the empty gutter: NEVER across table text.
-  // Identity/Catalog/Planning/Tracking contribute 4+8+6+2 = 20 physical FKs.
+  // Identity/Catalog/Planning/Tracking contribute 4+9+6+2 = 21 physical FKs.
   const fks=g.fks.split(String.fromCharCode(10))
    .map(row=>row.split('→').map(part=>part.trim()))
    .filter(parts=>parts.length===2);
-  const expectedFks={identity:4,catalog:8,planning:6,tracking:2,recommendation:0,worker:0};
+  const expectedFks={identity:4,catalog:9,planning:6,tracking:2,recommendation:0,worker:0};
   if(fks.length!==expectedFks[key])throw Error('Wrong FK count '+key+': '+fks.length);
   for(let ri=0;ri<fks.length;ri++){
    const child=g.tables.indexOf(fks[ri][0]),parent=g.tables.indexOf(fks[ri][1]);

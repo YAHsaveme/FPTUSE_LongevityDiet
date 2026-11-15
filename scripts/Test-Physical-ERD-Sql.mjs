@@ -38,6 +38,7 @@ const sources={
  db:'LongevityCatalogDb',
  fks:['RecipeAllergens>Allergens','RecipeAllergens>Recipes',
   'RecipeIngredients>Foods','RecipeIngredients>Recipes',
+  'RecipeCompositionRevisions>Recipes',
   'RuleAudits>RuleVersions','RuleSetVersionItems>RuleSetVersions',
   'RuleSetVersionItems>RuleVersions','RuleVersions>DietRules']
  },
@@ -97,6 +98,6 @@ for(const [owner,{db,fks}] of Object.entries(sources)){
  console.log('PASS '+db+' physical_tables='+actualTables.length+
    ' actual_local_FKs='+actualFks.length);
 }
-assert.equal(report.reduce((sum,x)=>sum+x.tables,0),50);
-assert.equal(report.reduce((sum,x)=>sum+x.fks,0),20);
-console.log('PHYSICAL_ERD_SQL_QA=PASS databases=6 physicalTables=50 sqlFKs=20');
+assert.equal(report.reduce((sum,x)=>sum+x.tables,0),51);
+assert.equal(report.reduce((sum,x)=>sum+x.fks,0),21);
+console.log('PHYSICAL_ERD_SQL_QA=PASS databases=6 physicalTables=51 sqlFKs=21');

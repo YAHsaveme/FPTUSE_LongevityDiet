@@ -116,24 +116,24 @@ for(const file of modelFiles){
  targetDbSets += [...src.matchAll(/public DbSet<([^>]+)>/g)].length;
 }
 // EF Core creates one implicit many-to-many physical join table, despite no
-// public DbSet. Physical SQL inventory (6 target DBs) confirms 50 tables.
+// public DbSet. Physical SQL inventory (6 target DBs) confirms 51 tables.
 const joinFile=fs.readFileSync(path.join(root,
  'src/LongevityDiet.Repositories/Catalog/Configurations/RuleSetVersionConfiguration.cs'),'utf8');
 const hasImplicitCatalogJoin=joinFile.includes('RuleSetVersionItem') &&
  joinFile.includes('UsingEntity<Dictionary<string, object>>');
 check(hasImplicitCatalogJoin,'Missing implicit physical Catalog RuleSetVersionItems table.');
-check(targetDbSets===49,'Unexpected entity ownership DbSet count: '+targetDbSets);
+check(targetDbSets===50,'Unexpected entity ownership DbSet count: '+targetDbSets);
 const physicalTableCount=targetDbSets+(hasImplicitCatalogJoin?1:0);
-check(physicalTableCount===50,'Unexpected target physical table count: '+physicalTableCount);
+check(physicalTableCount===51,'Unexpected target physical table count: '+physicalTableCount);
 check(tableCells===physicalTableCount,
  'ERD must list ALL physical tables including implicit EF join: '+tableCells+
  ' != '+physicalTableCount);
 // Ownership rails alone are not SQL relationships. The official ERD MUST
-// depict all 20 source-confirmed physical FKs as native child -> parent arrows.
+// depict all 21 source-confirmed physical FKs as native child -> parent arrows.
 const fkEdges=(diagrams['Database Diagram']?.edges||[])
  .filter(e=>e.includes('id="edge-fk-'));
-const expectedOwnerCounts={identity:4,catalog:8,planning:6,tracking:2,recommendation:0,worker:0};
-check(fkEdges.length===20,'ERD must draw 20 native physical foreign-key arrows, not only prose: '+fkEdges.length);
+const expectedOwnerCounts={identity:4,catalog:9,planning:6,tracking:2,recommendation:0,worker:0};
+check(fkEdges.length===21,'ERD must draw 21 native physical foreign-key arrows, not only prose: '+fkEdges.length);
 for(const [owner,count] of Object.entries(expectedOwnerCounts)){
  check(fkEdges.filter(e=>e.includes('id="edge-fk-'+owner+'-')).length===count,
   'ERD wrong physical FK arrow count for '+owner);
@@ -161,12 +161,12 @@ const handover=fs.readFileSync(path.join(root,
  'docs/assignment/00-ASSIGNMENT-DOCUMENT.md'),'utf8');
 const demo=fs.readFileSync(path.join(root,
  'docs/assignment/PRN232-FINAL-DEMO-7-STEPS.md'),'utf8');
-check(handover.includes('50 physical tables') &&
- handover.includes('RuleSetVersionItems') && handover.includes('20 source-confirmed'),
- 'Assignment handover must explain 50 physical tables, implicit EF join and 20 SQL FKs');
+check(handover.includes('51 physical tables') &&
+ handover.includes('RuleSetVersionItems') && handover.includes('21 source-confirmed'),
+ 'Assignment handover must explain 51 physical tables, implicit EF join and 21 SQL FKs');
 check(demo.includes('**năm**') && demo.includes('Business Flow') &&
- demo.includes('50 bảng vật lý / 20 SQL foreign keys'),
- 'Official demo must present five diagrams with accurate 50-table/20-FK target ERD');
+ demo.includes('51 bảng vật lý / 21 SQL foreign keys'),
+ 'Official demo must present five diagrams with accurate 51-table/21-FK target ERD');
 check(demo.includes('Validate-OfficialArchitecture.js') &&
  !demo.includes('node scripts/Validate-OverallDiagrams.js'),
  'Official demo must invoke current five-diagram validation, not a legacy diagram validator');

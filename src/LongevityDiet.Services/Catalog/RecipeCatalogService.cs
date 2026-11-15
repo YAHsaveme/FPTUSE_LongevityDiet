@@ -38,6 +38,22 @@ public sealed class RecipeCatalogService(
                 page.TotalItems));
     }
 
+    public async Task<CatalogServiceResult<PagedResult<RecipeCompositionRevisionDto>>> GetHistoryAsync(
+        Guid id, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default)
+    {
+        if (page < 1 || pageSize is < 1 or > 100 || (long)(page - 1) * pageSize > int.MaxValue)
+            return CatalogServiceResult.Failure<PagedResult<RecipeCompositionRevisionDto>>(
+                "invalid_pagination", "Page must be positive and page size must be 1..100.");
+        if (await recipes.FindByIdAsync(id, includeInactive: true, cancellationToken: cancellationToken) is null)
+            return CatalogServiceResult.Failure<PagedResult<RecipeCompositionRevisionDto>>(
+                "recipe_not_found", "Recipe was not found.");
+        var history = await recipes.GetRevisionPageAsync(id, page, pageSize, cancellationToken);
+        return CatalogServiceResult.Success(PagedResultFactory.Create(
+            history.Items.Select(x => new RecipeCompositionRevisionDto(
+                x.Id, x.RecipeId, x.RecordedAt, x.ChangeType, x.ActorId, x.SnapshotJson)).ToList(),
+            page, pageSize, history.TotalItems));
+    }
+
     public async Task<CatalogServiceResult<RecipeDetailDto>> GetAsync(
         Guid id,
         bool includeInactive = false,
@@ -53,9 +69,12 @@ public sealed class RecipeCatalogService(
             : CatalogServiceResult.Success(ToDetail(recipe));
     }
 
+    public Task<CatalogServiceResult<RecipeDetailDto>> CreateAsync(
+        SaveRecipeCommand command, CancellationToken cancellationToken = default) =>
+        CreateAsync(command, null, cancellationToken);
+
     public async Task<CatalogServiceResult<RecipeDetailDto>> CreateAsync(
-        SaveRecipeCommand command,
-        CancellationToken cancellationToken = default)
+        SaveRecipeCommand command, Guid? actorId, CancellationToken cancellationToken = default)
     {
         var validation = await ValidateAsync(command, cancellationToken);
         if (!validation.Succeeded)
@@ -93,6 +112,7 @@ public sealed class RecipeCatalogService(
         };
 
         ApplyIngredientsAndAllergens(recipe, command);
+        recipe.Revisions.Add(RecipeCompositionHistory.Capture(recipe, "Created", now, actorId));
         await recipes.AddAsync(recipe, cancellationToken);
         await recipes.SaveChangesAsync(cancellationToken);
 
@@ -104,10 +124,12 @@ public sealed class RecipeCatalogService(
         return CatalogServiceResult.Success(ToDetail(created ?? recipe));
     }
 
+    public Task<CatalogServiceResult<RecipeDetailDto>> UpdateAsync(
+        Guid id, SaveRecipeCommand command, CancellationToken cancellationToken = default) =>
+        UpdateAsync(id, command, null, cancellationToken);
+
     public async Task<CatalogServiceResult<RecipeDetailDto>> UpdateAsync(
-        Guid id,
-        SaveRecipeCommand command,
-        CancellationToken cancellationToken = default)
+        Guid id, SaveRecipeCommand command, Guid? actorId, CancellationToken cancellationToken = default)
     {
         var validation = await ValidateAsync(command, cancellationToken);
         if (!validation.Succeeded)
@@ -149,9 +171,11 @@ public sealed class RecipeCatalogService(
         recipe.HasLegume = command.HasLegume;
         recipe.HasWholeGrain = command.HasWholeGrain;
         recipe.HasFish = command.HasFish;
-        recipe.UpdatedAt = timeProvider.GetUtcNow();
+        var now = timeProvider.GetUtcNow();
+        recipe.UpdatedAt = now;
 
-        SyncIngredientsAndAllergens(recipe, command);
+        SyncIngredientsAndAllergens(recipe, command, now);
+        recipe.Revisions.Add(RecipeCompositionHistory.Capture(recipe, "Updated", now, actorId));
 
         await recipes.SaveChangesAsync(cancellationToken);
 
@@ -163,9 +187,12 @@ public sealed class RecipeCatalogService(
         return CatalogServiceResult.Success(ToDetail(updated ?? recipe));
     }
 
+    public Task<CatalogServiceResult<RecipeDetailDto>> DeactivateAsync(
+        Guid id, CancellationToken cancellationToken = default) =>
+        DeactivateAsync(id, null, cancellationToken);
+
     public async Task<CatalogServiceResult<RecipeDetailDto>> DeactivateAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
+        Guid id, Guid? actorId, CancellationToken cancellationToken = default)
     {
         var recipe = await recipes.FindByIdAsync(
             id,
@@ -181,7 +208,9 @@ public sealed class RecipeCatalogService(
         }
 
         recipe.IsActive = false;
-        recipe.UpdatedAt = timeProvider.GetUtcNow();
+        var now = timeProvider.GetUtcNow();
+        recipe.UpdatedAt = now;
+        recipe.Revisions.Add(RecipeCompositionHistory.Capture(recipe, "Deactivated", now, actorId));
         await recipes.SaveChangesAsync(cancellationToken);
         return CatalogServiceResult.Success(ToDetail(recipe));
     }
@@ -340,14 +369,13 @@ public sealed class RecipeCatalogService(
         }
     }
 
-    private static void SyncIngredientsAndAllergens(Recipe recipe, SaveRecipeCommand command)
+    private static void SyncIngredientsAndAllergens(Recipe recipe, SaveRecipeCommand command, DateTimeOffset now)
     {
         var requestedFoodIds = command.Ingredients.Select(x => x.FoodId).ToHashSet();
-        foreach (var existing in recipe.Ingredients
-                     .Where(x => !requestedFoodIds.Contains(x.FoodId))
-                     .ToList())
+        foreach (var existing in recipe.Ingredients.Where(x => !requestedFoodIds.Contains(x.FoodId) && !x.IsDeleted))
         {
-            recipe.Ingredients.Remove(existing);
+            existing.IsDeleted = true;
+            existing.DeletedAt = now;
         }
 
         foreach (var requested in command.Ingredients)
@@ -369,25 +397,28 @@ public sealed class RecipeCatalogService(
             existing.Amount = requested.Amount;
             existing.Unit = requested.Unit.Trim();
             existing.IsOptional = requested.IsOptional;
+            existing.IsDeleted = false;
+            existing.DeletedAt = null;
         }
 
         var requestedAllergenIds = command.AllergenIds.ToHashSet();
-        foreach (var existing in recipe.Allergens
-                     .Where(x => !requestedAllergenIds.Contains(x.AllergenId))
-                     .ToList())
+        foreach (var existing in recipe.Allergens.Where(x => !requestedAllergenIds.Contains(x.AllergenId) && !x.IsDeleted))
         {
-            recipe.Allergens.Remove(existing);
+            existing.IsDeleted = true;
+            existing.DeletedAt = now;
         }
 
         foreach (var allergenId in requestedAllergenIds)
         {
-            if (recipe.Allergens.All(x => x.AllergenId != allergenId))
+            var existing = recipe.Allergens.SingleOrDefault(x => x.AllergenId == allergenId);
+            if (existing is null)
             {
-                recipe.Allergens.Add(new RecipeAllergen
-                {
-                    RecipeId = recipe.Id,
-                    AllergenId = allergenId,
-                });
+                recipe.Allergens.Add(new RecipeAllergen { RecipeId = recipe.Id, AllergenId = allergenId });
+            }
+            else
+            {
+                existing.IsDeleted = false;
+                existing.DeletedAt = null;
             }
         }
     }
@@ -477,6 +508,7 @@ public sealed class RecipeCatalogService(
             recipe.HasFish,
             recipe.IsActive,
             recipe.Ingredients
+                .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.Food.Name)
                 .Select(x => new RecipeIngredientDto(
                     x.FoodId,
@@ -486,6 +518,7 @@ public sealed class RecipeCatalogService(
                     x.IsOptional))
                 .ToList(),
             recipe.Allergens
+                .Where(x => !x.IsDeleted)
                 .OrderBy(x => x.Allergen.Code)
                 .Select(x => new AllergenDto(
                     x.AllergenId,

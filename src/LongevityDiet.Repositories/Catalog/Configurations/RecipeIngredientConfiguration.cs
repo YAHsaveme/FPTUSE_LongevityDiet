@@ -10,6 +10,8 @@ public sealed class RecipeIngredientConfiguration : IEntityTypeConfiguration<Rec
     {
         builder.ToTable("RecipeIngredients", "catalog");
         builder.HasKey(x => new { x.RecipeId, x.FoodId });
+        builder.HasQueryFilter(x => !x.IsDeleted);
+        builder.HasIndex(x => new { x.RecipeId, x.IsDeleted });
         builder.Property(x => x.Amount).HasPrecision(10, 2);
         builder.Property(x => x.Unit).HasMaxLength(40).IsRequired();
         builder.HasIndex(x => x.FoodId);

@@ -2,6 +2,10 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using LongevityDiet.Domain.Catalog.Entities;
+using LongevityDiet.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LongevityDiet.IntegrationTests;
 
@@ -172,6 +176,169 @@ public sealed class CatalogApiTests : IClassFixture<IntegrationTestWebApplicatio
         using var secondJson = JsonDocument.Parse(await secondPage.Content.ReadAsStringAsync());
         var secondItem = Assert.Single(secondJson.RootElement.GetProperty("items").EnumerateArray());
         Assert.Equal("Lentil Alpha", secondItem.GetProperty("name").GetString());
+    }
+
+    [Fact]
+    public async Task AdminRecipe_CompositionSoftDeleteRestoreAndHistory_ArePersisted()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var client = _factory.CreateHttpsClient();
+        await AuthenticateAsAdminAsync(client);
+
+        async Task<Guid> CreateFoodAsync(string name)
+        {
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/admin/foods", CreateFoodRequest(name));
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            return json.RootElement.GetProperty("id").GetGuid();
+        }
+
+        var foodA = await CreateFoodAsync("QA History Lentils");
+        var foodB = await CreateFoodAsync("QA History Brown Rice");
+        var allergenId = Guid.NewGuid();
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            db.Allergens.Add(new Allergen
+            {
+                Id = allergenId, Code = "QA_HISTORY_ALLERGEN", Name = "Synthetic QA allergen", IsActive = true,
+            });
+            await db.SaveChangesAsync();
+        }
+
+        object Payload(decimal amount, bool includeSecond, bool includeAllergen) => new
+        {
+            Name = "History regression bowl",
+            Description = "Synthetic historical ingredient regression",
+            Category = "Main", Cuisine = "Vietnamese", Tags = "qa",
+            ServingCount = 1, PrepMinutes = 10,
+            CaloriesPerServing = 420m, ProteinGPerServing = 16m,
+            CarbohydrateGPerServing = 60m, FatGPerServing = 10m,
+            SaturatedFatGPerServing = 1m, SugarGPerServing = 1m, FiberGPerServing = 10m,
+            IsPlantForward = true, HasLegume = true, HasWholeGrain = true, HasFish = false,
+            Ingredients = includeSecond
+                ? new[]
+                {
+                    new { FoodId = foodA, Amount = amount, Unit = "g", IsOptional = false },
+                    new { FoodId = foodB, Amount = 50m, Unit = "g", IsOptional = true },
+                }
+                : new[] { new { FoodId = foodA, Amount = amount, Unit = "g", IsOptional = false } },
+            AllergenIds = includeAllergen ? new[] { allergenId } : Array.Empty<Guid>(),
+        };
+
+        var create = await client.PostAsJsonAsync(
+            "/api/v1/admin/recipes", Payload(110m, true, true));
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        using var created = JsonDocument.Parse(await create.Content.ReadAsStringAsync());
+        var recipeId = created.RootElement.GetProperty("id").GetGuid();
+
+        var remove = await client.PutAsJsonAsync(
+            $"/api/v1/admin/recipes/{recipeId}", Payload(160m, false, false));
+        Assert.Equal(HttpStatusCode.OK, remove.StatusCode);
+        using (var responseJson = JsonDocument.Parse(await remove.Content.ReadAsStringAsync()))
+        {
+            Assert.Single(responseJson.RootElement.GetProperty("ingredients").EnumerateArray());
+            Assert.Empty(responseJson.RootElement.GetProperty("allergens").EnumerateArray());
+        }
+
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var archived = await db.RecipeIngredients.IgnoreQueryFilters()
+                .SingleAsync(x => x.RecipeId == recipeId && x.FoodId == foodB);
+            Assert.True(archived.IsDeleted);
+            Assert.NotNull(archived.DeletedAt);
+            var archivedAllergen = await db.RecipeAllergens.IgnoreQueryFilters()
+                .SingleAsync(x => x.RecipeId == recipeId && x.AllergenId == allergenId);
+            Assert.True(archivedAllergen.IsDeleted);
+            Assert.NotNull(archivedAllergen.DeletedAt);
+        }
+
+        var historyPage = await client.GetAsync(
+            $"/api/v1/admin/recipes/{recipeId}/history?page=1&pageSize=1");
+        Assert.Equal(HttpStatusCode.OK, historyPage.StatusCode);
+        using (var json = JsonDocument.Parse(await historyPage.Content.ReadAsStringAsync()))
+        {
+            Assert.Equal(2, json.RootElement.GetProperty("totalItems").GetInt32());
+            Assert.Equal(2, json.RootElement.GetProperty("totalPages").GetInt32());
+            Assert.Single(json.RootElement.GetProperty("items").EnumerateArray());
+        }
+
+        var restore = await client.PutAsJsonAsync(
+            $"/api/v1/admin/recipes/{recipeId}", Payload(170m, true, true));
+        Assert.Equal(HttpStatusCode.OK, restore.StatusCode);
+        using (var restored = JsonDocument.Parse(await restore.Content.ReadAsStringAsync()))
+        {
+            Assert.Equal(2, restored.RootElement.GetProperty("ingredients").GetArrayLength());
+            Assert.Single(restored.RootElement.GetProperty("allergens").EnumerateArray());
+        }
+
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var rows = await db.RecipeIngredients.IgnoreQueryFilters()
+                .Where(x => x.RecipeId == recipeId).ToListAsync();
+            Assert.Equal(2, rows.Count);
+            Assert.All(rows, x => Assert.False(x.IsDeleted));
+            Assert.All(rows, x => Assert.Null(x.DeletedAt));
+            var restoredAllergen = await db.RecipeAllergens.IgnoreQueryFilters()
+                .SingleAsync(x => x.RecipeId == recipeId && x.AllergenId == allergenId);
+            Assert.False(restoredAllergen.IsDeleted);
+
+            var revisions = await db.RecipeCompositionRevisions.AsNoTracking()
+                .Where(x => x.RecipeId == recipeId).ToListAsync();
+            Assert.Equal(3, revisions.Count);
+            using var original = JsonDocument.Parse(
+                Assert.Single(revisions, x => x.ChangeType == "Created").SnapshotJson);
+            Assert.Equal(2, original.RootElement.GetProperty("ingredients").GetArrayLength());
+            Assert.Single(original.RootElement.GetProperty("allergens").EnumerateArray());
+            Assert.Contains(original.RootElement.GetProperty("ingredients").EnumerateArray(),
+                x => x.GetProperty("amount").GetDecimal() == 110m);
+            using var middle = JsonDocument.Parse(
+                Assert.Single(revisions, x => x.ChangeType == "Updated" &&
+                    x.SnapshotJson.Contains("160")).SnapshotJson);
+            Assert.Single(middle.RootElement.GetProperty("ingredients").EnumerateArray());
+            Assert.Empty(middle.RootElement.GetProperty("allergens").EnumerateArray());
+        }
+
+        // A future code path cannot bypass soft removal by calling DbSet.Remove.
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var activeIngredient = await db.RecipeIngredients
+                .SingleAsync(x => x.RecipeId == recipeId && x.FoodId == foodB);
+            db.RecipeIngredients.Remove(activeIngredient);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => db.SaveChangesAsync());
+        }
+
+        // A parent hard-delete must be rejected before SQL FK cascades could
+        // destroy the archived associations or immutable history.
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var recipeToRemove = await db.Recipes.SingleAsync(x => x.Id == recipeId);
+            db.Recipes.Remove(recipeToRemove);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => db.SaveChangesAsync());
+        }
+
+        var deactivate = await client.DeleteAsync($"/api/v1/admin/recipes/{recipeId}");
+        Assert.Equal(HttpStatusCode.NoContent, deactivate.StatusCode);
+        var hidden = await client.GetAsync($"/api/v1/recipes/{recipeId}");
+        Assert.Equal(HttpStatusCode.NotFound, hidden.StatusCode);
+
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var revisions = await db.RecipeCompositionRevisions
+                .Where(x => x.RecipeId == recipeId).ToListAsync();
+            Assert.Equal(4, revisions.Count);
+            var finalRevision = Assert.Single(revisions, x => x.ChangeType == "Deactivated");
+            using var snapshot = JsonDocument.Parse(finalRevision.SnapshotJson);
+            Assert.False(snapshot.RootElement.GetProperty("isActive").GetBoolean());
+            finalRevision.SnapshotJson = "{}";
+            await Assert.ThrowsAsync<InvalidOperationException>(() => db.SaveChangesAsync());
+        }
     }
 
     [Fact]

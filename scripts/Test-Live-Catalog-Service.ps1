@@ -38,7 +38,7 @@ if(-not $sa){throw 'SQL QA secret unavailable in container'}
 $sql=@'
 SET NOCOUNT ON;
 IF NOT EXISTS(SELECT 1 FROM [LongevityCatalogDb].[dbo].[__EFMigrationsHistory]) THROW 51000, 'Catalog migration missing', 1;
-IF (SELECT COUNT(*) FROM [LongevityCatalogDb].[INFORMATION_SCHEMA].[TABLES] WHERE TABLE_SCHEMA='catalog') <> 10 THROW 51001, 'Catalog table count incorrect', 1;
+IF (SELECT COUNT(*) FROM [LongevityCatalogDb].[INFORMATION_SCHEMA].[TABLES] WHERE TABLE_SCHEMA='catalog') <> 11 THROW 51001, 'Catalog table count incorrect', 1;
 IF EXISTS (SELECT 1 FROM [LongevityCatalogDb].[INFORMATION_SCHEMA].[TABLES] WHERE TABLE_NAME IN ('Users','UserProfiles','MealPlans','ActivityLogs','WorkerJobs')) THROW 51002, 'Cross-domain table detected', 1;
 IF (SELECT COUNT(*) FROM [LongevityCatalogDb].[catalog].[Foods]) <> 4 THROW 51003, 'Independent food count incorrect', 1;
 IF (SELECT COUNT(*) FROM [LongevityCatalogDb].[catalog].[Recipes]) <> 2 THROW 51004, 'Independent recipe count incorrect', 1;

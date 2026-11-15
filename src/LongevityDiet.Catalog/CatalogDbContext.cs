@@ -17,6 +17,7 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
     public DbSet<Recipe> Recipes => Set<Recipe>();
     public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
     public DbSet<RecipeAllergen> RecipeAllergens => Set<RecipeAllergen>();
+    public DbSet<RecipeCompositionRevision> RecipeCompositionRevisions => Set<RecipeCompositionRevision>();
     public DbSet<DietRule> DietRules => Set<DietRule>();
     public DbSet<RuleVersion> RuleVersions => Set<RuleVersion>();
     public DbSet<RuleSetVersion> RuleSetVersions => Set<RuleSetVersion>();
@@ -38,6 +39,12 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
     private void GuardHistory()
     {
         ChangeTracker.DetectChanges();
+        if (ChangeTracker.Entries<Recipe>().Any(e => e.State == EntityState.Deleted) ||
+            ChangeTracker.Entries<RecipeIngredient>().Any(e => e.State == EntityState.Deleted) ||
+            ChangeTracker.Entries<RecipeAllergen>().Any(e => e.State == EntityState.Deleted))
+            throw new InvalidOperationException("Recipes and their associations must be soft-deleted, never physically removed.");
+        if (ChangeTracker.Entries<RecipeCompositionRevision>().Any(e => e.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Recipe composition revision history is append-only.");
         if (ChangeTracker.Entries<RuleAudit>().Any(e =>
             e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Rule audit is append-only.");
@@ -69,6 +76,7 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
         modelBuilder.ApplyConfiguration(new RecipeConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeIngredientConfiguration());
         modelBuilder.ApplyConfiguration(new RecipeAllergenConfiguration());
+        modelBuilder.ApplyConfiguration(new RecipeCompositionRevisionConfiguration());
         modelBuilder.ApplyConfiguration(new DietRuleConfiguration());
         modelBuilder.ApplyConfiguration(new RuleVersionConfiguration());
         modelBuilder.ApplyConfiguration(new RuleSetVersionConfiguration());
