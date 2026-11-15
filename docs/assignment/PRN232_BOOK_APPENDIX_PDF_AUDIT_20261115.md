@@ -10,6 +10,10 @@
 
 **Latest cross-week follow-up, 2026-11-15:** Week 1 day 7 + week 2 day 1 have been source-page compared against PDF pages 227–230. The updated totals are **33/56 source-page-crosschecked slots and 205/350 numeric-unit facts; 23/56 slots still pending**. Prior figures below are historical batches. See `PRN232_BOOK_APPENDIX_EDITORIAL_WEEK_TURN_20261115.md`. This remains AI-assisted evidence, not clinical or independent human editorial approval.
 
+**Latest W2 days 2–3 follow-up, 2026-11-15:** AI-assisted visual and text source comparison of PDF pages 231–234 brought the count to **41/56 page-crosschecked slots, 256/350 numeric-unit tokens**, with **15/56 slots still awaiting this review level**. Older counts below are historical milestones. See `PRN232_BOOK_APPENDIX_EDITORIAL_W2D2_D3_20261115.md`. This is still NOT independent editorial/clinical certification and is not feedstock for Gemini/BookExact.
+
+**Latest source-page status, 2026-11-15:** The remaining week-2 day-4–7 source pages 235–242 have been compared with the rendered PDF and text layer (the two earlier baseline slots were also given explicit source notes). The Appendix A reference now has **56/56 meal slots and 350/350 parsed amount–unit mentions source-page-crosschecked at an AI-assisted level**. No independent human editorial or medical certification is claimed; 350 parsed mentions are not every book datum or clinically validated portion. All original chapters, Appendix B and the actual Gemini/recipe mapping remain distinct acceptance work. See `PRN232_APPENDIX_A_SOURCE_PAGE_CROSSCHECK_56_OF_56_20261115.md`. Earlier figures below document incremental historical baselines.
+
 ## Verified technical evidence, not medical/recipe approval
 
 1. The original PDF text layer was independently parsed on pages **215–242** with PyMuPDF, splitting by **week / day / breakfast / lunch / snack / dinner**. All **56** meal slots were recovered; the parser found exactly **350** ordered amount/unit tokens.

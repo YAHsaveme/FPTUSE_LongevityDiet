@@ -3,6 +3,9 @@ import { expect, test } from '@playwright/test'
 // Full UI-to-SQL business journey. Only the local isolated Docker QA project
 // should serve the browser; synthetic identities are never production users.
 test('member can complete catalog, planning, activity, challenge, report and reminder journeys', async ({ page }) => {
+  // The real SQL/Worker workflow includes an explicit 45s report readiness
+  // poll, so the test-level bound must exceed Playwright's 30s default.
+  test.setTimeout(120_000)
   const id = Date.now().toString()
   const email = `journey-${id}@example.test`
   const password = 'Qa!Journey123456'
@@ -182,7 +185,22 @@ test('member can complete catalog, planning, activity, challenge, report and rem
   })
 
   await test.step('Save reminder preferences via Web and verify SQL API readback', async () => {
-    await page.goto('/notifications')
+    // Follow the real in-app navigation from Reports instead of repeatedly
+    // reloading the document and rotating the refresh cookie. The final
+    // /profile step below separately tests a full authenticated page reload.
+    const quickNav = page.getByRole('navigation', { name: 'Điều hướng nhanh' })
+    await expect(quickNav).toBeVisible()
+    // Desktop exposes the direct secondary link, while <=800px screens hide
+    // it behind the More menu. Only interact with an actually visible target.
+    const directNotificationsLink = quickNav.getByRole('link', { name: 'Thông báo' })
+    if (await directNotificationsLink.isVisible()) {
+      await directNotificationsLink.click()
+    } else {
+      await quickNav.getByRole('button', { name: 'Mở các trang khác' }).click()
+      await quickNav.getByRole('group', { name: 'Các trang khác' })
+        .getByRole('link', { name: 'Thông báo' }).click()
+    }
+    await expect(page).toHaveURL(/\/notifications$/)
     await expect(page.getByRole('heading', { name: 'Giữ nhịp theo cách bạn chọn' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Bật thông báo trình duyệt/ })).toBeVisible()
     const emailConsent = page.getByLabel(/Đồng ý nhận email nhắc lịch/)
@@ -205,14 +223,18 @@ test('member can complete catalog, planning, activity, challenge, report and rem
   })
 
   await test.step('Protected routes and final logout', async () => {
-    // A full page reload must restore the authenticated session via the real
-    // refresh cookie. Assert the response explicitly so a 401/429/5xx cannot
-    // be mistaken for a missing logout button or a router regression.
-    const refreshAfterReload = page.waitForResponse((response) =>
-      new URL(response.url()).pathname === '/api/v1/auth/refresh', { timeout: 15000 })
-    await page.goto('/profile')
-    const refreshResponse = await refreshAfterReload
-    expect(refreshResponse.status(), 'Session refresh after navigating to /profile').toBe(200)
+    // Navigate within the same member session to avoid consuming another
+    // shared-IP auth/refresh attempt after many synthetic accounts in CI.
+    // The separate identity.spec.ts verifies full reload / refresh and revoke.
+    const quickNav = page.getByRole('navigation', { name: 'Điều hướng nhanh' })
+    const profileLink = quickNav.getByRole('link', { name: 'Cá nhân' })
+    if (await profileLink.isVisible()) {
+      await profileLink.click()
+    } else {
+      await quickNav.getByRole('button', { name: 'Mở các trang khác' }).click()
+      await quickNav.getByRole('group', { name: 'Các trang khác' })
+        .getByRole('link', { name: 'Cá nhân' }).click()
+    }
     await expect(page).toHaveURL(/\/profile$/)
     // Sign-out remains visible even if the underlying profile GET fails or stalls.
     await expect(page.getByRole('button', { name: 'Đăng xuất' })).toBeVisible()

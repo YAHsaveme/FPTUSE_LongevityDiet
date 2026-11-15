@@ -132,7 +132,9 @@ export function BookReferencePage() {
                 Đây chỉ là kiểm tra trích xuất, không phải xác minh công thức hay khẩu phần.
                 Đã đối chiếu trực tiếp {bookQuantityInventory.metadata.reviewedMeals} bữa
                 ({bookQuantityInventory.metadata.reviewedQuantities} dữ kiện) với ảnh trang PDF gốc;
-                {bookQuantityInventory.meals.length - bookQuantityInventory.metadata.reviewedMeals} bữa còn lại chưa được rà soát mức này.
+                {bookQuantityInventory.meals.length === bookQuantityInventory.metadata.reviewedMeals
+                  ? 'Đã đối chiếu đủ số bữa trong Phụ lục A ở mức kiểm tra nguồn; vẫn chưa qua phê duyệt độc lập.'
+                  : <>{bookQuantityInventory.meals.length - bookQuantityInventory.metadata.reviewedMeals} bữa còn lại chưa được rà soát mức này.</>}
                 Đây là kiểm tra nguồn có hỗ trợ AI, không phải người biên tập hay chuyên gia y tế độc lập chứng nhận.
                 Không dùng bản trích xuất để AI tự suy ra năng lượng,
                 định lượng cá nhân hoặc phác đồ ăn uống.
