@@ -16,7 +16,7 @@ test('Trang sách gốc hiển thị đủ chỉ dẫn nguồn, không nhận t�
   await expect(page.locator('.book-ref-meal-grid').getByText('Trang 236')).toBeVisible()
   await expect(page.getByText(/phải kiểm tra dị ứng/)).toBeVisible()
   await page.locator('.book-ref-quantity-details summary').click()
-  await expect(page.getByText(/Hiện mới đối chiếu trực tiếp hai bữa/)).toBeVisible()
+  await expect(page.getByText(/Hiện mới đối chiếu biên tập đầy đủ hai bữa/)).toBeVisible()
   await expect(page.locator('.book-ref-quantity-card')).toHaveCount(4)
   const dinnerQuantity = page.locator('.book-ref-quantity-card').filter({ hasText: 'Gạo đen, bí ngòi và tôm' })
   await expect(dinnerQuantity.getByText('tôm', { exact: true })).toBeVisible()
@@ -37,4 +37,16 @@ test('Trang sách gốc dễ đọc trên điện thoại 390px', async ({ page 
     view: document.documentElement.clientWidth,
   }))
   expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.view + 1)
+})
+
+test('Giới hạn đường trong bữa phụ không hiển thị như định lượng nguyên liệu', async ({ page }) => {
+  await page.goto('/book')
+  await page.locator('.book-ref-quantity-details summary').click()
+  const snack = page.locator('.book-ref-quantity-card').filter({ hasText: 'Giới hạn đường trong thanh hạt' })
+  await expect(snack).toBeVisible()
+  await expect(snack.getByText('< 8 g', { exact: true })).toBeVisible()
+  await expect(snack.getByText(/không phải nguyên liệu/)).toBeVisible()
+  await expect(page.getByText(/350 dữ kiện/)).toBeVisible()
+  await expect(page.getByText(/54 bữa còn lại vẫn cần kiểm duyệt/)).toBeVisible()
+  await expect(page.getByText('Tên nguyên liệu cần đối chiếu bản dịch')).toHaveCount(0)
 })

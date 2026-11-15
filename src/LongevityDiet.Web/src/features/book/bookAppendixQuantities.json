@@ -8,7 +8,17 @@
     "reviewedMeals": 2,
     "reviewedQuantities": 20,
     "reviewMethod": "Manual verification against the supplied PDF parsed page text; no clinical review",
-    "reviewDate": "2026-11-14"
+    "reviewDate": "2026-11-14",
+    "sourceTokenAudit": {
+      "sourcePdfSha256": "c4e762039b877d185ae1f44035cace4ba95f1791adbafb8097a0764dd26757d6",
+      "method": "Independent text-layer quantity/unit sequence extraction from user-supplied 306-page PDF; ordered per meal",
+      "matchedMeals": 56,
+      "matchedQuantityTokens": 350,
+      "contextLabelsResolved": 42,
+      "compositionLimitsTagged": 13,
+      "auditDate": "2026-11-15",
+      "note": "Source-token agreement is NOT human verification of recipes, portion suitability or clinical recommendations."
+    }
   },
   "meals": [
     {
@@ -22,7 +32,7 @@
       ],
       "facts": [
         {
-          "labelVi": null,
+          "labelVi": "Sữa hạnh nhân, hạt phỉ hoặc dừa không đường (tùy chọn)",
           "amount": "240",
           "unit": "mL",
           "pdfPage": 215
@@ -127,10 +137,12 @@
           "pdfPage": 215
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 215
+          "pdfPage": 215,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -200,7 +212,7 @@
           "pdfPage": 216
         },
         {
-          "labelVi": null,
+          "labelVi": "Nam việt quất sấy không đường hoặc trái cây sấy không đường",
           "amount": "20",
           "unit": "g",
           "pdfPage": 216
@@ -305,10 +317,12 @@
           "pdfPage": 217
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 217
+          "pdfPage": 217,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -434,7 +448,7 @@
           "pdfPage": 219
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "100",
           "unit": "g",
           "pdfPage": 219
@@ -484,7 +498,7 @@
           "pdfPage": 219
         },
         {
-          "labelVi": null,
+          "labelVi": "Sữa hạt phỉ",
           "amount": "125",
           "unit": "mL",
           "pdfPage": 219
@@ -521,7 +535,7 @@
       ],
       "facts": [
         {
-          "labelVi": null,
+          "labelVi": "Rau củ hỗn hợp nấu súp minestrone",
           "amount": "250",
           "unit": "g",
           "pdfPage": 220
@@ -575,7 +589,7 @@
           "pdfPage": 220
         },
         {
-          "labelVi": null,
+          "labelVi": "Hạnh nhân ăn kèm món tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 220
@@ -637,7 +651,7 @@
           "pdfPage": 221
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua",
           "amount": "150",
           "unit": "g",
           "pdfPage": 221
@@ -649,7 +663,7 @@
           "pdfPage": 221
         },
         {
-          "labelVi": null,
+          "labelVi": "Ớt chuông sống",
           "amount": "150",
           "unit": "g",
           "pdfPage": 221
@@ -667,7 +681,7 @@
           "pdfPage": 221
         },
         {
-          "labelVi": null,
+          "labelVi": "Hạt hồ đào (pecan)",
           "amount": "9",
           "unit": "g",
           "pdfPage": 221
@@ -717,10 +731,12 @@
           "pdfPage": 221
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 222
+          "pdfPage": 222,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -784,13 +800,13 @@
           "pdfPage": 222
         },
         {
-          "labelVi": null,
+          "labelVi": "Dứa làm món tráng miệng (một phương án)",
           "amount": "100",
           "unit": "g",
           "pdfPage": 222
         },
         {
-          "labelVi": null,
+          "labelVi": "Việt quất sấy khô (phương án thay thế dứa)",
           "amount": "20",
           "unit": "g",
           "pdfPage": 222
@@ -894,7 +910,7 @@
           "pdfPage": 223
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua phơi khô",
           "amount": "150",
           "unit": "g",
           "pdfPage": 223
@@ -938,10 +954,12 @@
           "pdfPage": 223
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 224
+          "pdfPage": 224,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -969,7 +987,7 @@
           "pdfPage": 224
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "150",
           "unit": "g",
           "pdfPage": 224
@@ -1073,7 +1091,7 @@
           "pdfPage": 225
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "150",
           "unit": "g",
           "pdfPage": 225
@@ -1085,7 +1103,7 @@
           "pdfPage": 225
         },
         {
-          "labelVi": null,
+          "labelVi": "Bánh cracker lúa mạch đen",
           "amount": "40",
           "unit": "g",
           "pdfPage": 225
@@ -1110,10 +1128,12 @@
           "pdfPage": 225
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 225
+          "pdfPage": 225,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -1142,7 +1162,7 @@
           "pdfPage": 226
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà rốt cỡ vừa",
           "amount": "2",
           "unit": "medium",
           "pdfPage": 226
@@ -1344,10 +1364,12 @@
           "pdfPage": 227
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 227
+          "pdfPage": 227,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -1467,13 +1489,13 @@
           "pdfPage": 229
         },
         {
-          "labelVi": null,
+          "labelVi": "Ớt chuông xanh và đỏ",
           "amount": "200",
           "unit": "g",
           "pdfPage": 229
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "150",
           "unit": "g",
           "pdfPage": 229
@@ -1522,10 +1544,12 @@
           "pdfPage": 229
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 229
+          "pdfPage": 229,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -1713,10 +1737,12 @@
           "pdfPage": 231
         },
         {
-          "labelVi": "sô-cô-la đen, sô-cô-la",
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 232
+          "pdfPage": 232,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -1750,7 +1776,7 @@
           "pdfPage": 232
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua",
           "amount": "150",
           "unit": "g",
           "pdfPage": 232
@@ -1915,10 +1941,12 @@
           "pdfPage": 233
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 233
+          "pdfPage": 233,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -1946,7 +1974,7 @@
           "pdfPage": 234
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "50",
           "unit": "g",
           "pdfPage": 234
@@ -1994,7 +2022,7 @@
           "pdfPage": 234
         },
         {
-          "labelVi": null,
+          "labelVi": "Quả anh đào sấy khô (phương án tráng miệng)",
           "amount": "20",
           "unit": "g",
           "pdfPage": 234
@@ -2050,13 +2078,13 @@
           "pdfPage": 235
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "150",
           "unit": "g",
           "pdfPage": 235
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà rốt cỡ vừa",
           "amount": "1",
           "unit": "medium",
           "pdfPage": 235
@@ -2117,10 +2145,12 @@
           "pdfPage": 235
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 235
+          "pdfPage": 235,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -2271,7 +2301,7 @@
           "pdfPage": 237
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "150",
           "unit": "g",
           "pdfPage": 237
@@ -2326,10 +2356,12 @@
           "pdfPage": 238
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 238
+          "pdfPage": 238,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -2345,7 +2377,7 @@
       ],
       "facts": [
         {
-          "labelVi": null,
+          "labelVi": "Đậu trắng cannellini đã nấu, khối lượng ướt để ráo",
           "amount": "150",
           "unit": "g",
           "pdfPage": 238
@@ -2467,7 +2499,7 @@
       ],
       "facts": [
         {
-          "labelVi": null,
+          "labelVi": "Cà chua",
           "amount": "500",
           "unit": "g",
           "pdfPage": 239
@@ -2565,10 +2597,12 @@
           "pdfPage": 239
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 239
+          "pdfPage": 239,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -2620,7 +2654,7 @@
           "pdfPage": 240
         },
         {
-          "labelVi": null,
+          "labelVi": "Bánh focaccia nguyên cám kèm dầu ô-liu (khẩu phần kết hợp, không phải chỉ dầu)",
           "amount": "60",
           "unit": "g",
           "pdfPage": 240
@@ -2700,13 +2734,13 @@
           "pdfPage": 241
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "100",
           "unit": "g",
           "pdfPage": 241
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà rốt cỡ vừa",
           "amount": "1",
           "unit": "medium",
           "pdfPage": 241
@@ -2756,10 +2790,12 @@
           "pdfPage": 241
         },
         {
-          "labelVi": null,
+          "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
           "amount": "8",
           "unit": "g",
-          "pdfPage": 242
+          "pdfPage": 242,
+          "factType": "composition-limit",
+          "comparison": "less-than"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -2787,7 +2823,7 @@
           "pdfPage": 242
         },
         {
-          "labelVi": null,
+          "labelVi": "Cà chua bi",
           "amount": "80",
           "unit": "g",
           "pdfPage": 242
