@@ -61,8 +61,8 @@ describe('independent Appendix A PDF token audit (nonclinical)', () => {
     expect(sugarLimits).toHaveLength(13)
     expect(sugarLimits.every(f => f.amount === '8' && f.unit === 'g'
       && 'comparison' in f && f.comparison === 'less-than')).toBe(true)
-    expect(appendix.meals.filter(m => m.verificationStatus === 'source-page-checked')).toHaveLength(17)
-    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(39)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'source-page-checked')).toHaveLength(25)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(31)
     expect(appendix.metadata.status).toBe('unverified-machine-extraction')
   })
 })
@@ -98,7 +98,7 @@ describe('source semantic corrections are never treated as clinical plan values'
       expect(findFact(2, 2, 'snack', i).factType).toBe('alternative')
     expect(findFact(2, 6, 'dinner', 6).factType).toBe('composite')
     expect(appendix.metadata.sourceSemanticAudit.correctedContextEntries).toBe(57)
-    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(39)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(31)
   })
 })
 
@@ -114,7 +114,7 @@ describe('selected Appendix A quantities outside the numeric-unit parser', () =>
       milkFree: true,
     })
     expect(appendix.metadata.sourceTokenAudit.matchedQuantityTokens).toBe(350)
-    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(39)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(31)
   })
 
   it('preserves the source spot checks for fruit counts not captured by the parser', () => {

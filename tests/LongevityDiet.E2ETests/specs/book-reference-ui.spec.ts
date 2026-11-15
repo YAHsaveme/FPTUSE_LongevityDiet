@@ -16,7 +16,7 @@ test('Trang sách gốc hiển thị đủ chỉ dẫn nguồn, không nhận t�
   await expect(page.locator('.book-ref-meal-grid').getByText('Trang 236')).toBeVisible()
   await expect(page.getByText(/phải kiểm tra dị ứng/)).toBeVisible()
   await page.locator('.book-ref-quantity-details summary').click()
-  await expect(page.getByText(/Đã đối chiếu trực tiếp 17 bữa/)).toBeVisible()
+  await expect(page.getByText(/Đã đối chiếu trực tiếp 25 bữa/)).toBeVisible()
   await expect(page.locator('.book-ref-quantity-card')).toHaveCount(4)
   const dinnerQuantity = page.locator('.book-ref-quantity-card').filter({ hasText: 'Gạo đen, bí ngòi và tôm' })
   await expect(dinnerQuantity.getByText('tôm', { exact: true })).toBeVisible()
@@ -55,7 +55,26 @@ test('Ngày 4 phân biệt mứt mơ với mật và tiêu chí thanh ăn nhẹ'
   await expect(breakfast.getByText('Mứt mơ không thêm đường').first()).toBeVisible()
   const snack = page.locator('.book-ref-quantity-card').filter({ hasText: 'thanh hạt' })
   await expect(snack.getByText('< 8 g', { exact: true })).toBeVisible()
-  await expect(page.getByText(/Đã đối chiếu trực tiếp 17 bữa/)).toBeVisible()
+  await expect(page.getByText(/Đã đối chiếu trực tiếp 25 bữa/)).toBeVisible()
+})
+
+test('Ngày 5 yến mạch 90 g lặp trong sách không bị cộng thành 180 g', async ({ page }) => {
+  await page.goto('/book')
+  await page.getByRole('button', { name: 'Ngày 5' }).click()
+  await page.locator('.book-ref-quantity-details summary').click()
+  const breakfast = page.locator('.book-ref-quantity-card').filter({ hasText: 'Yến mạch steel-cut' })
+  await expect(breakfast.getByText(/KHÔNG cộng thành 180 g/)).toBeVisible()
+  await expect(breakfast.getByText(/Sách lặp lại cùng một giá trị; không cộng hai lần/)).toBeVisible()
+  await expect(page.getByText(/Đã đối chiếu trực tiếp 25 bữa/)).toBeVisible()
+})
+
+test('Ngày 6 focaccia là món kết hợp, không phải 60 g dầu', async ({ page }) => {
+  await page.goto('/book')
+  await page.getByRole('button', { name: 'Ngày 6' }).click()
+  await page.locator('.book-ref-quantity-details summary').click()
+  const breakfast = page.locator('.book-ref-quantity-card').filter({ hasText: 'Focaccia nguyên cám' })
+  await expect(breakfast.getByText(/KHÔNG phải 60 g dầu ô-liu/)).toBeVisible()
+  await expect(breakfast.getByText('60 g', { exact: true })).toBeVisible()
 })
 
 test('Trang sách gốc dễ đọc trên điện thoại 390px', async ({ page }) => {
@@ -79,7 +98,7 @@ test('Giới hạn đường trong bữa phụ không hiển thị như định 
   await expect(snack.getByText('< 8 g', { exact: true })).toBeVisible()
   await expect(snack.getByText(/không phải nguyên liệu/)).toBeVisible()
   await expect(page.getByText(/350 dữ kiện/)).toBeVisible()
-  await expect(page.getByText(/39 bữa còn lại chưa được rà soát mức này/)).toBeVisible()
+  await expect(page.getByText(/31 bữa còn lại chưa được rà soát mức này/)).toBeVisible()
   await expect(page.getByText('Tên nguyên liệu cần đối chiếu bản dịch')).toHaveCount(0)
 })
 
