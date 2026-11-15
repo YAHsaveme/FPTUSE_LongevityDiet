@@ -20,6 +20,86 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
 
 
     [Fact]
+    public async Task EditingMealLog_PreservesArchivedIngredients_AndReturnsOnlyCurrentEntries()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var client = await CreateOnboardedUserClientAsync("ingredient-history");
+        var eatenAt = new DateTimeOffset(2026, 11, 15, 12, 0, 0, TimeSpan.FromHours(7));
+        var created = await client.PostAsJsonAsync("/api/v1/meal-logs",
+            new CreateMealLogRequest(eatenAt, "Lunch", "Ingredient history test", null, null,
+                [new MealLogItemRequest("ITEM-OLD", "Original food", 1m, "portion", 210,
+                    8m, 25m, 6m, 3m, true)]));
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var original = (await created.Content.ReadFromJsonAsync<MealLogResponse>())!;
+        Assert.Single(original.Items);
+
+        var edited = await client.PutAsJsonAsync($"/api/v1/meal-logs/{original.Id}",
+            new UpdateMealLogRequest(eatenAt, "Lunch", "Edited history test", null, null,
+                [new MealLogItemRequest("ITEM-NEW", "Replacement food", 1m, "portion", 320,
+                    12m, 35m, 10m, 5m, true)]));
+        Assert.Equal(HttpStatusCode.OK, edited.StatusCode);
+        var returned = (await edited.Content.ReadFromJsonAsync<MealLogResponse>())!;
+        Assert.Single(returned.Items);
+        Assert.Equal("Replacement food", returned.Items[0].FoodName);
+        Assert.Equal(320, returned.TotalCaloriesKcal);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+        var all = await db.MealLogItems.IgnoreQueryFilters().AsNoTracking()
+            .Where(x => x.MealLogId == original.Id).ToListAsync();
+        Assert.Equal(2, all.Count);
+        Assert.Equal("Original food", Assert.Single(all, x => x.IsDeleted).FoodName);
+        Assert.NotNull(Assert.Single(all, x => x.IsDeleted).DeletedAt);
+        Assert.Equal("Replacement food", Assert.Single(all, x => !x.IsDeleted).FoodName);
+        Assert.Single(await db.MealLogItems.Where(x => x.MealLogId == original.Id).ToListAsync());
+
+        var list = await client.GetFromJsonAsync<List<MealLogResponse>>(
+            "/api/v1/meal-logs?fromDate=2026-11-15&toDate=2026-11-15");
+        Assert.Single(Assert.Single(list!).Items);
+    }
+
+    [Fact]
+    public async Task TrackingOwnedDb_FilterHidesArchivedChildren_WithoutDestroyingRows()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<LongevityDiet.Tracking.TrackingDbContext>();
+        var meal = new LongevityDiet.Domain.Entities.MealLog
+        {
+            UserId = Guid.NewGuid(),
+            EatenAt = new DateTimeOffset(2026, 11, 15, 12, 0, 0, TimeSpan.FromHours(7)),
+            LocalDate = new DateOnly(2026, 11, 15),
+            Title = "Owned tracking archive proof",
+        };
+        var old = new LongevityDiet.Domain.Entities.MealLogItem
+        {
+            MealLogId = meal.Id, FoodName = "Archived ingredient", ServingAmount = 1,
+        };
+        meal.Items.Add(old);
+        db.MealLogs.Add(meal);
+        await db.SaveChangesAsync();
+
+        old.IsDeleted = true;
+        old.DeletedAt = DateTimeOffset.UtcNow;
+        var replacement = new LongevityDiet.Domain.Entities.MealLogItem
+        {
+            MealLogId = meal.Id, FoodName = "New ingredient", ServingAmount = 1,
+        };
+        meal.Items.Add(replacement);
+        db.Entry(replacement).State = EntityState.Added;
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var all = await db.MealLogItems.IgnoreQueryFilters().AsNoTracking()
+            .Where(x => x.MealLogId == meal.Id).ToArrayAsync();
+        Assert.Equal(2, all.Length);
+        Assert.NotNull(Assert.Single(all, x => x.IsDeleted).DeletedAt);
+        var visible = await db.MealLogs.AsNoTracking().Include(x => x.Items)
+            .SingleAsync(x => x.Id == meal.Id);
+        Assert.Single(visible.Items);
+        Assert.Equal("New ingredient", visible.Items.Single().FoodName);
+    }
+
+    [Fact]
     public async Task MemberHistoryPages_AreBoundedUserOwnedAndCompatibleWithLegacyLists()
     {
         await _factory.ResetDatabaseAsync();

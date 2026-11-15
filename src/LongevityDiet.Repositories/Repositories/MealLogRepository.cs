@@ -108,17 +108,20 @@ public sealed class MealLogRepository(LongevityDietDbContext dbContext) : IMealL
         await dbContext.MealLogs.AddAsync(mealLog, cancellationToken);
     }
 
-    public void ReplaceItems(MealLog mealLog, IReadOnlyList<MealLogItem> newItems)
+    public void ReplaceItems(MealLog mealLog, IReadOnlyList<MealLogItem> newItems, DateTimeOffset archivedAt)
     {
-        dbContext.MealLogItems.RemoveRange(mealLog.Items);
-        mealLog.Items.Clear();
+        // Preserve previous child rows so a meal edit never destroys history.
+        foreach (var previous in mealLog.Items.Where(x => !x.IsDeleted))
+        {
+            previous.IsDeleted = true;
+            previous.DeletedAt = archivedAt;
+        }
 
         foreach (var item in newItems)
         {
             mealLog.Items.Add(item);
+            dbContext.Entry(item).State = EntityState.Added;
         }
-
-        dbContext.MealLogItems.AddRange(newItems);
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>

@@ -16,6 +16,6 @@ public interface IMealLogRepository
         DateOnly localDate,
         CancellationToken cancellationToken = default);
     Task AddAsync(MealLog mealLog, CancellationToken cancellationToken = default);
-    void ReplaceItems(MealLog mealLog, IReadOnlyList<MealLogItem> newItems);
+    void ReplaceItems(MealLog mealLog, IReadOnlyList<MealLogItem> newItems, DateTimeOffset archivedAt);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

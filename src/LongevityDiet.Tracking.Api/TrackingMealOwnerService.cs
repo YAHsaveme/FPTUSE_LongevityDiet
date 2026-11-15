@@ -68,15 +68,15 @@ public sealed class TrackingMealOwnerService(
         row.Notes = input.Notes?.Trim();
         var now = clock.GetUtcNow();
         row.UpdatedAt = now;
-        var previousItems = row.Items.ToArray();
-        db.MealLogItems.RemoveRange(previousItems);
-        // Replace the navigation collection rather than clearing tracked
-        // deleted rows: EF must INSERT new items, never UPDATE deleted IDs.
-        row.Items = new List<MealLogItem>();
+        // Archive the previous ingredient snapshot; only active rows are shown or summed.
+        foreach (var previous in row.Items.Where(item => !item.IsDeleted))
+        {
+            previous.IsDeleted = true;
+            previous.DeletedAt = now;
+        }
+        var previousIds = row.Items.Select(item => item.Id).ToHashSet();
         FillItems(row, input.Items!);
-        // Explicit Added is essential for newly keyed children attached to an
-        // existing tracked aggregate; otherwise EF emits UPDATE instead of INSERT.
-        foreach (var replacement in row.Items)
+        foreach (var replacement in row.Items.Where(item => !previousIds.Contains(item.Id)))
             db.Entry(replacement).State = EntityState.Added;
         QueueEvent(row, "updated", now);
         var strategy = db.Database.CreateExecutionStrategy();
@@ -209,11 +209,11 @@ public sealed class TrackingMealOwnerService(
                 FiberGrams = item.FiberGrams,
                 IsPlantBased = item.IsPlantBased
             });
-        meal.TotalCaloriesKcal = meal.Items.Sum(x => x.CaloriesKcal);
-        meal.TotalProteinGrams = meal.Items.Sum(x => x.ProteinGrams);
-        meal.TotalCarbsGrams = meal.Items.Sum(x => x.CarbsGrams);
-        meal.TotalFatGrams = meal.Items.Sum(x => x.FatGrams);
-        meal.TotalFiberGrams = meal.Items.Sum(x => x.FiberGrams);
+        meal.TotalCaloriesKcal = meal.Items.Where(x => !x.IsDeleted).Sum(x => x.CaloriesKcal);
+        meal.TotalProteinGrams = meal.Items.Where(x => !x.IsDeleted).Sum(x => x.ProteinGrams);
+        meal.TotalCarbsGrams = meal.Items.Where(x => !x.IsDeleted).Sum(x => x.CarbsGrams);
+        meal.TotalFatGrams = meal.Items.Where(x => !x.IsDeleted).Sum(x => x.FatGrams);
+        meal.TotalFiberGrams = meal.Items.Where(x => !x.IsDeleted).Sum(x => x.FiberGrams);
     }
 
     private static DateOnly ToLocalDate(DateTimeOffset at, string zone) =>
@@ -360,7 +360,7 @@ public sealed class TrackingMealOwnerService(
         x.TimeZone, mealType = x.MealType.ToString(), x.Title, x.Notes,
         x.TotalCaloriesKcal, x.TotalProteinGrams, x.TotalCarbsGrams,
         x.TotalFatGrams, x.TotalFiberGrams, x.CreatedAt, x.UpdatedAt,
-        items = x.Items.Select(y => new
+        items = x.Items.Where(y => !y.IsDeleted).Select(y => new
         {
             y.Id, y.FoodCode, y.FoodName, y.ServingAmount, y.ServingUnit,
             y.CaloriesKcal, y.ProteinGrams, y.CarbsGrams, y.FatGrams,

@@ -468,6 +468,10 @@ public sealed class MealPlanningAndEatingWindowTests
                 [new MealLogItemInput("DN-01", "Súp đậu", 1m, "tô", 420, 15m, 55m, 10m, 10m, true)]));
 
         Assert.True(updatedDinner.Succeeded);
+        Assert.Single(updatedDinner.Value!.Items);
+        Assert.Equal(2, mealLogRepo.Logs.Single(log => log.Id == dinner.Value!.Id).Items.Count);
+        var archivedItem = mealLogRepo.Logs.Single(log => log.Id == dinner.Value!.Id).Items.Single(item => item.IsDeleted);
+        Assert.Equal(FixedNow, archivedItem.DeletedAt);
 
         var windowAfterEdit = await trackingService.GetEatingWindowSummaryAsync(
             userId,
@@ -813,13 +817,15 @@ public sealed class MealPlanningAndEatingWindowTests
             return Task.CompletedTask;
         }
 
-        public void ReplaceItems(MealLog mealLog, IReadOnlyList<MealLogItem> newItems)
+        public void ReplaceItems(MealLog mealLog, IReadOnlyList<MealLogItem> newItems, DateTimeOffset archivedAt)
         {
-            mealLog.Items.Clear();
-            foreach (var item in newItems)
+            foreach (var previous in mealLog.Items.Where(x => !x.IsDeleted))
             {
-                mealLog.Items.Add(item);
+                previous.IsDeleted = true;
+                previous.DeletedAt = archivedAt;
             }
+            foreach (var item in newItems)
+                mealLog.Items.Add(item);
         }
 
         public Task SaveChangesAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;

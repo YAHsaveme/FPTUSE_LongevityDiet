@@ -38,6 +38,8 @@ public sealed class MealLogItem
     public decimal FatGrams { get; set; }
     public decimal FiberGrams { get; set; }
     public bool IsPlantBased { get; set; } = true;
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 
     public MealLog MealLog { get; set; } = null!;
 }

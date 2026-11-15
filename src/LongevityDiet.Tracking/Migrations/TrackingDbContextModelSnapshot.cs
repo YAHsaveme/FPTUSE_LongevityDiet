@@ -189,6 +189,9 @@ namespace LongevityDiet.Tracking.Migrations
                         .HasPrecision(8, 2)
                         .HasColumnType("decimal(8,2)");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<decimal>("FatGrams")
                         .HasPrecision(8, 2)
                         .HasColumnType("decimal(8,2)");
@@ -205,6 +208,9 @@ namespace LongevityDiet.Tracking.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPlantBased")
                         .HasColumnType("bit");

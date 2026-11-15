@@ -110,7 +110,7 @@ public sealed class MealTrackingService(
         mealLog.UpdatedAt = now;
 
         var newItems = BuildLogItems(mealLog.Id, command.Items);
-        mealLogRepository.ReplaceItems(mealLog, newItems);
+        mealLogRepository.ReplaceItems(mealLog, newItems, now);
         ApplyAggregateTotals(mealLog, newItems);
 
         await mealLogRepository.SaveChangesAsync(cancellationToken);
@@ -395,6 +395,7 @@ public sealed class MealTrackingService(
     {
         var (_, localTime) = EatingWindowCalculator.ToUserLocalDateAndTime(log.EatenAt, log.TimeZone);
         var items = log.Items
+            .Where(x => !x.IsDeleted)
             .Select(x => new MealLogItemSummary(
                 x.Id,
                 x.FoodCode,
