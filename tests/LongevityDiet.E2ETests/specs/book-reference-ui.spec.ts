@@ -22,7 +22,11 @@ test('Trang sách gốc hiển thị đủ chỉ dẫn nguồn, không nhận t�
   await expect(dinnerQuantity.getByText('tôm', { exact: true })).toBeVisible()
   await expect(dinnerQuantity.getByText('60 g', { exact: true })).toBeVisible()
   await expect(dinnerQuantity.getByText(/Đã đối chiếu định lượng/)).toBeVisible()
-  await expect(page.locator('.book-ref-unverified')).toHaveCount(3)
+  // All four slots now have AI-assisted source-page context checks. This is
+  // not independent editorial/clinical approval: the warning must remain.
+  await expect(page.locator('.book-ref-unverified')).toHaveCount(0)
+  await expect(page.locator('.book-ref-verified')).toHaveCount(4)
+  await expect(page.getByText(/vẫn chưa qua phê duyệt độc lập/)).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Tra cứu nguồn vi chất' })).toBeVisible()
 })
 
@@ -168,8 +172,11 @@ test('Định lượng phân số 1/2 củ hành và rau ăn kèm hiển thị �
   await expect(lunch).toBeVisible()
   await expect(lunch.getByText('1/2 cỡ vừa', { exact: true })).toBeVisible()
   await expect(lunch.getByText(/không phải 2 củ/)).toBeVisible()
-  await expect(lunch.getByText('Rau lá xanh ăn kèm (khối lượng rau, không phải bánh mì)')).toBeVisible()
+  // Page 239 provides 200 g of cooked greens as an ALTERNATIVE to salad;
+  // the separate 40 g brown bread remains a side, not part of that weight.
+  await expect(lunch.getByText('Rau lá xanh luộc ăn kèm (lựa chọn thay salad rau xanh)')).toBeVisible()
   await expect(lunch.getByText('200 g', { exact: true })).toBeVisible()
+  await expect(lunch.getByText('Bánh mì nâu ăn kèm, không phải crouton')).toBeVisible()
 })
 
 test('Định lượng cả mẻ và giá trị lặp lại không bị trình bày là phần ăn riêng', async ({ page }) => {
