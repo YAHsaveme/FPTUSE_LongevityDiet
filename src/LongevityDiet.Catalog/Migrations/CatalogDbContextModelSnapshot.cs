@@ -311,7 +311,7 @@ namespace LongevityDiet.Catalog.Migrations
 
                     b.ToTable("RecipeAllergens", "catalog");
 
-                    b.HasQueryFilter((LongevityDiet.Domain.Catalog.Entities.RecipeAllergen x) => !x.IsDeleted);
+                    b.HasQueryFilter((Dictionary<string, object> x) => !EF.Property<bool>(x, "IsDeleted"));
                 });
 
             modelBuilder.Entity("LongevityDiet.Domain.Catalog.Entities.RecipeIngredient", b =>
@@ -348,7 +348,7 @@ namespace LongevityDiet.Catalog.Migrations
 
                     b.ToTable("RecipeIngredients", "catalog");
 
-                    b.HasQueryFilter((LongevityDiet.Domain.Catalog.Entities.RecipeIngredient x) => !x.IsDeleted);
+                    b.HasQueryFilter((Dictionary<string, object> x) => !EF.Property<bool>(x, "IsDeleted"));
                 });
 
 

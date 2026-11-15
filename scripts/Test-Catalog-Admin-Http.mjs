@@ -189,6 +189,29 @@ const recipeAfterUpdate = await request(catalog + '/api/v1/recipes/' + recipeId,
 check('CATALOG_MEMBER_READS_RECIPE_UPDATE', recipeAfterUpdate.status === 200 &&
   recipeAfterUpdate.data?.name === updatedRecipeBody.name &&
   recipeAfterUpdate.data?.caloriesPerServing === 111);
+// Independent Catalog SQL owner must expose immutable revision snapshots only to Admin.
+const memberHistoryDenied = await request(
+  catalog + '/api/v1/admin/recipes/' + recipeId + '/history',
+  { token: account.memberToken });
+check('CATALOG_RECIPE_HISTORY_ADMIN_ONLY', memberHistoryDenied.status === 403);
+const historyAfterUpdate = await request(
+  catalog + '/api/v1/admin/recipes/' + recipeId + '/history?page=1&pageSize=1',
+  { token: adminToken });
+check('CATALOG_OWNER_RECIPE_HISTORY_PAGINATES', historyAfterUpdate.status === 200 &&
+  historyAfterUpdate.data?.totalItems === 2 &&
+  historyAfterUpdate.data?.totalPages === 2 &&
+  historyAfterUpdate.data?.items?.length === 1);
+const allHistory = await request(
+  catalog + '/api/v1/admin/recipes/' + recipeId + '/history?page=1&pageSize=10',
+  { token: adminToken });
+const createdRev = allHistory.data?.items?.find(r => r.changeType === 'Created');
+const updatedRev = allHistory.data?.items?.find(r => r.changeType === 'Updated');
+const initialComposition = createdRev && JSON.parse(createdRev.snapshotJson);
+const amendedComposition = updatedRev && JSON.parse(updatedRev.snapshotJson);
+check('CATALOG_SQL_RECIPE_HISTORY_PRESERVES_PRIOR_AMOUNT',
+  allHistory.status === 200 && initialComposition?.ingredients?.[0]?.amount === 100 &&
+  amendedComposition?.ingredients?.[0]?.amount === 120);
+
 const invalidRecipeUpdate = await request(catalog + '/api/v1/admin/recipes/' + recipeId, {
   method: 'PUT', token: adminToken, body: { ...updatedRecipeBody, ingredients: [] },
 });
@@ -212,6 +235,15 @@ const deactivatedRecipe = await request(catalog + '/api/v1/admin/recipes/' + rec
   method: 'DELETE', token: adminToken,
 });
 check('CATALOG_OWNER_DEACTIVATES_RECIPE', deactivatedRecipe.status === 204);
+const historyAfterDeactivation = await request(
+  catalog + '/api/v1/admin/recipes/' + recipeId + '/history?page=1&pageSize=10',
+  { token: adminToken });
+const archivedRevision = historyAfterDeactivation.data?.items?.find(
+  r => r.changeType === 'Deactivated');
+check('CATALOG_OWNER_RECIPE_DEACTIVATION_APPENDS_HISTORY',
+  historyAfterDeactivation.status === 200 &&
+  historyAfterDeactivation.data?.totalItems === 3 &&
+  archivedRevision && JSON.parse(archivedRevision.snapshotJson).isActive === false);
 const hiddenRecipe = await request(catalog + '/api/v1/recipes/' + recipeId, {
   token: account.memberToken,
 });

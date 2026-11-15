@@ -11,7 +11,9 @@
 
 ## Validation already performed
 - A new integration test covers create -> amount edit -> remove both ingredient and allergen -> inspect archived rows -> pagination and immutable prior snapshot -> restore -> no duplicate composite keys -> soft-deactivate and member invisibility; also rejects explicit hard delete and modification of a revision.
-- Targeted SQLite integration test passed. Full .NET build and independent Catalog build passed after the structural changes; full suite and Docker SQL Server runtime are the remaining release gates.
+- Full .NET Release tests PASS: 108 unit + 124 integration = 232, zero failures. Independent Catalog builds with zero warnings.
+- New SQL Server model snapshot regression creates both legacy and independent Catalog EF migration metadata without opening a DB, verifies the dictionary-compatible soft-delete filters, and asserts `HasPendingModelChanges() == false`. This directly catches the previous CI startup error.
+- Independent Catalog Docker HTTP QA now also checks admin-only paginated composition history, retained quantities across edits, and deactivation snapshots. Live SQL Server migration and full Docker runtime remain release gates.
 
 ## Release and data safety
 - **Do not apply migrations to the user's Docker demo SQL volumes until a verified backup and separate SQL Server migration rehearsal exist.** Do not use `docker compose down -v` on user containers.
