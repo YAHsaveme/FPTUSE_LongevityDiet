@@ -27,6 +27,41 @@
       "sourceDuplicatesMarked": 1,
       "recipeBatchMentionsMarked": 3,
       "note": "Only machine-extracted source-reference data; not a per-person serving or editorial/clinical certification of the remaining meals"
+    },
+    "sourceOutsideNumericUnitAudit": {
+      "status": "selected-source-exceptions-only-not-an-exhaustive-audit",
+      "pdfPageRange": "215-242",
+      "observedSnackBarMentions": 13,
+      "snackBarCriteria": {
+        "energyKcal": 150,
+        "minimumDarkChocolatePercent": 70,
+        "sugarCeilingGramsExclusive": 8,
+        "milkFree": true,
+        "noteVi": "Tiêu chí thành phần thanh ăn nhẹ trong sách, không phải khẩu phần hoặc gợi ý riêng cho người dùng"
+      },
+      "countWithoutRecognizedUnitExamples": [
+        {
+          "week": 1,
+          "day": 5,
+          "slot": "breakfast",
+          "pdfPage": 223,
+          "labelVi": "Kiwi trong ví dụ trái cây tươi ăn kèm",
+          "count": 1,
+          "unitVi": "quả",
+          "status": "source-text-spot-checked"
+        },
+        {
+          "week": 1,
+          "day": 6,
+          "slot": "breakfast",
+          "pdfPage": 225,
+          "labelVi": "Táo trong ví dụ trái cây tươi ăn kèm dâu tây",
+          "count": 1,
+          "unitVi": "quả",
+          "status": "source-text-spot-checked"
+        }
+      ],
+      "note": "The 350 original parser matches cover numeric-unit tokens only; not all fruit counts, food examples, composition percentages, calories or cooking time. No AI ingestion authorized."
     }
   },
   "meals": [

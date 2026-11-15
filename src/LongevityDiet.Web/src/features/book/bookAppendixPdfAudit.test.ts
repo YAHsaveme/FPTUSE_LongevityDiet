@@ -101,3 +101,29 @@ describe('source semantic corrections are never treated as clinical plan values'
     expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(54)
   })
 })
+
+describe('selected Appendix A quantities outside the numeric-unit parser', () => {
+  it('keeps 13 bar energy and chocolate-composition notes separate from ingredient grams', () => {
+    const metadata = appendix.metadata.sourceOutsideNumericUnitAudit
+    expect(metadata.status).toBe('selected-source-exceptions-only-not-an-exhaustive-audit')
+    expect(metadata.observedSnackBarMentions).toBe(13)
+    expect(metadata.snackBarCriteria).toMatchObject({
+      energyKcal: 150,
+      minimumDarkChocolatePercent: 70,
+      sugarCeilingGramsExclusive: 8,
+      milkFree: true,
+    })
+    expect(appendix.metadata.sourceTokenAudit.matchedQuantityTokens).toBe(350)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(54)
+  })
+
+  it('preserves the source spot checks for fruit counts not captured by the parser', () => {
+    const notes = appendix.metadata.sourceOutsideNumericUnitAudit.countWithoutRecognizedUnitExamples
+    expect(notes).toHaveLength(2)
+    expect(notes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ week: 1, day: 5, slot: 'breakfast', count: 1, pdfPage: 223 }),
+      expect.objectContaining({ week: 1, day: 6, slot: 'breakfast', count: 1, pdfPage: 225 }),
+    ]))
+    expect(notes.every(x => x.status === 'source-text-spot-checked')).toBe(true)
+  })
+})
