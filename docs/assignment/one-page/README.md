@@ -1,4 +1,4 @@
-# LongevityDiet — five official top-down architecture diagrams (12/11/2026)
+# LongevityDiet — five official top-down architecture diagrams (16/11/2026)
 
 Exactly five official, editable Draw.io files, each with one single-page PDF,
 are provided here. There are no secondary FULL, 32-table or sketch variants.
@@ -8,7 +8,7 @@ are provided here. There are no secondary FULL, 32-table or sketch variants.
 | C0 System Context | [C0.drawio](C0.drawio) | [C0.pdf](C0.pdf) | Member + Admin → one system boundary |
 | C1 Container Architecture | [C1.drawio](C1.drawio) | [C1.pdf](C1.pdf) | Web → YARP → six service owners and databases → event brokers → Worker Ops |
 | C2 Component Architecture | [C2.drawio](C2.drawio) | [C2.pdf](C2.pdf) | REST endpoint → application service → DbContext/owner event per domain |
-| Database Diagram Overall | [Database Diagram.drawio](Database%20Diagram.drawio) | [Database Diagram.pdf](Database%20Diagram.pdf) | All 50 physical tables grouped by six SQL databases |
+| Database Diagram Overall | [Database Diagram.drawio](Database%20Diagram.drawio) | [Database Diagram.pdf](Database%20Diagram.pdf) | All 51 physical tables grouped by six SQL databases |
 | Business Flow Overall | [Business Flow.drawio](Business%20Flow.drawio) | [Business Flow.pdf](Business%20Flow.pdf) | Member onboarding → plan → tracking → LDAS → outbox → Worker → report |
 
 ## Direction and readability
@@ -29,20 +29,20 @@ Web HTTP :80** and **YARP HTTP :8080**; the public TLS ingress/cutover is
 
 In the Database Diagram, **dashed thin** horizontal links to each central
 vertical spine show **ownership by one SQL database**, NOT a physical FK.
-The **20 SQL-verified FK relationships are now native, solid, filled-arrow
+The **21 SQL-verified FK relationships are now native, solid, filled-arrow
 connectors directly between the child and parent table boxes**. Each relation
 is also listed at the bottom of its owner panel for independent checking:
-Identity 4, Catalog 8, Planning 6, Tracking 2, Recommendation 0, Worker 0.
+Identity 4, Catalog 9, Planning 6, Tracking 2, Recommendation 0, Worker 0.
 Same-column FK arrows route through the panel's outside margin; cross-column
 FK arrows use the middle gutter, so no arrow must pass through table text.
-The 50 physical tables include Catalog's implicit many-to-many join table.
+The 51 physical tables include Catalog's implicit many-to-many join table and the new append-only RecipeCompositionRevisions audit table.
 Cross-owner UUID/DomainEvent references never become SQL foreign keys.
 
 The Member and Admin actor icons were resized to human proportions, with
 their captions detached above the figure so connector strokes do not cross
 captions. The Business Flow FMD safety decision is explicitly split into
 two vertical YES/NO branches, and only the eligible branch rejoins Tracking.
-All files were exported again and visually inspected from the rendered PNGs.
+The updated ERD was re-exported; all five diagrams pass structural and geometry validation.
 The validators now reject missing physical FK arrows or non-owner FK edges.
 
 The Business Flow keeps Admin (publishing RuleVersion) connected to

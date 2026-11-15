@@ -3,10 +3,10 @@
 ## Scope and guarantees implemented
 - Both the transitional API and independently owned Catalog service now mark removed ingredient/allergen associations with `IsDeleted=true` and `DeletedAt`, preserving each composite key and enabling restoration.
 - EF Core query filters exclude archived child links from member recipe details, Planner candidate reads and normal catalog reads; mutation paths use `IgnoreQueryFilters()` to locate and reactivate existing links.
-- SaveChanges guards in both catalog DbContexts reject physical deletes of association rows and reject edits/deletes of `RecipeCompositionRevision` audit records.
+- SaveChanges guards in both catalog DbContexts reject physical deletes of recipes or association rows and reject edits/deletes of `RecipeCompositionRevision` audit records.
 - An append-only composition snapshot is added atomically to create/update/deactivation transactions. Captures active `foodId/amount/unit/isOptional`, active allergen IDs, recipe activity state, UTC timestamp, action, and the authenticated actor when present.
 - Admin-only history APIs: `GET /api/v1/admin/recipes/{id}/history?page=1&pageSize=20` (transitional API and independent Catalog) with server-side pagination, stable order and validation.
-- Migrations `20261116020000_RecipeCompositionSoftHistory` exist separately in legacy and independent Catalog owners. They add archive flags, indexes and a revision table without deleting current rows. On SQL Server, each pre-existing recipe receives one `Imported` baseline of its composition. Changes made *before* migration cannot be reconstructed beyond this baseline.
+- Migrations `20261116020000_RecipeCompositionSoftHistory` exist separately in legacy and independent Catalog owners. They add archive flags, indexes and a revision table without deleting current rows. On SQL Server, each pre-existing recipe receives one `Imported` baseline of its composition with the **migration-time UTC timestamp**, not an invented time for earlier recipe edits. Changes made *before* migration cannot be reconstructed beyond this baseline.
 - Automatic downgrade is intentionally blocked to avoid discarding archived rows or immutable revisions.
 
 ## Validation already performed

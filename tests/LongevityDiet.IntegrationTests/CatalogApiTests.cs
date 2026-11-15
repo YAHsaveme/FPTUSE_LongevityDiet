@@ -312,6 +312,16 @@ public sealed class CatalogApiTests : IClassFixture<IntegrationTestWebApplicatio
             await Assert.ThrowsAsync<InvalidOperationException>(() => db.SaveChangesAsync());
         }
 
+        // A parent hard-delete must be rejected before SQL FK cascades could
+        // destroy the archived associations or immutable history.
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var recipeToRemove = await db.Recipes.SingleAsync(x => x.Id == recipeId);
+            db.Recipes.Remove(recipeToRemove);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => db.SaveChangesAsync());
+        }
+
         var deactivate = await client.DeleteAsync($"/api/v1/admin/recipes/{recipeId}");
         Assert.Equal(HttpStatusCode.NoContent, deactivate.StatusCode);
         var hidden = await client.GetAsync($"/api/v1/recipes/{recipeId}");

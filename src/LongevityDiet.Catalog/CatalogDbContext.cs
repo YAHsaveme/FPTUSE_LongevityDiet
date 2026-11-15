@@ -39,9 +39,10 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
     private void GuardHistory()
     {
         ChangeTracker.DetectChanges();
-        if (ChangeTracker.Entries<RecipeIngredient>().Any(e => e.State == EntityState.Deleted) ||
+        if (ChangeTracker.Entries<Recipe>().Any(e => e.State == EntityState.Deleted) ||
+            ChangeTracker.Entries<RecipeIngredient>().Any(e => e.State == EntityState.Deleted) ||
             ChangeTracker.Entries<RecipeAllergen>().Any(e => e.State == EntityState.Deleted))
-            throw new InvalidOperationException("Recipe associations must be soft-deleted, never physically removed.");
+            throw new InvalidOperationException("Recipes and their associations must be soft-deleted, never physically removed.");
         if (ChangeTracker.Entries<RecipeCompositionRevision>().Any(e => e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Recipe composition revision history is append-only.");
         if (ChangeTracker.Entries<RuleAudit>().Any(e =>

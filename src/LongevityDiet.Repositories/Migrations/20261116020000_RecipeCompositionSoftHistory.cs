@@ -67,7 +67,7 @@ public sealed class RecipeCompositionSoftHistory : Migration
             migrationBuilder.Sql(@"
 INSERT INTO [catalog].[RecipeCompositionRevisions]
 ([Id], [RecipeId], [RecordedAt], [ChangeType], [ActorId], [SnapshotJson])
-SELECT NEWID(), r.[Id], CAST(SWITCHOFFSET(r.[UpdatedAt], '+00:00') AS datetime2), N'Imported', NULL,
+SELECT NEWID(), r.[Id], SYSUTCDATETIME(), N'Imported', NULL,
     (SELECT r.[Id] AS [recipeId], r.[IsActive] AS [isActive],
         JSON_QUERY((SELECT i.[FoodId] AS [foodId], i.[Amount] AS [amount],
                            i.[Unit] AS [unit], i.[IsOptional] AS [isOptional]
