@@ -1108,25 +1108,25 @@ public sealed class MealPlanningService(
 
         if (candidate.IsPlantBased)
         {
-            score += weights.GetValueOrDefault("PLANT_FORWARD", 25m);
+            score += weights.GetValueOrDefault("PLANT_FORWARD", 0m);
             reasons.Add("PLANT_FORWARD");
         }
 
         if (candidate.HasLegumes)
         {
-            score += weights.GetValueOrDefault("LEGUME_PROTEIN", 20m);
+            score += weights.GetValueOrDefault("LEGUME_PROTEIN", 0m);
             reasons.Add("LEGUME_PROTEIN");
         }
 
         if (candidate.HasWholeGrains)
         {
-            score += weights.GetValueOrDefault("COMPLEX_CARBS", 15m);
+            score += weights.GetValueOrDefault("COMPLEX_CARBS", 0m);
             reasons.Add("COMPLEX_CARBS");
         }
 
         if (candidate.SugarGrams <= 6.5m && candidate.SaturatedFatGrams <= 2.5m)
         {
-            score += weights.GetValueOrDefault("LOW_SUGAR_SATFAT", 15m);
+            score += weights.GetValueOrDefault("LOW_SUGAR_SATFAT", 0m);
             reasons.Add("LOW_SUGAR_SATFAT");
         }
         else if (candidate.SugarGrams > 12m || candidate.SaturatedFatGrams > 5m)
@@ -1139,8 +1139,8 @@ public sealed class MealPlanningService(
              string.Equals(userContext.DietaryPattern, "PlantForward", StringComparison.OrdinalIgnoreCase)))
         {
             var fishBoost = string.Equals(userContext.DietaryPattern, "Pescatarian", StringComparison.OrdinalIgnoreCase)
-                ? weights.GetValueOrDefault("MODERATE_FISH", 10m) + 8m
-                : weights.GetValueOrDefault("MODERATE_FISH", 10m);
+                ? weights.GetValueOrDefault("MODERATE_FISH", 0m) + 8m
+                : weights.GetValueOrDefault("MODERATE_FISH", 0m);
             score += fishBoost;
             reasons.Add("MODERATE_FISH");
         }
@@ -1150,13 +1150,13 @@ public sealed class MealPlanningService(
         {
             if (candidate.ProteinGrams >= 16m)
             {
-                score += weights.GetValueOrDefault("AGE_PROTEIN_FIT", 10m);
+                score += weights.GetValueOrDefault("AGE_PROTEIN_FIT", 0m);
                 reasons.Add("AGE_PROTEIN_FIT");
             }
         }
         else if (candidate.ProteinGrams is >= 7m and <= 24m)
         {
-            score += weights.GetValueOrDefault("AGE_PROTEIN_FIT", 10m);
+            score += weights.GetValueOrDefault("AGE_PROTEIN_FIT", 0m);
             reasons.Add("AGE_PROTEIN_FIT");
         }
 
@@ -1416,12 +1416,15 @@ public sealed class MealPlanningService(
         var ingredients = candidate.Ingredients.Count > 0
             ? string.Join(", ", candidate.Ingredients.Take(5).Select(VietnameseFoodName))
             : "chưa có danh sách thành phần chi tiết";
+        var provenanceWarning = candidate.ContractVersion.StartsWith("demo-", StringComparison.OrdinalIgnoreCase)
+            ? "CHẾ ĐỘ DEMO: Đây là món và dinh dưỡng minh họa được khai báo trong bộ dữ liệu thử nghiệm, không phải công thức gốc được xác minh từ sách. "
+            : "Đây là món từ danh mục quản trị; giá trị dinh dưỡng do người quản trị cung cấp và chưa mặc nhiên được xác minh theo sách. ";
         return $"Vì sao chọn món này: {why}. " +
             $"Khẩu phần tham khảo: {candidate.ServingSize:0.##} {candidate.ServingUnit}; " +
             $"năng lượng {candidate.CaloriesKcal} kcal; đạm {candidate.ProteinGrams:0.##} g; " +
             $"tinh bột {candidate.CarbsGrams:0.##} g; chất béo {candidate.FatGrams:0.##} g; " +
             $"chất xơ {candidate.FiberGrams:0.##} g. " +
-            $"Thành phần trong danh mục: {ingredients}. " +
+            $"Thành phần trong danh mục: {ingredients}. " + provenanceWarning +
             $"Tham chiếu bộ quy tắc phiên bản {ruleSetVersion} và nguyên tắc trong The Longevity Diet (2018), Chương 4, trang PDF 89–90. " +
             "Giá trị dinh dưỡng là dữ liệu danh mục, KHÔNG phải số đo từng món được chứng thực trong sách. Ứng viên đã qua bộ lọc dị ứng " +
             "và thực phẩm loại trừ được khai báo. Hãy kiểm tra thành phần thực tế " +

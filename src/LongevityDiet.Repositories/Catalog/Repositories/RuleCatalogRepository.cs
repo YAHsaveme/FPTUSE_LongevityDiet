@@ -53,16 +53,25 @@ public sealed class RuleCatalogRepository(LongevityDietDbContext dbContext) : IR
             .Include(x => x.DietRule)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-    public Task<RuleSetVersion?> GetActiveRuleSetAsync(
-        CancellationToken cancellationToken = default) =>
-        dbContext.RuleSetVersions
-            .AsNoTracking()
+    public async Task<RuleSetVersion?> GetActiveRuleSetAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.RuleSetVersions.AsNoTracking()
             .Include(x => x.RuleVersions)
             .ThenInclude(x => x.DietRule)
-            .Where(x => x.IsActive)
-            .OrderByDescending(x => x.EffectiveAt)
-            .ThenBy(x => x.Id)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Where(x => x.IsActive);
+
+        // SQLite cannot ORDER BY DateTimeOffset. Production SQL Server keeps
+        // SQL-side ordering; SQLite integration tests sort the small active set.
+        if (dbContext.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            var available = await query.ToListAsync(cancellationToken);
+            return available.OrderByDescending(x => x.EffectiveAt)
+                .ThenBy(x => x.Id).FirstOrDefault();
+        }
+        return await query.OrderByDescending(x => x.EffectiveAt)
+            .ThenBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+    }
 
     public async Task<IReadOnlyList<RuleVersion>> FindVersionsAsync(
         IReadOnlyCollection<Guid> ids,
