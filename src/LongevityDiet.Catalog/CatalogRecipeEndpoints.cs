@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using LongevityDiet.Domain.Catalog.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,21 @@ public static class CatalogRecipeEndpoints
             return Results.Ok(new { items, totalItems = total, page, pageSize });
         });
 
+        admin.MapGet("/recipes/{id:guid}/history", async (Guid id, CatalogDbContext db,
+            int page = 1, int pageSize = 20, CancellationToken ct = default) =>
+        {
+            if (!ValidPage(page, pageSize)) return Results.BadRequest(new { error = "invalid_pagination" });
+            if (!await db.Recipes.AsNoTracking().AnyAsync(r => r.Id == id, ct)) return Results.NotFound();
+            var query = db.RecipeCompositionRevisions.AsNoTracking().Where(r => r.RecipeId == id);
+            var count = await query.CountAsync(ct);
+            var items = await query.OrderByDescending(r => r.RecordedAt).ThenByDescending(r => r.Id)
+                .Skip((page - 1) * pageSize).Take(pageSize)
+                .Select(r => new { r.Id, r.RecipeId, r.RecordedAt, r.ChangeType, r.ActorId, r.SnapshotJson })
+                .ToArrayAsync(ct);
+            return Results.Ok(new { items, page, pageSize, totalItems = count,
+                totalPages = (int)Math.Ceiling(count / (double)pageSize) });
+        });
+
         admin.MapGet("/recipes/{id:guid}", async (Guid id, CatalogDbContext db, CancellationToken ct) =>
         {
             var recipe = await LoadAsync(db, id, includeInactive: true, ct);
@@ -38,7 +54,7 @@ public static class CatalogRecipeEndpoints
         });
 
         admin.MapPost("/recipes", async (CatalogDbContext db, SaveCatalogRecipe input,
-            CancellationToken ct) =>
+            HttpContext http, CancellationToken ct) =>
         {
             var error = await ValidateAsync(db, input, ct);
             if (error is not null) return Results.BadRequest(new { error });
@@ -46,8 +62,9 @@ public static class CatalogRecipeEndpoints
             var now = DateTimeOffset.UtcNow;
             var recipe = new Recipe { CreatedAt = now, UpdatedAt = now, IsActive = true };
             ApplyRecipe(recipe, input);
-            SyncIngredients(recipe, input);
-            SyncAllergens(recipe, input);
+            SyncIngredients(recipe, input, now);
+            SyncAllergens(recipe, input, now);
+            recipe.Revisions.Add(RecipeCompositionHistory.Capture(recipe, "Created", now, ActorId(http)));
             db.Recipes.Add(recipe);
             await db.SaveChangesAsync(ct);
             var saved = await LoadAsync(db, recipe.Id, includeInactive: true, ct);
@@ -55,34 +72,45 @@ public static class CatalogRecipeEndpoints
         });
 
         admin.MapPut("/recipes/{id:guid}", async (Guid id, CatalogDbContext db,
-            SaveCatalogRecipe input, CancellationToken ct) =>
+            SaveCatalogRecipe input, HttpContext http, CancellationToken ct) =>
         {
             var error = await ValidateAsync(db, input, ct);
             if (error is not null) return Results.BadRequest(new { error });
-            var recipe = await db.Recipes.Include(r => r.Ingredients).Include(r => r.Allergens)
+            var recipe = await db.Recipes.IgnoreQueryFilters().Include(r => r.Ingredients).Include(r => r.Allergens)
                 .FirstOrDefaultAsync(r => r.Id == id && r.IsActive, ct);
             if (recipe is null) return Results.NotFound();
 
+            var now = DateTimeOffset.UtcNow;
             ApplyRecipe(recipe, input);
-            SyncIngredients(recipe, input);
-            SyncAllergens(recipe, input);
-            recipe.UpdatedAt = DateTimeOffset.UtcNow;
+            SyncIngredients(recipe, input, now);
+            SyncAllergens(recipe, input, now);
+            recipe.UpdatedAt = now;
+            recipe.Revisions.Add(RecipeCompositionHistory.Capture(recipe, "Updated", now, ActorId(http)));
             await db.SaveChangesAsync(ct);
             var updated = await LoadAsync(db, id, includeInactive: true, ct);
             return Results.Ok(ToDetail(updated!));
         });
 
         admin.MapDelete("/recipes/{id:guid}", async (Guid id, CatalogDbContext db,
-            CancellationToken ct) =>
+            HttpContext http, CancellationToken ct) =>
         {
             var recipe = await db.Recipes.FirstOrDefaultAsync(r => r.Id == id && r.IsActive, ct);
             if (recipe is null) return Results.NotFound();
             recipe.IsActive = false; // Historical plans keep the same stable recipe ID.
-            recipe.UpdatedAt = DateTimeOffset.UtcNow;
+            var now = DateTimeOffset.UtcNow;
+            recipe.UpdatedAt = now;
+            // Capture the preserved active composition at deactivation time.
+            var tracked = await db.Recipes.Include(r => r.Ingredients).Include(r => r.Allergens)
+                .FirstAsync(r => r.Id == id, ct);
+            tracked.Revisions.Add(RecipeCompositionHistory.Capture(tracked, "Deactivated", now, ActorId(http)));
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
     }
+
+    private static Guid? ActorId(HttpContext http) =>
+        Guid.TryParse(http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+            http.User.FindFirst("sub")?.Value, out var actorId) ? actorId : null;
 
     private static bool ValidPage(int page, int pageSize) =>
         page >= 1 && pageSize is >= 1 and <= 100 &&
@@ -101,10 +129,10 @@ public static class CatalogRecipeEndpoints
         r.CarbohydrateGPerServing, r.FatGPerServing, r.SaturatedFatGPerServing,
         r.SugarGPerServing, r.FiberGPerServing, r.IsPlantForward, r.HasLegume,
         r.HasWholeGrain, r.HasFish, r.IsActive, r.CreatedAt, r.UpdatedAt,
-        Ingredients = r.Ingredients.OrderBy(x => x.Food.Name)
+        Ingredients = r.Ingredients.Where(x => !x.IsDeleted).OrderBy(x => x.Food.Name)
             .Select(x => new { x.FoodId, FoodName = x.Food.Name, x.Amount,
                 x.Unit, x.IsOptional }).ToArray(),
-        Allergens = r.Allergens.OrderBy(x => x.Allergen.Code)
+        Allergens = r.Allergens.Where(x => !x.IsDeleted).OrderBy(x => x.Allergen.Code)
             .Select(x => new { x.AllergenId, x.Allergen.Code, x.Allergen.Name }).ToArray()
     };
 
@@ -176,11 +204,14 @@ public static class CatalogRecipeEndpoints
         recipe.HasFish = input.HasFish;
     }
 
-    private static void SyncIngredients(Recipe recipe, SaveCatalogRecipe input)
+    private static void SyncIngredients(Recipe recipe, SaveCatalogRecipe input, DateTimeOffset now)
     {
         var requested = input.Ingredients!.ToDictionary(x => x.FoodId);
-        foreach (var old in recipe.Ingredients.Where(x => !requested.ContainsKey(x.FoodId)).ToList())
-            recipe.Ingredients.Remove(old);
+        foreach (var old in recipe.Ingredients.Where(x => !requested.ContainsKey(x.FoodId) && !x.IsDeleted))
+        {
+            old.IsDeleted = true;
+            old.DeletedAt = now;
+        }
         foreach (var ingredient in requested.Values)
         {
             var current = recipe.Ingredients.SingleOrDefault(x => x.FoodId == ingredient.FoodId);
@@ -192,17 +223,30 @@ public static class CatalogRecipeEndpoints
             current.Amount = ingredient.Amount;
             current.Unit = ingredient.Unit!.Trim();
             current.IsOptional = ingredient.IsOptional;
+            current.IsDeleted = false;
+            current.DeletedAt = null;
         }
     }
 
-    private static void SyncAllergens(Recipe recipe, SaveCatalogRecipe input)
+    private static void SyncAllergens(Recipe recipe, SaveCatalogRecipe input, DateTimeOffset now)
     {
         var ids = input.AllergenIds!.ToHashSet();
-        foreach (var old in recipe.Allergens.Where(x => !ids.Contains(x.AllergenId)).ToList())
-            recipe.Allergens.Remove(old);
+        foreach (var old in recipe.Allergens.Where(x => !ids.Contains(x.AllergenId) && !x.IsDeleted))
+        {
+            old.IsDeleted = true;
+            old.DeletedAt = now;
+        }
         foreach (var id in ids)
-            if (!recipe.Allergens.Any(x => x.AllergenId == id))
+        {
+            var existing = recipe.Allergens.SingleOrDefault(x => x.AllergenId == id);
+            if (existing is null)
                 recipe.Allergens.Add(new RecipeAllergen { RecipeId = recipe.Id, AllergenId = id });
+            else
+            {
+                existing.IsDeleted = false;
+                existing.DeletedAt = null;
+            }
+        }
     }
 }
 

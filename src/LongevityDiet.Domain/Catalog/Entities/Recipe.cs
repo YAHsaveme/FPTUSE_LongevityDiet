@@ -28,4 +28,5 @@ public sealed class Recipe
 
     public ICollection<RecipeIngredient> Ingredients { get; set; } = new List<RecipeIngredient>();
     public ICollection<RecipeAllergen> Allergens { get; set; } = new List<RecipeAllergen>();
+    public ICollection<RecipeCompositionRevision> Revisions { get; set; } = new List<RecipeCompositionRevision>();
 }

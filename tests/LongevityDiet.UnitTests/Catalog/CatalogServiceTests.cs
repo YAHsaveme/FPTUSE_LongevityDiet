@@ -258,6 +258,12 @@ public sealed class CatalogServiceTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<Allergen>>(allergens.Where(x => ids.Contains(x.Id)).ToList());
 
+        public Task<RepositoryPage<RecipeCompositionRevision>> GetRevisionPageAsync(
+            Guid recipeId, int page, int pageSize, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new RepositoryPage<RecipeCompositionRevision>(
+                StoredRecipe?.Id == recipeId ? StoredRecipe.Revisions.ToList() : [],
+                StoredRecipe?.Id == recipeId ? StoredRecipe.Revisions.Count : 0));
+
         public Task AddAsync(Recipe recipe, CancellationToken cancellationToken = default)
         {
             StoredRecipe = recipe;

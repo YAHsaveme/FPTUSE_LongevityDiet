@@ -10,6 +10,8 @@ public sealed class RecipeAllergenConfiguration : IEntityTypeConfiguration<Recip
     {
         builder.ToTable("RecipeAllergens", "catalog");
         builder.HasKey(x => new { x.RecipeId, x.AllergenId });
+        builder.HasQueryFilter(x => !x.IsDeleted);
+        builder.HasIndex(x => new { x.RecipeId, x.IsDeleted });
         builder.HasIndex(x => x.AllergenId);
         builder.HasOne(x => x.Recipe)
             .WithMany(x => x.Allergens)

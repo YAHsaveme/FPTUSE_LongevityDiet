@@ -34,6 +34,10 @@ public static class PagedResultFactory
         new(items, page, pageSize, totalItems, (int)Math.Ceiling(totalItems / (double)pageSize));
 }
 
+public sealed record RecipeCompositionRevisionDto(
+    Guid Id, Guid RecipeId, DateTime RecordedAt, string ChangeType,
+    Guid? ActorId, string SnapshotJson);
+
 public sealed record FoodQueryOptions(
     int Page = 1,
     int PageSize = 20,

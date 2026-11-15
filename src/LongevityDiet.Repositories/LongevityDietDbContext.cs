@@ -20,6 +20,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
     public DbSet<Allergen> Allergens => Set<Allergen>();
     public DbSet<RecipeAllergen> RecipeAllergens => Set<RecipeAllergen>();
+    public DbSet<RecipeCompositionRevision> RecipeCompositionRevisions => Set<RecipeCompositionRevision>();
     public DbSet<DietRule> DietRules => Set<DietRule>();
     public DbSet<RuleAudit> RuleAudits => Set<RuleAudit>();
     public DbSet<RuleVersion> RuleVersions => Set<RuleVersion>();
@@ -66,6 +67,11 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     private void GuardRuleHistory()
     {
         ChangeTracker.DetectChanges();
+        if (ChangeTracker.Entries<RecipeIngredient>().Any(e => e.State == EntityState.Deleted) ||
+            ChangeTracker.Entries<RecipeAllergen>().Any(e => e.State == EntityState.Deleted))
+            throw new InvalidOperationException("Recipe associations must be soft-deleted, never physically removed.");
+        if (ChangeTracker.Entries<RecipeCompositionRevision>().Any(e => e.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Recipe composition revision history is append-only.");
         if (ChangeTracker.Entries<RuleAudit>().Any(x => x.State is EntityState.Modified or EntityState.Deleted))
         {
             throw new InvalidOperationException("Rule audit records are append-only.");

@@ -83,7 +83,12 @@ public sealed class RecipeRepository(LongevityDietDbContext dbContext) : IRecipe
             .Include(x => x.Allergens)
             .ThenInclude(x => x.Allergen);
 
-        if (!trackChanges)
+        if (trackChanges)
+        {
+            // Include archived associations for safe reactivation of their composite keys.
+            source = source.IgnoreQueryFilters();
+        }
+        else
         {
             source = source.AsNoTracking();
         }
@@ -119,6 +124,16 @@ public sealed class RecipeRepository(LongevityDietDbContext dbContext) : IRecipe
             .AsNoTracking()
             .Where(x => ids.Contains(x.Id) && x.IsActive)
             .ToListAsync(cancellationToken);
+
+    public async Task<RepositoryPage<RecipeCompositionRevision>> GetRevisionPageAsync(
+        Guid recipeId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var source = dbContext.RecipeCompositionRevisions.AsNoTracking().Where(x => x.RecipeId == recipeId);
+        var count = await source.CountAsync(cancellationToken);
+        var items = await source.OrderByDescending(x => x.RecordedAt).ThenByDescending(x => x.Id)
+            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        return new RepositoryPage<RecipeCompositionRevision>(items, count);
+    }
 
     public async Task AddAsync(Recipe recipe, CancellationToken cancellationToken = default) =>
         await dbContext.Recipes.AddAsync(recipe, cancellationToken);

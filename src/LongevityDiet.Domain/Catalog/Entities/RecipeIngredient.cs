@@ -7,6 +7,8 @@ public sealed class RecipeIngredient
     public decimal Amount { get; set; }
     public string Unit { get; set; } = string.Empty;
     public bool IsOptional { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 
     public Recipe Recipe { get; set; } = null!;
     public Food Food { get; set; } = null!;
