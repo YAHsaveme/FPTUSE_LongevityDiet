@@ -16,8 +16,9 @@ const unitVietnamese: Record<string, string> = {
   handful: 'nắm', handfuls: 'nắm', sprig: 'nhánh', sprigs: 'nhánh',
   leaves: 'lá', medium: 'cỡ vừa', large: 'cỡ lớn', small: 'cỡ nhỏ',
 }
-function displayQuantity(amount: string, unit: string) {
-  return `${amount} ${unitVietnamese[unit.toLowerCase()] ?? unit}`
+function displayQuantity(amount: string, unit: string, comparison?: string) {
+  const value = `${amount} ${unitVietnamese[unit.toLowerCase()] ?? unit}`
+  return comparison === 'less-than' ? `< ${value}` : value
 }
 
 export function BookReferencePage() {
@@ -115,9 +116,12 @@ export function BookReferencePage() {
               <p className="book-ref-intro">
                 <strong>Đang kiểm tra:</strong> đây là các dữ kiện số lượng trích xuất từ PDF, bao gồm cả
                 giới hạn thành phần và khẩu phần ăn kèm, không phải tất cả đều là định lượng nguyên liệu.
-                Hiện mới đối chiếu trực tiếp hai bữa (20 dữ kiện) với trang 215 và 236; các bữa khác
-                vẫn cần xác minh. Không dùng bản trích xuất để AI tự suy ra năng lượng, định lượng cá nhân
-                hoặc phác đồ ăn uống.
+                Đã kiểm tra tự động chuỗi số lượng–đơn vị của 56 bữa (350 dữ kiện) với lớp chữ PDF gốc,
+                bổ sung nhãn theo ngữ cảnh cho 42 dữ kiện và nhận diện 13 giới hạn đường &lt; 8 g.
+                Đây chỉ là kiểm tra trích xuất, không phải xác minh công thức hay khẩu phần.
+                Hiện mới đối chiếu biên tập đầy đủ hai bữa (20 dữ kiện) với trang 215 và 236;
+                54 bữa còn lại vẫn cần kiểm duyệt. Không dùng bản trích xuất để AI tự suy ra năng lượng,
+                định lượng cá nhân hoặc phác đồ ăn uống.
               </p>
               <div className="book-ref-quantity-grid">
                 {quantityRecords.map(record => (
@@ -134,8 +138,13 @@ export function BookReferencePage() {
                       {record.facts.map((fact, index) => (
                         <li key={index}>
                           <span>{fact.labelVi ?? 'Tên nguyên liệu cần đối chiếu bản dịch'}</span>
-                          <strong>{displayQuantity(fact.amount, fact.unit)}</strong>
-                          <small>Trang {fact.pdfPage}</small>
+                          <strong>{displayQuantity(
+                            fact.amount, fact.unit, 'comparison' in fact ? fact.comparison : undefined,
+                          )}</strong>
+                          <small>Trang {fact.pdfPage}
+                            {'factType' in fact && fact.factType === 'composition-limit'
+                              ? ' · Giới hạn hàm lượng đường, không phải nguyên liệu' : ''}
+                          </small>
                         </li>
                       ))}
                     </ul>
