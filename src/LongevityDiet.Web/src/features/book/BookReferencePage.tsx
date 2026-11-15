@@ -133,6 +133,9 @@ export function BookReferencePage() {
                 Hiện mới đối chiếu biên tập đầy đủ hai bữa (20 dữ kiện) với trang 215 và 236;
                 54 bữa còn lại vẫn cần kiểm duyệt. Không dùng bản trích xuất để AI tự suy ra năng lượng,
                 định lượng cá nhân hoặc phác đồ ăn uống.
+                Lưu ý: 350 dữ kiện chỉ là mẫu có số đi kèm đơn vị mà bộ tách nhận diện;
+                chưa bao gồm mọi số đếm trái cây, năng lượng thanh ăn nhẹ hoặc phần trăm thành phần.
+                Những dữ kiện bổ sung dưới đây mới được kiểm tra chọn lọc, không phải khai thác hết sách.
               </p>
               <div className="book-ref-quantity-grid">
                 {quantityRecords.map(record => (
@@ -159,6 +162,23 @@ export function BookReferencePage() {
                         </li>
                       ))}
                     </ul>
+                    {bookQuantityInventory.metadata.sourceOutsideNumericUnitAudit.countWithoutRecognizedUnitExamples
+                      .filter(item => item.week === record.week && item.day === record.day && item.slot === record.slot)
+                      .map(item => (
+                        <p key={item.labelVi} className="book-ref-intro">
+                          Bổ sung từ trang {item.pdfPage}: {item.labelVi} — {item.count} {item.unitVi}
+                          {' '} (số đếm ngoài bộ tách số–đơn vị; chưa phải khẩu phần cá nhân)
+                        </p>
+                      ))}
+                    {record.slot === 'snack' && record.facts.some(
+                      fact => 'factType' in fact && fact.factType === 'composition-limit',
+                    ) && (
+                      <p className="book-ref-intro">
+                        Tiêu chí thanh ăn nhẹ trong sách: {bookQuantityInventory.metadata.sourceOutsideNumericUnitAudit.snackBarCriteria.energyKcal} kcal,
+                        sô-cô-la đen tối thiểu {bookQuantityInventory.metadata.sourceOutsideNumericUnitAudit.snackBarCriteria.minimumDarkChocolatePercent}%
+                        và không chứa sữa. Đây là dữ kiện thành phần, không phải gợi ý khẩu phần.
+                      </p>
+                    )}
                   </section>
                 ))}
               </div>

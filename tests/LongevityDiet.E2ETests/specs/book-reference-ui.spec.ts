@@ -74,3 +74,19 @@ test('Định lượng cả mẻ và giá trị lặp lại không bị trình b
   await page.getByRole('button', { name: 'Ngày 5' }).click()
   await expect(page.getByText(/Sách lặp lại cùng một giá trị; không cộng hai lần/)).toBeVisible()
 })
+
+test('Trang sách phân biệt tiêu chí dinh dưỡng thanh ăn nhẹ với định lượng cá nhân', async ({ page }) => {
+  await page.goto('/book')
+  await page.locator('.book-ref-quantity-details summary').click()
+  await expect(page.getByText(/Tiêu chí thanh ăn nhẹ trong sách: 150 kcal/)).toBeVisible()
+  await expect(page.getByText(/sô-cô-la đen tối thiểu 70%/)).toBeVisible()
+})
+
+test('Trang sách hiển thị số đếm táo và kiwi ngoài bộ tách đơn vị mà không nhận là định lượng AI', async ({ page }) => {
+  await page.goto('/book')
+  await page.getByRole('button', { name: 'Ngày 5' }).click()
+  await page.locator('.book-ref-quantity-details summary').click()
+  await expect(page.getByText(/Kiwi trong ví dụ trái cây tươi ăn kèm/)).toBeVisible()
+  await page.getByRole('button', { name: 'Ngày 6' }).click()
+  await expect(page.getByText(/Táo trong ví dụ trái cây tươi ăn kèm dâu tây/)).toBeVisible()
+})
