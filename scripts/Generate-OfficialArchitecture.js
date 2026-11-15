@@ -329,36 +329,57 @@ const groups=[
    .filter(parts=>parts.length===2);
   const expectedFks={identity:4,catalog:9,planning:6,tracking:2,recommendation:0,worker:0};
   if(fks.length!==expectedFks[key])throw Error('Wrong FK count '+key+': '+fks.length);
-  for(let ri=0;ri<fks.length;ri++){
-   const child=g.tables.indexOf(fks[ri][0]),parent=g.tables.indexOf(fks[ri][1]);
-   if(child<0||parent<0)throw Error('Unresolved SQL FK '+key+' '+fks[ri].join(' → '));
-   const childLeft=(child%2)===0,parentLeft=(parent%2)===0;
-   const cy=y+332+Math.floor(child/2)*89+32;
-   const py=y+332+Math.floor(parent/2)*89+32;
+  // Independent attachment ports and square lanes prevent stacked FK arrows.
+  const relations=fks.map(([childName,parentName],ri)=>{
+   const child=g.tables.indexOf(childName),parent=g.tables.indexOf(parentName);
+   if(child<0||parent<0)throw Error('Unresolved SQL FK '+key+' '+childName+' → '+parentName);
+   const childLeft=child%2===0,parentLeft=parent%2===0;
+   const sameRow=Math.floor(child/2)===Math.floor(parent/2);
+   const sameColumn=childLeft===parentLeft;
+   return {ri,child,parent,childLeft,parentLeft,sameRow,sameColumn,
+    sourceSide:sameColumn?(childLeft?'left':'right'):(sameRow?'top':childLeft?'right':'left'),
+    targetSide:sameColumn?(parentLeft?'left':'right'):(sameRow?'top':parentLeft?'right':'left')};
+  });
+  const port=(r,kind)=>{
+   const nodeKey=kind==='source'?'child':'parent';
+   const sideKey=kind==='source'?'sourceSide':'targetSide';
+   const peers=relations.filter(other=>other[nodeKey]===r[nodeKey]&&
+    other[sideKey]===r[sideKey]);
+   const index=peers.indexOf(r);
+   const spacing=peers.length<=1?0:Math.min(0.19,0.65/(peers.length-1));
+   return Number((0.5+(index-(peers.length-1)/2)*spacing).toFixed(4));
+  };
+  const outerLaneCount={left:0,right:0};
+  for(const r of relations){
+   const fromPort=port(r,'source'),toPort=port(r,'target');
+   const childX=x+(r.childLeft?35:735),parentX=x+(r.parentLeft?35:735);
+   const childTop=y+332+Math.floor(r.child/2)*89;
+   const parentTop=y+332+Math.floor(r.parent/2)*89;
+   const cy=childTop+64*fromPort,py=parentTop+64*toPort;
    let from,to,points;
-   if(childLeft===parentLeft){
-    // Same-column relationships bend around the outer margin of the registry.
-    const lane=x+(childLeft?14:w-14);
-    from=childLeft?[0,0.5]:[1,0.5];
-    to=parentLeft?[0,0.5]:[1,0.5];
+   if(r.sameColumn){
+    // Each FK has its own outer lane instead of covering an existing line.
+    const side=r.childLeft?'left':'right',index=outerLaneCount[side]++;
+    const margin=10+7*index;
+    if(margin>=35)throw Error('ERD FK lane exhausted '+key+' '+side);
+    const lane=x+(r.childLeft?margin:w-margin);
+    from=r.childLeft?[0,fromPort]:[1,fromPort];
+    to=r.parentLeft?[0,toPort]:[1,toPort];
     points=[{x:lane,y:cy},{x:lane,y:py}];
-   }else if(Math.abs(cy-py)<2){
-    // Same-row relationships route ABOVE both table cells, not through a label.
-    const lane=cy-48;
-    from=[0.5,0];to=[0.5,0];
-    points=[
-     {x:x+(childLeft?285:985),y:lane},
-     {x:x+(parentLeft?285:985),y:lane}
-    ];
+   }else if(r.sameRow){
+    const lane=childTop-48;
+    from=[fromPort,0];to=[toPort,0];
+    points=[{x:childX+500*fromPort,y:lane},
+     {x:parentX+500*toPort,y:lane}];
    }else{
-    // Opposite-column relationships stay entirely within the center gutter.
-    const lane=x+580+(ri%5)*22;
-    from=childLeft?[1,0.5]:[0,0.5];
-    to=parentLeft?[1,0.5]:[0,0.5];
+    // Unique orthogonal gutter lanes keep arrow tips away from table text.
+    const lane=x+558+(r.ri%8)*20;
+    from=r.childLeft?[1,fromPort]:[0,fromPort];
+    to=r.parentLeft?[1,toPort]:[0,toPort];
     points=[{x:lane,y:cy},{x:lane,y:py}];
    }
-   d.edge('fk-'+key+'-'+ri,'tbl-'+key+'-'+child,
-    'tbl-'+key+'-'+parent,{from,to,points,line:2.5});
+   d.edge('fk-'+key+'-'+r.ri,'tbl-'+key+'-'+r.child,
+    'tbl-'+key+'-'+r.parent,{from,to,points,line:2.5});
   }
   d.note('fk-'+key,
    'FK VẬT LÝ (BẢNG CON → BẢNG CHA): '+fks.length+' đường có mũi tên'+String.fromCharCode(10)+g.fks,

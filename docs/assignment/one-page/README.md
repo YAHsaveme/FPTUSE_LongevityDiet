@@ -33,8 +33,10 @@ The **21 SQL-verified FK relationships are now native, solid, filled-arrow
 connectors directly between the child and parent table boxes**. Each relation
 is also listed at the bottom of its owner panel for independent checking:
 Identity 4, Catalog 9, Planning 6, Tracking 2, Recommendation 0, Worker 0.
-Same-column FK arrows route through the panel's outside margin; cross-column
-FK arrows use the middle gutter, so no arrow must pass through table text.
+Same-column FK arrows use separate straight outside lanes; cross-column
+FK arrows use dedicated orthogonal gutter lanes. When multiple relations
+point to the same table, they attach at distinct, aligned arrowhead ports
+rather than covering each other or crossing table labels.
 The 51 physical tables include Catalog's implicit many-to-many join table and the new append-only RecipeCompositionRevisions audit table.
 Cross-owner UUID/DomainEvent references never become SQL foreign keys.
 
