@@ -280,6 +280,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         var mealLogItem = modelBuilder.Entity<MealLogItem>();
         mealLogItem.ToTable("MealLogItems");
         mealLogItem.HasKey(x => x.Id);
+        mealLogItem.HasQueryFilter(x => !x.IsDeleted);
         mealLogItem.Property(x => x.FoodCode).HasMaxLength(80);
         mealLogItem.Property(x => x.FoodName).HasMaxLength(200).IsRequired();
         mealLogItem.Property(x => x.ServingAmount).HasPrecision(8, 2);

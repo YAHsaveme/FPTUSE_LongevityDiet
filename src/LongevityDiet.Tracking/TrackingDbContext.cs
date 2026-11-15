@@ -40,6 +40,7 @@ public sealed class TrackingDbContext(DbContextOptions<TrackingDbContext> option
         var item = modelBuilder.Entity<MealLogItem>();
         item.ToTable("MealLogItems");
         item.HasKey(x => x.Id);
+        item.HasQueryFilter(x => !x.IsDeleted);
         item.Property(x => x.FoodCode).HasMaxLength(80);
         item.Property(x => x.FoodName).HasMaxLength(200).IsRequired();
         item.Property(x => x.ServingAmount).HasPrecision(8, 2);
