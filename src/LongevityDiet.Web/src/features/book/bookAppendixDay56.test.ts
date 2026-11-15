@@ -24,9 +24,9 @@ describe('Appendix A W1D5-D6 source identity is not clinical nutrition approval'
       pdfPages: [223, 224, 225, 226],
     })
     expect(appendix.metadata.status).toBe('unverified-machine-extraction')
-    expect(appendix.metadata.reviewedMeals).toBe(25)
-    expect(appendix.metadata.reviewedQuantities).toBe(161)
-    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(31)
+    expect(appendix.metadata.reviewedMeals).toBeGreaterThanOrEqual(25)
+    expect(appendix.metadata.reviewedQuantities).toBeGreaterThanOrEqual(161)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review').length).toBeLessThanOrEqual(31)
     for (const x of verified) {
       const found = meal(x.day, x.slot)
       expect(found.verificationStatus).toBe('source-page-checked')

@@ -219,12 +219,20 @@ public sealed class ActivityLdasApiTests : IClassFixture<IntegrationTestWebAppli
         var fetchedGoal = await client.GetFromJsonAsync<GoalView>("/api/v1/activities/goal");
         Assert.Equal(210, fetchedGoal!.WeeklyMinutesTarget);
 
-        var now = DateTimeOffset.UtcNow;
+        // Anchor the summary to the ACTIVITY'S local Monday, not the current
+        // week. On Sunday 17:00 UTC (Monday 00:00 in Ho Chi Minh City),
+        // "one hour ago" legitimately belongs to the previous local week.
+        var startedAt = DateTimeOffset.UtcNow.AddHours(-1);
+        var localDate = TrackingService.LocalDate(startedAt,
+            TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh"));
+        var weekStart = localDate.AddDays(-(((int)localDate.DayOfWeek + 6) % 7));
         var create = await client.PostAsJsonAsync("/api/v1/activities",
-            new { kind = 3, durationMinutes = 20, startedAt = now.AddHours(-1) });
+            new { kind = 3, durationMinutes = 20, startedAt });
         Assert.True(create.StatusCode == HttpStatusCode.Created, await create.Content.ReadAsStringAsync());
-        var summary = await client.GetFromJsonAsync<ActivitySummary>("/api/v1/activities/summary");
+        var summary = await client.GetFromJsonAsync<ActivitySummary>(
+            $"/api/v1/activities/summary?weekStart={weekStart:yyyy-MM-dd}");
         Assert.NotNull(summary);
+        Assert.Equal(weekStart, summary.WeekStart);
         Assert.True(summary.EquivalentMinutes >= 40);
         Assert.Equal(210, summary.WeeklyMinutesTarget);
     }

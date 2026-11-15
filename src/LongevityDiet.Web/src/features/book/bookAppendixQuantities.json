@@ -5,8 +5,8 @@
     "pdfPages": "215-242",
     "status": "unverified-machine-extraction",
     "noteVi": "Số lượng dưới đây được tách tự động từ PDF, chưa được biên tập viên xác minh. Chỉ dùng để đối chiếu, không dùng làm định lượng cá nhân hoặc đầu vào AI.",
-    "reviewedMeals": 25,
-    "reviewedQuantities": 161,
+    "reviewedMeals": 33,
+    "reviewedQuantities": 205,
     "reviewMethod": "AI-assisted text-layer AND rendered-page source cross-check; no independent human or clinical review",
     "reviewDate": "2026-11-15",
     "sourceTokenAudit": {
@@ -116,6 +116,23 @@
       "correctedLabels": 24,
       "sourcePdfSha256": "c4e762039b877d185ae1f44035cace4ba95f1791adbafb8097a0764dd26757d6",
       "note": "Reference-only source review, not independent editorial or clinical approval. Do NOT feed to AI."
+    },
+    "editorialBatchWeekTurn": {
+      "status": "source-page-crosschecked-not-clinically-approved",
+      "pdfPages": [
+        227,
+        228,
+        229,
+        230
+      ],
+      "weekDays": [
+        "W1D7",
+        "W2D1"
+      ],
+      "newlyCheckedMeals": 8,
+      "correctedLabels": 28,
+      "sourcePdfSha256": "c4e762039b877d185ae1f44035cace4ba95f1791adbafb8097a0764dd26757d6",
+      "note": "Reference-only AI-assisted source comparison, no editorial/medical approval or AI meal-plan ingestion."
     }
   },
   "meals": [
@@ -1593,7 +1610,7 @@
       "day": 7,
       "slot": "breakfast",
       "slotVi": "Bữa sáng",
-      "titleVi": "Bữa sáng theo Phụ lục A",
+      "titleVi": "Ngũ cốc trái cây và hạt với sữa hạnh nhân",
       "sourcePages": [
         227
       ],
@@ -1605,19 +1622,29 @@
           "pdfPage": 227
         },
         {
-          "labelVi": "ngũ cốc",
+          "labelVi": "Ngũ cốc kết hợp trái cây và các loại hạt",
           "amount": "60",
           "unit": "g",
           "pdfPage": 227
         },
         {
-          "labelVi": "trái cây tươi",
+          "labelVi": "Một quả trái cây tươi cỡ vừa (không quy định loại quả)",
           "amount": "1",
           "unit": "medium",
           "pdfPage": 227
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 227,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          227
+        ],
+        "noteVi": "Trang PDF 227: cà phê/espresso/Americano, sữa hạnh nhân 240 mL và NGŨ CỐC có trái cây và các loại hạt 60 g. Một trái cây tươi cỡ vừa là ví dụ không chỉ rõ loại; không được tự gán thành chuối hay quy ra gram. Không có số lượng cà phê.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
@@ -1642,25 +1669,25 @@
           "pdfPage": 227
         },
         {
-          "labelVi": "hạt thông, các loại hạt",
+          "labelVi": "Hạt thông",
           "amount": "9",
           "unit": "g",
           "pdfPage": 227
         },
         {
-          "labelVi": "hạt thông, các loại hạt",
+          "labelVi": "Hạt thông (nguồn ghi 1 tsp, không phải tbsp)",
           "amount": "1",
           "unit": "tsp",
           "pdfPage": 227
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "12",
           "unit": "mL",
           "pdfPage": 227
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "1",
           "unit": "tbsp",
           "pdfPage": 227
@@ -1678,33 +1705,43 @@
           "pdfPage": 227
         },
         {
-          "labelVi": "bánh mì",
+          "labelVi": "Bánh mì nguyên hạt đậm màu ăn kèm",
           "amount": "40",
           "unit": "g",
           "pdfPage": 227
         },
         {
-          "labelVi": "Salad rau xanh trộn ớt chuông đỏ, cà chua, cà rốt và nấm",
+          "labelVi": "Tổng khối lượng salad rau xanh ăn kèm (không phải 200 g ớt chuông)",
           "amount": "200",
           "unit": "g",
           "pdfPage": 227
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 227,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          227
+        ],
+        "noteVi": "Trang PDF 227: cải Brussels 250 g, tỏi 2 tép, hạt thông 9 g/1 THÌA CÀ PHÊ (nguồn ghi tsp, không tự đổi thành tbsp), dầu ô-liu 12 mL/1 thìa canh, Parmesan 5 g/1 thìa canh. Bánh mì nâu nguyên hạt đậm màu 40 g và salad rau xanh trộn ớt chuông, cà chua, cà rốt, nấm 200 g TỔNG CỘNG là các món ĂN KÈM. Ớt cay tùy chọn, muối/tiêu không có định lượng.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 7,
       "slot": "snack",
       "slotVi": "Bữa phụ",
-      "titleVi": "Bữa phụ theo Phụ lục A",
+      "titleVi": "Sữa chua sữa dê và thanh hạt–sôcôla đen",
       "sourcePages": [
         227,
         228
       ],
       "facts": [
         {
-          "labelVi": "sữa chua sữa dê",
+          "labelVi": "Sữa chua làm từ sữa dê (có thành phần sữa động vật)",
           "amount": "125",
           "unit": "g",
           "pdfPage": 227
@@ -1718,7 +1755,18 @@
           "comparison": "less-than"
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 227,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          227,
+          228
+        ],
+        "noteVi": "Trang PDF 227–228: sữa chua SỮA DÊ 125 g là sản phẩm từ sữa, không phù hợp tự động cho người dị ứng sữa/chế độ thuần thực vật. Thanh hạt/ngũ cốc sôcôla đen được yêu cầu KHÔNG chứa sữa, 150 kcal, đường ít hơn 8 g, sôcôla đen tối thiểu 70%; điều kiện của thanh không hủy bỏ việc sữa chua chứa sữa.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
@@ -1731,10 +1779,11 @@
       ],
       "facts": [
         {
-          "labelVi": "vẹm, nghêu",
+          "labelVi": "Nghêu và vẹm tổng cộng (60 g cho cả hai loại)",
           "amount": "60",
           "unit": "g",
-          "pdfPage": 228
+          "pdfPage": 228,
+          "factType": "composite"
         },
         {
           "labelVi": "tỏi",
@@ -1743,7 +1792,7 @@
           "pdfPage": 228
         },
         {
-          "labelVi": "rượu vang nấu ăn",
+          "labelVi": "Rượu vang trắng dùng trong nấu ăn (không phải đồ uống)",
           "amount": "40",
           "unit": "mL",
           "pdfPage": 228
@@ -1755,44 +1804,54 @@
           "pdfPage": 228
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "25",
           "unit": "mL",
           "pdfPage": 228
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "2",
           "unit": "tbsp",
           "pdfPage": 228
         },
         {
-          "labelVi": "Quả chà là gợi ý tráng miệng",
+          "labelVi": "Quả chà là tráng miệng gợi ý",
           "amount": "20",
           "unit": "g",
           "pdfPage": 228
         },
         {
-          "labelVi": "Hạt óc chó gợi ý tráng miệng",
+          "labelVi": "Hạt óc chó tráng miệng gợi ý",
           "amount": "25",
           "unit": "g",
           "pdfPage": 228
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 228,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          228
+        ],
+        "noteVi": "Trang PDF 228: nghêu VÀ vẹm được cân 60 g TỔNG CỘNG (không phải mỗi loại 60 g), tỏi hai tép, rượu vang trắng DÙNG NẤU ĂN 40 mL, mì spaghetti 40 g, dầu ô-liu 25 mL/2 thìa canh. Cà chua, mùi tây, muối/tiêu không có số lượng nguồn; rau lá xanh luộc là món ĂN KÈM không định lượng. Chà là 20 g và óc chó 25 g là GỢI Ý tráng miệng. Sách nhắc thực phẩm bổ sung nhưng tuyệt đối không tự tạo đơn dùng.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 2,
       "day": 1,
       "slot": "breakfast",
       "slotVi": "Bữa sáng",
-      "titleVi": "Bữa sáng theo Phụ lục A",
+      "titleVi": "Yến mạch với sữa hạnh nhân, quả mọng, sôcôla đen và hạt",
       "sourcePages": [
         229
       ],
       "facts": [
         {
-          "labelVi": "yến mạch",
+          "labelVi": "Yến mạch steel-cut",
           "amount": "80",
           "unit": "g",
           "pdfPage": 229
@@ -1804,20 +1863,30 @@
           "pdfPage": 229
         },
         {
-          "labelVi": "quả mọng",
+          "labelVi": "Quả mọng tươi hỗn hợp",
           "amount": "150",
           "unit": "g",
           "pdfPage": 229
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 229,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          229
+        ],
+        "noteVi": "Trang PDF 229: yến mạch steel-cut 80 g, sữa hạnh nhân 240 mL, quả mọng tươi hỗn hợp 150 g. Tên và hướng dẫn có nhắc sôcôla đen và các loại hạt nhưng KHÔNG GHI gram cho hai thành phần này; tuyệt đối không giả định lượng. Cà phê hoặc trà với nửa quả chanh vắt là ghi chú số đếm ngoài bộ tách.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 2,
       "day": 1,
       "slot": "lunch",
       "slotVi": "Bữa trưa",
-      "titleVi": "Salad Hy Lạp với feta, ô-liu, hành và ớt chuông",
+      "titleVi": "Salad Hy Lạp với feta, ô-liu, hành tây và ớt chuông",
       "sourcePages": [
         229
       ],
@@ -1835,7 +1904,7 @@
           "pdfPage": 229
         },
         {
-          "labelVi": "Ớt chuông xanh và đỏ",
+          "labelVi": "Ớt chuông xanh và đỏ (tổng cộng 200 g)",
           "amount": "200",
           "unit": "g",
           "pdfPage": 229
@@ -1847,44 +1916,54 @@
           "pdfPage": 229
         },
         {
-          "labelVi": "quả ô-liu",
+          "labelVi": "Quả ô-liu",
           "amount": "20",
           "unit": "g",
           "pdfPage": 229
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "12",
           "unit": "mL",
           "pdfPage": 229
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "1",
           "unit": "tbsp",
           "pdfPage": 229
         },
         {
-          "labelVi": "bánh mì nâu, bánh mì",
+          "labelVi": "Bánh mì nâu ăn kèm",
           "amount": "40",
           "unit": "g",
           "pdfPage": 229
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 229,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          229
+        ],
+        "noteVi": "Trang PDF 229: xà lách trộn 150 g, feta 20 g, ớt chuông xanh và đỏ 200 g TỔNG CỘNG, cà chua bi 150 g, QUẢ ô-liu 20 g, DẦU ô-liu 12 mL/1 thìa canh, bánh mì nâu ăn kèm 40 g. Hành tây là lựa chọn tùy ý KHÔNG có trọng lượng; muối tùy khẩu vị, không thêm một lượng tự suy.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 2,
       "day": 1,
       "slot": "snack",
       "slotVi": "Bữa phụ",
-      "titleVi": "Bữa phụ theo Phụ lục A",
+      "titleVi": "Sữa hạt phỉ không đường và thanh hạt–sôcôla đen",
       "sourcePages": [
         229
       ],
       "facts": [
         {
-          "labelVi": "sữa hạt phỉ",
+          "labelVi": "Sữa hạt phỉ không đường",
           "amount": "240",
           "unit": "mL",
           "pdfPage": 229
@@ -1898,20 +1977,30 @@
           "comparison": "less-than"
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 229,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          229
+        ],
+        "noteVi": "Trang PDF 229: sữa hạt phỉ KHÔNG đường 240 mL; thanh ăn nhẹ 150 kcal, dưới 8 g đường, sôcôla đen tối thiểu 70% và không chứa sữa là tiêu chí THÀNH PHẦN, không phải định lượng nguyên liệu hoặc thực đơn cá nhân.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 2,
       "day": 1,
       "slot": "dinner",
       "slotVi": "Bữa tối",
-      "titleVi": "Salad đậu gà và rau, kèm bánh đậu gà",
+      "titleVi": "Salad đậu gà, rau bina và bánh mì đậu gà",
       "sourcePages": [
         230
       ],
       "facts": [
         {
-          "labelVi": "đậu gà",
+          "labelVi": "Đậu gà đã nấu hoặc đóng hộp, để ráo",
           "amount": "150",
           "unit": "g",
           "pdfPage": 230
@@ -1923,25 +2012,25 @@
           "pdfPage": 230
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "25",
           "unit": "mL",
           "pdfPage": 230
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "2",
           "unit": "tbsp",
           "pdfPage": 230
         },
         {
-          "labelVi": "rau bina",
+          "labelVi": "Rau bina đã luộc",
           "amount": "200",
           "unit": "g",
           "pdfPage": 230
         },
         {
-          "labelVi": "bánh đậu gà, bánh mì",
+          "labelVi": "Bánh mì đậu gà thành phẩm, không phải khối lượng bột hoặc cả mẻ",
           "amount": "60",
           "unit": "g",
           "pdfPage": 230
@@ -1959,7 +2048,17 @@
           "pdfPage": 230
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 230,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, unquantified foods, allergen-sensitive options, combined masses, optional side/dessert",
+        "pdfPages": [
+          230
+        ],
+        "noteVi": "Trang PDF 230: đậu gà 150 g đã nấu hoặc từ hộp và để ráo; hành tây một củ cỡ vừa, dầu ô-liu 25 mL/2 thìa canh, rau bina luộc 200 g, bánh mì đậu gà THÀNH PHẨM 60 g (có chỉ dẫn công thức riêng). Đừng nhầm 60 g bánh đậu gà với 60 g BỘT đậu gà hay khối lượng cả mẻ farinata ngày 3. Chanh, muối/tiêu và dầu thêm nếu cần không có lượng nguồn; hạt hồ đào pecan 25 g và chà là 20 g là GỢI Ý tráng miệng, không bắt buộc.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 2,

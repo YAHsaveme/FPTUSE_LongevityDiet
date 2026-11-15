@@ -13,7 +13,13 @@ test('member can CRUD scheduled meals and archive a plan using the actual Web UI
   await page.locator('input[name="email"]').fill(email)
   await page.locator('input[name="password"]').fill(password)
   await page.locator('input[name="confirmPassword"]').fill(password)
+  // Avoid issuing a second login that can rotate the browser's refresh cookie.
+  const registerResponse = page.waitForResponse(r =>
+    r.request().method() === 'POST' && r.url().includes('/api/v1/auth/register'))
   await page.getByRole('button', { name: 'Tạo tài khoản' }).click()
+  const registered = await registerResponse
+  expect(registered.status()).toBe(201)
+  const registrationAccessToken = (await registered.json() as { accessToken: string }).accessToken
   await expect(page).toHaveURL(/\/onboarding$/)
   await page.locator('input[name="birthYear"]').fill('1996')
   await page.locator('input[name="wakeTime"]').fill('06:30')
@@ -23,10 +29,7 @@ test('member can CRUD scheduled meals and archive a plan using the actual Web UI
   await page.getByRole('button', { name: 'Hoàn tất thiết lập' }).click()
   await expect(page).toHaveURL(/\/app$/)
 
-  const login = await page.request.post('/api/v1/auth/login', { data: { email, password } })
-  expect(login.status()).toBe(200)
-  const token = (await login.json() as { accessToken: string }).accessToken
-  const headers = { Authorization: `Bearer ${token}` }
+  const headers = { Authorization: `Bearer ${registrationAccessToken}` }
   const screened = await page.request.put('/api/v1/wellness/screening', {
     headers,
     data: { riskFlags: [], allergiesReviewed: true, allergies: [] },
@@ -66,7 +69,11 @@ test('member can CRUD scheduled meals and archive a plan using the actual Web UI
   expect(snack).toBeDefined()
   expect(added.days[0].meals).toHaveLength(4)
 
-  await editor.getByRole('button', { name: 'Sửa ' + (await editor.locator('.meal-editor-row').last().locator('strong').textContent()) }).click()
+  // Recipe titles are not unique: the same candidate may appear in multiple slots.
+  // Scope actions to the one Snack row created above, rather than matching by title.
+  const snackRow = editor.locator('.meal-editor-row').filter({ hasText: 'Bữa phụ' })
+  await expect(snackRow).toHaveCount(1)
+  await snackRow.getByRole('button', { name: /^Sửa / }).click()
   await editor.locator('input[type="time"]').fill('15:30')
   await editor.getByRole('button', { name: 'Lưu chỉnh sửa' }).click()
   await expect(editor.getByRole('status')).toContainText('Đã cập nhật bữa ăn')
@@ -74,8 +81,8 @@ test('member can CRUD scheduled meals and archive a plan using the actual Web UI
   const edited = await afterEdit.json() as typeof plan
   expect(edited.days[0].meals.find(meal => meal.id === snack!.id)?.plannedTime).toMatch(/^15:30/)
 
-  await editor.getByRole('button', { name: /^Xóa / }).last().click()
-  await editor.getByRole('button', { name: 'Xác nhận xóa' }).click()
+  await snackRow.getByRole('button', { name: /^Xóa / }).click()
+  await snackRow.getByRole('button', { name: 'Xác nhận xóa' }).click()
   await expect(editor.getByRole('status')).toContainText('Đã xóa bữa ăn')
   const afterDelete = await page.request.get('/api/v1/meal-plans/current', { headers })
   const reduced = await afterDelete.json() as typeof plan
