@@ -16,7 +16,7 @@ test('Trang sách gốc hiển thị đủ chỉ dẫn nguồn, không nhận t�
   await expect(page.locator('.book-ref-meal-grid').getByText('Trang 236')).toBeVisible()
   await expect(page.getByText(/phải kiểm tra dị ứng/)).toBeVisible()
   await page.locator('.book-ref-quantity-details summary').click()
-  await expect(page.getByText(/Đã đối chiếu trực tiếp 9 bữa/)).toBeVisible()
+  await expect(page.getByText(/Đã đối chiếu trực tiếp 17 bữa/)).toBeVisible()
   await expect(page.locator('.book-ref-quantity-card')).toHaveCount(4)
   const dinnerQuantity = page.locator('.book-ref-quantity-card').filter({ hasText: 'Gạo đen, bí ngòi và tôm' })
   await expect(dinnerQuantity.getByText('tôm', { exact: true })).toBeVisible()
@@ -33,6 +33,29 @@ test('Bữa sáng ngày đầu không còn nhầm mứt việt quất thành m�
   await expect(breakfast.getByText('Mứt việt quất không thêm đường').first()).toBeVisible()
   await expect(breakfast.getByText(/KHÔNG PHẢI mật ong/)).toBeVisible()
   await expect(breakfast.getByText(/Chưa có xác nhận biên tập độc lập/)).toBeVisible()
+})
+
+test('Ngày 3 đối chiếu rõ định lượng mẻ farinata và món sinh tố thay thế', async ({ page }) => {
+  await page.goto('/book')
+  await page.getByRole('button', { name: 'Ngày 3' }).click()
+  await page.locator('.book-ref-quantity-details summary').click()
+  const breakfast = page.locator('.book-ref-quantity-card').filter({ hasText: 'mứt quả mọng' })
+  await expect(breakfast.getByText('Mứt quả mọng hỗn hợp không thêm đường').first()).toBeVisible()
+  const snack = page.locator('.book-ref-quantity-card').filter({ hasText: 'farinata' })
+  await expect(snack.getByText(/CẢ MẺ bánh/)).toBeVisible()
+  await expect(snack.getByText(/lựa chọn KHÁC/)).toBeVisible()
+  await expect(snack.getByText('240 g', { exact: true })).toBeVisible()
+})
+
+test('Ngày 4 phân biệt mứt mơ với mật và tiêu chí thanh ăn nhẹ', async ({ page }) => {
+  await page.goto('/book')
+  await page.getByRole('button', { name: 'Ngày 4' }).click()
+  await page.locator('.book-ref-quantity-details summary').click()
+  const breakfast = page.locator('.book-ref-quantity-card').filter({ hasText: 'mứt mơ' })
+  await expect(breakfast.getByText('Mứt mơ không thêm đường').first()).toBeVisible()
+  const snack = page.locator('.book-ref-quantity-card').filter({ hasText: 'thanh hạt' })
+  await expect(snack.getByText('< 8 g', { exact: true })).toBeVisible()
+  await expect(page.getByText(/Đã đối chiếu trực tiếp 17 bữa/)).toBeVisible()
 })
 
 test('Trang sách gốc dễ đọc trên điện thoại 390px', async ({ page }) => {
@@ -56,7 +79,7 @@ test('Giới hạn đường trong bữa phụ không hiển thị như định 
   await expect(snack.getByText('< 8 g', { exact: true })).toBeVisible()
   await expect(snack.getByText(/không phải nguyên liệu/)).toBeVisible()
   await expect(page.getByText(/350 dữ kiện/)).toBeVisible()
-  await expect(page.getByText(/47 bữa còn lại chưa được rà soát mức này/)).toBeVisible()
+  await expect(page.getByText(/39 bữa còn lại chưa được rà soát mức này/)).toBeVisible()
   await expect(page.getByText('Tên nguyên liệu cần đối chiếu bản dịch')).toHaveCount(0)
 })
 

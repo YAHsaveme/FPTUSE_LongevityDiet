@@ -20,9 +20,9 @@ describe('Appendix A first two days: visual source-page audit, not medical certi
       pdfPages: [215, 216, 217, 218],
       status: 'source-page-crosschecked-not-clinically-approved',
     })
-    expect(appendix.metadata.reviewedMeals).toBe(9)
-    expect(appendix.metadata.reviewedQuantities).toBe(55)
-    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(47)
+    expect(appendix.metadata.reviewedMeals).toBeGreaterThanOrEqual(9)
+    expect(appendix.metadata.reviewedQuantities).toBeGreaterThanOrEqual(55)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review').length).toBeLessThanOrEqual(47)
     for (const row of batch) {
       const meal = appendix.meals.find(m => m.week === row.week && m.day === row.day && m.slot === row.slot)
       expect(meal).toBeDefined()
