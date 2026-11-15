@@ -2,13 +2,19 @@ using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories.Repositories;
 using LongevityDiet.Repositories.Catalog.Queries;
 using LongevityDiet.Repositories.Catalog.Repositories;
+using LongevityDiet.Domain.Catalog;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace LongevityDiet.Services.Planning;
 
 public sealed class PlanningCatalogSnapshotProvider(
     IUserRepository userRepository,
     IMealPlanRepository mealPlanRepository,
-    IRecipeRepository? recipeRepository = null) : IPlanningInputProvider
+    IRecipeRepository? recipeRepository = null,
+    IRuleCatalogRepository? ruleCatalogRepository = null,
+    IConfiguration? configuration = null,
+    bool enableTestFixtures = false) : IPlanningInputProvider
 {
     private static readonly string[] FishAllergen = ["fish"];
 
@@ -585,23 +591,89 @@ public sealed class PlanningCatalogSnapshotProvider(
             PreferredCuisine: preferredCuisine);
     }
 
-    public Task<PlanningRuleSetSnapshot> GetActiveRuleSetAsync(
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult(DefaultRuleSet);
+    public async Task<PlanningRuleSetSnapshot> GetActiveRuleSetAsync(
+        CancellationToken cancellationToken = default)
+    {
+        if (enableTestFixtures)
+            return DefaultRuleSet; // Explicit test fixture only. Not a runtime fallback.
+
+        if (ruleCatalogRepository is null)
+            throw new InvalidOperationException("Planner requires an active, persisted RuleSet repository.");
+
+        var current = await ruleCatalogRepository.GetActiveRuleSetAsync(cancellationToken);
+        if (current is null)
+        {
+            // Isolated, synthetic API tests intentionally reset an empty catalog.
+            // Never silently fall back in a real, non-testing deployment.
+            if (string.Equals(configuration?["Planning:EnableDemoRuleSetFallback"], "true",
+                    StringComparison.OrdinalIgnoreCase))
+                return DefaultRuleSet;
+            throw new InvalidOperationException(
+                "No active published RuleSet exists. Review and publish one before generating plans.");
+        }
+        if (!current.IsActive || current.PublishedAt is null)
+            throw new InvalidOperationException("The selected RuleSet is not published.");
+
+        var now = DateTimeOffset.UtcNow;
+        if (current.PublishedAt > now || current.EffectiveAt > now)
+            throw new InvalidOperationException("RuleSet is not yet effective.");
+
+        var rules = new List<PlanningDietRuleSnapshot>();
+        foreach (var version in current.RuleVersions.OrderBy(v => v.DietRule.RuleKey))
+        {
+            if (version.State != RuleVersionState.Published ||
+                !version.DietRule.IsActive ||
+                version.PublishedAt is null || version.PublishedAt > now ||
+                version.EffectiveAt > now)
+                continue;
+
+            using var parameters = JsonDocument.Parse(version.ParametersJson);
+            if (parameters.RootElement.ValueKind != JsonValueKind.Object)
+                throw new InvalidOperationException("Published rule parameters must be an object.");
+
+            decimal weight = 0m; // Legacy JSON keys are NOT fabricated into new numeric weights.
+            if (parameters.RootElement.TryGetProperty("baseWeight", out var jsonWeight))
+            {
+                if (jsonWeight.ValueKind != JsonValueKind.Number ||
+                    !jsonWeight.TryGetDecimal(out weight) || weight < 0 || weight > 100)
+                    throw new InvalidOperationException("Published rule baseWeight must be a number from 0 to 100.");
+            }
+
+            var key = version.DietRule.RuleKey switch
+            {
+                "PLANT_FORWARD_PATTERN" => "PLANT_FORWARD",
+                "LIMIT_REFINED_SUGAR" => "LOW_SUGAR_SATFAT",
+                var other => other
+            };
+            rules.Add(new PlanningDietRuleSnapshot(
+                key, version.DietRule.Title, version.SourceType.ToString(),
+                version.SourceUrl, version.EvidenceLevel.ToString(), weight));
+        }
+        if (rules.Count == 0)
+            throw new InvalidOperationException("The active RuleSet has no effective, published rules.");
+        return new PlanningRuleSetSnapshot("v1", current.VersionLabel,
+            current.PublishedAt.Value, rules);
+    }
 
     /// <summary>
-    /// Use the live, Admin-maintained recipe catalog alongside verified example candidates.
-    /// A newly created recipe is eligible only when active, ingredients/foods are active,
-    /// and essential nutrition fields are supplied. Nutrition values remain Admin-entered
-    /// data, not a claim of validation against the copyrighted book.
+    /// Runtime defaults to Admin-maintained recipes in the database only. The
+    /// unverified fixture catalog is an explicit Development/Testing opt-in,
+    /// never an implicit production fallback or claim of original-book approval.
+    /// An active recipe is eligible only when its ingredients and nutrition exist;
+    /// Admin-entered nutrition is not independently certified by the book.
     /// </summary>
     public async Task<IReadOnlyList<PlanningCandidateMealSnapshot>> GetCandidateMealsAsync(
         CancellationToken cancellationToken = default)
     {
+        // Fixture meals are never silently offered in a real deployment.
+        // Demo runtime must opt in, and candidates are marked for provenance.
+        var demoEnabled = enableTestFixtures ||
+            string.Equals(configuration?["Planning:EnableDemoCandidates"], "true", StringComparison.OrdinalIgnoreCase);
+        var candidates = demoEnabled
+            ? CandidateCatalog.Select(item => item with { ContractVersion = "demo-reference-v1" }).ToList()
+            : new List<PlanningCandidateMealSnapshot>();
         if (recipeRepository is null)
-            return CandidateCatalog;
-
-        var candidates = CandidateCatalog.ToList();
+            return candidates;
         const int pageSize = 100;
         for (var pageNumber = 1; pageNumber <= 100; pageNumber++)
         {

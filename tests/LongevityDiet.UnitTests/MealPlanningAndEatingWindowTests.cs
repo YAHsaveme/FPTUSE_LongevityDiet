@@ -21,12 +21,12 @@ public sealed class MealPlanningAndEatingWindowTests
 
         var service1 = new MealPlanningService(
             planRepo1,
-            new PlanningCatalogSnapshotProvider(userRepo, planRepo1),
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo1, enableTestFixtures: true),
             new EmptyWellnessRepository("peanut"), timeProvider);
 
         var service2 = new MealPlanningService(
             planRepo2,
-            new PlanningCatalogSnapshotProvider(userRepo, planRepo2),
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo2, enableTestFixtures: true),
             new EmptyWellnessRepository("peanut"), timeProvider);
 
         var command = new GenerateMealPlanCommand(
@@ -88,7 +88,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var plans = new InMemoryMealPlanRepository();
         var planner = new MealPlanningService(
             plans,
-            new PlanningCatalogSnapshotProvider(users, plans),
+            new PlanningCatalogSnapshotProvider(users, plans, enableTestFixtures: true),
             new EmptyWellnessRepository(allergiesCsv),
             new FixedTimeProvider(FixedNow));
 
@@ -127,7 +127,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var userId = Guid.NewGuid();
         var userRepo = CreateUserRepositoryWithOnboardedUser(userId);
         var planRepo = new InMemoryMealPlanRepository();
-        var provider = new PlanningCatalogSnapshotProvider(userRepo, planRepo);
+        var provider = new PlanningCatalogSnapshotProvider(userRepo, planRepo, enableTestFixtures: true);
         var service = new MealPlanningService(planRepo, provider,
             new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow),
             new SafeFakeAiChoiceGenerator());
@@ -171,7 +171,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var users = CreateUserRepositoryWithOnboardedUser(userId, mealFrequency: 4);
         var plans = new InMemoryMealPlanRepository();
         var planner = new MealPlanningService(plans,
-            new PlanningCatalogSnapshotProvider(users, plans),
+            new PlanningCatalogSnapshotProvider(users, plans, enableTestFixtures: true),
             new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var generated = await planner.GeneratePlanAsync(userId,
@@ -197,7 +197,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var planRepo = new InMemoryMealPlanRepository();
         var service = new MealPlanningService(
             planRepo,
-            new PlanningCatalogSnapshotProvider(userRepo, planRepo),
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo, enableTestFixtures: true),
             new EmptyWellnessRepository("peanut,shellfish,soy,tree-nut"), new FixedTimeProvider(FixedNow));
 
         var command = new GenerateMealPlanCommand(
@@ -230,7 +230,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var planRepo = new InMemoryMealPlanRepository();
         var service = new MealPlanningService(
             planRepo,
-            new PlanningCatalogSnapshotProvider(userRepo, planRepo),
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo, enableTestFixtures: true),
             new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var command = new GenerateMealPlanCommand(
@@ -262,7 +262,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var planRepo = new InMemoryMealPlanRepository();
         var service = new MealPlanningService(
             planRepo,
-            new PlanningCatalogSnapshotProvider(userRepo, planRepo),
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo, enableTestFixtures: true),
             new EmptyWellnessRepository("peanut,shellfish"), new FixedTimeProvider(FixedNow));
 
         var generated = await service.GeneratePlanAsync(
@@ -301,7 +301,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var planRepo = new InMemoryMealPlanRepository();
         var service = new MealPlanningService(
             planRepo,
-            new PlanningCatalogSnapshotProvider(userRepo, planRepo),
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo, enableTestFixtures: true),
             new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var startDate = new DateOnly(2026, 11, 2);
@@ -504,7 +504,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var time = new MutableTimeProvider(new DateTimeOffset(2026, 12, 1, 4, 0, 0, TimeSpan.Zero));
         var planning = new MealPlanningService(
             planRepo,
-            new PlanningCatalogSnapshotProvider(userRepo, planRepo),
+            new PlanningCatalogSnapshotProvider(userRepo, planRepo, enableTestFixtures: true),
             new EmptyWellnessRepository(), time);
 
         Guid? previousPlan = null;
@@ -557,7 +557,7 @@ public sealed class MealPlanningAndEatingWindowTests
         var userId = Guid.NewGuid();
         var users = CreateUserRepositoryWithOnboardedUser(userId);
         var plans = new InMemoryMealPlanRepository();
-        var provider = new FirstCandidateFetchBarrier(new PlanningCatalogSnapshotProvider(users, plans));
+        var provider = new FirstCandidateFetchBarrier(new PlanningCatalogSnapshotProvider(users, plans, enableTestFixtures: true));
         var wellness = new EmptyWellnessRepository();
         var clock = new FixedTimeProvider(FixedNow);
         // Different scoped services represent two concurrent HTTP requests
@@ -599,7 +599,7 @@ public sealed class MealPlanningAndEatingWindowTests
         plans.Plans.Add(first);
         plans.Plans.Add(second);
         var service = new MealPlanningService(plans,
-            new PlanningCatalogSnapshotProvider(users, plans),
+            new PlanningCatalogSnapshotProvider(users, plans, enableTestFixtures: true),
             new EmptyWellnessRepository(), new FixedTimeProvider(FixedNow));
 
         var result = await service.ArchivePlanAsync(userId, second.Id);

@@ -6,6 +6,15 @@ namespace LongevityDiet.UnitTests;
 
 public sealed class RecommendationV2AndReplacementTests
 {
+    [Fact]
+    public void RequestedWeightVersion_CannotSilentlyMapToDefault()
+    {
+        var valid = RecommendationRankingPipeline.ResolveWeightProfile("LDC-WEIGHTS-V2.0");
+        Assert.Equal("LDC-WEIGHTS-V2.0", valid.Version);
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            RecommendationRankingPipeline.ResolveWeightProfile("LDC-WEIGHTS-V3-NOT-PUBLISHED"));
+    }
+
     private static List<RecommendationCandidateInput> CreateSampleCandidates() =>
     [
         new(

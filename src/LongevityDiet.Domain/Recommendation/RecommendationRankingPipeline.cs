@@ -303,6 +303,14 @@ public static class RecommendationRankingPipeline
             return ("invalid_request", "Recommendation request must not be null.");
         }
 
+        if (!string.IsNullOrWhiteSpace(request.WeightProfileVersion) &&
+            !string.Equals(request.WeightProfileVersion,
+                RecommendationSoftWeightProfile.DefaultV2.Version, StringComparison.Ordinal))
+        {
+            return ("unsupported_weight_profile_version",
+                "The requested recommendation weight profile version is not available.");
+        }
+
         if (string.IsNullOrWhiteSpace(request.RuleSetVersion))
         {
             return ("invalid_rule_set_version", "RuleSetVersion is required.");
@@ -327,8 +335,17 @@ public static class RecommendationRankingPipeline
         return null;
     }
 
-    public static RecommendationSoftWeightProfile ResolveWeightProfile(string? version) =>
-        RecommendationSoftWeightProfile.DefaultV2;
+    public static RecommendationSoftWeightProfile ResolveWeightProfile(string? version)
+    {
+        if (string.IsNullOrWhiteSpace(version) ||
+            string.Equals(version, RecommendationSoftWeightProfile.DefaultV2.Version,
+                StringComparison.Ordinal))
+            return RecommendationSoftWeightProfile.DefaultV2;
+
+        // Never claim that an arbitrary requested version was used.
+        throw new ArgumentOutOfRangeException(nameof(version),
+            "Requested recommendation weight profile version is not registered.");
+    }
 
     private static List<string> EvaluateHardConstraints(
         RecommendationCandidateInput candidate,
