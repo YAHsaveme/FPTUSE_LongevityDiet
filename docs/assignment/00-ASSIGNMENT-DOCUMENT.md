@@ -42,9 +42,9 @@ documentation and presentation **10%**.
 
 The official handover uses one editable Draw.io and one one-page PDF per diagram.
 C1/C2 show the ADR-005 target (six domain-owned SQL catalogs); the current legacy
-API and data migration remain transitional. The database view covers **50 physical tables in six target databases**:
-49 explicit EF Core DbSet tables plus the implicit Catalog many-to-many
-`RuleSetVersionItems` table. The diagram annotates **20 source-confirmed,
+API and data migration remain transitional. The database view covers **51 physical tables in six target databases**:
+50 explicit EF Core DbSet tables plus the implicit Catalog many-to-many
+`RuleSetVersionItems` table. The new Catalog `RecipeCompositionRevisions` table preserves immutable recipe-ingredient and allergen history. The diagram annotates **21 source-confirmed,
 within-owner SQL foreign keys**; cross-service IDs are not SQL FKs.
 Redis Streams is implemented and remains the primary business transport.
 RabbitMQ/AMQP is an **optional, QA-tested, metadata-only event-audit mirror**

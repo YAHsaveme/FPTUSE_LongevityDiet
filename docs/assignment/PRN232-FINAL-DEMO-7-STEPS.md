@@ -17,14 +17,14 @@ Kỳ vọng: SQL Server và Redis healthy, API/Gateway ready 200 khi các overla
 
 ## 01. System architecture
 
-Mở **đúng năm** tệp PDF và Draw.io trong `docs/assignment/one-page/`: C0, C1, C2, Database Diagram và Business Flow. Trình bày actors, REST/gRPC, Gateway, databases, Redis Streams, Worker và nhánh RabbitMQ audit tùy chọn. Phải phân biệt **Current Runtime** (Compose gốc, ba SQL DB, dữ liệu legacy) với **Target ADR-005** (sáu service owner, sáu DB có thể chạy trên Compose overlay QA). ERD mới mô tả **50 bảng vật lý / 20 SQL foreign keys nội bộ trong sáu target database** (49 DbSet + một bảng join EF implicit); không dùng con số của ERD Current Runtime cũ để giải thích bản này. QA target service độc lập **không đồng nghĩa** Web/legacy đã cutover hay có public TLS/443.
+Mở **đúng năm** tệp PDF và Draw.io trong `docs/assignment/one-page/`: C0, C1, C2, Database Diagram và Business Flow. Trình bày actors, REST/gRPC, Gateway, databases, Redis Streams, Worker và nhánh RabbitMQ audit tùy chọn. Phải phân biệt **Current Runtime** (Compose gốc, ba SQL DB, dữ liệu legacy) với **Target ADR-005** (sáu service owner, sáu DB có thể chạy trên Compose overlay QA). ERD mới mô tả **51 bảng vật lý / 21 SQL foreign keys nội bộ trong sáu target database** (50 DbSet + một bảng join EF implicit); không dùng con số của ERD Current Runtime cũ để giải thích bản này. QA target service độc lập **không đồng nghĩa** Web/legacy đã cutover hay có public TLS/443.
 
     node scripts/Validate-OfficialArchitecture.js
     node scripts/Validate-OfficialDiagram-Geometry.js --strict
     node scripts/Validate-CourseLinks.js
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Validate-ProjectStructure.ps1
 
-Kỳ vọng: cả năm Draw.io và năm PDF đơn trang đạt kiểm tra kết nối, căn chỉnh, tránh trùng chữ và thông số 50 bảng; giải thích đúng mức triển khai **target QA opt-in so với runtime mặc định**. Không gọi target là production/cutover hoàn tất.
+Kỳ vọng: cả năm Draw.io và năm PDF đơn trang đạt kiểm tra kết nối, căn chỉnh, tránh trùng chữ và thông số 51 bảng; giải thích đúng mức triển khai **target QA opt-in so với runtime mặc định**. Không gọi target là production/cutover hoàn tất.
 
 ## 02. REST API
 
