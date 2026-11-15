@@ -23,6 +23,26 @@ public sealed class AdminRulesController(RuleCatalogService rules, ICurrentUser 
         return Ok(result.Value);
     }
 
+
+    [HttpPost("rule-sets/activate")]
+    [ProducesResponseType<RuleSetDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<RuleSetDto>> ActivateRuleSet(
+        ActivateRuleSetRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await rules.ActivateRuleSetAsync(
+            new ActivateRuleSetCommand(request.VersionLabel, request.RuleVersionIds),
+            currentUser.UserId!.Value, cancellationToken);
+        if (!result.Succeeded || result.Value is null)
+            return this.ToProblem(result,
+                result.ErrorCode == "rule_set_conflict"
+                    ? StatusCodes.Status409Conflict
+                    : StatusCodes.Status400BadRequest);
+        return Created("/api/v1/diet-rules/active-set", result.Value);
+    }
+
     [HttpPost("diet-rules")]
     [ProducesResponseType<DietRuleDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

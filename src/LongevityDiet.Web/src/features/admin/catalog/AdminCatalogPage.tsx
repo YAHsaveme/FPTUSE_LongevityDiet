@@ -13,6 +13,8 @@ import {
   createRecipe,
   createRule,
   createRuleVersion,
+  getActiveRuleSet,
+  activateRuleSet,
   deactivateFood,
   deactivateRecipe,
   getAdminRecipe,
@@ -526,6 +528,29 @@ function RuleAdmin() {
   const [evidenceLevel, setEvidenceLevel] = useState(2)
   const [message, setMessage] = useState<string | null>(null)
   const rules = useQuery({ queryKey: ['admin', 'rules'], queryFn: () => getRules(true) })
+  const activeRuleSet = useQuery({
+    queryKey: ['admin', 'active-rule-set'],
+    queryFn: getActiveRuleSet,
+  })
+  const [nextRuleSetLabel, setNextRuleSetLabel] = useState('')
+  const [selectedRuleVersionIds, setSelectedRuleVersionIds] = useState<string[]>([])
+  const [confirmRuleSetActivation, setConfirmRuleSetActivation] = useState(false)
+  const activate = useMutation({
+    mutationFn: () => activateRuleSet({
+      versionLabel: nextRuleSetLabel.trim(), ruleVersionIds: selectedRuleVersionIds,
+    }),
+    onSuccess: (result) => {
+      setMessage('Đã kích hoạt bộ quy tắc ' + result.versionLabel +
+        '. Các thực đơn đã lưu vẫn giữ phiên bản quy tắc lịch sử.')
+      setSelectedRuleVersionIds([])
+      setNextRuleSetLabel('')
+      setConfirmRuleSetActivation(false)
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'active-rule-set'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'rules'] })
+      void queryClient.invalidateQueries({ queryKey: ['catalog', 'rules'] })
+    },
+    onError: (error) => setMessage(getApiErrorMessage(error)),
+  })
   const selectedRule = useMemo(() => rules.data?.find((rule) => rule.id === selectedRuleId) ?? rules.data?.[0], [rules.data, selectedRuleId])
   const addRule = useMutation({
     mutationFn: () => createRule({ ruleKey, title, description, category, isMedicalSensitive }),
@@ -552,6 +577,56 @@ function RuleAdmin() {
     <div className="admin-grid rules-admin-grid">
       <section className="admin-list-panel">
         <PanelHeading title="Quy tắc và phiên bản" note={String(rules.data?.length ?? 0) + ' quy tắc'} />
+        <section className="surface-card" style={{ padding: '1rem', marginBlock: '.8rem' }}
+          aria-label="Kích hoạt bộ quy tắc đã xuất bản">
+          <h3>Bộ quy tắc đang có hiệu lực</h3>
+          {activeRuleSet.isLoading && <p>Đang kiểm tra bộ quy tắc hiện tại...</p>}
+          {activeRuleSet.isError && <p role="alert">Chưa có bộ quy tắc đang hoạt động.</p>}
+          {activeRuleSet.data && (
+            <p><strong>{activeRuleSet.data.versionLabel}</strong> · {activeRuleSet.data.rules.length} phiên bản quy tắc đã xuất bản</p>
+          )}
+          <p>Chỉ lựa chọn phiên bản đã được quản trị viên khác phê duyệt.
+            Việc kích hoạt không sửa các phiên bản cũ hay thực đơn đã lưu.</p>
+          <label className="admin-field">
+            <span>Mã bộ quy tắc mới (duy nhất, 5–80 ký tự)</span>
+            <input value={nextRuleSetLabel}
+              onChange={(event) => setNextRuleSetLabel(event.target.value)}
+              placeholder="2026.11-reviewed-v2" />
+          </label>
+          <div role="group" aria-label="Chọn một phiên bản đã công bố cho mỗi quy tắc">
+            {rules.data?.filter(rule => !rule.isMedicalSensitive).map(rule => (
+              <div key={rule.id} style={{ marginBlock: '.65rem' }}>
+                <strong>{viContent(rule.title)} ({rule.ruleKey})</strong>
+                {rule.versions.filter(version => version.state === 2).map(version => (
+                  <label key={version.id} style={{ display: 'block' }}>
+                    <input type="checkbox" checked={selectedRuleVersionIds.includes(version.id)}
+                      onChange={(event) => setSelectedRuleVersionIds(current =>
+                        event.target.checked
+                          ? [...current.filter(id => !rule.versions.some(v => v.id === id)), version.id]
+                          : current.filter(id => id !== version.id))} />
+                    {' '}v{version.versionNumber} · {viContent(version.citation)}
+                  </label>
+                ))}
+                {!rule.versions.some(version => version.state === 2) && <small>Chưa có phiên bản được phê duyệt.</small>}
+              </div>
+            ))}
+          </div>
+          <label>
+            <input type="checkbox" checked={confirmRuleSetActivation}
+              onChange={(event) => setConfirmRuleSetActivation(event.target.checked)} />
+            {' '}Tôi xác nhận đã kiểm tra nguồn và muốn áp dụng các phiên bản được chọn cho thực đơn tạo mới.
+          </label>
+          <div className="admin-form-actions">
+            <button type="button" className="primary-admin-action"
+              disabled={activate.isPending || !confirmRuleSetActivation ||
+                selectedRuleVersionIds.length === 0 ||
+                !/^[A-Za-z0-9._-]{5,80}$/.test(nextRuleSetLabel.trim())}
+              onClick={() => activate.mutate()}>
+              <Save size={14} /> Kích hoạt bộ quy tắc mới
+            </button>
+          </div>
+        </section>
+
         <section className="surface-card" style={{ padding: '1rem', marginBlock: '.8rem' }} aria-label="Danh sách quy tắc chờ rà soát an toàn">
           <h3>Danh sách chờ duyệt về an toàn</h3>
           <label>
@@ -711,7 +786,7 @@ function RuleGovernance({ version }: { version: RuleVersion }) {
     {showHistory && <div aria-live="polite">
       <label>Lọc loại thay đổi <select value={actionFilter} onChange={event => { setActionFilter(event.target.value); setPage(1) }}>
         <option value="">Tất cả thay đổi</option>
-        {['Created', 'Edited', 'Submitted', 'Rejected', 'Published', 'Retired'].map(action => <option key={action} value={action}>{viContent(action)}</option>)}
+        {['Created', 'Edited', 'Submitted', 'Rejected', 'Published', 'Retired', 'ActivatedInRuleSet'].map(action => <option key={action} value={action}>{viContent(action)}</option>)}
       </select></label>
       {history.isLoading && <p>Đang tải lịch sử...</p>}
       {history.isError && <p role="alert">{getApiErrorMessage(history.error)}</p>}

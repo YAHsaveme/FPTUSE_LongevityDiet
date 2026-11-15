@@ -227,6 +227,10 @@ public sealed record RuleVersionDto(
     DateTimeOffset? EffectiveAt,
     DateTimeOffset? PublishedAt);
 
+public sealed record ActivateRuleSetCommand(
+    string VersionLabel,
+    IReadOnlyList<Guid> RuleVersionIds);
+
 public sealed record RuleSetDto(
     Guid Id,
     string VersionLabel,
