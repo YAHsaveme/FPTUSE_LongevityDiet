@@ -3,6 +3,9 @@ import { expect, test } from '@playwright/test'
 // Full UI-to-SQL business journey. Only the local isolated Docker QA project
 // should serve the browser; synthetic identities are never production users.
 test('member can complete catalog, planning, activity, challenge, report and reminder journeys', async ({ page }) => {
+  // The real SQL/Worker workflow includes an explicit 45s report readiness
+  // poll, so the test-level bound must exceed Playwright's 30s default.
+  test.setTimeout(120_000)
   const id = Date.now().toString()
   const email = `journey-${id}@example.test`
   const password = 'Qa!Journey123456'
@@ -187,9 +190,16 @@ test('member can complete catalog, planning, activity, challenge, report and rem
     // /profile step below separately tests a full authenticated page reload.
     const quickNav = page.getByRole('navigation', { name: 'Điều hướng nhanh' })
     await expect(quickNav).toBeVisible()
-    await quickNav.getByRole('button', { name: 'Mở các trang khác' }).click()
-    await quickNav.getByRole('group', { name: 'Các trang khác' })
-      .getByRole('link', { name: 'Thông báo' }).click()
+    // Desktop exposes the direct secondary link, while <=800px screens hide
+    // it behind the More menu. Only interact with an actually visible target.
+    const directNotificationsLink = quickNav.getByRole('link', { name: 'Thông báo' })
+    if (await directNotificationsLink.isVisible()) {
+      await directNotificationsLink.click()
+    } else {
+      await quickNav.getByRole('button', { name: 'Mở các trang khác' }).click()
+      await quickNav.getByRole('group', { name: 'Các trang khác' })
+        .getByRole('link', { name: 'Thông báo' }).click()
+    }
     await expect(page).toHaveURL(/\/notifications$/)
     await expect(page.getByRole('heading', { name: 'Giữ nhịp theo cách bạn chọn' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Bật thông báo trình duyệt/ })).toBeVisible()
