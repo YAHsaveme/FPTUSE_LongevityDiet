@@ -59,6 +59,51 @@ public sealed class MealPlanRepository(LongevityDietDbContext dbContext) : IMeal
             .ToList();
     }
 
+    public async Task<PagedRepositoryItems<MealPlan>> QueryPlansAsync(
+        Guid userId, HistoryPageQuery options, CancellationToken cancellationToken = default)
+    {
+        var source = dbContext.MealPlans.AsNoTracking().Where(x => x.UserId == userId);
+        if (!string.IsNullOrWhiteSpace(options.Search))
+            source = source.Where(x => x.DietaryPattern.Contains(options.Search));
+        if (options.FromDate.HasValue)
+            source = source.Where(x => x.StartDate >= options.FromDate.Value);
+        if (options.ToDate.HasValue)
+            source = source.Where(x => x.StartDate <= options.ToDate.Value);
+        if (!string.IsNullOrWhiteSpace(options.Status) &&
+            Enum.TryParse<MealPlanStatus>(options.Status, true, out var status))
+            source = source.Where(x => x.Status == status);
+        var total = await source.CountAsync(cancellationToken);
+        // The SQLite integration-test provider cannot translate DateTimeOffset ORDER BY.
+        // Production SQL Server still performs sorting and pagination in SQL.
+        if ((dbContext.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true) &&
+            options.SortBy.Equals("generatedAt", StringComparison.OrdinalIgnoreCase))
+        {
+            var sqliteRows = await source.Include(x => x.Days).ThenInclude(d => d.Meals)
+                .ToListAsync(cancellationToken);
+            var ordered = (options.Descending
+                ? sqliteRows.OrderByDescending(x => x.GeneratedAt)
+                : sqliteRows.OrderBy(x => x.GeneratedAt)).ThenBy(x => x.Id);
+            return new PagedRepositoryItems<MealPlan>(ordered
+                .Skip((options.Page - 1) * options.PageSize).Take(options.PageSize).ToList(), total);
+        }
+
+        var sorted = (options.SortBy.ToLowerInvariant(), options.Descending) switch
+        {
+            ("startdate", false) => source.OrderBy(x => x.StartDate).ThenBy(x => x.Id),
+            ("startdate", true) => source.OrderByDescending(x => x.StartDate).ThenBy(x => x.Id),
+            ("revisionnumber", false) => source.OrderBy(x => x.RevisionNumber).ThenBy(x => x.Id),
+            ("revisionnumber", true) => source.OrderByDescending(x => x.RevisionNumber).ThenBy(x => x.Id),
+            ("generatedat", false) => source.OrderBy(x => x.GeneratedAt).ThenBy(x => x.Id),
+            _ => source.OrderByDescending(x => x.GeneratedAt).ThenBy(x => x.Id),
+        };
+        var items = await sorted
+            .Include(x => x.Days).ThenInclude(d => d.Meals)
+            .AsSplitQuery()
+            .Skip((options.Page - 1) * options.PageSize).Take(options.PageSize)
+            .ToListAsync(cancellationToken);
+        return new PagedRepositoryItems<MealPlan>(items, total);
+    }
+
     public Task<UserDietaryPreference?> GetDietaryPreferenceAsync(
         Guid userId,
         CancellationToken cancellationToken = default) =>

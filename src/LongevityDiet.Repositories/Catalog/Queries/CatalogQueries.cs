@@ -34,7 +34,8 @@ public sealed record FoodQuery(
     bool? IsFish,
     bool ActiveOnly,
     FoodSortField SortField,
-    SortDirection SortDirection);
+    SortDirection SortDirection,
+    bool? IsActive = null);
 
 public sealed record RecipeQuery(
     int Page,
@@ -48,6 +49,7 @@ public sealed record RecipeQuery(
     bool? HasFish,
     bool ActiveOnly,
     RecipeSortField SortField,
-    SortDirection SortDirection);
+    SortDirection SortDirection,
+    bool? IsActive = null);
 
 public sealed record RepositoryPage<T>(IReadOnlyList<T> Items, int TotalItems);

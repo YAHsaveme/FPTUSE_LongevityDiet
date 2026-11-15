@@ -18,6 +18,80 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
         _factory = factory;
     }
 
+
+    [Fact]
+    public async Task MemberHistoryPages_AreBoundedUserOwnedAndCompatibleWithLegacyLists()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var anonymous = _factory.CreateHttpsClient();
+        foreach (var path in new[]
+            { "/api/v1/meal-plans/page", "/api/v1/meal-logs/page",
+              "/api/v1/challenges/history/page", "/api/v1/weekly-reports/page" })
+        {
+            Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.GetAsync(path)).StatusCode);
+        }
+
+        using var alice = await CreateOnboardedUserClientAsync("history-a");
+        using var bob = await CreateOnboardedUserClientAsync("history-b");
+
+        var screening = await alice.PutAsJsonAsync("/api/v1/wellness/screening",
+            new { RiskFlags = Array.Empty<string>(), AllergiesReviewed = true, Allergies = Array.Empty<string>() });
+        Assert.Equal(HttpStatusCode.OK, screening.StatusCode);
+        var localDate = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7));
+        var generated = await alice.PostAsJsonAsync("/api/v1/meal-plans/generate",
+            new GenerateMealPlanRequest(localDate, Days: 7));
+        Assert.Equal(HttpStatusCode.Created, generated.StatusCode);
+        var plan = await generated.Content.ReadFromJsonAsync<MealPlanResponse>();
+        Assert.NotNull(plan);
+
+        var alicePlans = await alice.GetAsync("/api/v1/meal-plans/page?page=1&pageSize=1&sortBy=generatedAt&status=Active");
+        Assert.Equal(HttpStatusCode.OK, alicePlans.StatusCode);
+        using (var body = System.Text.Json.JsonDocument.Parse(await alicePlans.Content.ReadAsStringAsync()))
+        {
+            Assert.Equal(1, body.RootElement.GetProperty("totalItems").GetInt32());
+            Assert.Equal(1, body.RootElement.GetProperty("items").GetArrayLength());
+        }
+        var bobPlans = await bob.GetAsync("/api/v1/meal-plans/page?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.OK, bobPlans.StatusCode);
+        using (var body = System.Text.Json.JsonDocument.Parse(await bobPlans.Content.ReadAsStringAsync()))
+            Assert.Equal(0, body.RootElement.GetProperty("totalItems").GetInt32());
+
+        var eatenAt = new DateTimeOffset(localDate, new TimeOnly(12, 0), TimeSpan.FromHours(7));
+        var logged = await alice.PostAsJsonAsync("/api/v1/meal-logs",
+            new CreateMealLogRequest(eatenAt, "Lunch", "Synthetic QA Lunch", null, null,
+                [new MealLogItemRequest("QA-LUNCH", "Synthetic Food", 1m, "portion",
+                    230, 10m, 25m, 8m, 3m, true)]));
+        Assert.Equal(HttpStatusCode.Created, logged.StatusCode);
+
+        var filteredLogs = await alice.GetAsync(
+            "/api/v1/meal-logs/page?page=1&pageSize=1&search=Synthetic&slotType=Lunch&sortBy=calories");
+        Assert.Equal(HttpStatusCode.OK, filteredLogs.StatusCode);
+        using (var body = System.Text.Json.JsonDocument.Parse(await filteredLogs.Content.ReadAsStringAsync()))
+            Assert.Equal(1, body.RootElement.GetProperty("totalItems").GetInt32());
+        var bobLogs = await bob.GetAsync("/api/v1/meal-logs/page");
+        Assert.Equal(HttpStatusCode.OK, bobLogs.StatusCode);
+        using (var body = System.Text.Json.JsonDocument.Parse(await bobLogs.Content.ReadAsStringAsync()))
+            Assert.Equal(0, body.RootElement.GetProperty("totalItems").GetInt32());
+
+        foreach (var path in new[]
+        {
+            "/api/v1/meal-plans/page?pageSize=101",
+            "/api/v1/meal-logs/page?slotType=Invalid",
+            "/api/v1/meal-logs/page?sortBy=unknown",
+            "/api/v1/challenges/history/page?page=0",
+            "/api/v1/weekly-reports/page?status=Invalid",
+            "/api/v1/weekly-reports/page?fromDate=2026-11-15&toDate=2026-11-01"
+        })
+        {
+            Assert.Equal(HttpStatusCode.BadRequest, (await alice.GetAsync(path)).StatusCode);
+        }
+
+        Assert.Equal(HttpStatusCode.OK, (await alice.GetAsync("/api/v1/challenges/history/page")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await alice.GetAsync("/api/v1/weekly-reports/page")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await alice.GetAsync("/api/v1/meal-logs")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await alice.GetAsync("/api/v1/meal-plans")).StatusCode);
+    }
+
     [Fact]
     public async Task MealPlanEndpoints_GenerateGetRegenerateMealAndRegeneratePlan_EnforceAllergiesAndExclusions()
     {

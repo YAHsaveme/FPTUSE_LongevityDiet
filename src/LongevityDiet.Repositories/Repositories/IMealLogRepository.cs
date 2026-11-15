@@ -5,6 +5,7 @@ namespace LongevityDiet.Repositories.Repositories;
 public interface IMealLogRepository
 {
     Task<MealLog?> GetByIdForUserAsync(Guid logId, Guid userId, CancellationToken cancellationToken = default);
+    Task<PagedRepositoryItems<MealLog>> QueryAsync(Guid userId, HistoryPageQuery options, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<MealLog>> ListByDateRangeAsync(
         Guid userId,
         DateOnly fromDate,

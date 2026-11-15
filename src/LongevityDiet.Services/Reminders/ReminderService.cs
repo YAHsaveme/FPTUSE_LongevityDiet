@@ -103,13 +103,45 @@ public sealed class ReminderService(
             user.Profile?.TimeZone ?? "Asia/Ho_Chi_Minh", clock.GetUtcNow());
     }
 
-    public async Task<NotificationPage> ListAsync(Guid userId, int page, int pageSize, CancellationToken ct)
+    public Task<NotificationPage> ListAsync(
+        Guid userId, int page, int pageSize, CancellationToken ct) =>
+        ListFilteredAsync(userId, page, pageSize, null, null, null, "createdAt", "desc", ct);
+
+    public async Task<NotificationPage> ListFilteredAsync(
+        Guid userId, int page, int pageSize, ReminderCategory? category,
+        bool? isRead, string? search, string sortBy, string sortDirection, CancellationToken ct)
     {
         await ActiveUserAsync(userId, ct);
         ValidatePage(page, pageSize);
+        if (category.HasValue && !Enum.IsDefined(category.Value))
+            throw new ReminderAccessException("invalid_category", "Unsupported notification category.");
+        if (search?.Length > 120)
+            throw new ReminderAccessException("invalid_search", "Search cannot exceed 120 characters.");
+        if (!new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "createdAt", "category", "title" }.Contains(sortBy))
+            throw new ReminderAccessException("invalid_sort", "Unsupported notification sort field.");
+        if (!new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "asc", "desc" }.Contains(sortDirection))
+            throw new ReminderAccessException("invalid_direction", "Sort direction must be asc or desc.");
         var query = db.Notifications.AsNoTracking().Where(n => n.UserId == userId);
+        if (category.HasValue) query = query.Where(n => n.Category == category.Value);
+        if (isRead.HasValue)
+            query = isRead.Value ? query.Where(n => n.ReadAtUtc != null) : query.Where(n => n.ReadAtUtc == null);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(n => n.Title.Contains(term) || n.Body.Contains(term));
+        }
         var total = await query.CountAsync(ct);
-        var items = await query.OrderByDescending(n => n.CreatedAtUtc).ThenBy(n => n.Id)
+        var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+        var sorted = (sortBy.ToLowerInvariant(), descending) switch
+        {
+            ("category", false) => query.OrderBy(n => n.Category).ThenBy(n => n.Id),
+            ("category", true) => query.OrderByDescending(n => n.Category).ThenBy(n => n.Id),
+            ("title", false) => query.OrderBy(n => n.Title).ThenBy(n => n.Id),
+            ("title", true) => query.OrderByDescending(n => n.Title).ThenBy(n => n.Id),
+            ("createdat", false) => query.OrderBy(n => n.CreatedAtUtc).ThenBy(n => n.Id),
+            _ => query.OrderByDescending(n => n.CreatedAtUtc).ThenBy(n => n.Id),
+        };
+        var items = await sorted
             .Skip((page - 1) * pageSize).Take(pageSize)
             .Select(n => new NotificationView(
                 n.Id, n.Category, n.Title, n.Body, n.DeepLink, n.CreatedAtUtc, n.ReadAtUtc,

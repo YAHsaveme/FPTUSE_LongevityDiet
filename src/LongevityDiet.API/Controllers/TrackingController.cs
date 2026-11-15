@@ -38,8 +38,12 @@ public sealed class TrackingController(
     [HttpGet("activities")]
     public Task<IActionResult> List(
         DateTimeOffset? from, DateTimeOffset? to,
-        int page = 1, int pageSize = 20, CancellationToken ct = default) =>
-        Handle(async userId => Ok(await service.ListAsync(userId, from, to, page, pageSize, ct)));
+        int page = 1, int pageSize = 20,
+        ActivityKind? kind = null, string? search = null,
+        string sortBy = "startedAt", string sortDirection = "desc",
+        CancellationToken ct = default) =>
+        Handle(async userId => Ok(await service.ListAsync(
+            userId, from, to, page, pageSize, ct, kind, search, sortBy, sortDirection)));
 
     [HttpGet("activities/daily")]
     public Task<IActionResult> Daily(DateOnly? date, CancellationToken ct) =>

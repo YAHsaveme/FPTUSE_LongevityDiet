@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/authState'
 import { api } from '../../lib/api'
+import { HistoryBrowser } from '../../components/HistoryBrowser'
 import { getApiErrorMessage } from '../../lib/apiError'
 import { viContent, viTokens, viReason, viLegacyPlanExplanation } from '../../lib/viContent'
 import { FmdWorkspaceSection } from './FmdWorkspaceSection'
@@ -1949,6 +1950,8 @@ export function PlannerWorkspacePage() {
         </section>
 
         {/* FMD FASTING MIMICKING DIET & SAFETY GATE SECTION */}
+        <HistoryBrowser kind="meal-plan" />
+        <HistoryBrowser kind="meal-log" />
         <FmdWorkspaceSection />
       </main>
     </div>

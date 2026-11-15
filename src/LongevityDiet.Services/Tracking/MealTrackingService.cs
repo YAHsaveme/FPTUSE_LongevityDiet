@@ -1,6 +1,7 @@
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories.Repositories;
 using LongevityDiet.Services.Identity;
+using LongevityDiet.Services.Querying;
 
 namespace LongevityDiet.Services.Tracking;
 
@@ -155,6 +156,29 @@ public sealed class MealTrackingService(
         await RecalculateAndPersistSnapshotAsync(schedule, affectedDate, now, cancellationToken);
 
         return ServiceResult.Success(true);
+    }
+
+    public async Task<ServiceResult<CollectionPage<MealLogSummary>>> QueryMealLogsAsync(
+        Guid userId, CollectionPageQuery query, CancellationToken cancellationToken = default)
+    {
+        var fields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "eatenAt", "localDate", "calories", "title" };
+        var invalid = query.Validate(fields);
+        if (invalid is null && !string.IsNullOrWhiteSpace(query.SlotType) &&
+            (!Enum.TryParse<MealSlotType>(query.SlotType, true, out var slot) ||
+            !Enum.IsDefined(slot)))
+            invalid = "Unsupported meal slot type.";
+        if (invalid is not null)
+            return ServiceResult.Failure<CollectionPage<MealLogSummary>>("invalid_query", invalid);
+
+        var page = await mealLogRepository.QueryAsync(userId,
+            new HistoryPageQuery(query.Page, query.PageSize,
+                string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim(),
+                query.FromDate, query.ToDate, null, query.SortBy,
+                string.Equals(query.SortDirection, "desc", StringComparison.OrdinalIgnoreCase),
+                query.SlotType), cancellationToken);
+        return ServiceResult.Success(CollectionPageFactory.Create(
+            page.Items.Select(ToSummary).ToList(), query.Page, query.PageSize, page.TotalItems));
     }
 
     public async Task<ServiceResult<IReadOnlyList<MealLogSummary>>> ListMealLogsAsync(

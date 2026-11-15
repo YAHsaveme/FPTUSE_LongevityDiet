@@ -188,7 +188,8 @@ public sealed class FoodCatalogService(
             options.IsFish,
             !includeInactive,
             sortField,
-            direction));
+            direction,
+            includeInactive ? options.IsActive : true));
     }
 
     private static (string Code, string Message)? Validate(SaveFoodCommand command)

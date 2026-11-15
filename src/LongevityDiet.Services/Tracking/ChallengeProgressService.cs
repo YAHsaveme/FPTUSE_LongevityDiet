@@ -1,6 +1,7 @@
 using LongevityDiet.Domain.Entities;
 using LongevityDiet.Repositories.Repositories;
 using LongevityDiet.Services.Identity;
+using LongevityDiet.Services.Querying;
 
 namespace LongevityDiet.Services.Tracking;
 
@@ -84,6 +85,25 @@ public sealed class ChallengeProgressService(
     {
         var items = await repository.ListHistoryAsync(userId, cancellationToken);
         return ServiceResult.Success<IReadOnlyList<UserChallengeSummary>>(items.Select(ToSummary).ToList());
+    }
+
+    public async Task<ServiceResult<CollectionPage<UserChallengeSummary>>> QueryHistoryAsync(
+        Guid userId, CollectionPageQuery query, CancellationToken cancellationToken = default)
+    {
+        var sorts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "startDate", "endDate", "updatedAt" };
+        var statuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "Active", "Completed", "Abandoned" };
+        var invalid = query.Validate(sorts, statuses);
+        if (invalid is not null)
+            return ServiceResult.Failure<CollectionPage<UserChallengeSummary>>("invalid_query", invalid);
+        var page = await repository.QueryHistoryAsync(userId,
+            new HistoryPageQuery(query.Page, query.PageSize,
+                string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim(),
+                query.FromDate, query.ToDate, query.Status, query.SortBy,
+                string.Equals(query.SortDirection, "desc", StringComparison.OrdinalIgnoreCase)), cancellationToken);
+        return ServiceResult.Success(CollectionPageFactory.Create(
+            page.Items.Select(ToSummary).ToList(), query.Page, query.PageSize, page.TotalItems));
     }
 
     public async Task<ServiceResult<UserChallengeSummary>> SetDayCompletionAsync(

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { getApiErrorMessage } from '../../lib/apiError'
 import './tracking.css'
+import './tracking-list-filters.css'
 
 type Category = 1 | 2 | 3 | 4
 type Notification = {
@@ -59,6 +60,12 @@ function decodeVapidKey(value: string): ArrayBuffer {
 export function NotificationsPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [messageSearch, setMessageSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [readFilter, setReadFilter] = useState('all')
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortDirection, setSortDirection] = useState('desc')
   // React Query supplies server defaults; local state exists only after an edit.
   const [draftOverride, setDraftOverride] = useState<Preference | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
@@ -116,11 +123,28 @@ export function NotificationsPage() {
     queryFn: async () => (await api.get<Schedule[]>('/reminders/preview')).data,
   })
   const messages = useQuery({
-    queryKey: ['notifications', page],
+    queryKey: ['notifications', 'list', page, pageSize, messageSearch, categoryFilter, readFilter, sortBy, sortDirection],
     queryFn: async () => (await api.get<Page<Notification>>('/notifications',
-      { params: { page, pageSize: 10 } })).data,
+      { params: {
+        page, pageSize, search: messageSearch.trim() || undefined,
+        category: categoryFilter || undefined,
+        isRead: readFilter === 'all' ? undefined : readFilter === 'read',
+        sortBy, sortDirection,
+      } })).data,
     refetchInterval: 30000,
   })
+  // Keep the foreground notification feed unfiltered: UI filters must not suppress new alerts.
+  const foregroundFeed = useQuery({
+    queryKey: ['notifications', 'foreground-feed'],
+    queryFn: async () => (await api.get<Page<Notification>>('/notifications',
+      { params: { page: 1, pageSize: 10 } })).data,
+    refetchInterval: 30000,
+  })
+  useEffect(() => {
+    if (!messages.data || page <= Math.max(1, messages.data.totalPages)) return
+    const handle = window.setTimeout(() => setPage(Math.max(1, messages.data?.totalPages ?? 1)), 0)
+    return () => window.clearTimeout(handle)
+  }, [messages.data, page])
   const unread = useQuery({
     queryKey: ['notifications-unread'],
     queryFn: async () => (await api.get<{ count: number }>('/notifications/unread-count')).data,
@@ -130,7 +154,7 @@ export function NotificationsPage() {
   // Foreground browser alerts require an explicit user gesture/permission.
   // This is NOT background Web Push: a closed tab cannot receive alerts.
   useEffect(() => {
-    const rows = messages.data?.items
+    const rows = foregroundFeed.data?.items
     if (!rows) return
     if (firstNotificationLoad.current) {
       rows.forEach(n => seenNotifications.current.add(n.id))
@@ -156,7 +180,7 @@ export function NotificationsPage() {
         alert.close()
       }
     }
-  }, [messages.data, browserNotificationsOn])
+  }, [foregroundFeed.data, browserNotificationsOn])
 
   async function enableBrowserAlerts() {
     if (!('Notification' in window)) {
@@ -425,6 +449,36 @@ export function NotificationsPage() {
           <button type="button" disabled={!unread.data?.count || markAll.isPending}
             onClick={() => markAll.mutate()}><CheckCheck size={16} /> Đọc tất cả</button>
         </div>
+        <div className="tracking-list-filters" aria-label="Lọc thông báo">
+          <label>Tìm thông báo<input aria-label="Tìm trong thông báo" value={messageSearch}
+            onChange={e => {setPage(1);setMessageSearch(e.target.value)}} /></label>
+          <label>Danh mục<select aria-label="Lọc danh mục thông báo" value={categoryFilter}
+            onChange={e => {setPage(1);setCategoryFilter(e.target.value)}}>
+            <option value="">Tất cả</option>
+            {([1,2,3,4] as const).map(code => <option value={code} key={code}>{categoryFor(code)}</option>)}
+          </select></label>
+          <label>Trạng thái đọc<select aria-label="Lọc trạng thái đã đọc" value={readFilter}
+            onChange={e => {setPage(1);setReadFilter(e.target.value)}}>
+            <option value="all">Tất cả</option><option value="unread">Chưa đọc</option><option value="read">Đã đọc</option>
+          </select></label>
+          <label>Sắp xếp<select aria-label="Sắp xếp thông báo" value={sortBy}
+            onChange={e => {setPage(1);setSortBy(e.target.value)}}>
+            <option value="createdAt">Ngày nhận</option><option value="category">Danh mục</option>
+            <option value="title">Tiêu đề</option>
+          </select></label>
+          <label>Thứ tự<select aria-label="Thứ tự thông báo" value={sortDirection}
+            onChange={e => {setPage(1);setSortDirection(e.target.value)}}>
+            <option value="desc">Giảm dần</option><option value="asc">Tăng dần</option>
+          </select></label>
+          <label>Số dòng/trang<select aria-label="Số thông báo mỗi trang" value={pageSize}
+            onChange={e => {setPage(1);setPageSize(Number(e.target.value))}}>
+            {[10,20,50,100].map(count => <option key={count} value={count}>{count}</option>)}
+          </select></label>
+          <button type="button" onClick={() => {
+            setPage(1);setPageSize(10);setMessageSearch('');setCategoryFilter('');
+            setReadFilter('all');setSortBy('createdAt');setSortDirection('desc')
+          }}>Đặt lại</button>
+        </div>
         {messages.isLoading ? <p>Đang tải thông báo...</p> :
           messages.isError ? <p role="alert">{getApiErrorMessage(messages.error)}</p> :
           messages.data?.items.length === 0 ? <p>Chưa có thông báo nào.</p> :
@@ -449,11 +503,15 @@ export function NotificationsPage() {
               </div>
             ))}
           </div>}
+        {messages.data && <p aria-label="Số thông báo trong danh sách">Tổng cộng {messages.data.totalItems} thông báo.</p>}
         {(messages.data?.totalPages ?? 0) > 1 && <div className="tracking-pagination">
+          <button disabled={page <= 1} onClick={() => setPage(1)}>Đầu</button>
           <button disabled={page === 1} onClick={() => setPage(page - 1)}>Trước</button>
           <span>Trang {page} / {messages.data?.totalPages}</span>
           <button disabled={page === (messages.data?.totalPages ?? 1)}
             onClick={() => setPage(page + 1)}>Sau</button>
+          <button disabled={page >= (messages.data?.totalPages ?? 1)}
+            onClick={() => setPage(messages.data?.totalPages ?? 1)}>Cuối</button>
         </div>}
       </section>
     </main>

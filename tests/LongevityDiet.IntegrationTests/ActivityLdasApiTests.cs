@@ -27,6 +27,56 @@ public sealed class ActivityLdasApiTests : IClassFixture<IntegrationTestWebAppli
         Assert.Equal(HttpStatusCode.Unauthorized, create.StatusCode);
     }
 
+
+    [Fact]
+    public async Task ActivityList_ServerSideFilterSearchSort_StaysOwnerScoped()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var alice = await AuthorizedClientAsync();
+        using var bob = await AuthorizedClientAsync();
+        var started = DateTimeOffset.UtcNow.AddHours(-1);
+        foreach (var row in new[]
+        {
+            new { kind = 1, duration = 20, note = "Synthetic Walk", minutesAgo = 20 },
+            new { kind = 2, duration = 45, note = "Synthetic Cycling", minutesAgo = 10 },
+            new { kind = 1, duration = 30, note = "Other Walk", minutesAgo = 5 }
+        })
+        {
+            var response = await alice.PostAsJsonAsync("/api/v1/activities", new
+            {
+                row.kind, durationMinutes = row.duration,
+                startedAt = started.AddMinutes(-row.minutesAgo), row.note
+            });
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        }
+
+        var list = await alice.GetAsync(
+            "/api/v1/activities?page=1&pageSize=1&kind=1&search=Walk&sortBy=durationMinutes&sortDirection=desc");
+        Assert.Equal(HttpStatusCode.OK, list.StatusCode);
+        using (var body = JsonDocument.Parse(await list.Content.ReadAsStringAsync()))
+        {
+            Assert.Equal(2, body.RootElement.GetProperty("totalItems").GetInt32());
+            Assert.Equal(2, body.RootElement.GetProperty("totalPages").GetInt32());
+            Assert.Equal(30, body.RootElement.GetProperty("items")[0].GetProperty("durationMinutes").GetInt32());
+        }
+        var secondPage = await alice.GetAsync(
+            "/api/v1/activities?page=2&pageSize=1&kind=1&search=Walk&sortBy=durationMinutes&sortDirection=desc");
+        Assert.Equal(HttpStatusCode.OK, secondPage.StatusCode);
+        using (var body = JsonDocument.Parse(await secondPage.Content.ReadAsStringAsync()))
+            Assert.Equal(20, body.RootElement.GetProperty("items")[0].GetProperty("durationMinutes").GetInt32());
+        var otherUser = await bob.GetAsync("/api/v1/activities?page=1&pageSize=20");
+        using (var body = JsonDocument.Parse(await otherUser.Content.ReadAsStringAsync()))
+            Assert.Equal(0, body.RootElement.GetProperty("totalItems").GetInt32());
+
+        foreach (var invalid in new[] {
+            "/api/v1/activities?kind=99",
+            "/api/v1/activities?sortBy=unsafe",
+            "/api/v1/activities?sortDirection=random",
+            "/api/v1/activities?pageSize=101",
+        })
+            Assert.Equal(HttpStatusCode.BadRequest, (await alice.GetAsync(invalid)).StatusCode);
+    }
+
     [Fact]
     public async Task ActivityCrud_IsUserOwned_AndSoftDeleteRecalculates()
     {

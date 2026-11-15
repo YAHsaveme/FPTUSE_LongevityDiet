@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { FileText, RefreshCw } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
+import '../../components/history-browser.css'
 import { getApiErrorMessage } from '../../lib/apiError'
 import { viContent, viReportMetric, viReportSummary } from '../../lib/viContent'
 
@@ -25,10 +27,23 @@ function metricValue(metric: Metric) {
 
 export function WeeklyReportsPage() {
   const client = useQueryClient()
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
+  const [sortBy, setSortBy] = useState('weekStart')
+  const [sortDirection, setSortDirection] = useState('desc')
   const reports = useQuery({
-    queryKey: ['weekly-reports'],
-    queryFn: async () => (await api.get<Report[]>('/weekly-reports')).data,
+    queryKey: ['weekly-reports', page, pageSize, search, status, sortBy, sortDirection],
+    queryFn: async () => (await api.get<{ items: Report[]; totalItems: number; totalPages: number }>('/weekly-reports/page', {
+      params: { page, pageSize, search: search.trim() || undefined, status: status || undefined, sortBy, sortDirection },
+    })).data,
   })
+  useEffect(() => {
+    if (!reports.data || page <= Math.max(1, reports.data.totalPages)) return
+    const handle = window.setTimeout(() => setPage(Math.max(1, reports.data?.totalPages ?? 1)), 0)
+    return () => window.clearTimeout(handle)
+  }, [reports.data, page])
   const current = useQuery({
     queryKey: ['weekly-report-current'],
     queryFn: async () => {
@@ -91,9 +106,27 @@ export function WeeklyReportsPage() {
 
         <section className="workspace-section">
           <div className="section-heading"><div><span className="eyebrow">LỊCH SỬ</span><h2>Các báo cáo đã được lưu.</h2></div></div>
-          <div className="planner-days-grid">
-            {reports.data?.map((item) => <article className="surface-card" key={item.id}><strong>{item.weekStart} → {item.weekEnd}</strong><span>{viContent(item.status)} · phiên bản {item.reportVersion}</span><small>{viReportSummary(item.summary)}</small></article>)}
+          <div className="report-history-controls" aria-label="Bộ lọc báo cáo lịch sử">
+            <label>Tìm nội dung <input aria-label="Tìm báo cáo" value={search} onChange={e => {setPage(1); setSearch(e.target.value)}} /></label>
+            <label>Trạng thái <select aria-label="Trạng thái báo cáo" value={status} onChange={e => {setPage(1); setStatus(e.target.value)}}><option value="">Tất cả</option><option value="Ready">Đã tạo</option><option value="Pending">Đang chờ</option><option value="Failed">Lỗi</option></select></label>
+            <label>Sắp xếp <select aria-label="Sắp xếp báo cáo" value={sortBy} onChange={e => {setPage(1); setSortBy(e.target.value)}}><option value="weekStart">Tuần báo cáo</option><option value="generatedAt">Ngày tạo</option><option value="reportVersion">Phiên bản</option></select></label>
+            <label>Thứ tự <select aria-label="Thứ tự báo cáo" value={sortDirection} onChange={e => {setPage(1); setSortDirection(e.target.value)}}><option value="desc">Mới trước</option><option value="asc">Cũ trước</option></select></label>
+            <label>Số dòng/trang <select aria-label="Số báo cáo mỗi trang" value={pageSize} onChange={e => {setPage(1); setPageSize(Number(e.target.value))}}>{[10,20,50,100].map(n=><option key={n} value={n}>{n}</option>)}</select></label>
+            <button type="button" className="secondary-button" onClick={() => {setPage(1);setPageSize(10);setSearch('');setStatus('');setSortBy('weekStart');setSortDirection('desc')}}>Đặt lại</button>
           </div>
+          {reports.isLoading && <p role="status">Đang tải lịch sử...</p>}
+          {reports.isError && <p role="alert">{getApiErrorMessage(reports.error, 'Không thể tải lịch sử.')}</p>}
+          {reports.data?.items.length === 0 && <p role="status">Chưa có báo cáo phù hợp.</p>}
+          <div className="planner-days-grid">
+            {reports.data?.items.map((item) => <article className="surface-card" key={item.id}><strong>{item.weekStart} → {item.weekEnd}</strong><span>{viContent(item.status)} · phiên bản {item.reportVersion}</span><small>{viReportSummary(item.summary)}</small></article>)}
+          </div>
+          {reports.data && <nav className="report-history-pagination" aria-label="Phân trang báo cáo">
+            <span>{reports.data.totalItems} báo cáo · Trang {page}/{Math.max(1, reports.data.totalPages)}</span>
+            <button type="button" disabled={page<=1} onClick={() => setPage(1)}>Trang đầu</button>
+            <button type="button" disabled={page<=1} onClick={() => setPage(p=>p-1)}>Trước</button>
+            <button type="button" disabled={page>=reports.data.totalPages} onClick={() => setPage(p=>p+1)}>Sau</button>
+            <button type="button" disabled={page>=reports.data.totalPages} onClick={() => setPage(reports.data?.totalPages || 1)}>Trang cuối</button>
+          </nav>}
         </section>
       </main>
     </div>

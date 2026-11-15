@@ -701,6 +701,22 @@ public sealed class MealPlanningAndEatingWindowTests
     private sealed class InMemoryMealPlanRepository : IMealPlanRepository
     {
         public List<MealPlan> Plans { get; } = [];
+
+        public Task<PagedRepositoryItems<MealPlan>> QueryPlansAsync(
+            Guid userId, HistoryPageQuery options, CancellationToken cancellationToken = default)
+        {
+            var source = Plans.Where(x => x.UserId == userId);
+            if (options.FromDate.HasValue) source = source.Where(x => x.StartDate >= options.FromDate.Value);
+            if (options.ToDate.HasValue) source = source.Where(x => x.StartDate <= options.ToDate.Value);
+            if (!string.IsNullOrEmpty(options.Search))
+                source = source.Where(x => x.DietaryPattern.Contains(options.Search));
+            var rows = (options.Descending
+                ? source.OrderByDescending(x => x.GeneratedAt)
+                : source.OrderBy(x => x.GeneratedAt)).ThenBy(x => x.Id).ToList();
+            return Task.FromResult(new PagedRepositoryItems<MealPlan>(
+                rows.Skip((options.Page - 1) * options.PageSize).Take(options.PageSize).ToList(),
+                rows.Count));
+        }
         public Dictionary<Guid, UserDietaryPreference> Preferences { get; } = [];
 
         public Task<MealPlan?> GetActiveByUserAsync(Guid userId, CancellationToken cancellationToken = default) =>
@@ -750,6 +766,21 @@ public sealed class MealPlanningAndEatingWindowTests
     private sealed class InMemoryMealLogRepository : IMealLogRepository
     {
         public List<MealLog> Logs { get; } = [];
+
+        public Task<PagedRepositoryItems<MealLog>> QueryAsync(
+            Guid userId, HistoryPageQuery options, CancellationToken cancellationToken = default)
+        {
+            var source = Logs.Where(x => x.UserId == userId && !x.IsDeleted);
+            if (options.FromDate.HasValue) source = source.Where(x => x.LocalDate >= options.FromDate.Value);
+            if (options.ToDate.HasValue) source = source.Where(x => x.LocalDate <= options.ToDate.Value);
+            if (!string.IsNullOrEmpty(options.Search)) source = source.Where(x => x.Title.Contains(options.Search));
+            var rows = (options.Descending
+                ? source.OrderByDescending(x => x.EatenAt)
+                : source.OrderBy(x => x.EatenAt)).ThenBy(x => x.Id).ToList();
+            return Task.FromResult(new PagedRepositoryItems<MealLog>(
+                rows.Skip((options.Page - 1) * options.PageSize).Take(options.PageSize).ToList(),
+                rows.Count));
+        }
 
         public Task<MealLog?> GetByIdForUserAsync(Guid logId, Guid userId, CancellationToken cancellationToken = default) =>
             Task.FromResult(Logs.FirstOrDefault(x => x.Id == logId && x.UserId == userId && !x.IsDeleted));

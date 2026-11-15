@@ -2,6 +2,7 @@ using LongevityDiet.API.Errors;
 using LongevityDiet.API.Infrastructure;
 using LongevityDiet.API.Security;
 using LongevityDiet.Services.Tracking;
+using LongevityDiet.Services.Querying;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,15 @@ public sealed class WeeklyReportsController(
         if (currentUser.UserId is not { } userId) return Unauthorized();
         var result = await service.ListAsync(userId, cancellationToken);
         return Ok(result.Value);
+    }
+
+    [HttpGet("page")]
+    [ProducesResponseType<CollectionPage<WeeklyReportSummary>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> QueryPage([FromQuery] CollectionPageQuery query, CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId) return Unauthorized();
+        var result = await service.QueryReportsAsync(userId, query, cancellationToken);
+        return result.Succeeded && result.Value is not null ? Ok(result.Value) : this.ToProblem(result);
     }
 
     [HttpGet("current")]
