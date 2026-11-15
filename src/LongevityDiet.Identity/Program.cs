@@ -62,6 +62,15 @@ builder.Services.AddRateLimiter(o =>
         ctx.Connection.RemoteIpAddress?.ToString() ?? "local",
         _ => new FixedWindowRateLimiterOptions
         { PermitLimit = 40, QueueLimit = 0, Window = TimeSpan.FromMinutes(1), AutoReplenishment = true }));
+    // Keep session rotation and logout bounded but independent of login floods.
+    o.AddPolicy("identity-refresh", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        ctx.Connection.RemoteIpAddress?.ToString() ?? "local",
+        _ => new FixedWindowRateLimiterOptions
+        { PermitLimit = 100, QueueLimit = 0, Window = TimeSpan.FromMinutes(1), AutoReplenishment = true }));
+    o.AddPolicy("identity-revoke", ctx => RateLimitPartition.GetFixedWindowLimiter(
+        ctx.Connection.RemoteIpAddress?.ToString() ?? "local",
+        _ => new FixedWindowRateLimiterOptions
+        { PermitLimit = 100, QueueLimit = 0, Window = TimeSpan.FromMinutes(1), AutoReplenishment = true }));
 });
 var app = builder.Build();
 app.UseExceptionHandler();
@@ -130,7 +139,7 @@ auth.MapPost("/refresh", async (HttpContext http, AuthenticationService service,
     }
     SetCookie(http, result.Value!);
     return Results.Ok(ToSession(result.Value!));
-});
+}).RequireRateLimiting("identity-refresh");
 auth.MapPost("/revoke", async (HttpContext http, AuthenticationService service,
     CancellationToken ct) =>
 {
@@ -138,7 +147,7 @@ auth.MapPost("/revoke", async (HttpContext http, AuthenticationService service,
     await service.RevokeAsync(token, ct);
     ClearCookie(http);
     return Results.NoContent();
-});
+}).RequireRateLimiting("identity-revoke");
 
 var api = app.MapGroup("/api/v1").RequireAuthorization();
 api.MapProfileOwnerEndpoints();

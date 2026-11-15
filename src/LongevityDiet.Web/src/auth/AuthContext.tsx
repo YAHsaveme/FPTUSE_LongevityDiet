@@ -104,11 +104,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Do not block logout due to notification transport or permissions.
       }
     }
-    try {
-      await api.post('/auth/revoke')
-    } finally {
-      clearSession()
-    }
+    // The HttpOnly refresh cookie remains valid if the revoke request fails.
+    // Do not show a successful logout or erase the local user on HTTP 429/5xx.
+    await api.post('/auth/revoke')
+    clearSession()
   }, [clearSession])
 
   const updateSessionUser = useCallback((updates: Partial<SessionUser>) => {

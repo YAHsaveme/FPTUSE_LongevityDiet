@@ -169,6 +169,38 @@ public sealed class IdentityApiTests : IClassFixture<IntegrationTestWebApplicati
     }
 
     [Fact]
+    public async Task LoginThrottle_DoesNotBlockRefreshOrServerConfirmedRevoke()
+    {
+        using var isolatedFactory = new IntegrationTestWebApplicationFactory();
+        await isolatedFactory.ResetDatabaseAsync();
+        using var client = isolatedFactory.CreateHttpsClient();
+
+        var payload = CreateRegistration();
+        var register = await client.PostAsJsonAsync("/api/v1/auth/register", payload);
+        Assert.Equal(HttpStatusCode.Created, register.StatusCode);
+
+        var wasThrottled = false;
+        for (var attempt = 0; attempt < 45; attempt++)
+        {
+            var response = await client.PostAsJsonAsync("/api/v1/auth/login",
+                new { Email = "not-a-valid-address", Password = "wrong" });
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                wasThrottled = true;
+            else
+                Assert.True(response.StatusCode is HttpStatusCode.BadRequest or
+                    HttpStatusCode.Unauthorized);
+        }
+        Assert.True(wasThrottled, "Interactive auth must remain rate-limited.");
+
+        var refresh = await client.PostAsync("/api/v1/auth/refresh", content: null);
+        Assert.Equal(HttpStatusCode.OK, refresh.StatusCode);
+        var revoke = await client.PostAsync("/api/v1/auth/revoke", content: null);
+        Assert.Equal(HttpStatusCode.NoContent, revoke.StatusCode);
+        var replay = await client.PostAsync("/api/v1/auth/refresh", content: null);
+        Assert.Equal(HttpStatusCode.Unauthorized, replay.StatusCode);
+    }
+
+    [Fact]
     public async Task OpenApi_ContainsBearerSchemeAndProtectedProfileOperation()
     {
         await _factory.ResetDatabaseAsync();

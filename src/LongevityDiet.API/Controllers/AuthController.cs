@@ -58,6 +58,7 @@ public sealed class AuthController(AuthenticationService authenticationService) 
     }
 
     [HttpPost("refresh")]
+    [EnableRateLimiting("auth-refresh")]
     [ProducesResponseType<AuthSessionResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthSessionResponse>> Refresh(CancellationToken cancellationToken)
@@ -79,6 +80,7 @@ public sealed class AuthController(AuthenticationService authenticationService) 
     }
 
     [HttpPost("revoke")]
+    [EnableRateLimiting("auth-revoke")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Revoke(CancellationToken cancellationToken)
     {

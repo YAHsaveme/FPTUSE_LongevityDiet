@@ -88,6 +88,24 @@ try
                     Window = TimeSpan.FromMinutes(1),
                     AutoReplenishment = true,
                 }));
+        // Session renewal and revocation are separate from password attempts.
+        // Keep both bounded per IP; account-login floods must not prevent logout.
+        options.AddPolicy("auth-refresh", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? "local",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 100, QueueLimit = 0,
+                    Window = TimeSpan.FromMinutes(1), AutoReplenishment = true,
+                }));
+        options.AddPolicy("auth-revoke", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? "local",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 100, QueueLimit = 0,
+                    Window = TimeSpan.FromMinutes(1), AutoReplenishment = true,
+                }));
         options.AddPolicy("member-api", context =>
             RateLimitPartition.GetFixedWindowLimiter(
                 context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
