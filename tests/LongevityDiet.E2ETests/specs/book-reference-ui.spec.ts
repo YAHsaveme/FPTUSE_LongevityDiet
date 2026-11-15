@@ -50,3 +50,27 @@ test('Giới hạn đường trong bữa phụ không hiển thị như định 
   await expect(page.getByText(/54 bữa còn lại vẫn cần kiểm duyệt/)).toBeVisible()
   await expect(page.getByText('Tên nguyên liệu cần đối chiếu bản dịch')).toHaveCount(0)
 })
+
+test('Định lượng phân số 1/2 củ hành và rau ăn kèm hiển thị đúng trang PDF 239', async ({ page }) => {
+  await page.goto('/book')
+  await page.getByRole('button', { name: 'Tuần thứ hai' }).click()
+  await page.getByRole('button', { name: 'Ngày 6' }).click()
+  await page.locator('.book-ref-quantity-details summary').click()
+  const lunch = page.locator('.book-ref-quantity-card').filter({ hasText: 'Hành tây đỏ' })
+  await expect(lunch).toBeVisible()
+  await expect(lunch.getByText('1/2 cỡ vừa', { exact: true })).toBeVisible()
+  await expect(lunch.getByText(/không phải 2 củ/)).toBeVisible()
+  await expect(lunch.getByText('Rau lá xanh ăn kèm (khối lượng rau, không phải bánh mì)')).toBeVisible()
+  await expect(lunch.getByText('200 g', { exact: true })).toBeVisible()
+})
+
+test('Định lượng cả mẻ và giá trị lặp lại không bị trình bày là phần ăn riêng', async ({ page }) => {
+  await page.goto('/book')
+  await page.getByRole('button', { name: 'Ngày 3' }).click()
+  await page.locator('.book-ref-quantity-details summary').click()
+  const snack = page.locator('.book-ref-quantity-card').filter({ hasText: 'Bột đậu gà' })
+  await expect(snack.getByText('240 g', { exact: true })).toBeVisible()
+  await expect(snack.getByText(/Định lượng công thức làm mẻ, không phải khẩu phần một người/).first()).toBeVisible()
+  await page.getByRole('button', { name: 'Ngày 5' }).click()
+  await expect(page.getByText(/Sách lặp lại cùng một giá trị; không cộng hai lần/)).toBeVisible()
+})
