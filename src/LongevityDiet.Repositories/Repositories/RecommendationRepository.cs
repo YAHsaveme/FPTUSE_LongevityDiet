@@ -26,6 +26,7 @@ public sealed class RecommendationRepository(LongevityDietDbContext dbContext) :
     {
         var normalizedToken = preference.FoodToken.Trim().ToLowerInvariant();
         var existing = await dbContext.UserFoodPreferences
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(
                 x => x.UserId == preference.UserId && x.FoodToken == normalizedToken,
                 cancellationToken);
@@ -37,6 +38,8 @@ public sealed class RecommendationRepository(LongevityDietDbContext dbContext) :
             return;
         }
 
+        existing.IsDeleted = false;
+        existing.DeletedAt = null;
         existing.DisplayLabel = preference.DisplayLabel;
         existing.PreferenceKind = preference.PreferenceKind;
         existing.Source = preference.Source;
@@ -60,7 +63,9 @@ public sealed class RecommendationRepository(LongevityDietDbContext dbContext) :
             return false;
         }
 
-        dbContext.UserFoodPreferences.Remove(existing);
+        existing.IsDeleted = true;
+        existing.DeletedAt = DateTimeOffset.UtcNow;
+        existing.UpdatedAt = existing.DeletedAt.Value;
         return true;
     }
 

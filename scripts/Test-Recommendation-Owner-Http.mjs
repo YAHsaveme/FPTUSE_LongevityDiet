@@ -88,7 +88,12 @@ for (let i = 0; i < 40; i++) {
 check('RECOMMENDATION_OWNER_SQL_READY', ready);
 check('RECOMMENDATION_EF_MIGRATION', Number(sql('SET NOCOUNT ON; SELECT COUNT(*) ' +
   'FROM [LongevityRecommendationDb].[dbo].[__EFMigrationsHistory];')
-  .split(/\s+/).find(x => /^\d+$/.test(x))) >= 1);
+  .split(/\s+/).find(x => /^\d+$/.test(x))) >= 2);
+check('RECOMMENDATION_SOFT_DELETE_COLUMNS',
+  Number(sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
+    '[LongevityRecommendationDb].sys.columns c JOIN ' +
+    '[LongevityRecommendationDb].sys.tables t ON c.object_id=t.object_id ' +
+    "WHERE t.name='UserFoodPreferences' AND c.name IN ('IsDeleted','DeletedAt');")) === 2);
 const rpc = await grpcCoach();
 check('RECOMMENDATION_OWNER_GRPC_HTTP2', rpc.status === '0' &&
   rpc.response.length > 8 &&
@@ -164,6 +169,25 @@ check('RECOMMENDATION_OWNER_CAN_DELETE_PREF',
   (await request(prefPath, { token: a.token, method: 'DELETE' })).status === 204);
 check('RECOMMENDATION_PREF_DELETED',
   (await request(prefs, { token: a.token })).value?.length === 0);
+check('RECOMMENDATION_SOFT_DELETE_RETAINS_PHYSICAL_ROW',
+  Number(sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
+    '[LongevityRecommendationDb].[dbo].[UserFoodPreferences] ' +
+    "WHERE [UserId]='" + a.userId + "' AND [FoodToken]='QA-RICE-001' " +
+    'AND [IsDeleted]=1 AND [DeletedAt] IS NOT NULL;')) === 1);
+const reactivated = await request(prefPath, {
+  token: a.token, method: 'PUT',
+  body: { displayLabel: 'Restored brown rice', preferenceKind: 'Preferred' },
+});
+check('RECOMMENDATION_RESTORES_SAME_ROW_AFTER_DELETE',
+  reactivated.status === 200 && reactivated.value?.id === explicit.value?.id &&
+  reactivated.value?.preferenceKind === 'Preferred');
+check('RECOMMENDATION_REACTIVATED_VISIBLE_ONCE',
+  (await request(prefs, { token: a.token })).value?.length === 1);
+check('RECOMMENDATION_REACTIVATION_HAS_NO_DUPLICATE',
+  Number(sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
+    '[LongevityRecommendationDb].[dbo].[UserFoodPreferences] ' +
+    "WHERE [UserId]='" + a.userId + "' AND [FoodToken]='QA-RICE-001' " +
+    'AND [IsDeleted]=0 AND [DeletedAt] IS NULL;')) === 1);
 check('RECOMMENDATION_DB_HAS_NO_FOREIGN_DOMAIN_TABLES',
   sql('SET NOCOUNT ON; SELECT COUNT(*) FROM [LongevityRecommendationDb].sys.tables ' +
     "WHERE [name] IN ('Users','MealPlans','MealLogs','Foods','WorkerJobs');")
@@ -175,7 +199,7 @@ check('RECOMMENDATION_FEEDBACK_SINGLE_ROW_IDEMPOTENT',
 check('RECOMMENDATION_OUTBOX_VERSIONED_EVENTS',
   sql('SET NOCOUNT ON; SELECT COUNT(*) FROM ' +
     '[LongevityRecommendationDb].[dbo].[RecommendationOutbox] WHERE [UserId]=\'' +
-    a.userId + "';").split(/\s+/).includes('4'));
+    a.userId + "';").split(/\s+/).includes('5'));
 const redisIds = dockerId('redis');
 check('RECOMMENDATION_ISOLATED_REDIS', redisIds.length === 1);
 let published = false;

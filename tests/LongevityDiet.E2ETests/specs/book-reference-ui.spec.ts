@@ -13,8 +13,16 @@ test('Trang sách gốc hiển thị đủ chỉ dẫn nguồn, không nhận t�
   await page.getByRole('button', { name: 'Ngày 4' }).click()
   await expect(page.getByRole('heading', { name: 'Tuần 2, ngày 4' })).toBeVisible()
   await expect(page.getByText(/Gạo đen với bí ngòi và tôm/)).toBeVisible()
-  await expect(page.getByText('Trang 236')).toBeVisible()
+  await expect(page.locator('.book-ref-meal-grid').getByText('Trang 236')).toBeVisible()
   await expect(page.getByText(/phải kiểm tra dị ứng/)).toBeVisible()
+  await page.locator('.book-ref-quantity-details summary').click()
+  await expect(page.getByText(/Hiện mới đối chiếu trực tiếp hai bữa/)).toBeVisible()
+  await expect(page.locator('.book-ref-quantity-card')).toHaveCount(4)
+  const dinnerQuantity = page.locator('.book-ref-quantity-card').filter({ hasText: 'Gạo đen, bí ngòi và tôm' })
+  await expect(dinnerQuantity.getByText('tôm', { exact: true })).toBeVisible()
+  await expect(dinnerQuantity.getByText('60 g', { exact: true })).toBeVisible()
+  await expect(dinnerQuantity.getByText(/Đã đối chiếu định lượng/)).toBeVisible()
+  await expect(page.locator('.book-ref-unverified')).toHaveCount(3)
   await expect(page.getByRole('heading', { name: 'Tra cứu nguồn vi chất' })).toBeVisible()
 })
 
@@ -22,6 +30,8 @@ test('Trang sách gốc dễ đọc trên điện thoại 390px', async ({ page 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/book')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await page.locator('.book-ref-quantity-details summary').click()
+  await expect(page.locator('.book-ref-quantity-card')).toHaveCount(4)
   const dimensions = await page.evaluate(() => ({
     scroll: document.documentElement.scrollWidth,
     view: document.documentElement.clientWidth,

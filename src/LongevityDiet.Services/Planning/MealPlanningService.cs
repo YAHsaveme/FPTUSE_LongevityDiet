@@ -597,6 +597,7 @@ public sealed class MealPlanningService(
         Guid userId, Guid planId, Guid? dayId, Guid? plannedMealId,
         SavePlannedMealCommand command, CancellationToken cancellationToken)
     {
+        using var mutationLease = await MealPlanMutationGate.AcquireAsync(userId, cancellationToken);
         var plan = await mealPlanRepository.GetByIdForUserAsync(planId, userId, cancellationToken);
         if (plan is null)
             return ServiceResult.Failure<MealPlanSummary>("meal_plan_not_found", "Meal plan was not found.");
@@ -702,6 +703,7 @@ public sealed class MealPlanningService(
         Guid userId, Guid planId, Guid plannedMealId,
         CancellationToken cancellationToken = default)
     {
+        using var mutationLease = await MealPlanMutationGate.AcquireAsync(userId, cancellationToken);
         var plan = await mealPlanRepository.GetByIdForUserAsync(planId, userId, cancellationToken);
         if (plan is null)
             return ServiceResult.Failure<MealPlanSummary>("meal_plan_not_found", "Meal plan was not found.");
@@ -715,12 +717,14 @@ public sealed class MealPlanningService(
             return ServiceResult.Failure<MealPlanSummary>("last_meal_required",
                 "Keep at least one meal in each day. Archive the entire plan if it is no longer needed.");
 
-        // This is a required EF relationship configured with Cascade; removing the
-        // child from its tracked parent's collection deletes the orphan on SaveChanges.
-        day.Meals.Remove(meal);
+        // Preserve the planned meal and all details for audit; query filters hide it
+        // from the active plan without physically removing the required EF child.
+        var removedAt = timeProvider.GetUtcNow();
+        meal.IsDeleted = true;
+        meal.DeletedAt = removedAt;
         mealPlanRepository.RemovePlannedMeal(meal);
-        day.TargetCaloriesKcal = day.Meals.Sum(m => m.CaloriesKcal);
-        plan.UpdatedAt = timeProvider.GetUtcNow();
+        day.TargetCaloriesKcal = day.Meals.Where(m => !m.IsDeleted).Sum(m => m.CaloriesKcal);
+        plan.UpdatedAt = removedAt;
         await mealPlanRepository.SaveChangesAsync(cancellationToken);
         return ServiceResult.Success(ToSummary(plan));
     }
@@ -1411,6 +1415,7 @@ public sealed class MealPlanningService(
             .Select(d =>
             {
                 var meals = d.Meals
+                    .Where(m => !m.IsDeleted)
                     .OrderBy(m => m.SlotOrder)
                     .Select(m => new PlannedMealSummary(
                         m.Id,

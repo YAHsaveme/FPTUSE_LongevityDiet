@@ -46,7 +46,11 @@ public sealed class WellnessRepository(LongevityDietDbContext db) : IWellnessRep
     public Task<WellnessCheckIn?> GetCheckInByIdAsync(Guid userId, Guid checkInId, CancellationToken cancellationToken = default) =>
         db.WellnessCheckIns.FirstOrDefaultAsync(x => x.UserId == userId && x.Id == checkInId, cancellationToken);
 
-    public void RemoveCheckIn(WellnessCheckIn checkIn) => db.WellnessCheckIns.Remove(checkIn);
+    public void RemoveCheckIn(WellnessCheckIn checkIn)
+    {
+        checkIn.IsDeleted = true;
+        checkIn.DeletedAt ??= DateTimeOffset.UtcNow;
+    }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         db.SaveChangesAsync(cancellationToken);

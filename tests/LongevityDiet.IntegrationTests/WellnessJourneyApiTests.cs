@@ -5,6 +5,9 @@ using LongevityDiet.API.Contracts.Planning;
 using LongevityDiet.API.Contracts.Wellness;
 using LongevityDiet.Services.Planning;
 using LongevityDiet.Services.Wellness;
+using LongevityDiet.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LongevityDiet.IntegrationTests;
 
@@ -336,6 +339,56 @@ public sealed class WellnessJourneyApiTests : IClassFixture<IntegrationTestWebAp
         var allowed = await client.PostAsJsonAsync("/api/v1/meal-plans/generate",
             new GenerateMealPlanRequest(today, 7));
         Assert.Equal(HttpStatusCode.Created, allowed.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeletedWellnessCheckIn_RemainsInDatabaseButAllowsNewRecordForSameDayAndPhase()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var client = await OnboardedAsync("softdelete-wellness");
+        var today = LocalToday();
+        var input = new SaveWellnessCheckInRequest(
+            today, "During", 4, 4, 4, 4, ["fatigue"], ["better_sleep"],
+            null, "First report");
+
+        var first = await client.PostAsJsonAsync("/api/v1/wellness/check-ins", input);
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        var firstView = await first.Content.ReadFromJsonAsync<CheckInView>();
+        Assert.NotNull(firstView);
+
+        var deleted = await client.DeleteAsync($"/api/v1/wellness/check-ins/{firstView.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await client.DeleteAsync($"/api/v1/wellness/check-ins/{firstView.Id}")).StatusCode);
+
+        var overview = await client.GetFromJsonAsync<WellnessOverview>("/api/v1/wellness/overview");
+        Assert.NotNull(overview);
+        Assert.DoesNotContain(overview.RecentCheckIns, x => x.Id == firstView.Id);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var original = await db.WellnessCheckIns.IgnoreQueryFilters()
+                .SingleAsync(x => x.Id == firstView.Id);
+            Assert.True(original.IsDeleted);
+            Assert.NotNull(original.DeletedAt);
+            Assert.False(await db.WellnessCheckIns.AnyAsync(x => x.Id == firstView.Id));
+        }
+
+        var replacement = await client.PostAsJsonAsync("/api/v1/wellness/check-ins", input);
+        Assert.Equal(HttpStatusCode.OK, replacement.StatusCode);
+        var replacementView = await replacement.Content.ReadFromJsonAsync<CheckInView>();
+        Assert.NotNull(replacementView);
+        Assert.NotEqual(firstView.Id, replacementView.Id);
+
+        using var finalScope = _factory.Services.CreateScope();
+        var finalDb = finalScope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+        var versions = await finalDb.WellnessCheckIns.IgnoreQueryFilters()
+            .Where(x => x.LocalDate == today && x.Phase == "During")
+            .ToListAsync();
+        Assert.Equal(2, versions.Count);
+        Assert.Single(versions, x => !x.IsDeleted);
+        Assert.Single(versions, x => x.IsDeleted);
     }
 
     private static DateOnly LocalToday() =>

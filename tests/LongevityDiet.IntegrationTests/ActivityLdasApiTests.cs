@@ -132,12 +132,30 @@ public sealed class ActivityLdasApiTests : IClassFixture<IntegrationTestWebAppli
         Assert.Equal(25, summary.EquivalentMinutes);
         Assert.Equal("Asia/Ho_Chi_Minh", summary.TimeZone);
 
+        // Verify the persisted activity on its actual Asia/Ho_Chi_Minh day.
+        // The /latest endpoint intentionally scores *today*, which may differ
+        // from the activity day when the test runs around local midnight.
+        var activityDateScore = await client.GetFromJsonAsync<ScoreView>(
+            $"/api/v1/ldas/{localDate:yyyy-MM-dd}");
+        Assert.NotNull(activityDateScore);
+        Assert.True(activityDateScore.IsPartial);
+        Assert.Null(activityDateScore.Score);
+        Assert.Equal(localDate, activityDateScore.LocalDate);
+        Assert.Equal(35m, activityDateScore.CoveragePercent);
+        Assert.Single(activityDateScore.Breakdown,
+            d => d.Code == "activity" && d.RawScore.HasValue);
+
         var latest = await client.GetFromJsonAsync<ScoreView>("/api/v1/ldas/latest");
         Assert.NotNull(latest);
         Assert.True(latest.IsPartial);
         Assert.Null(latest.Score);
-        Assert.Equal(35m, latest.CoveragePercent);
-        Assert.Equal(1, latest.Breakdown.Count(d => d.Code == "activity" && d.RawScore.HasValue));
+        Assert.True(latest.LocalDate == localDate ||
+                    latest.LocalDate == localDate.AddDays(1),
+            $"Unexpected /latest date {latest.LocalDate} versus activity date {localDate}.");
+        // Crossing midnight must not attribute yesterday's workout to today.
+        Assert.Equal(latest.LocalDate == localDate ? 35m : 0m, latest.CoveragePercent);
+        Assert.Equal(latest.LocalDate == localDate ? 1 : 0,
+            latest.Breakdown.Count(d => d.Code == "activity" && d.RawScore.HasValue));
     }
 
     [Fact]

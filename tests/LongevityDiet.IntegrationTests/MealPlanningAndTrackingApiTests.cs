@@ -3,6 +3,9 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using LongevityDiet.API.Contracts.Planning;
 using LongevityDiet.API.Contracts.Tracking;
+using LongevityDiet.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LongevityDiet.IntegrationTests;
 
@@ -244,6 +247,24 @@ public sealed class MealPlanningAndTrackingApiTests : IClassFixture<IntegrationT
         Assert.Equal(HttpStatusCode.OK, deleted.StatusCode);
         Assert.Equal(3,
             (await deleted.Content.ReadFromJsonAsync<MealPlanResponse>())!.Days[0].Meals.Count);
+        // Soft deletion must preserve the row and all measured fields.
+        using (var historyScope = _factory.Services.CreateScope())
+        {
+            var db = historyScope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var historyRow = await db.PlannedMeals.IgnoreQueryFilters()
+                .SingleAsync(x => x.Id == snackId);
+            Assert.True(historyRow.IsDeleted);
+            Assert.NotNull(historyRow.DeletedAt);
+            Assert.False(await db.PlannedMeals.AnyAsync(x => x.Id == snackId));
+        }
+        // Reusing the same slot after a soft delete must satisfy the filtered
+        // unique index while retaining the previous row as history.
+        var readded = await owner.PostAsJsonAsync(addUri, snack);
+        Assert.Equal(HttpStatusCode.Created, readded.StatusCode);
+        var readdedPlan = await readded.Content.ReadFromJsonAsync<MealPlanResponse>();
+        Assert.NotNull(readdedPlan);
+        Assert.Equal(4, readdedPlan.Days[0].Meals.Count);
+        Assert.DoesNotContain(readdedPlan.Days[0].Meals, x => x.Id == snackId);
 
         // Deleting one planned meal never erases another member's data and
         // the historical plan is kept when the owner archives the schedule.

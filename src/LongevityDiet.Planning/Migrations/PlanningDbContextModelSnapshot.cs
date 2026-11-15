@@ -417,6 +417,9 @@ namespace LongevityDiet.Planning.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(600)
@@ -449,6 +452,9 @@ namespace LongevityDiet.Planning.Migrations
                         .IsRequired()
                         .HasMaxLength(800)
                         .HasColumnType("nvarchar(800)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPlantBased")
                         .HasColumnType("bit");
@@ -505,7 +511,8 @@ namespace LongevityDiet.Planning.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MealPlanDayId", "SlotOrder")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("UserId", "MealPlanId");
 

@@ -93,7 +93,11 @@ public sealed class MealPlanRepository(LongevityDietDbContext dbContext) : IMeal
     public async Task AddPlannedMealAsync(PlannedMeal meal, CancellationToken cancellationToken = default) =>
         await dbContext.PlannedMeals.AddAsync(meal, cancellationToken);
 
-    public void RemovePlannedMeal(PlannedMeal meal) => dbContext.PlannedMeals.Remove(meal);
+    public void RemovePlannedMeal(PlannedMeal meal)
+    {
+        meal.IsDeleted = true;
+        meal.DeletedAt ??= DateTimeOffset.UtcNow;
+    }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);

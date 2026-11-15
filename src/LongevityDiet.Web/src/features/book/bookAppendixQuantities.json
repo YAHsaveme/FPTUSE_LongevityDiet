@@ -1,0 +1,2853 @@
+{
+  "metadata": {
+    "bookId": "longo-2018-the-longevity-diet",
+    "appendix": "A",
+    "pdfPages": "215-242",
+    "status": "unverified-machine-extraction",
+    "noteVi": "Số lượng dưới đây được tách tự động từ PDF, chưa được biên tập viên xác minh. Chỉ dùng để đối chiếu, không dùng làm định lượng cá nhân hoặc đầu vào AI.",
+    "reviewedMeals": 2,
+    "reviewedQuantities": 20,
+    "reviewMethod": "Manual verification against the supplied PDF parsed page text; no clinical review",
+    "reviewDate": "2026-11-14"
+  },
+  "meals": [
+    {
+      "week": 1,
+      "day": 1,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        215
+      ],
+      "facts": [
+        {
+          "labelVi": null,
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "bánh focaccia nguyên cám, dầu ô-liu, bánh focaccia",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 215
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 1,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Rau bina, hạt thông và nho khô",
+      "sourcePages": [
+        215
+      ],
+      "facts": [
+        {
+          "labelVi": "rau bina",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "hạt thông",
+          "amount": "9",
+          "unit": "g",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "hạt thông",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "nho khô",
+          "amount": "9",
+          "unit": "g",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "nho khô",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "dầu ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "dầu ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": "bánh cracker lúa mì spelt ăn kèm",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 215
+        }
+      ],
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 215
+    },
+    {
+      "week": 1,
+      "day": 1,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        215
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa dừa",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 215
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 215
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 1,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Mì nguyên cám với bông cải xanh và đậu đen",
+      "sourcePages": [
+        216
+      ],
+      "facts": [
+        {
+          "labelVi": "đậu đen",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "bông cải xanh",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "mì Ý",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "1",
+          "unit": "clove",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "5",
+          "unit": "g",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": "quả nam việt quất, hạt óc chó",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 216
+        },
+        {
+          "labelVi": null,
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 216
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 2,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        217
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạnh nhân, ngũ cốc",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": "sữa hạnh nhân, ngũ cốc",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 217
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 2,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Gạo hoang dã, đậu que và cà chua tươi",
+      "sourcePages": [
+        217
+      ],
+      "facts": [
+        {
+          "labelVi": "gạo hoang dã, gạo",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": "đậu que",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": "cà chua",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "2",
+          "unit": "cloves",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu, chanh",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 217
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 2,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        217
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạt phỉ",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 217
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 217
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 2,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Cá hồi phi lê với măng tây",
+      "sourcePages": [
+        218
+      ],
+      "facts": [
+        {
+          "labelVi": "phi lê cá hồi",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 218
+        },
+        {
+          "labelVi": "măng tây",
+          "amount": "300",
+          "unit": "g",
+          "pdfPage": 218
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 218
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 218
+        },
+        {
+          "labelVi": "bánh mì nguyên cám, bánh mì",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 218
+        },
+        {
+          "labelVi": "giấm",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 218
+        },
+        {
+          "labelVi": "quả nam việt quất, hạt phỉ",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 218
+        },
+        {
+          "labelVi": "quả nam việt quất, hạt phỉ",
+          "amount": "30",
+          "unit": "g",
+          "pdfPage": 218
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 3,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        219
+      ],
+      "facts": [
+        {
+          "labelVi": "bánh mì nguyên cám, bánh mì",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "2",
+          "unit": "tsp",
+          "pdfPage": 219
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 3,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Lúa mì spelt với bí ngòi, ô-liu và mùi tây",
+      "sourcePages": [
+        219
+      ],
+      "facts": [
+        {
+          "labelVi": "lúa mì spelt",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "bí ngòi",
+          "amount": "300",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "1",
+          "unit": "clove",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": null,
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "chanh",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 219
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 3,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        219,
+        220
+      ],
+      "facts": [
+        {
+          "labelVi": "cần tây",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": null,
+          "amount": "125",
+          "unit": "mL",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "bột đậu gà",
+          "amount": "240",
+          "unit": "g",
+          "pdfPage": 219
+        },
+        {
+          "labelVi": "nước",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 220
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 3,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Súp minestrone đậu gà và mì",
+      "sourcePages": [
+        220
+      ],
+      "facts": [
+        {
+          "labelVi": null,
+          "amount": "250",
+          "unit": "g",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "đậu gà",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "mì Ý",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "5",
+          "unit": "g",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "quả anh đào, hạnh nhân",
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": "quả anh đào, hạnh nhân",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 220
+        },
+        {
+          "labelVi": null,
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 220
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 4,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        221
+      ],
+      "facts": [
+        {
+          "labelVi": "bánh bagel quế nho khô",
+          "amount": "2",
+          "unit": "pieces",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "bánh bagel quế nho khô",
+          "amount": "80",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 221
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 4,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Salad lúa mạch, ô-liu và các loại hạt",
+      "sourcePages": [
+        221
+      ],
+      "facts": [
+        {
+          "labelVi": "lúa mạch",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "nấm",
+          "amount": "75",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "ngô",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "atisô",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": null,
+          "amount": "9",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "12",
+          "unit": "g",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 221
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 4,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        221,
+        222
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa dừa",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 221
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 222
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 4,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Súp mì và đậu lăng",
+      "sourcePages": [
+        222
+      ],
+      "facts": [
+        {
+          "labelVi": "đậu lăng",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "khoai tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "cà rốt",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "cà chua",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "2",
+          "unit": "cloves",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "mì Ý",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": null,
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": null,
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 222
+        },
+        {
+          "labelVi": "hạt óc chó",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 222
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 5,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        223
+      ],
+      "facts": [
+        {
+          "labelVi": "yến mạch",
+          "amount": "90",
+          "unit": "g",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "yến mạch",
+          "amount": "90",
+          "unit": "g",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "sữa hạnh nhân",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "mật ong",
+          "amount": "10",
+          "unit": "g",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "mật ong",
+          "amount": "2",
+          "unit": "tsp",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "trái cây tươi",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 223
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 5,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Rau escarole, ô-liu, cà chua và húng quế",
+      "sourcePages": [
+        223
+      ],
+      "facts": [
+        {
+          "labelVi": "rau escarole",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "hạt thông, các loại hạt",
+          "amount": "9",
+          "unit": "g",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "hạt thông, các loại hạt",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "húng quế",
+          "amount": "5",
+          "unit": "leaves",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": "muối",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 223
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 5,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        223,
+        224
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạt phỉ",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 223
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 224
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 5,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Bạch tuộc và khoai tây",
+      "sourcePages": [
+        224
+      ],
+      "facts": [
+        {
+          "labelVi": "bạch tuộc",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "khoai tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "giấm",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "quả nam việt quất",
+          "amount": "50",
+          "unit": "g",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "quả nam việt quất",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 224
+        },
+        {
+          "labelVi": "hạnh nhân",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 224
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 6,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        225
+      ],
+      "facts": [
+        {
+          "labelVi": "bánh focaccia nguyên cám khô, dầu ô-liu, bánh focaccia",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 225
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 6,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Cà tím nướng với phô mai feta và cà chua",
+      "sourcePages": [
+        225
+      ],
+      "facts": [
+        {
+          "labelVi": "cà tím",
+          "amount": "250",
+          "unit": "g",
+          "pdfPage": 225
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 225
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 225
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 225
+        },
+        {
+          "labelVi": "phô mai feta",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 225
+        },
+        {
+          "labelVi": null,
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 225
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 6,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        225
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạnh nhân",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 225
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 225
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 6,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Mì và đậu que kiểu Molochio",
+      "sourcePages": [
+        225,
+        226
+      ],
+      "facts": [
+        {
+          "labelVi": "đậu trắng navy",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 225
+        },
+        {
+          "labelVi": "đậu que",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": null,
+          "amount": "2",
+          "unit": "medium",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "khoai tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "bí ngòi",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "cà chua",
+          "amount": "1",
+          "unit": "large",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "2",
+          "unit": "cloves",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "húng quế",
+          "amount": "5",
+          "unit": "leaves",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "mì Ý",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "5",
+          "unit": "g",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "hạt phỉ",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 226
+        },
+        {
+          "labelVi": "hạt phỉ",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 226
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 7,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        227
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạnh nhân",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "ngũ cốc",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "trái cây tươi",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 227
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 7,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Cải Brussels với tỏi, hạt thông và Parmesan",
+      "sourcePages": [
+        227
+      ],
+      "facts": [
+        {
+          "labelVi": "cải Brussels",
+          "amount": "250",
+          "unit": "g",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "2",
+          "unit": "cloves",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "hạt thông, các loại hạt",
+          "amount": "9",
+          "unit": "g",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "hạt thông, các loại hạt",
+          "amount": "1",
+          "unit": "tsp",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "5",
+          "unit": "g",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": "nấm, giấm",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 227
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 7,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        227,
+        228
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa chua sữa dê",
+          "amount": "125",
+          "unit": "g",
+          "pdfPage": 227
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 227
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 1,
+      "day": 7,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Mì spaghetti với nghêu và vẹm",
+      "sourcePages": [
+        228
+      ],
+      "facts": [
+        {
+          "labelVi": "vẹm, nghêu",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 228
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "2",
+          "unit": "cloves",
+          "pdfPage": 228
+        },
+        {
+          "labelVi": "rượu vang nấu ăn",
+          "amount": "40",
+          "unit": "mL",
+          "pdfPage": 228
+        },
+        {
+          "labelVi": "mì spaghetti",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 228
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 228
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 228
+        },
+        {
+          "labelVi": "hạt óc chó",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 228
+        },
+        {
+          "labelVi": "hạt óc chó",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 228
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 1,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        229
+      ],
+      "facts": [
+        {
+          "labelVi": "yến mạch",
+          "amount": "80",
+          "unit": "g",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": "sữa hạnh nhân",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": "quả mọng",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 229
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 1,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Salad Hy Lạp với feta, ô-liu, hành và ớt chuông",
+      "sourcePages": [
+        229
+      ],
+      "facts": [
+        {
+          "labelVi": "xà lách",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": "phô mai feta",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": null,
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 229
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 1,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        229
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạt phỉ",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 229
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 229
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 1,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Salad đậu gà và rau, kèm bánh đậu gà",
+      "sourcePages": [
+        230
+      ],
+      "facts": [
+        {
+          "labelVi": "đậu gà",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 230
+        },
+        {
+          "labelVi": "hành tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 230
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 230
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 230
+        },
+        {
+          "labelVi": "rau bina",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 230
+        },
+        {
+          "labelVi": "bánh đậu gà, bánh mì",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 230
+        },
+        {
+          "labelVi": "các loại hạt",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 230
+        },
+        {
+          "labelVi": "các loại hạt",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 230
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 2,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        231
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạt phỉ",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "bánh mì óc chó, bánh mì",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 231
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 2,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Súp bí đỏ và bánh mì nướng giòn",
+      "sourcePages": [
+        231
+      ],
+      "facts": [
+        {
+          "labelVi": "bí đỏ, bí",
+          "amount": "300",
+          "unit": "g",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "bánh mì nướng giòn",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "bí đỏ",
+          "amount": "9",
+          "unit": "g",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "bí đỏ",
+          "amount": "1",
+          "unit": "tsp",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 231
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 2,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        231,
+        232
+      ],
+      "facts": [
+        {
+          "labelVi": "chuối",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "chuối",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "sữa hạt phỉ",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 231
+        },
+        {
+          "labelVi": "sô-cô-la đen, sô-cô-la",
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 232
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 2,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Mì với cá ngừ, ô-liu, bạch hoa và cà chua",
+      "sourcePages": [
+        232
+      ],
+      "facts": [
+        {
+          "labelVi": "mì Ý",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "cá ngừ",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "atisô, chanh",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "hạt phỉ, nho khô",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "hạt phỉ, nho khô",
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 232
+        },
+        {
+          "labelVi": "hạt phỉ, nho khô",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 232
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 3,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        233
+      ],
+      "facts": [
+        {
+          "labelVi": "bánh bagel quế nho khô",
+          "amount": "2",
+          "unit": "pieces",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "bánh bagel quế nho khô",
+          "amount": "80",
+          "unit": "g",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "mứt",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 233
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 3,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Cơm với bí ngòi và đậu Hà Lan",
+      "sourcePages": [
+        233
+      ],
+      "facts": [
+        {
+          "labelVi": "gạo",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "bí ngòi",
+          "amount": "250",
+          "unit": "g",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "đậu Hà Lan",
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "hành tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "phô mai Parmesan, sốt pesto",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": "phô mai Parmesan, sốt pesto",
+          "amount": "1",
+          "unit": "tsp",
+          "pdfPage": 233
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 3,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        233
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa dừa",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 233
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 233
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 3,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Salad đậu trắng, hành, hương thảo và rau diếp xoăn",
+      "sourcePages": [
+        234
+      ],
+      "facts": [
+        {
+          "labelVi": "rau diếp xoăn",
+          "amount": "180",
+          "unit": "g",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "1",
+          "unit": "clove",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": null,
+          "amount": "50",
+          "unit": "g",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "hành tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "đậu trắng cannellini",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "bánh focaccia nguyên cám, dầu ô-liu, bánh focaccia",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "quả anh đào, hạnh nhân",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": "quả anh đào, hạnh nhân",
+          "amount": "80",
+          "unit": "g",
+          "pdfPage": 234
+        },
+        {
+          "labelVi": null,
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 234
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 4,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        235
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạnh nhân",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "bánh mì nho khô và óc chó, bánh mì óc chó, bánh mì",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "chuối",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 235
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 4,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Salad củ thì là, cà chua, cà rốt, hành và ô-liu",
+      "sourcePages": [
+        235
+      ],
+      "facts": [
+        {
+          "labelVi": "củ thì là",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": null,
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "hành tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "bánh focaccia nguyên cám khô, dầu ô-liu, bánh focaccia",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": "rau diếp xoăn, chanh",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 235
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 4,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        235
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa chua sữa dê",
+          "amount": "125",
+          "unit": "g",
+          "pdfPage": 235
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 235
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 4,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Gạo đen, bí ngòi và tôm",
+      "sourcePages": [
+        236
+      ],
+      "facts": [
+        {
+          "labelVi": "gạo đen (gạo Venus)",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "bí ngòi",
+          "amount": "250",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "cà chua bi",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "tôm",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "5",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "phô mai Parmesan",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "nhụy hoa nghệ tây",
+          "amount": "4",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "dầu ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "dầu ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "rau trộn ăn kèm",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "nam việt quất sấy gợi ý tráng miệng",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 236
+        },
+        {
+          "labelVi": "hạt óc chó gợi ý tráng miệng",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 236
+        }
+      ],
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 236
+    },
+    {
+      "week": 2,
+      "day": 5,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        237
+      ],
+      "facts": [
+        {
+          "labelVi": "gạo",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "chuối",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "sô-cô-la đen, sô-cô-la",
+          "amount": "30",
+          "unit": "g",
+          "pdfPage": 237
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 5,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Salad spelt Địa Trung Hải với atisô và nấm",
+      "sourcePages": [
+        237
+      ],
+      "facts": [
+        {
+          "labelVi": "lúa mì spelt",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "atisô",
+          "amount": "80",
+          "unit": "g",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "cà rốt",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "g",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "nấm",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 237
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "1",
+          "unit": "clove",
+          "pdfPage": 237
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 5,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        238
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạnh nhân",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 238
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 5,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Súp rau minestrone kiểu Liguria",
+      "sourcePages": [
+        238
+      ],
+      "facts": [
+        {
+          "labelVi": null,
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "khoai tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "cà tím",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "bí ngòi",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "bắp cải",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "đậu Hà Lan",
+          "amount": "1",
+          "unit": "handful",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "đậu que",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "1",
+          "unit": "clove",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "mì Ý",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "sốt pesto",
+          "amount": "1",
+          "unit": "tsp",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "bánh mì nguyên cám, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 238
+        },
+        {
+          "labelVi": "trái cây tươi",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 238
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 6,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        239
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạt phỉ",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "ngũ cốc",
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 239
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 6,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Súp cà chua với húng quế, pesto và bánh mì giòn",
+      "sourcePages": [
+        239
+      ],
+      "facts": [
+        {
+          "labelVi": null,
+          "amount": "500",
+          "unit": "g",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "cà rốt",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "cần tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "khoai tây",
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "hành tây",
+          "amount": "2",
+          "unit": "medium",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "g",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "húng quế",
+          "amount": "5",
+          "unit": "leaves",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "sốt pesto",
+          "amount": "5",
+          "unit": "g",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "sốt pesto",
+          "amount": "1",
+          "unit": "tsp",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "bánh mì nướng giòn",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "200",
+          "unit": "g",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 239
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 6,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        239,
+        240
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạt phỉ",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 239
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 239
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 6,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Súp kem đậu gà và bông cải hấp",
+      "sourcePages": [
+        240
+      ],
+      "facts": [
+        {
+          "labelVi": "đậu gà",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": "hương thảo",
+          "amount": "1",
+          "unit": "sprig",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": "tỏi",
+          "amount": "1",
+          "unit": "clove",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "mL",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": "bông cải xanh, chanh",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": null,
+          "amount": "60",
+          "unit": "g",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": "hạnh nhân",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 240
+        },
+        {
+          "labelVi": "hạnh nhân",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 240
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 7,
+      "slot": "breakfast",
+      "slotVi": "Bữa sáng",
+      "titleVi": "Bữa sáng theo Phụ lục A",
+      "sourcePages": [
+        241
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa hạnh nhân",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "bánh mì nam việt quất, bánh mì",
+          "amount": "80",
+          "unit": "g",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "mật ong",
+          "amount": "10",
+          "unit": "g",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "mật ong",
+          "amount": "2",
+          "unit": "tsp",
+          "pdfPage": 241
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 7,
+      "slot": "lunch",
+      "slotVi": "Bữa trưa",
+      "titleVi": "Salad lúa mạch với bông cải, feta và cà chua",
+      "sourcePages": [
+        241
+      ],
+      "facts": [
+        {
+          "labelVi": "lúa mạch",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "bông cải xanh",
+          "amount": "150",
+          "unit": "g",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": null,
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": null,
+          "amount": "1",
+          "unit": "medium",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "phô mai feta",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "12",
+          "unit": "mL",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "1",
+          "unit": "tbsp",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": "bánh mì nâu, bánh mì",
+          "amount": "40",
+          "unit": "g",
+          "pdfPage": 241
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 7,
+      "slot": "snack",
+      "slotVi": "Bữa phụ",
+      "titleVi": "Bữa phụ theo Phụ lục A",
+      "sourcePages": [
+        241,
+        242
+      ],
+      "facts": [
+        {
+          "labelVi": "sữa dừa",
+          "amount": "240",
+          "unit": "mL",
+          "pdfPage": 241
+        },
+        {
+          "labelVi": null,
+          "amount": "8",
+          "unit": "g",
+          "pdfPage": 242
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    },
+    {
+      "week": 2,
+      "day": 7,
+      "slot": "dinner",
+      "slotVi": "Bữa tối",
+      "titleVi": "Pizza rau củ, cá cơm và cá mòi (không phô mai)",
+      "sourcePages": [
+        242
+      ],
+      "facts": [
+        {
+          "labelVi": "đế pizza",
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "cá cơm, cá mòi",
+          "amount": "90",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": null,
+          "amount": "80",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "atisô",
+          "amount": "50",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "nấm",
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "rau bina",
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "tiêu",
+          "amount": "100",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "quả ô-liu",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "dầu ô-liu, ô-liu",
+          "amount": "2",
+          "unit": "tbsp",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "quả nam việt quất",
+          "amount": "25",
+          "unit": "g",
+          "pdfPage": 242
+        },
+        {
+          "labelVi": "quả nam việt quất",
+          "amount": "20",
+          "unit": "g",
+          "pdfPage": 242
+        }
+      ],
+      "verificationStatus": "needs-human-review"
+    }
+  ]
+}

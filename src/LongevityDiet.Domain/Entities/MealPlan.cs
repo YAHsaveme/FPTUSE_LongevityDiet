@@ -67,6 +67,8 @@ public sealed class PlannedMeal
     public string ReasonCodesCsv { get; set; } = string.Empty;
     public string ExplanationSummary { get; set; } = string.Empty;
     public int RegenerationCount { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public MealPlanDay MealPlanDay { get; set; } = null!;

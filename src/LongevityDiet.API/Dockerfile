@@ -17,4 +17,5 @@ RUN dotnet publish "src/LongevityDiet.API/LongevityDiet.API.csproj" -c Release -
 FROM base AS final
 WORKDIR /app
 COPY --from=build /out .
+COPY src/LongevityDiet.API/docker-healthcheck.sh /app/docker-healthcheck.sh
 ENTRYPOINT ["dotnet", "LongevityDiet.API.dll"]

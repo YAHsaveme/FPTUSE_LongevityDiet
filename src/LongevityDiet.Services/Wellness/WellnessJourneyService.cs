@@ -172,6 +172,8 @@ public sealed class WellnessJourneyService(
         var existing = await repository.GetCheckInByIdAsync(userId, checkInId, ct);
         if (existing is null)
             return ServiceResult.Failure<bool>("check_in_not_found", "Check-in not found.");
+        existing.IsDeleted = true;
+        existing.DeletedAt = clock.GetUtcNow();
         repository.RemoveCheckIn(existing);
         await repository.SaveChangesAsync(ct);
         return ServiceResult.Success(true);

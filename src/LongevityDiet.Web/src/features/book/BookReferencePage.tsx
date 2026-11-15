@@ -5,12 +5,26 @@ import {
   LONGO_BOOK, LONGO_BOOK_CHAPTERS, LONGO_BOOK_MICRONUTRIENTS,
   LONGO_BOOK_RULES, LONGO_BOOK_TWO_WEEK_MEALS,
 } from './bookReferenceData'
+import bookQuantityInventory from './bookAppendixQuantities.json'
 import './bookReference.css'
+
+const unitVietnamese: Record<string, string> = {
+  g: 'g', grams: 'g', ml: 'mL', l: 'L', oz: 'oz', lb: 'lb',
+  tbsp: 'muỗng canh', tsp: 'muỗng cà phê', cup: 'cốc', cups: 'cốc',
+  clove: 'tép', cloves: 'tép', glass: 'ly', glasses: 'ly',
+  piece: 'miếng', pieces: 'miếng', slice: 'lát', slices: 'lát',
+  handful: 'nắm', handfuls: 'nắm', sprig: 'nhánh', sprigs: 'nhánh',
+  leaves: 'lá', medium: 'cỡ vừa', large: 'cỡ lớn', small: 'cỡ nhỏ',
+}
+function displayQuantity(amount: string, unit: string) {
+  return `${amount} ${unitVietnamese[unit.toLowerCase()] ?? unit}`
+}
 
 export function BookReferencePage() {
   const [week, setWeek] = useState<1 | 2>(1)
   const [selectedDay, setSelectedDay] = useState(1)
   const day = LONGO_BOOK_TWO_WEEK_MEALS.find(item => item.week === week && item.day === selectedDay)!
+  const quantityRecords = bookQuantityInventory.meals.filter(item => item.week === week && item.day === selectedDay)
 
   return (
     <main className="book-ref-page">
@@ -96,6 +110,39 @@ export function BookReferencePage() {
               <div><small>BỮA PHỤ</small><p>{day.snack}</p><span>Theo thực đơn ngày trong Phụ lục A</span></div>
               <div><small>BỮA TỐI</small><p>{day.dinner}</p><span>Trang {day.dinnerPdfPage}</span></div>
             </div>
+            <details className="book-ref-quantity-details">
+              <summary>Đối chiếu nguyên liệu và số lượng tại trang sách ({quantityRecords.reduce((sum, item) => sum + item.facts.length, 0)} dữ kiện)</summary>
+              <p className="book-ref-intro">
+                <strong>Đang kiểm tra:</strong> đây là các dữ kiện số lượng trích xuất từ PDF, bao gồm cả
+                giới hạn thành phần và khẩu phần ăn kèm, không phải tất cả đều là định lượng nguyên liệu.
+                Hiện mới đối chiếu trực tiếp hai bữa (20 dữ kiện) với trang 215 và 236; các bữa khác
+                vẫn cần xác minh. Không dùng bản trích xuất để AI tự suy ra năng lượng, định lượng cá nhân
+                hoặc phác đồ ăn uống.
+              </p>
+              <div className="book-ref-quantity-grid">
+                {quantityRecords.map(record => (
+                  <section key={record.slot} className="book-ref-quantity-card">
+                    <h4>{record.slotVi}: {record.titleVi}</h4>
+                    <small>Phụ lục A — trang PDF {record.sourcePages.join(', ')}</small>
+                    <p className={record.verificationStatus === 'source-page-checked'
+                      ? 'book-ref-verified' : 'book-ref-unverified'}>
+                      {record.verificationStatus === 'source-page-checked'
+                        ? 'Đã đối chiếu định lượng với trang gốc; chưa phải xác nhận lâm sàng'
+                        : 'Trích xuất máy — cần xác minh từng nguyên liệu và định lượng'}
+                    </p>
+                    <ul>
+                      {record.facts.map((fact, index) => (
+                        <li key={index}>
+                          <span>{fact.labelVi ?? 'Tên nguyên liệu cần đối chiếu bản dịch'}</span>
+                          <strong>{displayQuantity(fact.amount, fact.unit)}</strong>
+                          <small>Trang {fact.pdfPage}</small>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            </details>
             {day.fishOrSeafood && <p className="book-ref-fish-note">Bữa này có cá hoặc hải sản trong bản sách; phải kiểm tra dị ứng, thành phần và giới hạn tần suất trước khi sử dụng.</p>}
           </article>
           <p className="book-ref-footnote">

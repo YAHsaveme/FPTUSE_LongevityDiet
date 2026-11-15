@@ -5,6 +5,9 @@ using System.Text.Json;
 using LongevityDiet.API.Contracts.Auth;
 using LongevityDiet.API.Contracts.Planning;
 using LongevityDiet.API.Contracts.Recommendation;
+using LongevityDiet.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LongevityDiet.IntegrationTests;
 
@@ -83,6 +86,39 @@ public sealed class RecommendationAndReplacementApiTests : IClassFixture<Integra
         Assert.Contains(
             rejectedAfterExclusion,
             r => r.GetProperty("candidateCode").GetString() == topCandidateCode);
+
+        // Deleting an explicit exclusion keeps its original row for recovery.
+        var removed = await client.DeleteAsync(
+            "/api/v1/recommendations/preferences/" + Uri.EscapeDataString(topCandidateCode));
+        Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
+
+        var normalizedPreferenceToken = topCandidateCode.ToLowerInvariant();
+        Guid oldId;
+        using (var historyScope = _factory.Services.CreateScope())
+        {
+            var db = historyScope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+            var stored = await db.UserFoodPreferences.IgnoreQueryFilters()
+                .SingleAsync(x => x.FoodToken == normalizedPreferenceToken);
+            oldId = stored.Id;
+            Assert.True(stored.IsDeleted);
+            Assert.NotNull(stored.DeletedAt);
+            Assert.False(await db.UserFoodPreferences.AnyAsync(x => x.Id == oldId));
+        }
+
+        var reactivated = await client.PostAsJsonAsync(
+            "/api/v1/recommendations/preferences",
+            new UpsertFoodPreferenceRequest(
+                topCandidateCode, "ExplicitExclusion",
+                "Khôi phục loại trừ", "Kiểm tra khôi phục"));
+        Assert.Equal(HttpStatusCode.OK, reactivated.StatusCode);
+
+        using var restoredScope = _factory.Services.CreateScope();
+        var restoredDb = restoredScope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+        var restored = await restoredDb.UserFoodPreferences
+            .SingleAsync(x => x.FoodToken == normalizedPreferenceToken);
+        Assert.Equal(oldId, restored.Id);
+        Assert.False(restored.IsDeleted);
+        Assert.Null(restored.DeletedAt);
     }
 
     [Fact]
