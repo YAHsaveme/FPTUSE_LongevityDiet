@@ -18,6 +18,15 @@
       "compositionLimitsTagged": 13,
       "auditDate": "2026-11-15",
       "note": "Source-token agreement is NOT human verification of recipes, portion suitability or clinical recommendations."
+    },
+    "sourceSemanticAudit": {
+      "status": "spot-checked-against-original-pdf",
+      "auditDate": "2026-11-15",
+      "correctedContextEntries": 57,
+      "correctedFractionTokens": 1,
+      "sourceDuplicatesMarked": 1,
+      "recipeBatchMentionsMarked": 3,
+      "note": "Only machine-extracted source-reference data; not a per-person serving or editorial/clinical certification of the remaining meals"
     }
   },
   "meals": [
@@ -38,10 +47,11 @@
           "pdfPage": 215
         },
         {
-          "labelVi": "bánh focaccia nguyên cám, dầu ô-liu, bánh focaccia",
+          "labelVi": "Bánh focaccia nguyên cám kèm dầu ô-liu (khối lượng khẩu phần kết hợp)",
           "amount": "60",
           "unit": "g",
-          "pdfPage": 215
+          "pdfPage": 215,
+          "factType": "composite"
         },
         {
           "labelVi": "mứt",
@@ -206,7 +216,7 @@
           "pdfPage": 216
         },
         {
-          "labelVi": "quả nam việt quất, hạt óc chó",
+          "labelVi": "Hạt óc chó gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 216
@@ -231,13 +241,13 @@
       ],
       "facts": [
         {
-          "labelVi": "sữa hạnh nhân, ngũ cốc",
+          "labelVi": "Ngũ cốc ăn sáng",
           "amount": "60",
           "unit": "g",
           "pdfPage": 217
         },
         {
-          "labelVi": "sữa hạnh nhân, ngũ cốc",
+          "labelVi": "Sữa hạnh nhân ăn cùng ngũ cốc",
           "amount": "240",
           "unit": "mL",
           "pdfPage": 217
@@ -292,7 +302,7 @@
           "pdfPage": 217
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu, chanh",
+          "labelVi": "Rau lá xanh luộc ăn kèm (ví dụ: cải kale hoặc cải diếp xoăn)",
           "amount": "200",
           "unit": "g",
           "pdfPage": 217
@@ -368,19 +378,19 @@
           "pdfPage": 218
         },
         {
-          "labelVi": "giấm",
+          "labelVi": "Salad rau xanh trộn cà chua, cà rốt, thì là và ớt chuông",
           "amount": "200",
           "unit": "g",
           "pdfPage": 218
         },
         {
-          "labelVi": "quả nam việt quất, hạt phỉ",
+          "labelVi": "Hạt phỉ gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 218
         },
         {
-          "labelVi": "quả nam việt quất, hạt phỉ",
+          "labelVi": "Nam việt quất sấy gợi ý tráng miệng",
           "amount": "30",
           "unit": "g",
           "pdfPage": 218
@@ -472,7 +482,7 @@
           "pdfPage": 219
         },
         {
-          "labelVi": "chanh",
+          "labelVi": "Rau lá xanh luộc ăn kèm (ví dụ: cải cầu vồng)",
           "amount": "200",
           "unit": "g",
           "pdfPage": 219
@@ -492,34 +502,39 @@
       ],
       "facts": [
         {
-          "labelVi": "cần tây",
+          "labelVi": "Sinh tố quả mọng (lựa chọn thay thế bánh đậu gà và rau sống)",
           "amount": "150",
           "unit": "g",
-          "pdfPage": 219
+          "pdfPage": 219,
+          "factType": "alternative"
         },
         {
-          "labelVi": "Sữa hạt phỉ",
+          "labelVi": "Sữa hạt phỉ dùng cho sinh tố (lựa chọn thay thế)",
           "amount": "125",
           "unit": "mL",
-          "pdfPage": 219
+          "pdfPage": 219,
+          "factType": "alternative"
         },
         {
-          "labelVi": "bột đậu gà",
+          "labelVi": "Bột đậu gà trong công thức làm bánh farinata; không phải khẩu phần ăn một người",
           "amount": "240",
           "unit": "g",
-          "pdfPage": 219
+          "pdfPage": 219,
+          "factType": "recipe-batch"
         },
         {
-          "labelVi": "nước",
+          "labelVi": "Nước trong công thức làm bánh farinata",
           "amount": "240",
           "unit": "mL",
-          "pdfPage": 220
+          "pdfPage": 220,
+          "factType": "recipe-batch"
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu tùy chọn trong công thức bánh farinata",
           "amount": "2",
           "unit": "tbsp",
-          "pdfPage": 220
+          "pdfPage": 220,
+          "factType": "recipe-batch"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -577,19 +592,21 @@
           "pdfPage": 220
         },
         {
-          "labelVi": "quả anh đào, hạnh nhân",
+          "labelVi": "Quả anh đào tươi (lựa chọn món tráng miệng)",
           "amount": "100",
           "unit": "g",
-          "pdfPage": 220
+          "pdfPage": 220,
+          "factType": "alternative"
         },
         {
-          "labelVi": "quả anh đào, hạnh nhân",
+          "labelVi": "Quả anh đào sấy (lựa chọn thay anh đào tươi)",
           "amount": "20",
           "unit": "g",
-          "pdfPage": 220
+          "pdfPage": 220,
+          "factType": "alternative"
         },
         {
-          "labelVi": "Hạnh nhân ăn kèm món tráng miệng",
+          "labelVi": "Hạnh nhân dùng cho món tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 220
@@ -608,16 +625,18 @@
       ],
       "facts": [
         {
-          "labelVi": "bánh bagel quế nho khô",
+          "labelVi": "Hai lát bánh mì nướng (lựa chọn thay bánh bagel)",
           "amount": "2",
           "unit": "pieces",
-          "pdfPage": 221
+          "pdfPage": 221,
+          "factType": "alternative"
         },
         {
-          "labelVi": "bánh bagel quế nho khô",
+          "labelVi": "Bánh bagel quế nho khô hoặc bánh mì nướng (khối lượng tổng)",
           "amount": "80",
           "unit": "g",
-          "pdfPage": 221
+          "pdfPage": 221,
+          "factType": "composite"
         },
         {
           "labelVi": "mứt",
@@ -675,7 +694,7 @@
           "pdfPage": 221
         },
         {
-          "labelVi": "atisô",
+          "labelVi": "Rau củ ngâm chua (atisô, dưa leo, hành lá)",
           "amount": "150",
           "unit": "g",
           "pdfPage": 221
@@ -831,16 +850,17 @@
       ],
       "facts": [
         {
-          "labelVi": "yến mạch",
+          "labelVi": "Yến mạch cắt hạt (định lượng được lặp trong văn bản sách)",
           "amount": "90",
           "unit": "g",
           "pdfPage": 223
         },
         {
-          "labelVi": "yến mạch",
+          "labelVi": "Yến mạch cắt hạt (cùng một định lượng lặp lại; không cộng hai lần)",
           "amount": "90",
           "unit": "g",
-          "pdfPage": 223
+          "pdfPage": 223,
+          "factType": "source-duplicate"
         },
         {
           "labelVi": "sữa hạnh nhân",
@@ -928,7 +948,7 @@
           "pdfPage": 223
         },
         {
-          "labelVi": "muối",
+          "labelVi": "Cà rốt tươi ăn kèm; có thể dùng sống hoặc luộc",
           "amount": "150",
           "unit": "g",
           "pdfPage": 223
@@ -1017,22 +1037,24 @@
           "pdfPage": 224
         },
         {
-          "labelVi": "giấm",
+          "labelVi": "Salad rau xanh trộn dưa leo, cà chua, cà rốt ăn kèm",
           "amount": "200",
           "unit": "g",
           "pdfPage": 224
         },
         {
-          "labelVi": "quả nam việt quất",
+          "labelVi": "Nam việt quất tươi (lựa chọn tráng miệng)",
           "amount": "50",
           "unit": "g",
-          "pdfPage": 224
+          "pdfPage": 224,
+          "factType": "alternative"
         },
         {
-          "labelVi": "quả nam việt quất",
+          "labelVi": "Nam việt quất sấy (lựa chọn thay quả tươi)",
           "amount": "20",
           "unit": "g",
-          "pdfPage": 224
+          "pdfPage": 224,
+          "factType": "alternative"
         },
         {
           "labelVi": "hạnh nhân",
@@ -1234,7 +1256,7 @@
           "pdfPage": 226
         },
         {
-          "labelVi": "hạt phỉ",
+          "labelVi": "Việt quất sấy khô gợi ý tráng miệng",
           "amount": "20",
           "unit": "g",
           "pdfPage": 226
@@ -1338,7 +1360,7 @@
           "pdfPage": 227
         },
         {
-          "labelVi": "nấm, giấm",
+          "labelVi": "Salad rau xanh trộn ớt chuông đỏ, cà chua, cà rốt và nấm",
           "amount": "200",
           "unit": "g",
           "pdfPage": 227
@@ -1421,13 +1443,13 @@
           "pdfPage": 228
         },
         {
-          "labelVi": "hạt óc chó",
+          "labelVi": "Quả chà là gợi ý tráng miệng",
           "amount": "20",
           "unit": "g",
           "pdfPage": 228
         },
         {
-          "labelVi": "hạt óc chó",
+          "labelVi": "Hạt óc chó gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 228
@@ -1601,13 +1623,13 @@
           "pdfPage": 230
         },
         {
-          "labelVi": "các loại hạt",
+          "labelVi": "Hạt hồ đào (pecan) gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 230
         },
         {
-          "labelVi": "các loại hạt",
+          "labelVi": "Quả chà là gợi ý tráng miệng",
           "amount": "20",
           "unit": "g",
           "pdfPage": 230
@@ -1687,13 +1709,13 @@
           "pdfPage": 231
         },
         {
-          "labelVi": "bí đỏ",
+          "labelVi": "Hạt bí ngô (không phải thịt bí ngô)",
           "amount": "9",
           "unit": "g",
           "pdfPage": 231
         },
         {
-          "labelVi": "bí đỏ",
+          "labelVi": "Hạt bí ngô (đơn vị tương đương)",
           "amount": "1",
           "unit": "tsp",
           "pdfPage": 231
@@ -1719,22 +1741,25 @@
       ],
       "facts": [
         {
-          "labelVi": "chuối",
+          "labelVi": "Sinh tố hỗn hợp quả mọng (phương án A)",
           "amount": "150",
           "unit": "g",
-          "pdfPage": 231
+          "pdfPage": 231,
+          "factType": "alternative"
         },
         {
-          "labelVi": "chuối",
+          "labelVi": "Chuối dùng kèm sinh tố quả mọng (phương án A)",
           "amount": "1",
           "unit": "medium",
-          "pdfPage": 231
+          "pdfPage": 231,
+          "factType": "alternative"
         },
         {
-          "labelVi": "sữa hạt phỉ",
+          "labelVi": "Sữa hạt phỉ dùng với thanh hạt và sô-cô-la (phương án B)",
           "amount": "240",
           "unit": "mL",
-          "pdfPage": 231
+          "pdfPage": 231,
+          "factType": "alternative"
         },
         {
           "labelVi": "Giới hạn đường trong thanh hạt và sô-cô-la (không phải khối lượng nguyên liệu)",
@@ -1794,7 +1819,7 @@
           "pdfPage": 232
         },
         {
-          "labelVi": "atisô, chanh",
+          "labelVi": "Atisô luộc ăn kèm, nêm dầu và chanh",
           "amount": "150",
           "unit": "g",
           "pdfPage": 232
@@ -1806,22 +1831,24 @@
           "pdfPage": 232
         },
         {
-          "labelVi": "hạt phỉ, nho khô",
+          "labelVi": "Hạt phỉ gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 232
         },
         {
-          "labelVi": "hạt phỉ, nho khô",
+          "labelVi": "Nho tươi gợi ý tráng miệng (lựa chọn A)",
           "amount": "100",
           "unit": "g",
-          "pdfPage": 232
+          "pdfPage": 232,
+          "factType": "alternative"
         },
         {
-          "labelVi": "hạt phỉ, nho khô",
+          "labelVi": "Nho khô gợi ý tráng miệng (lựa chọn B)",
           "amount": "20",
           "unit": "g",
-          "pdfPage": 232
+          "pdfPage": 232,
+          "factType": "alternative"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -1910,16 +1937,18 @@
           "pdfPage": 233
         },
         {
-          "labelVi": "phô mai Parmesan, sốt pesto",
+          "labelVi": "Phô mai Parmesan (lựa chọn thay sốt pesto)",
           "amount": "1",
           "unit": "tbsp",
-          "pdfPage": 233
+          "pdfPage": 233,
+          "factType": "alternative"
         },
         {
-          "labelVi": "phô mai Parmesan, sốt pesto",
+          "labelVi": "Sốt pesto (lựa chọn thay Parmesan)",
           "amount": "1",
           "unit": "tsp",
-          "pdfPage": 233
+          "pdfPage": 233,
+          "factType": "alternative"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -2010,22 +2039,24 @@
           "pdfPage": 234
         },
         {
-          "labelVi": "quả anh đào, hạnh nhân",
+          "labelVi": "Hạnh nhân gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 234
         },
         {
-          "labelVi": "quả anh đào, hạnh nhân",
+          "labelVi": "Anh đào tươi gợi ý tráng miệng (phương án A)",
           "amount": "80",
           "unit": "g",
-          "pdfPage": 234
+          "pdfPage": 234,
+          "factType": "alternative"
         },
         {
-          "labelVi": "Quả anh đào sấy khô (phương án tráng miệng)",
+          "labelVi": "Anh đào sấy gợi ý tráng miệng (phương án B)",
           "amount": "20",
           "unit": "g",
-          "pdfPage": 234
+          "pdfPage": 234,
+          "factType": "alternative"
         }
       ],
       "verificationStatus": "needs-human-review"
@@ -2120,7 +2151,7 @@
           "pdfPage": 235
         },
         {
-          "labelVi": "rau diếp xoăn, chanh",
+          "labelVi": "Rau diếp xoăn (chicory) luộc ăn kèm",
           "amount": "200",
           "unit": "g",
           "pdfPage": 235
@@ -2252,7 +2283,7 @@
       ],
       "facts": [
         {
-          "labelVi": "gạo",
+          "labelVi": "Thanh ngũ cốc Rice Krispies nguyên cám; không phải gạo rời",
           "amount": "60",
           "unit": "g",
           "pdfPage": 237
@@ -2523,10 +2554,11 @@
           "pdfPage": 239
         },
         {
-          "labelVi": "hành tây",
-          "amount": "2",
+          "labelVi": "Hành tây đỏ (1/2 củ cỡ vừa); bản trích xuất trước đọc nhầm 1/2 thành 2",
+          "amount": "1/2",
           "unit": "medium",
-          "pdfPage": 239
+          "pdfPage": 239,
+          "factType": "fraction-correction"
         },
         {
           "labelVi": "dầu ô-liu, ô-liu",
@@ -2565,13 +2597,13 @@
           "pdfPage": 239
         },
         {
-          "labelVi": "bánh mì nâu, bánh mì",
+          "labelVi": "Rau lá xanh ăn kèm (khối lượng rau, không phải bánh mì)",
           "amount": "200",
           "unit": "g",
           "pdfPage": 239
         },
         {
-          "labelVi": "bánh mì nâu, bánh mì",
+          "labelVi": "Bánh mì nâu ăn cùng rau lá xanh",
           "amount": "40",
           "unit": "g",
           "pdfPage": 239
@@ -2654,19 +2686,20 @@
           "pdfPage": 240
         },
         {
-          "labelVi": "Bánh focaccia nguyên cám kèm dầu ô-liu (khẩu phần kết hợp, không phải chỉ dầu)",
+          "labelVi": "Bánh đậu gà hoặc focaccia nguyên cám với dầu ô-liu (phương án thay thế)",
           "amount": "60",
           "unit": "g",
-          "pdfPage": 240
+          "pdfPage": 240,
+          "factType": "composite"
         },
         {
-          "labelVi": "hạnh nhân",
+          "labelVi": "Mơ sấy khô gợi ý tráng miệng",
           "amount": "20",
           "unit": "g",
           "pdfPage": 240
         },
         {
-          "labelVi": "hạnh nhân",
+          "labelVi": "Hạnh nhân gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 240
@@ -2847,7 +2880,7 @@
           "pdfPage": 242
         },
         {
-          "labelVi": "tiêu",
+          "labelVi": "Ớt chuông (rau củ pizza); không phải 100 g hạt tiêu",
           "amount": "100",
           "unit": "g",
           "pdfPage": 242
@@ -2871,13 +2904,13 @@
           "pdfPage": 242
         },
         {
-          "labelVi": "quả nam việt quất",
+          "labelVi": "Hạt dẻ cười không muối gợi ý tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 242
         },
         {
-          "labelVi": "quả nam việt quất",
+          "labelVi": "Nam việt quất sấy gợi ý tráng miệng",
           "amount": "20",
           "unit": "g",
           "pdfPage": 242

@@ -33,7 +33,7 @@ const digestRows = [
   '2-4-snack:0b657d44c67bac7c3e2e0b', '2-4-dinner:9cfa2495a10bc8d565d5bb',
   '2-5-breakfast:73058fa5b0db07c0481dcc', '2-5-lunch:c91ffb8bb0788cbc41b9a8',
   '2-5-snack:6da7d7a51a2e24eb948891', '2-5-dinner:8317d9a33f1d3f6aec9a40',
-  '2-6-breakfast:183ebcc4c63ad81ba9938f', '2-6-lunch:f59d47d1a5b7eb9b53548f',
+  '2-6-breakfast:183ebcc4c63ad81ba9938f', '2-6-lunch:db0b9d93c8e05bb05dacc6',
   '2-6-snack:ec0c6ec72817d43e5a1c5c', '2-6-dinner:c48c89c1bd9a125c0f0c24',
   '2-7-breakfast:7a11456568b13112c2f02b', '2-7-lunch:7e4f063745ae34b85e9641',
   '2-7-snack:504d07c1414bf3ece179d6', '2-7-dinner:d01d980e4c800735cf27d1',
@@ -64,5 +64,40 @@ describe('independent Appendix A PDF token audit (nonclinical)', () => {
     expect(appendix.meals.filter(m => m.verificationStatus === 'source-page-checked')).toHaveLength(2)
     expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(54)
     expect(appendix.metadata.status).toBe('unverified-machine-extraction')
+  })
+})
+
+describe('source semantic corrections are never treated as clinical plan values', () => {
+  const findFact = (week: number, day: number, slot: string, index: number) =>
+    appendix.meals.find(meal => meal.week === week && meal.day === day && meal.slot === slot)!
+      .facts[index] as { amount: string; unit: string; labelVi: string; factType?: string }
+
+  it('recognizes fractions without misreading 1/2 medium as 2 medium', () => {
+    const onion = findFact(2, 6, 'lunch', 4)
+    expect(onion.amount).toBe('1/2')
+    expect(onion.unit).toBe('medium')
+    expect(onion.labelVi).toContain('Hành tây đỏ')
+    expect(onion.factType).toBe('fraction-correction')
+    expect(appendix.metadata.sourceSemanticAudit.correctedFractionTokens).toBe(1)
+  })
+
+  it('does not mistake vegetable peppers, accompanying carrots, or bread for seasonings', () => {
+    expect(findFact(2, 7, 'dinner', 6).labelVi).toContain('Ớt chuông')
+    expect(findFact(1, 5, 'lunch', 8).labelVi).toContain('Cà rốt')
+    expect(findFact(2, 6, 'lunch', 11).labelVi).toContain('Rau lá xanh')
+    expect(findFact(2, 6, 'lunch', 12).labelVi).toContain('Bánh mì nâu')
+    expect(findFact(1, 1, 'dinner', 8).labelVi).toContain('Hạt óc chó')
+    expect(findFact(2, 7, 'dinner', 10).labelVi).toContain('Hạt dẻ cười')
+  })
+
+  it('flags cookbook batch, repeated source mention, and alternatives as non-additive', () => {
+    expect(findFact(1, 5, 'breakfast', 1).factType).toBe('source-duplicate')
+    for (const i of [2, 3, 4])
+      expect(findFact(1, 3, 'snack', i).factType).toBe('recipe-batch')
+    for (const i of [0, 1, 2])
+      expect(findFact(2, 2, 'snack', i).factType).toBe('alternative')
+    expect(findFact(2, 6, 'dinner', 6).factType).toBe('composite')
+    expect(appendix.metadata.sourceSemanticAudit.correctedContextEntries).toBe(57)
+    expect(appendix.meals.filter(m => m.verificationStatus === 'needs-human-review')).toHaveLength(54)
   })
 })

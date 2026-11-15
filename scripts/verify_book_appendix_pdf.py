@@ -20,7 +20,7 @@ import sys
 
 EXPECTED_PAGES = range(215, 243)
 UNIT_PATTERN = re.compile(
-    r"(?<![\dA-Za-z])(?P<amount>\d+(?:[.,]\d+)?)\s*"
+    r"(?<![\dA-Za-z])(?P<amount>\d+/\d+|\d+(?:[.,]\d+)?)\s*"
     r"(?P<unit>mL|ml|g|tbsp|tsp|cloves|clove|leaves|"
     r"pieces|piece|sprigs|sprig|handful|medium|large)(?!\w)",
     re.IGNORECASE,

@@ -16,6 +16,14 @@ const unitVietnamese: Record<string, string> = {
   handful: 'nắm', handfuls: 'nắm', sprig: 'nhánh', sprigs: 'nhánh',
   leaves: 'lá', medium: 'cỡ vừa', large: 'cỡ lớn', small: 'cỡ nhỏ',
 }
+const sourceFactNotes: Record<string, string> = {
+  'composition-limit': 'Giới hạn đường, không phải nguyên liệu',
+  'alternative': 'Lựa chọn thay thế; không cộng đồng thời các phương án',
+  'recipe-batch': 'Định lượng công thức làm mẻ, không phải khẩu phần một người',
+  'source-duplicate': 'Sách lặp lại cùng một giá trị; không cộng hai lần',
+  'composite': 'Khối lượng kết hợp, không phải lượng riêng của từng nguyên liệu',
+  'fraction-correction': 'Giữ nguyên phân số từ sách: 1/2 củ, không phải 2 củ',
+}
 function displayQuantity(amount: string, unit: string, comparison?: string) {
   const value = `${amount} ${unitVietnamese[unit.toLowerCase()] ?? unit}`
   return comparison === 'less-than' ? `< ${value}` : value
@@ -118,6 +126,9 @@ export function BookReferencePage() {
                 giới hạn thành phần và khẩu phần ăn kèm, không phải tất cả đều là định lượng nguyên liệu.
                 Đã kiểm tra tự động chuỗi số lượng–đơn vị của 56 bữa (350 dữ kiện) với lớp chữ PDF gốc,
                 bổ sung nhãn theo ngữ cảnh cho 42 dữ kiện và nhận diện 13 giới hạn đường &lt; 8 g.
+                Đồng thời đã sửa thêm {bookQuantityInventory.metadata.sourceSemanticAudit.correctedContextEntries}
+                mục có nguy cơ hiểu sai ngữ cảnh: phân số 1/2, món ăn kèm, nguyên liệu tráng miệng,
+                lựa chọn thay thế, định lượng cho cả mẻ và con số xuất hiện lặp lại.
                 Đây chỉ là kiểm tra trích xuất, không phải xác minh công thức hay khẩu phần.
                 Hiện mới đối chiếu biên tập đầy đủ hai bữa (20 dữ kiện) với trang 215 và 236;
                 54 bữa còn lại vẫn cần kiểm duyệt. Không dùng bản trích xuất để AI tự suy ra năng lượng,
@@ -142,8 +153,8 @@ export function BookReferencePage() {
                             fact.amount, fact.unit, 'comparison' in fact ? fact.comparison : undefined,
                           )}</strong>
                           <small>Trang {fact.pdfPage}
-                            {'factType' in fact && fact.factType === 'composition-limit'
-                              ? ' · Giới hạn hàm lượng đường, không phải nguyên liệu' : ''}
+                            {'factType' in fact && typeof fact.factType === 'string'
+                              ? ' · ' + (sourceFactNotes[fact.factType] ?? 'Thông tin nguồn cần đối chiếu') : ''}
                           </small>
                         </li>
                       ))}
