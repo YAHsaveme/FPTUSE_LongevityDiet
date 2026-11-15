@@ -314,6 +314,9 @@ public sealed class CatalogServiceTests
         public Task AddRuleSetAsync(RuleSetVersion value, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
+        public Task ActivateStagedRuleSetAsync(CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
         public Task<RepositoryPage<RuleVersion>> GetReviewQueueAsync(
             int page, int pageSize, bool? medicalSensitive, CancellationToken cancellationToken = default)
         {

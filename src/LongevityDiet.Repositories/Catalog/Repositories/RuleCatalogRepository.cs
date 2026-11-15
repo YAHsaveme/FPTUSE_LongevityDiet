@@ -77,6 +77,7 @@ public sealed class RuleCatalogRepository(LongevityDietDbContext dbContext) : IR
         IReadOnlyCollection<Guid> ids,
         CancellationToken cancellationToken = default) =>
         await dbContext.RuleVersions
+            .Include(x => x.DietRule)
             .Where(x => ids.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
@@ -91,6 +92,20 @@ public sealed class RuleCatalogRepository(LongevityDietDbContext dbContext) : IR
 
     public async Task AddAuditAsync(RuleAudit audit, CancellationToken cancellationToken = default) =>
         await dbContext.RuleAudits.AddAsync(audit, cancellationToken);
+
+    public async Task ActivateStagedRuleSetAsync(CancellationToken cancellationToken = default)
+    {
+        // The staged RuleSet and audit are already tracked but not saved.
+        // SERIALIZABLE protects the active-set transition as one DB transaction.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(
+            System.Data.IsolationLevel.Serializable, cancellationToken);
+        var previouslyActive = await dbContext.RuleSetVersions
+            .Where(x => x.IsActive).ToListAsync(cancellationToken);
+        foreach (var old in previouslyActive)
+            old.IsActive = false;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+    }
 
     public async Task<RepositoryPage<RuleAudit>> GetHistoryAsync(Guid versionId, int page, int pageSize, string? search, string? action, CancellationToken cancellationToken = default)
     {

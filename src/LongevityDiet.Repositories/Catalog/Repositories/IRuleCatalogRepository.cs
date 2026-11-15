@@ -22,6 +22,7 @@ public interface IRuleCatalogRepository
     Task AddRuleAsync(DietRule rule, CancellationToken cancellationToken = default);
     Task AddVersionAsync(RuleVersion version, CancellationToken cancellationToken = default);
     Task AddRuleSetAsync(RuleSetVersion ruleSet, CancellationToken cancellationToken = default);
+    Task ActivateStagedRuleSetAsync(CancellationToken cancellationToken = default);
     Task AddAuditAsync(RuleAudit audit, CancellationToken cancellationToken = default);
     Task<RepositoryPage<RuleAudit>> GetHistoryAsync(Guid versionId, int page, int pageSize, string? search, string? action, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);

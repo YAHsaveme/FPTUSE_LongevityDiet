@@ -56,6 +56,10 @@ public sealed record CreateDietRuleRequest(
     string Category,
     bool IsMedicalSensitive);
 
+public sealed record ActivateRuleSetRequest(
+    string VersionLabel,
+    IReadOnlyList<Guid> RuleVersionIds);
+
 public sealed record SaveRuleVersionRequest(
     string ParametersJson,
     string SourceUrl,

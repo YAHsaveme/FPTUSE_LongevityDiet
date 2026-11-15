@@ -98,6 +98,25 @@ export type RuleReviewQueueItem = {
   createdAt: string
 }
 
+export type ActiveRuleSet = {
+  id: string
+  versionLabel: string
+  isActive: boolean
+  effectiveAt: string | null
+  publishedAt: string | null
+  rules: RuleVersion[]
+}
+
+export async function getActiveRuleSet() {
+  const response = await api.get<ActiveRuleSet>('/diet-rules/active-set')
+  return response.data
+}
+
+export async function activateRuleSet(input: { versionLabel: string; ruleVersionIds: string[] }) {
+  const response = await api.post<ActiveRuleSet>('/admin/rule-sets/activate', input)
+  return response.data
+}
+
 export type RuleSetPlanUsage = {
   ruleSetVersion: string
   isActiveRuleSet: boolean

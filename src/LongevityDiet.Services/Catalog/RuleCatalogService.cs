@@ -269,7 +269,7 @@ public sealed class RuleCatalogService(
             return CatalogServiceResult.Failure<PagedResult<RuleAuditDto>>("rule_version_not_found", "Rule version was not found.");
         }
 
-        if (search?.Length > 200 || (action is not null && action is not ("Created" or "Edited" or "Submitted" or "Rejected" or "Published" or "Retired")))
+        if (search?.Length > 200 || (action is not null && action is not ("Created" or "Edited" or "Submitted" or "Rejected" or "Published" or "Retired" or "ActivatedInRuleSet")))
         {
             return CatalogServiceResult.Failure<PagedResult<RuleAuditDto>>("invalid_filter", "Use a supported action and search up to 200 characters.");
         }
@@ -362,6 +362,97 @@ public sealed class RuleCatalogService(
                 "active_rule_set_not_found",
                 "No active rule set is available.")
             : CatalogServiceResult.Success(ToRuleSetDto(ruleSet));
+    }
+
+
+    public async Task<CatalogServiceResult<RuleSetDto>> ActivateRuleSetAsync(
+        ActivateRuleSetCommand command,
+        Guid actorId,
+        CancellationToken cancellationToken = default)
+    {
+        if (actorId == Guid.Empty || command is null ||
+            string.IsNullOrWhiteSpace(command.VersionLabel) ||
+            command.VersionLabel.Length is < 5 or > 80 ||
+            !command.VersionLabel.All(c =>
+                char.IsAsciiLetterOrDigit(c) || c is '-' or '_' or '.') ||
+            command.RuleVersionIds is null ||
+            command.RuleVersionIds.Count is < 1 or > 20 ||
+            command.RuleVersionIds.Contains(Guid.Empty) ||
+            command.RuleVersionIds.Distinct().Count() != command.RuleVersionIds.Count)
+        {
+            return CatalogServiceResult.Failure<RuleSetDto>(
+                "invalid_rule_set", "Provide a unique 5-80 character version label and 1-20 distinct published rule version IDs.");
+        }
+
+        var versions = await rules.FindVersionsAsync(command.RuleVersionIds, cancellationToken);
+        if (versions.Count != command.RuleVersionIds.Count ||
+            versions.Any(v => v.DietRule is null ||
+                !v.DietRule.IsActive ||
+                v.State != RuleVersionState.Published ||
+                v.PublishedAt is null) ||
+            versions.GroupBy(v => v.DietRuleId).Any(group => group.Count() > 1))
+        {
+            return CatalogServiceResult.Failure<RuleSetDto>(
+                "invalid_rule_versions", "Every selected version must be published, belong to an active rule, and represent a unique rule.");
+        }
+
+        var now = timeProvider.GetUtcNow();
+        if (versions.Any(v => v.EffectiveAt > now || v.PublishedAt > now))
+        {
+            return CatalogServiceResult.Failure<RuleSetDto>(
+                "rule_version_not_effective", "A selected rule version is not yet effective.");
+        }
+
+        foreach (var version in versions)
+        {
+            var validation = ValidateVersion(version.ParametersJson, version.SourceUrl,
+                version.Citation, version.SourceType, version.EvidenceLevel);
+            if (validation is not null)
+                return CatalogServiceResult.Failure<RuleSetDto>(validation.Value.Code, validation.Value.Message);
+
+            using var parameters = JsonDocument.Parse(version.ParametersJson);
+            if (parameters.RootElement.TryGetProperty("baseWeight", out var weight) &&
+                (weight.ValueKind != JsonValueKind.Number ||
+                 !weight.TryGetDecimal(out var value) || value < 0 || value > 100))
+            {
+                return CatalogServiceResult.Failure<RuleSetDto>(
+                    "invalid_rule_weight", "Rule baseWeight must be a number from 0 to 100.");
+            }
+        }
+
+        var next = new RuleSetVersion
+        {
+            VersionLabel = command.VersionLabel,
+            IsActive = true,
+            EffectiveAt = now,
+            PublishedAt = now,
+            CreatedAt = now,
+            RuleVersions = versions.ToList()
+        };
+        await rules.AddRuleSetAsync(next, cancellationToken);
+        foreach (var version in versions)
+        {
+            await rules.AddAuditAsync(new RuleAudit
+            {
+                RuleVersionId = version.Id,
+                VersionNumber = version.VersionNumber,
+                ActorId = actorId,
+                OccurredAt = now,
+                Action = "ActivatedInRuleSet",
+                Details = "Activated published rule version in rule set " + next.VersionLabel
+            }, cancellationToken);
+        }
+
+        try
+        {
+            await rules.ActivateStagedRuleSetAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            return CatalogServiceResult.Failure<RuleSetDto>(
+                "rule_set_conflict", "Concurrent activation or duplicate version label. Reload and retry.");
+        }
+        return CatalogServiceResult.Success(ToRuleSetDto(next));
     }
 
     private static (string Code, string Message)? ValidateVersion(

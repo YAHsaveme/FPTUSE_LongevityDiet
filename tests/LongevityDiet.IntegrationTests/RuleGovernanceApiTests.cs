@@ -16,6 +16,67 @@ public sealed class RuleGovernanceApiTests : IClassFixture<IntegrationTestWebApp
 
     public RuleGovernanceApiTests(IntegrationTestWebApplicationFactory factory) => _factory = factory;
 
+
+    [Fact]
+    public async Task AdminActivation_PublishedOnly_AtomicHistoryAndPlannerReadNewVersion()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var admin = _factory.CreateHttpsClient();
+        using var reviewer = _factory.CreateHttpsClient();
+        using var member = _factory.CreateHttpsClient();
+        await AuthenticateAsync(admin, admin: true);
+        await AuthenticateAsync(reviewer, admin: true);
+        await AuthenticateAsync(member, admin: false);
+
+        var (_, versionId) = await CreateRuleVersionAsync(admin);
+        var newRuleSet = new { VersionLabel = "qa-published-v2", RuleVersionIds = new[] { versionId } };
+        var forbidden = await member.PostAsJsonAsync("/api/v1/admin/rule-sets/activate", newRuleSet);
+        Assert.Equal(System.Net.HttpStatusCode.Forbidden, forbidden.StatusCode);
+
+        var draft = await admin.PostAsJsonAsync("/api/v1/admin/rule-sets/activate", newRuleSet);
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, draft.StatusCode);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound,
+            (await admin.GetAsync("/api/v1/diet-rules/active-set")).StatusCode);
+
+        var submitted = await admin.PostAsync($"/api/v1/admin/rule-versions/{versionId}/review", null);
+        Assert.Equal(System.Net.HttpStatusCode.OK, submitted.StatusCode);
+        var published = await reviewer.PostAsync($"/api/v1/admin/rule-versions/{versionId}/publication", null);
+        Assert.Equal(System.Net.HttpStatusCode.OK, published.StatusCode);
+
+        var activated = await admin.PostAsJsonAsync("/api/v1/admin/rule-sets/activate", newRuleSet);
+        Assert.Equal(System.Net.HttpStatusCode.Created, activated.StatusCode);
+        using (var firstJson = JsonDocument.Parse(await activated.Content.ReadAsStringAsync()))
+            Assert.Equal("qa-published-v2", firstJson.RootElement.GetProperty("versionLabel").GetString());
+
+        var duplicate = await admin.PostAsJsonAsync("/api/v1/admin/rule-sets/activate", newRuleSet);
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, duplicate.StatusCode);
+
+        var repeated = await admin.PostAsJsonAsync("/api/v1/admin/rule-sets/activate",
+            new { VersionLabel = "qa-invalid-repeat", RuleVersionIds = new[] { versionId, versionId } });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, repeated.StatusCode);
+
+        var newer = await admin.PostAsJsonAsync("/api/v1/admin/rule-sets/activate",
+            new { VersionLabel = "qa-published-v3", RuleVersionIds = new[] { versionId } });
+        Assert.Equal(System.Net.HttpStatusCode.Created, newer.StatusCode);
+        var active = await member.GetAsync("/api/v1/diet-rules/active-set");
+        Assert.Equal(System.Net.HttpStatusCode.OK, active.StatusCode);
+        using (var activeJson = JsonDocument.Parse(await active.Content.ReadAsStringAsync()))
+            Assert.Equal("qa-published-v3", activeJson.RootElement.GetProperty("versionLabel").GetString());
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+        var allSets = await db.RuleSetVersions.AsNoTracking().ToArrayAsync();
+        Assert.Equal(2, allSets.Length);
+        Assert.Single(allSets, set => set.IsActive);
+        Assert.Equal("qa-published-v2", Assert.Single(allSets, set => !set.IsActive).VersionLabel);
+        var auditCount = await db.RuleAudits.CountAsync(entry =>
+            entry.RuleVersionId == versionId && entry.Action == "ActivatedInRuleSet");
+        Assert.Equal(2, auditCount);
+        var plannerSource = scope.ServiceProvider.GetRequiredService<LongevityDiet.Services.Planning.IPlanningInputProvider>();
+        var resolved = await plannerSource.GetActiveRuleSetAsync();
+        Assert.Equal("qa-published-v3", resolved.RuleSetVersion);
+    }
+
     [Fact]
     public async Task RuleLifecycle_RequiresReview_RecordsAuditAndPreservesHistory()
     {
