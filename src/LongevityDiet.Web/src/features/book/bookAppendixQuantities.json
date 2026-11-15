@@ -5,8 +5,8 @@
     "pdfPages": "215-242",
     "status": "unverified-machine-extraction",
     "noteVi": "Số lượng dưới đây được tách tự động từ PDF, chưa được biên tập viên xác minh. Chỉ dùng để đối chiếu, không dùng làm định lượng cá nhân hoặc đầu vào AI.",
-    "reviewedMeals": 9,
-    "reviewedQuantities": 55,
+    "reviewedMeals": 17,
+    "reviewedQuantities": 109,
     "reviewMethod": "AI-assisted text-layer AND rendered-page source cross-check; no independent human or clinical review",
     "reviewDate": "2026-11-15",
     "sourceTokenAudit": {
@@ -80,6 +80,24 @@
       "newlyCheckedMeals": 7,
       "correctedLabels": 12,
       "note": "These seven slots were matched to PDF page images and text; unquantified alternatives/preparation noted, not an independent human clinical certification; NO AI ingestion."
+    },
+    "editorialBatchDay34": {
+      "status": "source-page-crosschecked-not-clinically-approved",
+      "sourcePdfSha256": "c4e762039b877d185ae1f44035cace4ba95f1791adbafb8097a0764dd26757d6",
+      "pdfPages": [
+        219,
+        220,
+        221,
+        222
+      ],
+      "week": 1,
+      "days": [
+        3,
+        4
+      ],
+      "newlyCheckedMeals": 8,
+      "correctedLabels": 19,
+      "note": "AI-assisted source-page cross-check only; not medical approval, independent editorial sign-off or authorization to feed Gemini."
     }
   },
   "meals": [
@@ -526,7 +544,7 @@
       "day": 3,
       "slot": "breakfast",
       "slotVi": "Bữa sáng",
-      "titleVi": "Bữa sáng theo Phụ lục A",
+      "titleVi": "Bữa sáng: bánh mì nguyên cám nướng và mứt quả mọng không thêm đường",
       "sourcePages": [
         219
       ],
@@ -538,26 +556,36 @@
           "pdfPage": 219
         },
         {
-          "labelVi": "mứt",
+          "labelVi": "Mứt quả mọng hỗn hợp không thêm đường",
           "amount": "40",
           "unit": "g",
           "pdfPage": 219
         },
         {
-          "labelVi": "mứt",
+          "labelVi": "Mứt quả mọng hỗn hợp không thêm đường",
           "amount": "2",
           "unit": "tsp",
           "pdfPage": 219
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 219,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          219
+        ],
+        "noteVi": "Trang PDF 219: cà phê hoặc trà; bánh mì nguyên cám nướng 60 g; mứt quả mọng hỗn hợp KHÔNG thêm đường 40 g/2 thìa cà phê. Hai số lượng của mứt cùng mô tả một món, không phải mật ong hoặc hai món cộng lại.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 3,
       "slot": "lunch",
       "slotVi": "Bữa trưa",
-      "titleVi": "Lúa mì spelt với bí ngòi, ô-liu và mùi tây",
+      "titleVi": "Lúa mì spelt với bí ngòi, tỏi, ô-liu và mùi tây",
       "sourcePages": [
         219
       ],
@@ -593,13 +621,13 @@
           "pdfPage": 219
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "12",
           "unit": "mL",
           "pdfPage": 219
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "1",
           "unit": "tbsp",
           "pdfPage": 219
@@ -611,14 +639,24 @@
           "pdfPage": 219
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 219,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          219
+        ],
+        "noteVi": "Trang PDF 219: nấu lúa mì spelt 40 g, bí ngòi 300 g, tỏi 1 tép, cà chua bi 100 g, ô-liu quả 25 g, dầu ô-liu 12 mL/1 thìa canh và mùi tây không định lượng. Rau lá xanh luộc 200 g là MÓN ĂN KÈM. Phần mô tả bước làm có chữ “cooked rice” dù tên và danh sách nguyên liệu ghi spelt; coi là điểm cần biên tập, KHÔNG đổi spelt sang gạo.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 3,
       "slot": "snack",
       "slotVi": "Bữa phụ",
-      "titleVi": "Bữa phụ theo Phụ lục A",
+      "titleVi": "Bánh đậu gà farinata với rau sống HOẶC sinh tố quả mọng",
       "sourcePages": [
         219,
         220
@@ -660,14 +698,25 @@
           "factType": "recipe-batch"
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 219,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          219,
+          220
+        ],
+        "noteVi": "Trang PDF 219–220: một lựa chọn là bánh farinata từ đậu gà kèm cà rốt/cần tây sống; lựa chọn KHÁC là sinh tố quả mọng 150 g với 125 mL sữa hạt phỉ. Bột đậu gà 240 g, nước 240 mL và dầu ô-liu tùy chọn 2 thìa canh là nguyên liệu cho CẢ MẺ bánh, không phải khối lượng khẩu phần một người. Sách mô tả nướng ở 350°F khoảng 15 phút, hoặc áp chảo. Không cộng hai lựa chọn bữa phụ.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 3,
       "slot": "dinner",
       "slotVi": "Bữa tối",
-      "titleVi": "Súp minestrone đậu gà và mì",
+      "titleVi": "Súp minestrone đậu gà và mì, tráng miệng tùy chọn",
       "sourcePages": [
         220
       ],
@@ -679,25 +728,25 @@
           "pdfPage": 220
         },
         {
-          "labelVi": "đậu gà",
+          "labelVi": "Đậu gà đã ngâm/nấu, tính theo khối lượng ướt",
           "amount": "150",
           "unit": "g",
           "pdfPage": 220
         },
         {
-          "labelVi": "mì Ý",
+          "labelVi": "Mì pasta cho súp",
           "amount": "40",
           "unit": "g",
           "pdfPage": 220
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "25",
           "unit": "mL",
           "pdfPage": 220
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "2",
           "unit": "tbsp",
           "pdfPage": 220
@@ -729,20 +778,30 @@
           "factType": "alternative"
         },
         {
-          "labelVi": "Hạnh nhân dùng cho món tráng miệng",
+          "labelVi": "Hạnh nhân cho lựa chọn tráng miệng cùng anh đào khô",
           "amount": "25",
           "unit": "g",
           "pdfPage": 220
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 220,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          220
+        ],
+        "noteVi": "Trang PDF 220: rau minestrone 250 g, đậu gà 150 g khối lượng ướt, mì 40 g, dầu ô-liu 25 mL/2 thìa canh, Parmesan 5 g/1 thìa canh. Salad xanh là MÓN ĂN KÈM không có số lượng. Tráng miệng là anh đào tươi 100 g HOẶC anh đào khô 20 g kết hợp hạnh nhân 25 g, chỉ là GỢI Ý và không cộng bắt buộc.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 4,
       "slot": "breakfast",
       "slotVi": "Bữa sáng",
-      "titleVi": "Bữa sáng theo Phụ lục A",
+      "titleVi": "Bagel quế và nho khô hoặc bánh mì nướng, cùng mứt mơ",
       "sourcePages": [
         221
       ],
@@ -762,26 +821,36 @@
           "factType": "composite"
         },
         {
-          "labelVi": "mứt",
+          "labelVi": "Mứt mơ không thêm đường",
           "amount": "20",
           "unit": "g",
           "pdfPage": 221
         },
         {
-          "labelVi": "mứt",
+          "labelVi": "Mứt mơ không thêm đường",
           "amount": "1",
           "unit": "tbsp",
           "pdfPage": 221
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 221,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          221
+        ],
+        "noteVi": "Trang PDF 221: cà phê hoặc trà với nửa quả chanh vắt; bagel quế nho khô HOẶC 2 lát bánh mì nướng, khối lượng 80 g; mứt mơ KHÔNG thêm đường 20 g/1 thìa canh. Hai số lượng mứt cùng một thành phần; số đếm nửa quả chanh không phải 1/2 khẩu phần bánh.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 4,
       "slot": "lunch",
       "slotVi": "Bữa trưa",
-      "titleVi": "Salad lúa mạch, ô-liu và các loại hạt",
+      "titleVi": "Salad đại mạch, ô-liu, hạt hồ đào và rau củ",
       "sourcePages": [
         221
       ],
@@ -841,33 +910,43 @@
           "pdfPage": 221
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "12",
           "unit": "mL",
           "pdfPage": 221
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "1",
           "unit": "tbsp",
           "pdfPage": 221
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 221,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          221
+        ],
+        "noteVi": "Trang PDF 221: đại mạch 40 g, cà chua 150 g, nấm sống 75 g, ớt chuông sống 150 g, ngô 20 g, rau củ ngâm chua 150 g, hạt pecan 9 g, quả ô-liu 12 g/1 thìa canh và dầu ô-liu 12 mL/1 thìa canh. Ô-liu QUẢ không phải DẦU ô-liu; rau thơm tùy chọn và muối/tiêu không có lượng bắt buộc. Salad có thể dùng ấm hoặc để lạnh.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 4,
       "slot": "snack",
       "slotVi": "Bữa phụ",
-      "titleVi": "Bữa phụ theo Phụ lục A",
+      "titleVi": "Sữa dừa không đường và thanh hạt–sôcôla đen",
       "sourcePages": [
         221,
         222
       ],
       "facts": [
         {
-          "labelVi": "sữa dừa",
+          "labelVi": "Sữa dừa không đường",
           "amount": "240",
           "unit": "mL",
           "pdfPage": 221
@@ -881,20 +960,31 @@
           "comparison": "less-than"
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 221,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          221,
+          222
+        ],
+        "noteVi": "Trang PDF 221–222: sữa dừa KHÔNG đường 240 mL (một ly), thanh ngũ cốc và hạt với sôcôla đen có 150 kcal, ít hơn 8 g đường, tối thiểu 70% sôcôla đen và không chứa sữa. Các chỉ tiêu trên mô tả sản phẩm, KHÔNG phải một lượng nguyên liệu phải cân.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
       "day": 4,
       "slot": "dinner",
       "slotVi": "Bữa tối",
-      "titleVi": "Súp mì và đậu lăng",
+      "titleVi": "Súp mì đậu lăng và rau củ",
       "sourcePages": [
         222
       ],
       "facts": [
         {
-          "labelVi": "đậu lăng",
+          "labelVi": "Đậu lăng đã nấu và để ráo",
           "amount": "150",
           "unit": "g",
           "pdfPage": 222
@@ -924,19 +1014,19 @@
           "pdfPage": 222
         },
         {
-          "labelVi": "mì Ý",
+          "labelVi": "Mì pasta cho súp",
           "amount": "40",
           "unit": "g",
           "pdfPage": 222
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "25",
           "unit": "mL",
           "pdfPage": 222
         },
         {
-          "labelVi": "dầu ô-liu, ô-liu",
+          "labelVi": "Dầu ô-liu",
           "amount": "2",
           "unit": "tbsp",
           "pdfPage": 222
@@ -954,13 +1044,23 @@
           "pdfPage": 222
         },
         {
-          "labelVi": "hạt óc chó",
+          "labelVi": "Hạt óc chó dùng cùng lựa chọn việt quất khô tráng miệng",
           "amount": "25",
           "unit": "g",
           "pdfPage": 222
         }
       ],
-      "verificationStatus": "needs-human-review"
+      "verificationStatus": "source-page-checked",
+      "verificationPage": 222,
+      "sourceReview": {
+        "method": "AI-assisted visual PDF page plus text-layer comparison; independent human/medical sign-off NOT completed",
+        "scope": "ingredient identity, alternatives, recipe-batch amounts, source layout and optional foods",
+        "pdfPages": [
+          222
+        ],
+        "noteVi": "Trang PDF 222: đậu lăng đã ngâm/nấu, để ráo 150 g; khoai tây/cà rốt/cà chua mỗi thứ một củ cỡ vừa; tỏi 2 tép cắt đôi; rosemary tùy ý; mì 40 g; dầu ô-liu 25 mL/2 thìa canh. Gợi ý tráng miệng: dứa 100 g HOẶC việt quất khô 20 g cùng óc chó 25 g. Sách có đoạn nhắc bổ sung vi chất và omega-3; tuyệt đối KHÔNG chuyển ghi chú đó thành đơn sử dụng tự động.",
+        "reviewDate": "2026-11-15"
+      }
     },
     {
       "week": 1,
