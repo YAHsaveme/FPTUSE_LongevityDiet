@@ -6,6 +6,8 @@
 
 **Latest follow-up, 2026-11-15:** Eight additional week-1 day-3/day-4 slots on pages 219–222 have now undergone an AI-assisted visual/text source comparison, raising the current reference count to **17/56 slots, 109 numeric-unit facts**, with **39/56 slots still pending**. The earlier 2/56 and 9/56 figures below are historical baselines, not present-time totals. See `PRN232_BOOK_APPENDIX_EDITORIAL_W1D3_D4_20261115.md`. No independent clinical sign-off or permission for AI meal generation is implied.
 
+**Follow-up W1 days 5–6, 2026-11-15:** A further eight slots on PDF pages 223–226 were checked against the rendered original and its text layer. The **latest counts are 25/56 source-page-crosschecked slots and 161/350 quantity-token mentions**, with **31/56 slots still requiring equivalent verification**. The 2/56, 9/56 and 17/56 numbers below document earlier milestones. See `PRN232_BOOK_APPENDIX_EDITORIAL_W1D5_D6_20261115.md`. This is still AI-assisted reference/source review, not independent medical or editorial certification.
+
 ## Verified technical evidence, not medical/recipe approval
 
 1. The original PDF text layer was independently parsed on pages **215–242** with PyMuPDF, splitting by **week / day / breakfast / lunch / snack / dinner**. All **56** meal slots were recovered; the parser found exactly **350** ordered amount/unit tokens.
