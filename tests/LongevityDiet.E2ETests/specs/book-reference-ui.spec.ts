@@ -16,7 +16,7 @@ test('Trang sách gốc hiển thị đủ chỉ dẫn nguồn, không nhận t�
   await expect(page.locator('.book-ref-meal-grid').getByText('Trang 236')).toBeVisible()
   await expect(page.getByText(/phải kiểm tra dị ứng/)).toBeVisible()
   await page.locator('.book-ref-quantity-details summary').click()
-  await expect(page.getByText(/Hiện mới đối chiếu biên tập đầy đủ hai bữa/)).toBeVisible()
+  await expect(page.getByText(/Đã đối chiếu trực tiếp 9 bữa/)).toBeVisible()
   await expect(page.locator('.book-ref-quantity-card')).toHaveCount(4)
   const dinnerQuantity = page.locator('.book-ref-quantity-card').filter({ hasText: 'Gạo đen, bí ngòi và tôm' })
   await expect(dinnerQuantity.getByText('tôm', { exact: true })).toBeVisible()
@@ -24,6 +24,15 @@ test('Trang sách gốc hiển thị đủ chỉ dẫn nguồn, không nhận t�
   await expect(dinnerQuantity.getByText(/Đã đối chiếu định lượng/)).toBeVisible()
   await expect(page.locator('.book-ref-unverified')).toHaveCount(3)
   await expect(page.getByRole('heading', { name: 'Tra cứu nguồn vi chất' })).toBeVisible()
+})
+
+test('Bữa sáng ngày đầu không còn nhầm mứt việt quất thành mật ong', async ({ page }) => {
+  await page.goto('/book')
+  await page.locator('.book-ref-quantity-details summary').click()
+  const breakfast = page.locator('.book-ref-quantity-card').filter({ hasText: 'focaccia nguyên cám' })
+  await expect(breakfast.getByText('Mứt việt quất không thêm đường').first()).toBeVisible()
+  await expect(breakfast.getByText(/KHÔNG PHẢI mật ong/)).toBeVisible()
+  await expect(breakfast.getByText(/Chưa có xác nhận biên tập độc lập/)).toBeVisible()
 })
 
 test('Trang sách gốc dễ đọc trên điện thoại 390px', async ({ page }) => {
@@ -47,7 +56,7 @@ test('Giới hạn đường trong bữa phụ không hiển thị như định 
   await expect(snack.getByText('< 8 g', { exact: true })).toBeVisible()
   await expect(snack.getByText(/không phải nguyên liệu/)).toBeVisible()
   await expect(page.getByText(/350 dữ kiện/)).toBeVisible()
-  await expect(page.getByText(/54 bữa còn lại vẫn cần kiểm duyệt/)).toBeVisible()
+  await expect(page.getByText(/47 bữa còn lại chưa được rà soát mức này/)).toBeVisible()
   await expect(page.getByText('Tên nguyên liệu cần đối chiếu bản dịch')).toHaveCount(0)
 })
 

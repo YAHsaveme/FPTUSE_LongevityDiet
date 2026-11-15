@@ -2,6 +2,8 @@
 
 **Source:** User-supplied `The Longevity Diet` by Valter Longo (2018), ISBN 9780525534075, 306 PDF pages. SHA-256: `c4e762039b877d185ae1f44035cace4ba95f1791adbafb8097a0764dd26757d6`. The book PDF is **not** distributed or committed to Git.
 
+**Later source-page update, 2026-11-15:** The 2/56 and 54/56 figures below describe the original machine-token audit baseline. An additional seven slots on PDF pages 215–218 were subsequently checked against the rendered PDF and text. The current counts are **9/56 source-page-crosschecked** and **47/56 still awaiting that review**, with 55 checked numeric facts. See `PRN232_BOOK_APPENDIX_EDITORIAL_W1D1_D2_20261115.md`. The whole dataset remains unverified for independent human/medical purposes.
+
 ## Verified technical evidence, not medical/recipe approval
 
 1. The original PDF text layer was independently parsed on pages **215–242** with PyMuPDF, splitting by **week / day / breakfast / lunch / snack / dinner**. All **56** meal slots were recovered; the parser found exactly **350** ordered amount/unit tokens.

@@ -130,8 +130,11 @@ export function BookReferencePage() {
                 mục có nguy cơ hiểu sai ngữ cảnh: phân số 1/2, món ăn kèm, nguyên liệu tráng miệng,
                 lựa chọn thay thế, định lượng cho cả mẻ và con số xuất hiện lặp lại.
                 Đây chỉ là kiểm tra trích xuất, không phải xác minh công thức hay khẩu phần.
-                Hiện mới đối chiếu biên tập đầy đủ hai bữa (20 dữ kiện) với trang 215 và 236;
-                54 bữa còn lại vẫn cần kiểm duyệt. Không dùng bản trích xuất để AI tự suy ra năng lượng,
+                Đã đối chiếu trực tiếp {bookQuantityInventory.metadata.reviewedMeals} bữa
+                ({bookQuantityInventory.metadata.reviewedQuantities} dữ kiện) với ảnh trang PDF gốc;
+                {bookQuantityInventory.meals.length - bookQuantityInventory.metadata.reviewedMeals} bữa còn lại chưa được rà soát mức này.
+                Đây là kiểm tra nguồn có hỗ trợ AI, không phải người biên tập hay chuyên gia y tế độc lập chứng nhận.
+                Không dùng bản trích xuất để AI tự suy ra năng lượng,
                 định lượng cá nhân hoặc phác đồ ăn uống.
                 Lưu ý: 350 dữ kiện chỉ là mẫu có số đi kèm đơn vị mà bộ tách nhận diện;
                 chưa bao gồm mọi số đếm trái cây, năng lượng thanh ăn nhẹ hoặc phần trăm thành phần.
@@ -148,6 +151,12 @@ export function BookReferencePage() {
                         ? 'Đã đối chiếu định lượng với trang gốc; chưa phải xác nhận lâm sàng'
                         : 'Trích xuất máy — cần xác minh từng nguyên liệu và định lượng'}
                     </p>
+                    {'sourceReview' in record && record.sourceReview && (
+                      <p className="book-ref-intro">
+                        <strong>Ghi chú đối chiếu trang PDF:</strong> {record.sourceReview.noteVi}
+                        {' '} (Chưa có xác nhận biên tập độc lập hoặc phê duyệt lâm sàng.)
+                      </p>
+                    )}
                     <ul>
                       {record.facts.map((fact, index) => (
                         <li key={index}>
