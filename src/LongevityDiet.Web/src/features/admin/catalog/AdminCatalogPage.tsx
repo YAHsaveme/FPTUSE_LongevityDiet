@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import './admin-pagination.css'
+import { RecipeHistoryPanel } from './RecipeHistoryPanel'
 import { useAdminCollection } from './useAdminCollection'
 import { AdminCollectionControls, AdminCollectionPagination } from './AdminCollectionControls'
 import { viContent } from '../../../lib/viContent'
@@ -209,6 +210,7 @@ function RecipeAdmin() {
   const queryClient = useQueryClient()
   const [form, setForm] = useState<SaveRecipeInput>(emptyRecipe)
   const [editingRecipe, setEditingRecipe] = useState<RecipeDetail | null>(null)
+  const [historyRecipe, setHistoryRecipe] = useState<{ id: string; name: string } | null>(null)
   const listing = useAdminCollection('recipe')
   const [ingredientSearch, setIngredientSearch] = useState('')
   const [message, setMessage] = useState<string | null>(null)
@@ -235,6 +237,7 @@ function RecipeAdmin() {
       setEditingRecipe(null)
       setMessage(editingRecipe ? 'Đã cập nhật công thức.' : 'Đã thêm công thức.')
       void queryClient.invalidateQueries({ queryKey: ['admin', 'recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'recipe-history'] })
       void queryClient.invalidateQueries({ queryKey: ['catalog', 'recipes'] })
     },
     onError: (error) => setMessage(getApiErrorMessage(error)),
@@ -245,6 +248,7 @@ function RecipeAdmin() {
     onSuccess: () => {
       setMessage('Đã ngừng sử dụng công thức.')
       void queryClient.invalidateQueries({ queryKey: ['admin', 'recipes'] })
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'recipe-history'] })
       void queryClient.invalidateQueries({ queryKey: ['catalog', 'recipes'] })
     },
     onError: (error) => setMessage(getApiErrorMessage(error)),
@@ -350,6 +354,7 @@ function RecipeAdmin() {
               <div className="admin-item-actions">
                 <Link to={'/catalog/recipes/' + recipe.id}>Xem</Link>
                 <button onClick={() => void beginEdit(recipe.id)}>Sửa</button>
+                <button type="button" onClick={() => setHistoryRecipe({ id: recipe.id, name: recipe.name })}>Lịch sử</button>
                 {recipe.isActive && (
                   <button className="danger" onClick={() => deactivate.mutate(recipe.id)}>
                     <Trash2 size={13} /> Ngừng sử dụng
@@ -361,6 +366,11 @@ function RecipeAdmin() {
         </div>
         {recipes.data && <AdminCollectionPagination query={listing} totalItems={recipes.data.totalItems} totalPages={recipes.data.totalPages} />}
         {recipes.data?.items.length === 0 && <p role="status">Không có dữ liệu phù hợp với bộ lọc hiện tại.</p>}
+        {historyRecipe && (
+          <RecipeHistoryPanel key={historyRecipe.id}
+            recipeId={historyRecipe.id} recipeName={historyRecipe.name}
+            onClose={() => setHistoryRecipe(null)} />
+        )}
       </section>
 
       <section className="admin-form-panel">

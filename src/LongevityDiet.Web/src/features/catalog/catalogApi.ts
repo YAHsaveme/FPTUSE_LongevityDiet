@@ -70,6 +70,15 @@ export type RecipeDetail = RecipeSummary & {
   allergens: Allergen[]
 }
 
+export type RecipeCompositionRevision = {
+  id: string
+  recipeId: string
+  recordedAt: string
+  changeType: string
+  actorId: string | null
+  snapshotJson: string
+}
+
 export type RuleVersion = {
   id: string
   dietRuleId: string
@@ -222,6 +231,14 @@ export async function getRecipe(id: string) {
 
 export async function getAdminRecipe(id: string) {
   const response = await api.get<RecipeDetail>(`/admin/recipes/${id}`)
+  return response.data
+}
+
+export async function getRecipeHistory(id: string, page = 1, pageSize = 5) {
+  const response = await api.get<PagedResult<RecipeCompositionRevision>>(
+    `/admin/recipes/${id}/history`,
+    { params: { page, pageSize } },
+  )
   return response.data
 }
 
