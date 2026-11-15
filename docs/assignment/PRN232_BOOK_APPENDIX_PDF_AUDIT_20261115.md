@@ -8,6 +8,8 @@
 
 **Follow-up W1 days 5–6, 2026-11-15:** A further eight slots on PDF pages 223–226 were checked against the rendered original and its text layer. The **latest counts are 25/56 source-page-crosschecked slots and 161/350 quantity-token mentions**, with **31/56 slots still requiring equivalent verification**. The 2/56, 9/56 and 17/56 numbers below document earlier milestones. See `PRN232_BOOK_APPENDIX_EDITORIAL_W1D5_D6_20261115.md`. This is still AI-assisted reference/source review, not independent medical or editorial certification.
 
+**Latest cross-week follow-up, 2026-11-15:** Week 1 day 7 + week 2 day 1 have been source-page compared against PDF pages 227–230. The updated totals are **33/56 source-page-crosschecked slots and 205/350 numeric-unit facts; 23/56 slots still pending**. Prior figures below are historical batches. See `PRN232_BOOK_APPENDIX_EDITORIAL_WEEK_TURN_20261115.md`. This remains AI-assisted evidence, not clinical or independent human editorial approval.
+
 ## Verified technical evidence, not medical/recipe approval
 
 1. The original PDF text layer was independently parsed on pages **215–242** with PyMuPDF, splitting by **week / day / breakfast / lunch / snack / dinner**. All **56** meal slots were recovered; the parser found exactly **350** ordered amount/unit tokens.
