@@ -42,6 +42,11 @@ describe('Admin RuleSet activation', () => {
       title: 'Plant-forward source rule', description: 'QA only', category: 'Nutrition',
       isMedicalSensitive: false, isActive: true,
       versions: [publishedVersion, draftVersion],
+    }, {
+      id: 'medical-rule', ruleKey: 'FMD_MEDICAL_QA',
+      title: 'Restricted medical rule', description: 'Not for automated plans',
+      category: 'FMD', isMedicalSensitive: true, isActive: true,
+      versions: [{ ...publishedVersion, id: 'medical-version', dietRuleId: 'medical-rule' }],
     }])
     vi.mocked(getActiveRuleSet).mockResolvedValue({
       id: 'active-1', versionLabel: 'qa-current-v1', isActive: true,
@@ -71,6 +76,7 @@ describe('Admin RuleSet activation', () => {
     const selector = screen.getByRole('group', { name: 'Chọn một phiên bản đã công bố cho mỗi quy tắc' })
     const published = within(selector).getByRole('checkbox', { name: /v1/ })
     expect(within(selector).queryByRole('checkbox', { name: /v2/ })).toBeNull()
+    expect(within(selector).queryByText(/Restricted medical rule/)).toBeNull()
     fireEvent.click(published)
     expect(activateButton).toBeDisabled()
     fireEvent.click(screen.getByRole('checkbox', { name: /Tôi xác nhận đã kiểm tra nguồn/ }))

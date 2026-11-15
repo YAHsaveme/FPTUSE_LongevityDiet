@@ -396,6 +396,15 @@ public sealed class RuleCatalogService(
                 "invalid_rule_versions", "Every selected version must be published, belong to an active rule, and represent a unique rule.");
         }
 
+        // Without a clinically governed approval pathway, medical-sensitive
+        // rules must not be turned into autonomous nutrition-plan inputs.
+        if (versions.Any(v => v.DietRule.IsMedicalSensitive))
+        {
+            return CatalogServiceResult.Failure<RuleSetDto>(
+                "medical_sensitive_rule_blocked",
+                "Medical-sensitive rule versions cannot be activated for automated meal planning.");
+        }
+
         var now = timeProvider.GetUtcNow();
         if (versions.Any(v => v.EffectiveAt > now || v.PublishedAt > now))
         {

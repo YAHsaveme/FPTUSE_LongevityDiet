@@ -77,6 +77,47 @@ public sealed class RuleGovernanceApiTests : IClassFixture<IntegrationTestWebApp
         Assert.Equal("qa-published-v3", resolved.RuleSetVersion);
     }
 
+
+    [Fact]
+    public async Task MedicalSensitiveRule_CannotBeActivatedForAutomatedMealPlanning()
+    {
+        await _factory.ResetDatabaseAsync();
+        using var admin = _factory.CreateHttpsClient();
+        using var reviewer = _factory.CreateHttpsClient();
+        await AuthenticateAsync(admin, admin: true);
+        await AuthenticateAsync(reviewer, admin: true);
+        var created = await admin.PostAsJsonAsync("/api/v1/admin/diet-rules", new
+        {
+            RuleKey = "FMD_MEDICAL_QA",
+            Title = "Medical contraindication QA",
+            Description = "This is a restricted synthetic safety rule",
+            Category = "FMD",
+            IsMedicalSensitive = true,
+        });
+        Assert.Equal(System.Net.HttpStatusCode.Created, created.StatusCode);
+        using var ruleJson = JsonDocument.Parse(await created.Content.ReadAsStringAsync());
+        var ruleId = ruleJson.RootElement.GetProperty("id").GetGuid();
+
+        var version = await admin.PostAsJsonAsync(
+            $"/api/v1/admin/diet-rules/{ruleId}/versions",
+            VersionInput("{\"baseWeight\":10}"));
+        Assert.Equal(System.Net.HttpStatusCode.Created, version.StatusCode);
+        using var versionJson = JsonDocument.Parse(await version.Content.ReadAsStringAsync());
+        var versionId = versionJson.RootElement.GetProperty("id").GetGuid();
+        Assert.Equal(System.Net.HttpStatusCode.OK,
+            (await admin.PostAsync($"/api/v1/admin/rule-versions/{versionId}/review", null)).StatusCode);
+        Assert.Equal(System.Net.HttpStatusCode.OK,
+            (await reviewer.PostAsync($"/api/v1/admin/rule-versions/{versionId}/publication", null)).StatusCode);
+
+        var blocked = await admin.PostAsJsonAsync("/api/v1/admin/rule-sets/activate",
+            new { VersionLabel = "qa-medical-denied", RuleVersionIds = new[] { versionId } });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, blocked.StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<LongevityDietDbContext>();
+        Assert.Empty(await db.RuleSetVersions.AsNoTracking().ToListAsync());
+    }
+
     [Fact]
     public async Task RuleLifecycle_RequiresReview_RecordsAuditAndPreservesHistory()
     {

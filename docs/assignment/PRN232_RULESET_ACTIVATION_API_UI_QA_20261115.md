@@ -7,7 +7,7 @@ Depends on PR #72, which replaced unconditional hardcoded Planner RuleSets with 
 2. A different administrator must review and publish the version. Published versions are immutable, preserving historical plans.
 3. In /admin/catalog → Quy tắc → Kích hoạt bộ quy tắc đã xuất bản, Admin sees the currently active RuleSet and only published versions, at most one per rule.
 4. Admin enters a unique 5–80-character version label, selects eligible versions, explicitly confirms and invokes POST /api/v1/admin/rule-sets/activate.
-5. Server validates Admin authorization, publication and effective dates, parent active rule, source citation, per-rule uniqueness and optional baseWeight range 0–100.
+5. Server validates Admin authorization, publication and effective dates, parent active rule, source citation, per-rule uniqueness and optional baseWeight range 0–100. Rules marked medical-sensitive are explicitly prohibited from automated Planner activation until a separately governed clinical process exists.
 6. Repository stages a new active RuleSet and per-version ActivatedInRuleSet audit events in a SERIALIZABLE SQL transaction, marking old RuleSets inactive. It does not delete old RuleSets, published versions or historical user plans.
 7. GET /api/v1/diet-rules/active-set and Planner IPlanningInputProvider.GetActiveRuleSetAsync now read the new active label and versions.
 

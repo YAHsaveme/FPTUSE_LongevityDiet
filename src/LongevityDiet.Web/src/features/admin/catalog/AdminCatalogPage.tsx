@@ -594,7 +594,7 @@ function RuleAdmin() {
               placeholder="2026.11-reviewed-v2" />
           </label>
           <div role="group" aria-label="Chọn một phiên bản đã công bố cho mỗi quy tắc">
-            {rules.data?.map(rule => (
+            {rules.data?.filter(rule => !rule.isMedicalSensitive).map(rule => (
               <div key={rule.id} style={{ marginBlock: '.65rem' }}>
                 <strong>{viContent(rule.title)} ({rule.ruleKey})</strong>
                 {rule.versions.filter(version => version.state === 2).map(version => (
@@ -786,7 +786,7 @@ function RuleGovernance({ version }: { version: RuleVersion }) {
     {showHistory && <div aria-live="polite">
       <label>Lọc loại thay đổi <select value={actionFilter} onChange={event => { setActionFilter(event.target.value); setPage(1) }}>
         <option value="">Tất cả thay đổi</option>
-        {['Created', 'Edited', 'Submitted', 'Rejected', 'Published', 'Retired'].map(action => <option key={action} value={action}>{viContent(action)}</option>)}
+        {['Created', 'Edited', 'Submitted', 'Rejected', 'Published', 'Retired', 'ActivatedInRuleSet'].map(action => <option key={action} value={action}>{viContent(action)}</option>)}
       </select></label>
       {history.isLoading && <p>Đang tải lịch sử...</p>}
       {history.isError && <p role="alert">{getApiErrorMessage(history.error)}</p>}
