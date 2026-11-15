@@ -138,9 +138,23 @@ for(const [owner,count] of Object.entries(expectedOwnerCounts)){
  check(fkEdges.filter(e=>e.includes('id="edge-fk-'+owner+'-')).length===count,
   'ERD wrong physical FK arrow count for '+owner);
 }
+const fkTargetPorts=new Set();
+const fkSourcePorts=new Set();
 for(const e of fkEdges){
  const source=(e.match(/source="([^"]+)"/)||[])[1]||'';
  const target=(e.match(/target="([^"]+)"/)||[])[1]||'';
+ const style=(e.match(/style="([^"]+)"/)||[])[1]||'';
+ const portKey=(node,a,b)=>{
+  const x=style.match(new RegExp(a+'=([0-9.]+)'))?.[1];
+  const y=style.match(new RegExp(b+'=([0-9.]+)'))?.[1];
+  return node+':'+x+':'+y;
+ };
+ const input=portKey(target,'entryX','entryY');
+ const output=portKey(source,'exitX','exitY');
+ check(!fkTargetPorts.has(input),'ERD overlapping FK arrowheads at '+input);
+ check(!fkSourcePorts.has(output),'ERD overlapping outgoing FK ports at '+output);
+ fkTargetPorts.add(input);
+ fkSourcePorts.add(output);
  const fromOwner=(source.match(/^tbl-([a-z]+)-/)||[])[1];
  const toOwner=(target.match(/^tbl-([a-z]+)-/)||[])[1];
  check(!!fromOwner&&fromOwner===toOwner,
@@ -148,6 +162,35 @@ for(const e of fkEdges){
  check(e.includes('endArrow=block')&&e.includes('endFill=1'),
   'Physical FK needs a clear filled arrowhead: '+source+' -> '+target);
 }
+// Verify the full directed path through every service and the main
+// member journey, rather than accepting two disconnected end points.
+const hasNativePath=(name,source,target)=>(diagrams[name]?.edges||[])
+ .some(e=>e.includes('source="'+source+'"')&&e.includes('target="'+target+'"'));
+const requirePath=(name,ids)=>{
+ for(let i=0;i<ids.length-1;i++)
+  check(hasNativePath(name,ids[i],ids[i+1]),
+   name+' missing directed step '+ids[i]+' -> '+ids[i+1]);
+};
+requirePath('C0',['member','system']);
+requirePath('C0',['admin','system']);
+requirePath('C1',['member','web','gateway','router','route-spine']);
+requirePath('C1',['admin','web','gateway','router','route-spine']);
+for(const owner of ['identity','catalog','planning','tracking','recommendation','worker'])
+ requirePath('C1',['route-spine','svc-'+owner,'db-'+owner,'event-spine']);
+requirePath('C1',['event-spine','outbox','redis','consumer']);
+requirePath('C1',['redis','rabbit','consumer']);
+requirePath('C2',['member','web','gateway','api-spine']);
+requirePath('C2',['admin','web','gateway','api-spine']);
+for(const key of ['id','cat','plan','track','rec','work'])
+ requirePath('C2',['api-spine','endpoint-'+key,'service-'+key,'repo-'+key,'event-spine']);
+requirePath('C2',['event-spine','queue-dispatch','redis','rabbit']);
+requirePath('Business Flow',['member','auth','profile','catalog','planning',
+ 'tracking','score','outbox','redis','worker','report','end']);
+requirePath('Business Flow',['admin','admin-rbac','admin-review','catalog']);
+requirePath('Business Flow',['planning','fmd-request','fmd-gate','fmd-yes','tracking']);
+requirePath('Business Flow',['fmd-gate','fmd-no']);
+requirePath('Business Flow',['redis','rabbit','rabbit-audit','audit-receipt']);
+
 for(const actorDiagram of ['C0','C1','C2','Business Flow']){
  const xml=diagrams[actorDiagram]?.xml||'';
  check(xml.includes('actor-caption-member')&&xml.includes('actor-caption-admin'),
