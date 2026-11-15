@@ -88,9 +88,9 @@ public sealed class PlannerDynamicCatalogAndRulesTests : IClassFixture<Integrati
 
         newSet.IsActive = false;
         await db.SaveChangesAsync();
-        var error = await Assert.ThrowsAsync<InvalidOperationException>(
+        var error = await Assert.ThrowsAsync<PlanningCatalogUnavailableException>(
             () => source.GetActiveRuleSetAsync());
-        Assert.Contains("No active published RuleSet", error.Message);
+        Assert.Equal("planning_rules_unavailable", error.Code);
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public sealed class PlannerDynamicCatalogAndRulesTests : IClassFixture<Integrati
         var plans = services.GetRequiredService<IMealPlanRepository>();
         var runtime = new PlanningCatalogSnapshotProvider(users, plans);
         Assert.Empty(await runtime.GetCandidateMealsAsync());
-        await Assert.ThrowsAsync<InvalidOperationException>(
+        await Assert.ThrowsAsync<PlanningCatalogUnavailableException>(
             () => runtime.GetActiveRuleSetAsync());
 
         var explicitlySynthetic = new PlanningCatalogSnapshotProvider(

@@ -4,6 +4,7 @@ type ProblemDetails = {
   title?: string
   detail?: string
   errors?: Record<string, string[]>
+  code?: string
 }
 
 /** One user-facing error vocabulary across all Member pages. */
@@ -18,6 +19,20 @@ export function getApiErrorMessage(error: unknown, fallback = 'Đã có lỗi x�
   }
 
   const { status, data } = error.response
+  // Only these explicitly modeled, safe Planner-precondition codes are actionable.
+  // All other 5xx errors remain generic to avoid leaking exception details.
+  if (status === 503) {
+    switch (data?.code) {
+      case 'planning_rules_unavailable':
+        return 'Chưa có bộ quy tắc đang hoạt động. Hãy nhờ quản trị viên kiểm tra và kích hoạt bộ quy tắc đã công bố.'
+      case 'planning_rules_not_effective':
+        return 'Bộ quy tắc chưa tới ngày có hiệu lực. Hãy liên hệ quản trị viên.'
+      case 'planning_rules_invalid':
+        return 'Bộ quy tắc chưa hợp lệ để tạo thực đơn. Hãy liên hệ quản trị viên kiểm tra phiên bản đã công bố.'
+      case 'planning_catalog_empty':
+        return 'Danh mục chưa có công thức đủ thông tin. Hãy nhờ quản trị viên cập nhật công thức và nguyên liệu trước khi tạo thực đơn.'
+    }
+  }
   // Never expose internal exception details or stack traces to end users.
   if (status >= 500) return 'Hệ thống đang gặp sự cố. Vui lòng thử lại sau.'
   if (status === 429) return 'Bạn thao tác quá nhanh. Vui lòng đợi một chút rồi thử lại.'
