@@ -58,6 +58,7 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
   const navigate = useNavigate()
   const { user, logout, updateSessionUser } = useAuth()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [logoutError, setLogoutError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
   const profileQuery = useQuery({
@@ -131,8 +132,14 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
   })
 
   const handleLogout = async () => {
-    await logout()
-    navigate('/login', { replace: true })
+    setLogoutError(null)
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch {
+      // Server-side refresh-token revocation was not confirmed.
+      setLogoutError('Đăng xuất chưa hoàn tất trên máy chủ. Phiên đăng nhập vẫn hoạt động; vui lòng thử lại.')
+    }
   }
 
   // Logout must remain reachable when /profile is slow or unavailable.
@@ -148,6 +155,7 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
     return (
       <main className="profile-page">
         <header className="profile-topbar">{logoutButton}</header>
+        {logoutError && <p role="alert" className="form-error">{logoutError}</p>}
         <div className="auth-loading" role="status">
           <span />
           <p>Đang tải hồ sơ...</p>
@@ -160,6 +168,7 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
     return (
       <main className="profile-page">
         <header className="profile-topbar">{logoutButton}</header>
+        {logoutError && <p role="alert" className="form-error">{logoutError}</p>}
         <section className="profile-card compact-message">
           <span className="eyebrow">KHÔNG THỂ TẢI HỒ SƠ</span>
           <h1>Phiên làm việc cần được làm mới.</h1>
@@ -183,6 +192,7 @@ export function ProfileEditorPage({ onboarding = false }: ProfileEditorPageProps
 
         {logoutButton}
       </header>
+      {logoutError && <p role="alert" className="form-error">{logoutError}</p>}
 
       <section className="profile-layout">
         <div className="profile-intro">

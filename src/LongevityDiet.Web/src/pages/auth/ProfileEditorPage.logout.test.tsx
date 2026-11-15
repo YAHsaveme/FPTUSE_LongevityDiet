@@ -36,13 +36,26 @@ const setup = (mode: 'loading' | 'error' | 'ready', onboarding = false) => {
 }
 
 describe('Profile logout remains available in all non-onboarding states', () => {
-  beforeEach(() => logout.mockClear())
+  beforeEach(() => {
+    logout.mockReset()
+    logout.mockResolvedValue(undefined)
+  })
   it.each(['loading', 'error', 'ready'] as const)('keeps logout visible when query is %s', async (mode) => {
     setup(mode)
     fireEvent.click(screen.getByRole('button', { name: 'Đăng xuất' }))
     await waitFor(() => expect(logout).toHaveBeenCalledOnce())
     expect(await screen.findByText('Login destination')).toBeInTheDocument()
   })
+  it.each(['loading', 'error', 'ready'] as const)(
+    'keeps session and shows an actionable error if server revoke fails while %s',
+    async (mode) => {
+      logout.mockRejectedValueOnce(new Error('Synthetic 429'))
+      setup(mode)
+      fireEvent.click(screen.getByRole('button', { name: 'Đăng xuất' }))
+      expect(await screen.findByRole('alert')).toHaveTextContent('Đăng xuất chưa hoàn tất trên máy chủ')
+      expect(screen.queryByText('Login destination')).toBeNull()
+    },
+  )
   it('does not add a logout button to first-time onboarding', () => {
     setup('loading', true)
     expect(screen.queryByRole('button', { name: 'Đăng xuất' })).toBeNull()

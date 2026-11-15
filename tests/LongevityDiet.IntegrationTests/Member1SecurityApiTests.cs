@@ -51,9 +51,11 @@ public sealed class Member1SecurityApiTests
         await factory.ResetDatabaseAsync();
         using var client = factory.CreateHttpsClient();
         var blocked = false;
+        // Password-entry endpoints keep the strict 40/min/IP budget. Refresh
+        // and revoke have separate bounded budgets so they cannot be starved.
         for (var attempt = 0; attempt < 44; attempt++)
         {
-            using var response = await client.PostAsync("/api/v1/auth/refresh", null);
+            using var response = await client.PostAsync("/api/v1/auth/login", null);
             if (response.StatusCode != HttpStatusCode.TooManyRequests)
                 continue;
             blocked = true;
