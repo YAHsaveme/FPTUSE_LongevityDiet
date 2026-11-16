@@ -5,13 +5,13 @@ namespace LongevityDiet.API.Contracts.Tracking;
 public sealed record MealLogItemRequest(
     [MaxLength(80)] string? FoodCode,
     [Required, MinLength(1), MaxLength(200)] string FoodName,
-    [Range(typeof(decimal), "0.1", "5000")] decimal ServingAmount,
+    [Range(typeof(decimal), "0.1", "5000", ParseLimitsInInvariantCulture = true)] decimal ServingAmount,
     [Required, MaxLength(64)] string ServingUnit,
     [Range(0, 5000)] int CaloriesKcal,
-    [Range(typeof(decimal), "0", "500")] decimal ProteinGrams,
-    [Range(typeof(decimal), "0", "500")] decimal CarbsGrams,
-    [Range(typeof(decimal), "0", "500")] decimal FatGrams,
-    [Range(typeof(decimal), "0", "200")] decimal FiberGrams,
+    [Range(typeof(decimal), "0", "500", ParseLimitsInInvariantCulture = true)] decimal ProteinGrams,
+    [Range(typeof(decimal), "0", "500", ParseLimitsInInvariantCulture = true)] decimal CarbsGrams,
+    [Range(typeof(decimal), "0", "500", ParseLimitsInInvariantCulture = true)] decimal FatGrams,
+    [Range(typeof(decimal), "0", "200", ParseLimitsInInvariantCulture = true)] decimal FiberGrams,
     bool IsPlantBased = true);
 
 public sealed record CreateMealLogRequest(
