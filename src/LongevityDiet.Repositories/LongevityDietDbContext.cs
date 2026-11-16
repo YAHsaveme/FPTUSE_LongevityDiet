@@ -11,6 +11,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     public DbSet<WellnessScreening> WellnessScreenings => Set<WellnessScreening>();
     public DbSet<WellnessCheckIn> WellnessCheckIns => Set<WellnessCheckIn>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<MemberAccountAudit> MemberAccountAudits => Set<MemberAccountAudit>();
     public DbSet<ReminderPreference> ReminderPreferences => Set<ReminderPreference>();
     public DbSet<UserNotification> Notifications => Set<UserNotification>();
     public DbSet<IdentityOutboxEvent> IdentityOutbox => Set<IdentityOutboxEvent>();
@@ -67,6 +68,8 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
     private void GuardRuleHistory()
     {
         ChangeTracker.DetectChanges();
+        if (ChangeTracker.Entries<MemberAccountAudit>().Any(a => a.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Member account audit entries are append-only.");
         if (ChangeTracker.Entries<Recipe>().Any(e => e.State == EntityState.Deleted) ||
             ChangeTracker.Entries<RecipeIngredient>().Any(e => e.State == EntityState.Deleted) ||
             ChangeTracker.Entries<RecipeAllergen>().Any(e => e.State == EntityState.Deleted))
@@ -109,6 +112,7 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         user.Property(x => x.DisplayName).HasMaxLength(120).IsRequired();
         user.Property(x => x.Role).HasConversion<string>().HasMaxLength(24);
         user.Property(x => x.Status).HasConversion<string>().HasMaxLength(24);
+        user.Property(x => x.SessionVersion).HasDefaultValue(0);
         user.HasOne(x => x.Profile)
             .WithOne(x => x.User)
             .HasForeignKey<UserProfile>(x => x.UserId)
@@ -119,6 +123,15 @@ public sealed class LongevityDietDbContext(DbContextOptions<LongevityDietDbConte
         profile.HasKey(x => x.UserId);
         profile.Property(x => x.TimeZone).HasMaxLength(100).IsRequired();
         profile.Property(x => x.FoodPreference).HasMaxLength(500);
+
+        var accountAudit = modelBuilder.Entity<MemberAccountAudit>();
+        accountAudit.ToTable("MemberAccountAudits");
+        accountAudit.HasKey(a => a.Id);
+        accountAudit.Property(a => a.PreviousStatus).HasConversion<string>().HasMaxLength(24);
+        accountAudit.Property(a => a.NewStatus).HasConversion<string>().HasMaxLength(24);
+        accountAudit.Property(a => a.Reason).HasMaxLength(300).IsRequired();
+        accountAudit.HasIndex(a => new { a.MemberId, a.ChangedAt });
+        accountAudit.HasIndex(a => new { a.ActorAdminId, a.ChangedAt });
 
         var refreshToken = modelBuilder.Entity<RefreshToken>();
         refreshToken.ToTable("RefreshTokens");

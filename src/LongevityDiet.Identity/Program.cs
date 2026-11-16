@@ -43,6 +43,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.MapInboundClaims = false;
+        // Keep the owned Identity service in sync with the primary API:
+        // disabled accounts and bearer tokens issued before a lock are rejected.
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var claim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? context.Principal?.FindFirst("sub")?.Value;
+                if (!Guid.TryParse(claim, out var id))
+                {
+                    context.Fail("Missing or invalid identity claim.");
+                    return;
+                }
+
+                var identityDb = context.HttpContext.RequestServices.GetRequiredService<IdentityDbContext>();
+                var account = await identityDb.Users.AsNoTracking()
+                    .Where(u => u.Id == id)
+                    .Select(u => new { u.Status, u.Role, u.SessionVersion })
+                    .SingleOrDefaultAsync(context.HttpContext.RequestAborted);
+                var rawVersion = context.Principal?.FindFirst("account_version")?.Value;
+                var version = int.TryParse(rawVersion, out var parsed) ? parsed : 0;
+                if (account is null || account.Status != AccountStatus.Active ||
+                    context.Principal?.IsInRole(account.Role.ToString()) != true ||
+                    account.SessionVersion != version)
+                    context.Fail("Account disabled or token session version is no longer valid.");
+            },
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true, ValidIssuer = jwt.Issuer,

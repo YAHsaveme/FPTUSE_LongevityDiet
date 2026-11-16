@@ -30,6 +30,7 @@ public sealed class IdentityJwtProvider(IOptions<IdentityJwtOptions> options,
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(ClaimTypes.Name, user.DisplayName),
             new(ClaimTypes.Role, user.Role.ToString()),
+            new("account_version", user.SessionVersion.ToString(System.Globalization.CultureInfo.InvariantCulture)),
             new("profile_complete", (user.Profile?.ProfileCompleted ?? false).ToString().ToLowerInvariant())
         };
         var credentials = new SigningCredentials(
