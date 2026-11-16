@@ -28,6 +28,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         users.Property(x => x.DisplayName).HasMaxLength(120).IsRequired();
         users.Property(x => x.Role).HasConversion<string>().HasMaxLength(24);
         users.Property(x => x.Status).HasConversion<string>().HasMaxLength(24);
+        users.Property(x => x.SessionVersion).HasDefaultValue(0);
         users.HasOne(x => x.Profile).WithOne(x => x.User)
             .HasForeignKey<UserProfile>(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
 

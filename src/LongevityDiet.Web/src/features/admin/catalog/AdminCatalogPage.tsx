@@ -81,6 +81,7 @@ export function AdminCatalogPage() {
         <nav className="catalog-nav">
           <Link to="/app">Hôm nay</Link>
           <Link to="/catalog">Danh mục</Link>
+          <Link to="/admin/members">Người dùng Member</Link>
           <Link className="active" to="/admin/catalog">Quản trị</Link>
           <Link to="/profile">Hồ sơ</Link>
         </nav>
@@ -95,6 +96,7 @@ export function AdminCatalogPage() {
         </section>
         <section className="catalog-workspace">
           <div className="catalog-tabs admin-tabs">
+            <Link to="/admin/members">Quản lý Member</Link>
             <button className={tab === 'foods' ? 'active' : ''} onClick={() => setTab('foods')}><Leaf size={15} /> Thực phẩm</button>
             <button className={tab === 'recipes' ? 'active' : ''} onClick={() => setTab('recipes')}><Utensils size={15} /> Công thức</button>
             <button className={tab === 'rules' ? 'active' : ''} onClick={() => setTab('rules')}><BookOpen size={15} /> Quy tắc</button>

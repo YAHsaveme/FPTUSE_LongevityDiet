@@ -17,7 +17,7 @@ const memberLinks = [
 const primaryRoutes = new Set(['/app', '/catalog', '/activity', '/progress'])
 
 const isMemberLocation = (pathname: string) =>
-  ['/app', '/planner', '/catalog', '/book', '/activity', '/progress', '/reports', '/notifications', '/profile', '/admin/catalog']
+  ['/app', '/planner', '/catalog', '/book', '/activity', '/progress', '/reports', '/notifications', '/profile', '/admin/catalog', '/admin/members']
     .some((path) => pathname === path || pathname.startsWith(path + '/'))
 
 /** Cross-feature navigation; does not modify business state or API calls. */
@@ -31,7 +31,7 @@ export function QuickNavigation() {
   if (!user?.profileCompleted || !isMemberLocation(pathname)) return null
 
   const links = user.role === 'Admin'
-    ? [...memberLinks, { to: '/admin/catalog' as const, label: 'Quản trị', Icon: ShieldCheck }]
+    ? [...memberLinks, { to: '/admin/catalog' as const, label: 'Quản trị', Icon: ShieldCheck }, { to: '/admin/members' as const, label: 'Member', Icon: UserRound }]
     : memberLinks
 
   const secondaryLinks = links.filter(({ to }) => !primaryRoutes.has(to))

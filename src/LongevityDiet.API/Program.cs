@@ -169,6 +169,8 @@ try
     });
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IAdminMemberRepository, AdminMemberRepository>();
+    builder.Services.AddScoped<MemberAdministrationService>();
     // Default SQL persistence is intentionally unchanged until Cloudflare D1
     // has been provisioned, migrated, authenticated, and E2E verified.
     var cloudflareSessions = builder.Configuration
@@ -307,6 +309,32 @@ try
         .AddJwtBearer(options =>
         {
             options.MapInboundClaims = false;
+            // Accounts disabled by Admin are rejected immediately, including unexpired JWTs.
+            options.Events = new JwtBearerEvents
+            {
+                OnTokenValidated = async context =>
+                {
+                    var claim = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                        ?? context.Principal?.FindFirst("sub")?.Value;
+                    if (!Guid.TryParse(claim, out var id))
+                    {
+                        context.Fail("Missing or invalid identity claim.");
+                        return;
+                    }
+
+                    var accountDb = context.HttpContext.RequestServices.GetRequiredService<LongevityDietDbContext>();
+                    var account = await accountDb.Users.AsNoTracking()
+                        .Where(u => u.Id == id)
+                        .Select(u => new { u.Status, u.Role, u.SessionVersion })
+                        .SingleOrDefaultAsync(context.HttpContext.RequestAborted);
+                    var rawVersion = context.Principal?.FindFirst("account_version")?.Value;
+                    var tokenVersion = int.TryParse(rawVersion, out var parsed) ? parsed : 0;
+                    if (account is null || account.Status != AccountStatus.Active ||
+                        context.Principal?.IsInRole(account.Role.ToString()) != true ||
+                        account.SessionVersion != tokenVersion)
+                        context.Fail("Account disabled or JWT role does not match the account.");
+                },
+            };
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,

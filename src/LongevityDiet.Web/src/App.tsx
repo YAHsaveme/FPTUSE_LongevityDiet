@@ -45,6 +45,12 @@ const AdminCatalogPage = lazy(() =>
   import('./features/admin/catalog/AdminCatalogPage').then((module) => ({ default: module.AdminCatalogPage })),
 )
 
+const AdminMembersPage = lazy(() =>
+  import('./features/admin/members/AdminMembersPage').then((module) => ({
+    default: module.AdminMembersPage,
+  })),
+)
+
 const ChallengeDashboardPage = lazy(() =>
   import('./features/progress/ChallengeDashboardPage').then((module) => ({
     default: module.ChallengeDashboardPage,
@@ -197,6 +203,14 @@ function App() {
           }
         />
 
+        <Route
+          path="/admin/members"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <AdminMembersPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
