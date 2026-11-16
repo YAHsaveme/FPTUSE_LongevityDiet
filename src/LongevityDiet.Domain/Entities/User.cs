@@ -15,6 +15,8 @@ public sealed class User
     public string DisplayName { get; set; } = string.Empty;
     public UserRole Role { get; set; } = UserRole.Member;
     public AccountStatus Status { get; set; } = AccountStatus.Active;
+    // Incremented on account lock so old bearer tokens stay invalid after unlock.
+    public int SessionVersion { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
